@@ -90,14 +90,13 @@ if !exists('g:qfixmemo_timeformat')
 endif
 function! qfixmemo#SetTimeFormatRegxp(fmt)
   let s:qfixmemo_timeformat = a:fmt
-  let s:qfixmemo_timeformat = substitute(s:qfixmemo_timeformat, '%Y', '\\d\\{4}', 'g')
-  let s:qfixmemo_timeformat = substitute(s:qfixmemo_timeformat, '%m', '\\d\\{2}', 'g')
-  let s:qfixmemo_timeformat = substitute(s:qfixmemo_timeformat, '%d', '\\d\\{2}', 'g')
-  let s:qfixmemo_timeformat = substitute(s:qfixmemo_timeformat, '%H', '\\d\\{2}', 'g')
-  let s:qfixmemo_timeformat = substitute(s:qfixmemo_timeformat, '%M', '\\d\\{2}', 'g')
-  let s:qfixmemo_timeformat = substitute(s:qfixmemo_timeformat, '%S', '\\d\\{2}', 'g')
-  let s:qfixmemo_timeformat = s:qfixmemo_timeformat
   let s:qfixmemo_timeformat = '^' . escape(s:qfixmemo_timeformat, '[~*.#')
+  let s:qfixmemo_timeformat = substitute(s:qfixmemo_timeformat, '\C%Y', '[0-9][0-9][0-9][0-9]', 'g')
+  let s:qfixmemo_timeformat = substitute(s:qfixmemo_timeformat, '\C%m', '[0-1][0-9]', 'g')
+  let s:qfixmemo_timeformat = substitute(s:qfixmemo_timeformat, '\C%d', '[0-3][0-9]', 'g')
+  let s:qfixmemo_timeformat = substitute(s:qfixmemo_timeformat, '\C%H', '[0-2][0-9]', 'g')
+  let s:qfixmemo_timeformat = substitute(s:qfixmemo_timeformat, '\C%M', '[0-5][0-9]', 'g')
+  let s:qfixmemo_timeformat = substitute(s:qfixmemo_timeformat, '\C%S', '[0-5][0-9]', 'g')
 endfunction
 call qfixmemo#SetTimeFormatRegxp(g:qfixmemo_timeformat)
 
@@ -118,6 +117,11 @@ endif
 " 最近更新したエントリ一覧の日数
 if !exists('g:qfixmemo_recentdays')
   let g:qfixmemo_recentdays = 10
+endif
+
+" 最近のタイムスタンプ一覧の日数
+if !exists('g:qfixmemo_timestamp_recentdays')
+  let g:qfixmemo_timestamp_recentdays = 5
 endif
 
 " フォールディングパターン
@@ -234,6 +238,7 @@ silent! function QFixMemoKeymap()
 
   silent! nnoremap <silent> <unique> <Leader>m       :<C-u>call qfixmemo#ListMru()<CR>
   silent! nnoremap <silent> <unique> <Leader>l       :<C-u>call qfixmemo#ListRecent()<CR>
+  silent! nnoremap <silent> <unique> <Leader>L       :<C-u>call qfixmemo#ListRecentTimeStamp()<CR>
   silent! nnoremap <silent> <unique> <Leader>a       :<C-u>call qfixmemo#List('open')<CR>
   silent! nnoremap <silent> <unique> <Leader>ra      :<C-u>call qfixmemo#List('open')<CR>
   silent! nnoremap <silent> <unique> <Leader>A       :<C-u>call qfixmemo#ListFile(g:qfixmemo_diary)<CR>
@@ -289,6 +294,7 @@ silent! function QFixMemoMenubar(menu, leader)
   exe printf(sepcmd, 1)
   call s:addMenu(menucmd, 'MRU(&M)'       , 'm')
   call s:addMenu(menucmd, 'ListRecent(&L)', 'l')
+  call s:addMenu(menucmd, 'ListRecent(Stamp)(&2)', 'L')
   call s:addMenu(menucmd, 'ListAll(&A)'   , 'a')
   call s:addMenu(menucmd, 'DiaryList(&O)' , 'A')
   call s:addMenu(menucmd, 'FileList(&Q)'  , 'rA')
@@ -925,13 +931,89 @@ if !exists('g:qfixmemo_escape')
   let g:qfixmemo_escape = '[]~*.\#'
 endif
 
-function! qfixmemo#ListCache(mode, ...)
+function! qfixmemo#ListMru()
   call qfixmemo#Init()
-  let mode = a:mode
-  if qfixlist#GetList() != []
-    let mode = substitute(mode, 'open', 'cache', '')
+  if count
+    let g:QFixMRU_Entries = count
   endif
-  call qfixmemo#List(mode)
+  redraw | echo 'QFixMemo : Read MRU...'
+  call QFixMRU(g:qfixmemo_dir)
+  redraw | echo ''
+endfunction
+
+function! qfixmemo#ListRecent()
+  call qfixmemo#Init()
+  if count
+    let g:qfixmemo_recentdays = count
+  endif
+  let title = QFixMRUGetTitleGrepRegxp(g:qfixmemo_ext)
+  let qflist = qfixlist#search(title, g:qfixmemo_dir, 'mtime', g:qfixmemo_recentdays, g:qfixmemo_fileencoding, '**/*')
+  call qfixlist#copen(qflist, g:qfixmemo_dir)
+endfunction
+
+function! qfixmemo#ListRecentTimeStamp(...)
+  call qfixmemo#Init()
+  if count
+    let g:qfixmemo_recentdays = count
+  endif
+  let days = g:qfixmemo_recentdays
+  let fmt = g:qfixmemo_timeformat
+  let fmt = '^' . escape(fmt, '[~*.#')
+  let fmt = substitute(fmt, '\C%H', '[0-2][0-9]', 'g')
+  let fmt = substitute(fmt, '\C%M', '[0-5][0-9]', 'g')
+  let fmt = substitute(fmt, '\C%S', '[0-5][0-9]', 'g')
+
+  " NOTE: findstrモードならファイルの更新時間で絞り込んでタイムスタンプを探す
+  "       findstrモードでなければタイムスタンプの正規表現を作成して検索
+  let findstr = (g:mygrepprg == '') + (g:mygrepprg == 'findstr') + (a:0)
+
+  let tregxp = ''
+  let ltime = localtime()
+  for n in range(days)
+    let year  = strftime('%Y', ltime)
+    let month = strftime('%m', ltime)
+    let day   = strftime('%d', ltime)
+
+    let regxp = fmt
+    let regxp = substitute(regxp, '\C%Y', year, 'g')
+    let regxp = substitute(regxp, '\C%m', month, 'g')
+    let regxp = substitute(regxp, '\C%d', day, 'g')
+
+    let tregxp = tregxp . printf('|%s', regxp)
+    let ltime -= 24*60*60
+  endfor
+  let tregxp = substitute(tregxp, '^|', '', '')
+
+  let fmt = substitute(fmt, '\C%Y', '[0-2][0-9][0-9][0-9]', 'g')
+  let fmt = substitute(fmt, '\C%m', '[0-1][0-9]', 'g')
+  let fmt = substitute(fmt, '\C%d', '[0-3][0-9]', 'g')
+  let fmt = fmt . '\([^-@!+~.]*\|$\)'
+
+  if findstr
+    let pattern = QFixMRUGetTitleGrepRegxp(g:qfixmemo_ext)
+    let qflist = qfixlist#search(pattern, g:qfixmemo_dir, 'none', g:qfixmemo_recentdays, g:qfixmemo_fileencoding, '**/*')
+  else
+    let qflist = qfixlist#search(tregxp, g:qfixmemo_dir, 'none', 0, g:qfixmemo_fileencoding, '**/*')
+  endif
+
+  let tpattern = qfixmemo#TitleRegxp()
+  let tregxp = substitute(tregxp, '|', '\\|', 'g')
+  let idx = 0
+  for d in qflist
+    let file = d['filename']
+    let lnum = d['lnum']
+    let [entry, flnum, llnum] = QFixMRUGet('entry', file, lnum, tpattern)
+    let qflist[idx]['text'] = entry[0]
+    call filter(entry, "v:val =~ '" . fmt . "'")
+    call filter(entry, "v:val =~ '" . tregxp . "'")
+    if len(entry) == 0
+      call remove(qflist, idx)
+      continue
+    endif
+    let idx += 1
+  endfor
+
+  call qfixlist#copen(qflist, g:qfixmemo_dir)
 endfunction
 
 function! qfixmemo#List(mode, ...)
@@ -954,24 +1036,13 @@ function! qfixmemo#List(mode, ...)
   endif
 endfunction
 
-function! qfixmemo#ListRecent()
+function! qfixmemo#ListCache(mode, ...)
   call qfixmemo#Init()
-  if count
-    let g:qfixmemo_recentdays = count
+  let mode = a:mode
+  if qfixlist#GetList() != []
+    let mode = substitute(mode, 'open', 'cache', '')
   endif
-  let title = QFixMRUGetTitleGrepRegxp(g:qfixmemo_ext)
-  let qflist = qfixlist#search(title, g:qfixmemo_dir, 'mtime', g:qfixmemo_recentdays, g:qfixmemo_fileencoding, '**/*')
-  call qfixlist#copen(qflist, g:qfixmemo_dir)
-endfunction
-
-function! qfixmemo#ListMru()
-  call qfixmemo#Init()
-  if count
-    let g:QFixMRU_Entries = count
-  endif
-  redraw | echo 'QFixMemo : Read MRU...'
-  call QFixMRU(g:qfixmemo_dir)
-  redraw | echo ''
+  call qfixmemo#List(mode)
 endfunction
 
 function! qfixmemo#ListFile(file)

@@ -25,6 +25,14 @@ endfunction
 function! QFixMemoBufReadPost()
 endfunction
 
+" BufWinEnter
+function! QFixMemoBufWinEnter()
+endfunction
+
+" BufEnter
+function! QFixMemoBufEnter()
+endfunction
+
 " BufWritePre
 function! QFixMemoBufWritePre()
   " タイトル行付加
@@ -43,18 +51,3 @@ endfunction
 function! QFixMemoBufWritePost()
 endfunction
 
-" BufWinEnter
-function! QFixMemoBufWinEnter()
-endfunction
-
-" BufEnter
-function! QFixMemoBufEnter()
-endfunction
-
-" VimEnter
-function! QFixMemoVimEnter()
-endfunction
-
-" Initialize
-function! QFixMemoInit()
-endfunction

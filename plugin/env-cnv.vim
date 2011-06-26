@@ -52,10 +52,10 @@ endif
 if !exists('howm_filename')
   let howm_filename     = '%Y/%m/%Y-%m-%d-%H%M%S.'.s:howmsuffix
 endif
-" howmファイルの拡張子
-if !exists('loaded_MyHowmChEnv')
-  let QFixHowm_FileExt  = fnamemodify(g:howm_filename,':e')
+if !exists('QFixHowm_FileExt')
+  let g:QFixHowm_FileExt  = fnamemodify(g:howm_filename,':e')
 endif
+
 if !exists('howm_fileencoding')
   let howm_fileencoding = &enc
 endif
@@ -122,6 +122,15 @@ if !exists('g:QFixHowm_SplitMode')
   let g:QFixHowm_SplitMode = 0
 endif
 
+" タイトル行識別子
+if !exists('g:QFixHowm_Title')
+  let g:QFixHowm_Title = '='
+endif
+" オートタイトル文字数
+if !exists('g:QFixHowm_Replace_Title_Len')
+  let g:QFixHowm_Replace_Title_Len = 64
+endif
+
 " howmテンプレート
 if !exists('g:QFixHowm_Template')
   let g:QFixHowm_Template = [
@@ -141,19 +150,16 @@ endif
 
 "キーマップリーダー
 if !exists('g:QFixHowm_Key')
-  if exists('g:howm_mapleader')
-    let g:QFixHowm_Key = howm_mapleader
-  else
-    let g:QFixHowm_Key = 'g'
-  endif
+  let g:QFixHowm_Key = 'g'
 endif
-
-"2ストローク目キーマップ
 if !exists('g:QFixHowm_KeyB')
   let g:QFixHowm_KeyB = ','
 endif
-if !exists('g:qfixmemo_mapleader')
-  let g:qfixmemo_mapleader     = g:QFixHowm_Key . g:QFixHowm_KeyB
+let g:qfixmemo_mapleader = g:QFixHowm_Key . g:QFixHowm_KeyB
+
+" キーワードリンク
+if !exists('g:QFixHowm_keywordfile')
+  let g:QFixHowm_keywordfile = '~/.howm-keys'
 endif
 if !exists('g:QFixHowm_Wiki')
   let g:QFixHowm_Wiki = 0
@@ -161,10 +167,8 @@ endif
 if !exists('g:QFixHowm_WikiDir')
   let g:QFixHowm_WikiDir = ''
 endif
-if !exists('g:QFixHowm_keywordfile')
-  let g:QFixHowm_keywordfile = '~/.howm-keys'
-endif
 
+" 基準ディレクトリ
 if !exists('g:QFixMRU_RootDir') && exists('g:QFixHowm_RootDir')
   let g:QFixMRU_RootDir = g:QFixHowm_RootDir
 endif
@@ -172,14 +176,25 @@ if !exists('g:QFixMemo_RootDir') && exists('g:QFixHowm_RootDir')
   let g:QFixMemo_RootDir = g:QFixHowm_RootDir
 endif
 
+" 起動時コマンド
+if exists('g:QFixHowm_VimEnterCmd')
+  let g:qfixmemo_vimenter_cmd  = g:QFixHowm_VimEnterCmd
+endif
+if exists('g:QFixHowm_VimEnterTime')
+  let g:qfixmemo_vimenter_time = g:QFixHowm_VimEnterTime
+endif
+if exists('g:QFixHowm_VimEnterFile')
+  let g:qfixmemo_vimenter_file = g:QFixHowm_VimEnterFile
+endif
+if exists('g:QFixHowm_VimEnterMsg')
+  let g:qfixmemo_vimenter_msg = g:QFixHowm_VimEnterMsg
+endif
+
 function! QFixHowmSetup()
   let g:qfixmemo_dir           = g:howm_dir
   let g:qfixmemo_fileencoding  = g:howm_fileencoding
   let g:qfixmemo_fileformat    = g:howm_fileformat
   let g:qfixmemo_ext           = g:QFixHowm_FileExt
-
-  " キーマップリーダー
-  let g:qfixmemo_mapleader     = g:QFixHowm_Key . g:QFixHowm_KeyB
 
   " タイトルマーカー
   let g:qfixmemo_title         = g:QFixHowm_Title
@@ -239,6 +254,7 @@ function! QFixHowmSetup()
     let g:qfixmemo_ext      = g:QFixHowm_UserFileExt
     let g:qfixmemo_filetype = g:QFixHowm_UserFileType
   endif
+
   let g:qfixmemo_keyword_mode = g:QFixHowm_Wiki
   let g:qfixmemo_keyword_file = g:QFixHowm_keywordfile
   let g:qfixmemo_keyword_dir  = g:QFixHowm_WikiDir

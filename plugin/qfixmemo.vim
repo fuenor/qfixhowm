@@ -278,7 +278,7 @@ silent! function QFixMemoLocalKeymap()
   endif
 endfunction
 
-silent! function qfixmemo#Menubar(menu, leader)
+silent! function QFixMemoMenubar(menu, leader)
   let menucmd = 'amenu <silent> 41.333 '.a:menu.'.%s<Tab>'.a:leader.'%s :call feedkeys("'.a:leader.'%s","t")<CR>'
   let sepcmd  = 'amenu <silent> 41.333 '.a:menu.'.-sep%d-			<Nop>'
   call s:addMenu(menucmd, 'CreateNew(&C)'      , 'c')
@@ -351,7 +351,7 @@ let g:mapleader = g:qfixmemo_mapleader
 call QFixMemoKeymap()
 call QFixMemoKeymapPost()
 
-call qfixmemo#Menubar('Memo(&M)', g:mapleader)
+call QFixMemoMenubar('Memo(&M)', g:mapleader)
 
 if exists('s:mapleader')
   let g:mapleader = s:mapleader
@@ -393,6 +393,7 @@ augroup END
 function! s:VimEnter()
   call QFixMemoTitleRegxp()
   call QFixMemoVimEnter()
+  call qfixmemo#VimEnterCmd()
 endfunction
 
 function! s:BufWinEnter()
@@ -1446,9 +1447,9 @@ function! qfixmemo#LoadKeyword(...)
     let keyword = escape(keyword, '\\')
     let s:KeywordHighlight = s:KeywordHighlight.''.keyword.'\|'
   endfor
+  silent! syn clear qfixmemoKeyword
   let s:KeywordHighlight = substitute(s:KeywordHighlight, '\\|\s*$', '', '')
   if s:KeywordHighlight != ''
-    silent! syn clear qfixmemoKeyword
     exe 'syn match qfixmemoKeyword display "\V'.s:KeywordHighlight.'"'
   endif
 endfunction
@@ -1529,9 +1530,13 @@ function! qfixmemo#RebuildKeyword()
   if len(qflist)
     call QFixSetqflist(qflist)
     QFixCopen
+    call cursor(1, 1)
+    redraw | echo 'QFixMemo : done.'
+  else
+    call delete(expand(g:qfixmemo_keyword_file))
+    call qfixmemo#LoadKeyword('highlight')
+    redraw | echo 'QFixMemo : no keywords.'
   endif
-  call cursor(1, 1)
-  redraw | echo 'QFixMemo : done.'
 endfunction
 
 " オートリンクを開く
@@ -1676,5 +1681,50 @@ function! qfixmemo#Help()
   call setline(1, g:QFixHowmHelpList)
   call cursor(1,1)
   call s:syntaxHighlight()
+endfunction
+
+""""""""""""""""""""""""""""""
+" 起動時コマンドの基準時間
+if !exists('g:qfixmemo_vimenter_time')
+  let g:qfixmemo_vimenter_time = '07:00'
+endif
+" 起動時間チェック用ファイル
+if !exists('g:qfixmemo_vimenter_file')
+  let g:qfixmemo_vimenter_file = '~/.vimenter.qm'
+endif
+
+function! qfixmemo#VimEnterCmd()
+  if !exists('g:qfixmemo_vimenter_cmd')
+    return
+  endif
+
+  let cmd   = g:qfixmemo_mapleader . g:qfixmemo_vimenter_cmd
+  let file  = fnamemodify(g:qfixmemo_vimenter_file, ':p')
+  let tstr  = substitute(g:qfixmemo_vimenter_time, '[^0-9]', '', 'g')
+
+  let ltime = localtime()
+  let lstr  = strftime('%Y%m%d%H%M', ltime)
+  let estr  = strftime('%Y%m%d', ltime) . tstr
+  if lstr < estr
+    let ltime -= 24*60*60
+    let estr = strftime('%Y%m%d', ltime) . tstr
+  endif
+
+  let ftime = getftime(file)
+  let fstr = strftime('%Y%m%d%H%M', ftime)
+  if ftime > 0 && fstr > estr
+    return
+  endif
+
+  call writefile([], file)
+  if exists('g:qfixmemo_vimenter_msg')
+    let mes = g:qfixmemo_vimenter_msg
+    let choice = confirm(mes, "&OK\n&Cancel", 1, "Q")
+    if choice != 1
+      redraw
+      return
+    endif
+  endif
+  call feedkeys(cmd, 't')
 endfunction
 

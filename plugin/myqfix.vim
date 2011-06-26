@@ -3,10 +3,10 @@
 "                 Preview, sortings and advanced search for Quickfix.
 "         Author: Futoshi Ueno <fuenor@gmail.com>
 "                 http://sites.google.com/site/fudist/Home  (Japanese)
-"  Last Modified: 2011-03-10 21:52
+"  Last Modified: 2011-06-26 11:30
 "=============================================================================
 scriptencoding utf-8
-let s:Version = 2.80
+let s:Version = 2.81
 
 "What Is This:
 "  This plugin adds preview, sortings and advanced search to your quickfix window.
@@ -138,13 +138,13 @@ if !exists('g:QFix_Copen_winfixheight')
   let g:QFix_Copen_winfixheight   = 1
 endif
 if !exists('g:QFix_Copen_winfixwidth')
-  let g:QFix_Copen_winfixwidth    = 1
+  let g:QFix_Copen_winfixwidth    = 0
 endif
 if !exists('g:QFix_Preview_winfixheight')
-  let g:QFix_Preview_winfixheight = 0
+  let g:QFix_Preview_winfixheight = 1
 endif
 if !exists('g:QFix_Preview_winfixwidth')
-  let g:QFix_Preview_winfixwidth = 0
+  let g:QFix_Preview_winfixwidth  = 1
 endif
 if !exists('g:QFix_TabEditMode')
   let g:QFix_TabEditMode = 1
@@ -983,7 +983,13 @@ function! QFixPclose()
   elseif winnr('$') == 1 && tabpagenr('$') > 1 && &previewwindow
     tabclose
   else
+    let saved_winfixheight = &winfixheight
+    let saved_winfixwidth  = &winfixwidth
+    setlocal nowinfixheight
+    setlocal nowinfixwidth
     silent! pclose!
+    let &winfixheight = saved_winfixheight
+    let &winfixwidth  = saved_winfixwidth
   endif
   if &buftype == 'quickfix'
     call QFixResize(h)
@@ -1063,7 +1069,13 @@ function! QFixPreviewOpen(file, line, ...)
   let s:QFixPreviewfile = file
   if &previewwindow
   else
+    let saved_winfixheight = &winfixheight
+    let saved_winfixwidth  = &winfixwidth
+    " setlocal winfixheight
+    " setlocal winfixwidth
     silent! exec 'silent! '.g:QFix_PreviewOpenCmd.' pedit! '.s:tempdir.'/'.g:QFix_PreviewName
+    let &winfixheight = saved_winfixheight
+    let &winfixwidth  = saved_winfixwidth
   endif
   silent! wincmd P
   let s:QFix_PreviewWin = bufnr('%')

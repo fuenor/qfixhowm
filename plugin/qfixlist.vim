@@ -112,6 +112,7 @@ endfunction
 augroup QFixFiles
   au!
   autocmd BufWinEnter __QFix_Files__ call <SID>BufWinEnter(g:QFix_PreviewEnable)
+  autocmd BufEnter    __QFix_Files__ call <SID>BufEnter()
   autocmd BufLeave    __QFix_Files__ call <SID>BufLeave()
   autocmd CursorHold  __QFix_Files__ call <SID>Preview()
 augroup END
@@ -229,6 +230,9 @@ function! s:BufWinEnter(preview)
   hi def link qfError	Error
 
   silent exec 'lchdir ' . escape(s:QFixList_dir, ' ')
+endfunction
+
+function! s:BufEnter()
 endfunction
 
 function! s:BufLeave()

@@ -249,7 +249,7 @@ silent! function QFixMemoKeymap()
 
   silent! nnoremap <silent> <unique> <Leader>rr      :<C-u>call qfixmemo#RandomWalk(g:qfixmemo_random_file)<CR>
   silent! nnoremap <silent> <unique> <Leader>rR      :<C-u>call qfixmemo#RebuildRandomCache(g:qfixmemo_random_file)<CR>
-  silent! nnoremap <silent> <unique> <Leader>rK      :<C-u>call qfixmemo#RebuildKeyword()<CR>
+  silent! nnoremap <silent> <unique> <Leader>rk      :<C-u>call qfixmemo#RebuildKeyword()<CR>
 
   silent! nnoremap <silent> <unique> <Leader>s       :<C-u>call qfixmemo#FGrep()<CR>
   silent! nnoremap <silent> <unique> <Leader>g       :<C-u>call qfixmemo#Grep()<CR>
@@ -310,7 +310,7 @@ silent! function QFixMemoMenubar(menu, leader)
   call s:addMenu(menucmd, 'RandomWalk(&R)'        , 'rr')
   call s:addMenu(menucmd, 'Rebuild-RandomWalk(&F)', 'rR')
   exe printf(sepcmd, 5)
-  call s:addMenu(menucmd, 'Rebuild-Keyword(&W)', 'rK')
+  call s:addMenu(menucmd, 'Rebuild-Keyword(&W)', 'rk')
   exe printf(sepcmd, 6)
   call s:addMenu(menucmd, 'Help(&H)', 'H')
   exe printf(sepcmd, 7)

@@ -1362,13 +1362,18 @@ function! qfixmemo#Cmd_AT(mode) range
   endif
 
   let rez = []
+  let elist = []
   let h = g:QFix_Height
-
   let tpattern = qfixmemo#TitleRegxp()
   for n in range(cnt)
     let file = QFixGet('file', firstline+n)
     let lnum = QFixGet('lnum', firstline+n)
     let [entry, flnum, llnum] = QFixMRUGet('entry', file, lnum, tpattern)
+    let tdesc = entry[0] . flnum . llnum
+    if count(elist, tdesc) != 0
+      continue
+    endif
+    call add(elist, tdesc)
     if g:qfixmemo_separator != ''
       let str = printf(g:qfixmemo_separator, file)
       let entry = insert(entry, str, 1)

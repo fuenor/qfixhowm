@@ -15,7 +15,8 @@ endif
 " このファイルでオプションのコンバートを行っているため、QFixMemoはQFixHowmとオ
 " プション互換のプラグインとして動作しています。
 "
-" .vimrcに以下を設定するとQFixHowmオプションのコンバートを行わなくなります。
+" Vimの設定ファイルへ設定追加するとQFixHowmオプションのコンバートを行わなくな
+" ります。
 "
 " " QFixHowmとのオプションコンバートを行わない
 " let QFixHowm_Convert = 0
@@ -176,6 +177,24 @@ if !exists('g:QFixMemo_RootDir') && exists('g:QFixHowm_RootDir')
   let g:QFixMemo_RootDir = g:QFixHowm_RootDir
 endif
 
+" ファイル名をタイトル行から生成したファイル名へ変更する場合の文字数
+if !exists('g:QFixHowm_FilenameLen')
+  let g:QFixHowm_FilenameLen = len(fnamemodify(strftime(g:howm_filename), ':t:r'))
+endif
+
+" サブウィンドウを出す方向
+if !exists('g:SubWindow_Dir')
+  let g:SubWindow_Dir = "topleft vertical"
+endif
+" サブウィンドウのファイル名
+if !exists('g:SubWindow_Title')
+  let g:SubWindow_Title = '~/__submenu__.'.s:howmsuffix
+endif
+" サブウィンドウのサイズ
+if !exists('g:SubWindow_Width')
+  let g:SubWindow_Width = 30
+endif
+
 " 起動時コマンド
 if exists('g:QFixHowm_VimEnterCmd')
   let g:qfixmemo_vimenter_cmd  = g:QFixHowm_VimEnterCmd
@@ -245,6 +264,16 @@ function! QFixHowmSetup()
   let g:qfixmemo_random_columns = g:QFixHowm_RandomWalkColumns
   " ランダムに表示しない正規表現
   let g:qfixmemo_random_exclude = g:QFixHowm_RandomWalkExclude
+
+  " サブウィンドウのファイル名
+  let g:qfixmemo_submenu_title = g:SubWindow_Title
+  " サブウィンドウを出す方向
+  let g:qfixmemo_submenu_dir   = g:SubWindow_Dir
+  " サブウィンドウのサイズ
+  let g:qfixmemo_submenu_width = g:SubWindow_Width
+
+  " ファイル名をタイトル行から生成したファイル名へ変更する場合の文字数
+  let g:qfixmemo_rename_length = g:QFixHowm_FilenameLen
 
   " 新規ファイル作成時のオプション
   " let g:qfixmemo_editcmd = ''

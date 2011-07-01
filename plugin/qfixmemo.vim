@@ -8,19 +8,19 @@ let s:Version = 0.01
 scriptencoding utf-8
 
 "=============================================================================
-if exists('disable_qfixmemo') && disable_qfixmemo == 1
+if exists('g:disable_qfixmemo') && g:disable_qfixmemo == 1
   finish
 endif
 if exists('g:qfixmemo_version') && g:qfixmemo_version < s:Version
   unlet loaded_qfixmemo
 endif
-if exists("loaded_qfixmemo") && !exists('fudist')
+if exists('g:loaded_qfixmemo') && !exists('fudist')
   finish
 endif
 if v:version < 700 || &cp
   finish
 endif
-let loaded_qfixmemo = 1
+let g:loaded_qfixmemo = 1
 let g:qfixmemo_version = s:Version
 
 let s:debug = 0
@@ -145,6 +145,19 @@ if !exists('g:qfixmemo_separator')
   let g:qfixmemo_separator = '>>> %s'
 endif
 
+" サブウィンドウを出す方向
+if !exists('g:qfixmemo_submenu_dir')
+  let g:qfixmemo_submenu_dir = "topleft vertical"
+endif
+" サブウィンドウのファイル名
+if !exists('g:qfixmemo_submenu_title')
+  let g:qfixmemo_submenu_title = '~/__submenu__'
+endif
+" サブウィンドウのサイズ
+if !exists('g:qfixmemo_submenu_width')
+  let g:qfixmemo_submenu_width = 30
+endif
+
 " ランダム表示保存ファイル
 if !exists('g:qfixmemo_random_file')
   let g:qfixmemo_random_file = '~/.qfixmemo-random'
@@ -160,6 +173,11 @@ endif
 " ランダムに表示しない正規表現
 if !exists('g:qfixmemo_random_exclude')
   let g:qfixmemo_random_exclude = ''
+endif
+
+" リネームで使用するファイル名の長さ
+if !exists('g:qfixmemo_rename_length')
+  let g:qfixmemo_rename_length = len(strftime(g:qfixmemo_filename))
 endif
 
 " 新規ファイル作成時のオプション
@@ -237,6 +255,7 @@ silent! function QFixMemoKeymap()
   silent! nnoremap <silent> <unique> <Leader>U       :<C-u>call qfixmemo#Quickmemo(0)<CR>
   silent! nnoremap <silent> <unique> <Leader><Space> :<C-u>call qfixmemo#Edit(g:qfixmemo_diary)<CR>
   silent! nnoremap <silent> <unique> <Leader>j       :<C-u>call qfixmemo#PairFile('%')<CR>
+  silent! nnoremap <silent> <unique> <Leader>i       :<C-u>call qfixmemo#ToggleSubWindow('%')<CR>
 
   silent! nnoremap <silent> <unique> <Leader>m       :<C-u>call qfixmemo#ListMru()<CR>
   silent! nnoremap <silent> <unique> <Leader>l       :<C-u>call qfixmemo#ListRecent()<CR>
@@ -245,6 +264,7 @@ silent! function QFixMemoKeymap()
   silent! nnoremap <silent> <unique> <Leader>ra      :<C-u>call qfixmemo#List('open')<CR>
   silent! nnoremap <silent> <unique> <Leader>A       :<C-u>call qfixmemo#ListFile(g:qfixmemo_diary)<CR>
   silent! nnoremap <silent> <unique> <Leader>rA      :<C-u>call qfixmemo#Glob(g:qfixmemo_dir, '**/*', 'open')<CR>
+  silent! nnoremap <silent> <unique> <Leader>rN      :<C-u>call qfixmemo#ListRenameFile(g:qfixmemo_filename)<CR>
 
   " キャッシュ使用
   " nnoremap <silent> <Leader>a                        :<C-u>call qfixmemo#ListCache('open')<CR>
@@ -280,6 +300,10 @@ silent! function QFixMemoLocalKeymap()
   nnoremap <silent> <buffer> <LocalLeader>f :<C-u>call qfixmemo#FGrep()<CR>
   nnoremap <silent> <buffer> <LocalLeader>e :<C-u>call qfixmemo#Grep()<CR>
 
+  nnoremap <silent> <buffer> <LocalLeader>w :<C-u>call qfixmemo#ForceWrite()<CR>
+
+  nnoremap <silent> <buffer> <LocalLeader>rn :<C-u>call qfixmemo#Rename()<CR>
+
   if exists("*QFixHowmUserModeCR")
     nnoremap <silent> <buffer> <CR> :call QFixHowmUserModeCR()<CR>
   endif
@@ -294,12 +318,13 @@ silent! function QFixMemoMenubar(menu, leader)
   call s:addMenu(menucmd, 'QuickMemo(&U)'      , 'u')
   call s:addMenu(menucmd, 'PairFile(&J)'       , 'j')
   exe printf(sepcmd, 1)
-  call s:addMenu(menucmd, 'MRU(&M)'       , 'm')
-  call s:addMenu(menucmd, 'ListRecent(&L)', 'l')
+  call s:addMenu(menucmd, 'MRU(&M)'              , 'm')
+  call s:addMenu(menucmd, 'ListRecent(&L)'       , 'l')
   call s:addMenu(menucmd, 'ListRecent(Stamp)(&2)', 'L')
-  call s:addMenu(menucmd, 'ListAll(&A)'   , 'a')
-  call s:addMenu(menucmd, 'DiaryList(&O)' , 'A')
-  call s:addMenu(menucmd, 'FileList(&Q)'  , 'rA')
+  call s:addMenu(menucmd, 'ListAll(&A)'          , 'a')
+  call s:addMenu(menucmd, 'DiaryList(&O)'        , 'A')
+  call s:addMenu(menucmd, 'FileList(&Q)'         , 'rA')
+  call s:addMenu(menucmd, 'SubMenu(&I)'          , 'i')
   exe printf(sepcmd, 2)
   call s:addMenu(menucmd, 'FGrep(&S)', 's')
   call s:addMenu(menucmd, 'Grep(&G)' , 'g')
@@ -314,8 +339,11 @@ silent! function QFixMemoMenubar(menu, leader)
   exe printf(sepcmd, 5)
   call s:addMenu(menucmd, 'Rebuild-Keyword(&W)', 'rk')
   exe printf(sepcmd, 6)
-  call s:addMenu(menucmd, 'Help(&H)', 'H')
+  " call s:addMenu(menucmd, 'Rename(&Z)'      , 'rn')
+  call s:addMenu(menucmd, 'Rename-files(&Z)', 'rN')
   exe printf(sepcmd, 7)
+  call s:addMenu(menucmd, 'Help(&H)', 'H')
+  exe printf(sepcmd, 8)
   let submenu = '.Buffer[Local]\ (&B)'
   let sepcmd  = 'amenu <silent> 41.333 '.a:menu.submenu.'.-sep%d-			<Nop>'
   let menucmd = 'amenu <silent> 41.333 '.a:menu.submenu.'.%s<Tab>'.a:leader.'%s :call feedkeys("'.a:leader.'%s","t")<CR>'
@@ -334,6 +362,8 @@ silent! function QFixMemoMenubar(menu, leader)
   call s:addMenu(menucmd, 'DeleteEntry(&X)', 'x')
   call s:addMenu(menucmd, 'MoveEntry(&M)'  , 'X')
   call s:addMenu(menucmd, 'DivideEntry(&W)', 'W')
+  exe printf(sepcmd, 5)
+  call s:addMenu(menucmd, 'Rename(&Z)', 'rn')
 endfunction
 
 function! s:addMenu(menu, acc, cmd)
@@ -450,16 +480,18 @@ endfunction
 silent! function QFixMemoBufEnterPre()
 endfunction
 
-function! s:BufWritePre()
-  if !s:isQFixMemo(expand('%'))
-    return
+" 強制書込
+function! qfixmemo#ForceWrite()
+  let saved_bt = &buftype
+  if &buftype == 'nofile'
+    setlocal buftype=
   endif
-  if search('^.\+$', 'ncw') == 0
-    return
-  endif
-  call QFixMemoBufWritePre()
+  let s:ForceWrite = 1
+  write!
+  let &buftype = saved_bt
 endfunction
 
+" タイトル行付加
 function! qfixmemo#AddTitle()
   let l:qfixmemo_title = escape(g:qfixmemo_title, g:qfixmemo_escape)
   let rpattern = '^'.l:qfixmemo_title .'\s*\(\[.\{-}]*\]\s*\)*\s*$'
@@ -510,25 +542,7 @@ function! qfixmemo#AddTitle()
   call setpos('.', save_cursor)
 endfunction
 
-function! qfixmemo#DeleteNullLines()
-  let save_cursor = getpos('.')
-  "ファイル末尾を空白一行に
-  call cursor(line('$'), 1)
-  let endline = line('.')
-  if getline('.') !~ '^$'
-    exec "put=''"
-  else
-    let firstline = search('^.\+$', 'nbW')
-    if firstline == 0
-      return
-    endif
-    if firstline+2 <= endline
-      exec firstline+2.','.endline.'delete _'
-    endif
-  endif
-  call setpos('.', save_cursor)
-endfunction
-
+" タイムスタンプ行付加
 function! qfixmemo#AddTime()
   let l:qfixmemo_title = escape(g:qfixmemo_title, g:qfixmemo_escape)
   let save_cursor = getpos('.')
@@ -550,6 +564,7 @@ function! qfixmemo#AddTime()
   call setpos('.', save_cursor)
 endfunction
 
+" タイムスタンプアップデート
 let s:qfixmemoWriteUpdateTime = 1
 function! qfixmemo#UpdateTime()
   call qfixmemo#Init()
@@ -569,6 +584,41 @@ function! qfixmemo#UpdateTime()
     call setline(fline, str)
   endif
   call setpos('.', save_cursor)
+endfunction
+
+" 行末の空白行を削除
+function! qfixmemo#DeleteNullLines()
+  let save_cursor = getpos('.')
+  "ファイル末尾を空白一行に
+  call cursor(line('$'), 1)
+  let endline = line('.')
+  if getline('.') !~ '^$'
+    exec "put=''"
+  else
+    let firstline = search('^.\+$', 'nbW')
+    if firstline == 0
+      return
+    endif
+    if firstline+2 <= endline
+      exec firstline+2.','.endline.'delete _'
+    endif
+  endif
+  call setpos('.', save_cursor)
+endfunction
+
+let s:ForceWrite = 0
+function! s:BufWritePre()
+  if !s:isQFixMemo(expand('%'))
+    return
+  endif
+  if s:ForceWrite
+    let s:ForceWrite = 0
+    return
+  endif
+  if search('^.\+$', 'ncw') == 0
+    return
+  endif
+  call QFixMemoBufWritePre()
 endfunction
 
 function! s:filetype()
@@ -787,6 +837,9 @@ endfunction
 
 function! s:isQFixMemo(file)
   let file = fnamemodify(a:file, ':p')
+  if file =~ substitute(expand(g:qfixmemo_submenu_title), '\\', '/', 'g')
+    return 1
+  endif
   if fnamemodify(file, ':e') != g:qfixmemo_ext
     return 0
   endif
@@ -1082,14 +1135,20 @@ function! qfixmemo#ListFile(file)
   let title = '^'.escape(g:qfixmemo_title, g:qfixmemo_escape)
   let qflist = qfixlist#search(title, g:qfixmemo_dir, 'reverse', 0, g:qfixmemo_fileencoding, '**/*')
   let pattern = a:file.'.'.g:qfixmemo_ext
-  let pattern = substitute(pattern, '%Y', '\\d\\{4}', 'g')
-  let pattern = substitute(pattern, '%m', '\\d\\{2}', 'g')
-  let pattern = substitute(pattern, '%d', '\\d\\{2}', 'g')
-  let pattern = substitute(pattern, '%H', '\\d\\{2}', 'g')
-  let pattern = substitute(pattern, '%M', '\\d\\{2}', 'g')
-  let pattern = substitute(pattern, '%S', '\\d\\{2}', 'g')
+  let pattern = s:strftimeRegxp(pattern)
   call filter(qflist, "v:val['filename'] =~ '" . pattern . "'")
   call qfixlist#open(qflist, g:qfixmemo_dir)
+endfunction
+
+function! s:strftimeRegxp(regxp)
+  let regxp = a:regxp
+  let regxp = substitute(regxp, '%Y', '\\d\\{4}', 'g')
+  let regxp = substitute(regxp, '%m', '\\d\\{2}', 'g')
+  let regxp = substitute(regxp, '%d', '\\d\\{2}', 'g')
+  let regxp = substitute(regxp, '%H', '\\d\\{2}', 'g')
+  let regxp = substitute(regxp, '%M', '\\d\\{2}', 'g')
+  let regxp = substitute(regxp, '%S', '\\d\\{2}', 'g')
+  return regxp
 endfunction
 
 " Globファイルリスト
@@ -1120,11 +1179,122 @@ function! qfixmemo#Glob(path, file, mode)
   endfor
   silent! exec 'lchdir ' . prevPath
   redraw | echo ''
-  if mode =~ 'copen'
+  if mode =~ 'list'
+    return qflist
+  elseif mode =~ 'copen'
     call qfixlist#copen(qflist, path)
-  else
+  elseif
     call qfixlist#open(qflist, path)
   endif
+endfunction
+
+let s:RenameQFList = []
+function! qfixmemo#ListRenameFile(file)
+  call qfixmemo#Init()
+  let qflist = qfixmemo#Glob(g:qfixmemo_dir, '**/*.'.g:qfixmemo_ext, 'list')
+  let pattern = a:file.'.'.g:qfixmemo_ext
+  let pattern = s:strftimeRegxp(pattern)
+  call filter(qflist, "v:val['filename'] =~ '" . pattern . "'")
+  let pattern = g:qfixmemo_diary.'.'.g:qfixmemo_ext
+  let pattern = s:strftimeRegxp(pattern)
+  call filter(qflist, "v:val['filename'] !~ '" . pattern . "'")
+  call filter(qflist, "v:val['filename'] !~ '/" . g:qfixmemo_pairfile_dir . "/'")
+  for d in qflist
+    let file = s:formatFileName(d['text'], g:qfixmemo_rename_length)
+    let d['text'] = file . '.' .  g:qfixmemo_ext
+  endfor
+
+  call qfixlist#open(qflist, g:qfixmemo_dir)
+  let s:RenameQFList = qflist
+  nnoremap <silent> <buffer> !     :<C-u>call qfixmemo#RenameAll()<CR>
+  nnoremap <silent> <buffer> <C-g> :<C-u>call qfixmemo#RenameAll()<CR>
+  redraw| echo ' <C-g> or ! : Rename all files.'
+endfunction
+
+function! s:formatFileName(fname, len)
+  let title = '^'.escape(g:qfixmemo_title, g:qfixmemo_escape)
+  let fname = a:fname
+
+  let fname = substitute(fname, title . '\s*\|\.\+$', '', 'g')
+  let fname = substitute(fname, '^\(\[[^\]]\+\]\s*\)\+', '', 'g')
+  let chars = a:len
+  let fn =  chars != 0 ? '' : fname
+  while chars
+    let ch = matchstr(fname, '.')
+    if ch == ''
+      break
+    endif
+    let fn = fn.ch
+    let len = len(ch)
+    let fname = strpart(fname, len)
+    let chars -= len > 1 ? 2 : 1
+    if fname == '' || chars < 1
+      break
+    endif
+  endwhile
+  let fn = substitute(fn, '[/:*?"<>|\\]', '_', 'g')
+  return fn
+endfunction
+
+function! qfixmemo#Rename()
+  let from = substitute(fnamemodify(expand('%'), ':p'), '\\', '/', 'g')
+  while 1
+    let to = input('Rename to : ')
+    if to == ''
+      return
+    endif
+    let to = substitute(to, '[/:*?"<>|\\]', '_', 'g')
+    let to = substitute(to, '^\s*\|\s*$', '', 'g')
+    if to !~ '\.' . fnamemodify(from, ':e')
+      let to = to .  '.' . fnamemodify(from, ':e')
+    endif
+    if filereadable(fnamemodify(from, ':p:h') . '/' . to)
+      let mes = '"'.to.'" already exists.'
+      let choice = confirm(mes, "&Input name\n&Overwrite\n&Cancel", 1, "Q")
+      if choice == 1
+        let to = ''
+        continue
+      elseif choice != 2
+        return
+      else
+        break
+      endif
+    else
+      break
+    endif
+  endwhile
+  let to = fnamemodify(from, ':p:h') . '/' . to
+  update
+  call rename(from, to)
+  silent! exec 'silent! edit '.escape(to, ' %#')
+  silent! exec 'silent! bwipeout '.from
+endfunction
+
+function! qfixmemo#RenameAll()
+  let mes = '!!! Rename all memo files.'
+  if confirm(mes, "&OK\n&Cancel", 2, "W") != 1
+    return
+  endif
+
+  let glist = []
+  for d in s:RenameQFList
+    let from = d['filename']
+    let to = substitute(d['text'], '^\s*\|\s*$', '', 'g')
+    let to = fnamemodify(from, ':p:h') . '/' . to
+    if filereadable(to) || fnamemodify(to, ':t:r') =~ ''
+      call add(glist, d)
+      continue
+    endif
+    call rename(from, to)
+  endfor
+  close!
+  call qfixlist#open(glist, g:qfixmemo_dir)
+  if len(glist)
+    redraw|echo 'Please, change these filename(s).'
+  else
+    redraw|echo 'Done.'
+  endif
+  let s:RenameQFList = glist
 endfunction
 
 """"""""""""""""""""""""""""""
@@ -1324,6 +1494,47 @@ endif
 function! s:Grep(pattern)
   let qflist = qfixlist#search(a:pattern, g:qfixmemo_dir, '', 0, g:qfixmemo_fileencoding, '**/*')
   call qfixlist#copen(qflist, g:qfixmemo_dir)
+endfunction
+
+""""""""""""""""""""""""""""""
+" sub window
+function! qfixmemo#ToggleSubWindow()
+  call qfixmemo#Init()
+  let bufnum = bufnr(g:qfixmemo_submenu_title)
+  let winnum = bufwinnr(g:qfixmemo_submenu_title)
+  if bufnum != -1 && winnum != -1
+    exec "bd ". bufnum
+  else
+    call s:OpenQFixSubWin()
+  endif
+endfunction
+
+function! s:OpenQFixSubWin()
+  let winnum = bufwinnr(g:qfixmemo_submenu_title)
+  if winnum != -1
+    if winnr() != winnum
+      exec winnum . 'wincmd w'
+    endif
+    return
+  endif
+  let windir = g:qfixmemo_submenu_dir
+  let winsize = g:qfixmemo_submenu_width
+
+  let bufnum = bufnr(g:qfixmemo_submenu_title)
+  if bufnum == -1
+    let wcmd = g:SubWindow_Title
+  else
+    let wcmd = '+buffer' . bufnum
+  endif
+  exec 'silent! ' . windir . ' ' . winsize . 'split ' . wcmd
+  setlocal buftype=nofile
+  setlocal bufhidden=hide
+  setlocal noswapfile
+  setlocal nowrap
+  setlocal foldcolumn=0
+  setlocal nolist
+  setlocal winfixwidth
+  nnoremap <silent> <buffer> q :close<CR>
 endfunction
 
 """"""""""""""""""""""""""""""

@@ -156,7 +156,20 @@ http://sites.google.com/site/fudist/Home/grep/install
 <Leader>rK           キーワードファイルを再作成
 
 ------------------------------------------------------------------------------
-3.1 ペアファイル					*qfixmemo-pairfile*
+3.1 クイックメモ					*qfixmemo-quickmemo*
+
+<Leader>u           qfixmemo_quickmemo, qfixmemo_quickmemo1, ...を開く
+<Leader>U           使用ファイル名をqfixmemo_quickmemoにリセット
+
+クイックメモではカウント指定が可能です。
+
+2g,u などとして実行時にカウント指定すると qfixmemo_quickmemo2 のように対応する
+ファイル名のクイックメモが開かれ、以降は g,u を使用すると一番最後に指定された
+クイックメモが開かれます。
+クイックメモは g,U でデフォルト(qfixmemo_quickmemo)に戻すことが出来ます。
+
+------------------------------------------------------------------------------
+3.2 ペアファイル					*qfixmemo-pairfile*
 
 <Leader>j           let qfixmemo_pairfile_dir  = 'pairfile'
 
@@ -172,7 +185,7 @@ http://sites.google.com/site/fudist/Home/grep/install
 タックスで表示されます。
 
 ------------------------------------------------------------------------------
-3.2 シンタックスハイライト				*qfixmemo-syntax*
+3.3 シンタックスハイライト				*qfixmemo-syntax*
 
 デフォルトのファイルタイプ'qfix_memo'には以下のようなシンタックスハイライ
 トが定義されています。
@@ -216,7 +229,7 @@ http://sites.google.com/site/fudist/Home/grep/install
 ハイライトが異なる箇所があります。
 
 ------------------------------------------------------------------------------
-3.3 メモファイル削除					*qfixmemo-delete*
+3.4 メモファイル削除					*qfixmemo-delete*
 
 メモファイルはバッファの内容を削除して保存すると削除されます。
 またQuickfixウィンドウ上で D コマンドを実行してもファイル削除可能ですが、一ファ

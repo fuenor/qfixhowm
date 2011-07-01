@@ -2,9 +2,9 @@
 "    Description: MRU entry list (with QFixPreview)
 "         Author: fuenor <fuenor@gmail.com>
 "                 http://sites.google.com/site/fudist/Home  (Japanese)
-"  Last Modified: 2011-04-24 11:26
+"  Last Modified: 2011-07-01 19:13
 "=============================================================================
-let s:Version = 1.03
+let s:Version = 1.04
 scriptencoding utf-8
 
 "What Is This:
@@ -489,9 +489,9 @@ function! QFixMRUGet(mode, mfile, lnum, ...)
   call cursor(lnum, 1)
   "空白行なら一番近い行の内容を取得
   if text == ''
-    let tlnum = search('^\s*[^\s]', 'cnbW')
+    let tlnum = search('^\s*[^[:space:]]', 'cnbW')
     if tlnum == 0
-      let tlnum = search('\s*[^\s]', 'cnW')
+      let tlnum = search('\s*[^[:space:]]', 'cnW')
     endif
     if tlnum
       let text = getline(tlnum)
@@ -613,9 +613,9 @@ function! QFixMRUWrite(write, ...)
     return
   endif
 
-  let lnum = search('^\s*[^\s]', 'cnbW')
+  let lnum = search('^\s*[^[:space:]]', 'cnbW')
   if lnum == 0
-    let lnum = search('\s*[^\s]', 'cnW')
+    let lnum = search('\s*[^[:space:]]', 'cnW')
   endif
   let [text, min, max] = QFixMRUGet('title', '%', lnum)
   let mru = {'filename':mfile, 'lnum':lnum, 'text':text}

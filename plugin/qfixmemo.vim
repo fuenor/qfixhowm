@@ -58,6 +58,7 @@ endif
 if !exists('g:qfixmemo_forceencoding')
   let g:qfixmemo_forceencoding = 1
 endif
+
 " QFixMemoのシンタックスハイライト設定
 " 0 : 何も設定しない
 " 1 : タイトル行
@@ -86,7 +87,7 @@ endif
 
 " タイムスタンプフォーマット
 if !exists('g:qfixmemo_timeformat')
-  let g:qfixmemo_timeformat         = '[%Y-%m-%d %H:%M]'
+  let g:qfixmemo_timeformat = '[%Y-%m-%d %H:%M]'
 endif
 function! qfixmemo#SetTimeFormatRegxp(fmt)
   let s:qfixmemo_timeformat = a:fmt

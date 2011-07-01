@@ -577,6 +577,7 @@ function! s:BufWinEnterMenu(preview, head)
   hi link QFMenuButton	Special
   hi link QFMenuSButton	Identifier
   exe 'set ft='.g:qfixmemo_filetype
+  runtime! syntax/howm_schedule.vim
   syn region QFMenuSButton start=+%"\zs+ end=+[^"]\+\ze"\[+ end='$'
   syn region QFMenuButton  start=+"\[\zs+ end=+[^\]]\+\ze\(\s\|]\)+ end='$'
   exe 'syn match mqfFileName "^'.a:head.'[^|]*"'.' nextgroup=qfSeparator'

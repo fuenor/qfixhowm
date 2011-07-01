@@ -463,6 +463,13 @@ QFixMemoのタイトル検索用正規表現は QFixMemoTitleRegxp()でも独自
       nnoremap <silent> <buffer> <LocalLeader>f :<C-u>call qfixmemo#FGrep()<CR>
     endfunction
 
+拡張子まで含めて指定ファイルを開く
+
+拡張子がqfixmemo_extのファイルではなく、拡張子まで含めた指定ファイルを開くには
+qfixmemo#EditFile() を使用します。
+g,Jで qfixmemo_dir/example.nvl を開く例 >
+    nnoremap <silent> <Leader>J :<C-u>call qfixmemo#EditFile('example.nvl')<CR>
+
 ------------------------------------------------------------------------------
 10.3 保存前処理							*qfixmemo-user-keymap*
 

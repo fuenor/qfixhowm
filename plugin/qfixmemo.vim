@@ -646,6 +646,7 @@ function! qfixmemo#Init()
 endfunction
 
 """"""""""""""""""""""""""""""
+" 拡張子を付加してqfixmemo#EditFile()を呼び出し
 function! qfixmemo#Edit(...)
   call qfixmemo#Init()
   if a:0 == 0
@@ -653,26 +654,35 @@ function! qfixmemo#Edit(...)
     if file == ''
       return
     endif
-    let file = g:qfixmemo_dir . '/' . strftime(file)
+    let file = strftime(file)
   else
-    let file = g:qfixmemo_dir . '/' . strftime(a:1)
+    let file = strftime(a:1)
   endif
   if fnamemodify(file, ':e') != g:qfixmemo_ext
     let file = file . '.' . g:qfixmemo_ext
   endif
+  call qfixmemo#EditFile(file)
+endfunction
+
+" qfixmemo_dir内のファイルを開く
+function! qfixmemo#EditFile(file)
+  call qfixmemo#Init()
+  let file = a:file
+  let file = g:qfixmemo_dir . '/' . strftime(file)
   let file = substitute(fnamemodify(file, ':p'), '\\', '/', 'g')
 
   let opt = '++enc=' . g:qfixmemo_fileencoding . ' ++ff=' . g:qfixmemo_fileformat . ' '
   let mode = g:qfixmemo_splitmode ? 'split' : ''
   call s:edit(file, opt, mode)
-  return
 endfunction
 
+" 日記を開く
 function! qfixmemo#EditDiary()
   call qfixmemo#Init()
   call qfixmemo#Edit(g:qfixmemo_diary)
 endfunction
 
+" ペアファイルを開く
 function! qfixmemo#PairFile(file)
   call qfixmemo#Init()
   let file = a:file
@@ -772,7 +782,6 @@ function! s:isQFixMemo(file)
   return 1
 endfunction
 
-" テンプレート挿入
 function! qfixmemo#Template(cmd)
   call qfixmemo#Init()
   let cmd    = a:cmd
@@ -931,6 +940,7 @@ if !exists('g:qfixmemo_escape')
   let g:qfixmemo_escape = '[]~*.\#'
 endif
 
+" MRUを開く
 function! qfixmemo#ListMru()
   call qfixmemo#Init()
   if count
@@ -941,6 +951,7 @@ function! qfixmemo#ListMru()
   redraw | echo ''
 endfunction
 
+" 最近編集されたファイル内のエントリ一覧
 function! qfixmemo#ListRecent()
   call qfixmemo#Init()
   if count
@@ -951,6 +962,7 @@ function! qfixmemo#ListRecent()
   call qfixlist#copen(qflist, g:qfixmemo_dir)
 endfunction
 
+" タイムスタンプが最近のエントリ一覧
 function! qfixmemo#ListRecentTimeStamp(...)
   call qfixmemo#Init()
   if count
@@ -1016,6 +1028,7 @@ function! qfixmemo#ListRecentTimeStamp(...)
   call qfixlist#copen(qflist, g:qfixmemo_dir)
 endfunction
 
+" 全エントリ一覧
 function! qfixmemo#List(mode, ...)
   call qfixmemo#Init()
   let mode = a:mode
@@ -1036,6 +1049,7 @@ function! qfixmemo#List(mode, ...)
   endif
 endfunction
 
+" キャッシュ表示
 function! qfixmemo#ListCache(mode, ...)
   call qfixmemo#Init()
   let mode = a:mode
@@ -1045,6 +1059,7 @@ function! qfixmemo#ListCache(mode, ...)
   call qfixmemo#List(mode)
 endfunction
 
+" ファイルリスト
 function! qfixmemo#ListFile(file)
   call qfixmemo#Init()
   let title = '^'.escape(g:qfixmemo_title, g:qfixmemo_escape)
@@ -1097,6 +1112,7 @@ endfunction
 
 """"""""""""""""""""""""""""""
 let s:rwalk = []
+" ランダム表示
 function! qfixmemo#RandomWalk(file, ...)
   call qfixmemo#Init()
   let file = expand(a:file)
@@ -1123,6 +1139,7 @@ function! qfixmemo#RandomWalk(file, ...)
   redraw | echo ''
 endfunction
 
+" ランダムキャッシュ再作成
 function! qfixmemo#RebuildRandomCache(file)
   call qfixmemo#Init()
   let file = a:file
@@ -1249,6 +1266,7 @@ function! s:randomWriteFile(file)
 endfunction
 
 """"""""""""""""""""""""""""""
+" Grep
 function! qfixmemo#Grep(...)
   call qfixmemo#Init()
   let fixmode = 0
@@ -1277,6 +1295,7 @@ function! qfixmemo#Grep(...)
   endif
 endfunction
 
+" FGrep
 function! qfixmemo#FGrep()
   call qfixmemo#Grep('fix')
 endfunction

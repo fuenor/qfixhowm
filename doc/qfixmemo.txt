@@ -448,7 +448,7 @@ QFixMemoのタイトル検索用正規表現は QFixMemoTitleRegxp()でも独自
 イトル行として検索するよう設定されています。
 
 ------------------------------------------------------------------------------
-10.2 キーマップ							*qfixmemo-user-keymap*
+10.2 キーマップ						*qfixmemo-user-keymap*
 
 独自キーマップは .vimrc等に QFixMemoKeymapPost() を作成する事で変更可能です。
 
@@ -471,7 +471,7 @@ g,Jで qfixmemo_dir/example.nvl を開く例 >
     nnoremap <silent> <Leader>J :<C-u>call qfixmemo#EditFile('example.nvl')<CR>
 
 ------------------------------------------------------------------------------
-10.3 保存前処理							*qfixmemo-user-keymap*
+10.3 保存前処理						*qfixmemo-pre-save*
 
 保存前にタイトル行とタイムスタンプの付加とファイル末の空行削除等が行われます。
 保存前処理は .vimrc等に QFixMemoBufWritePre() を作成する事で変更可能です。

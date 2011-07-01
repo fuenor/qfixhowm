@@ -232,7 +232,8 @@ endfunction
 silent! function QFixMemoKeymap()
   silent! nnoremap <silent> <unique> <Leader>C       :<C-u>call qfixmemo#Edit()<CR>
   silent! nnoremap <silent> <unique> <Leader>c       :<C-u>call qfixmemo#Edit(g:qfixmemo_filename)<CR>
-  silent! nnoremap <silent> <unique> <Leader>u       :<C-u>call qfixmemo#Edit(g:qfixmemo_quickmemo)<CR>
+  silent! nnoremap <silent> <unique> <Leader>u       :<C-u>call qfixmemo#Quickmemo()<CR>
+  silent! nnoremap <silent> <unique> <Leader>U       :<C-u>call qfixmemo#Quickmemo(0)<CR>
   silent! nnoremap <silent> <unique> <Leader><Space> :<C-u>call qfixmemo#Edit(g:qfixmemo_diary)<CR>
   silent! nnoremap <silent> <unique> <Leader>j       :<C-u>call qfixmemo#PairFile('%')<CR>
 
@@ -674,6 +675,21 @@ function! qfixmemo#EditFile(file)
   let opt = '++enc=' . g:qfixmemo_fileencoding . ' ++ff=' . g:qfixmemo_fileformat . ' '
   let mode = g:qfixmemo_splitmode ? 'split' : ''
   call s:edit(file, opt, mode)
+endfunction
+
+" クイックメモを開く
+let s:qfixmemo_quickmemo = g:qfixmemo_quickmemo
+function! qfixmemo#Quickmemo(...)
+  if a:0 && a:1 == 0
+    let s:qfixmemo_quickmemo = g:qfixmemo_quickmemo
+  endif
+  let file = s:qfixmemo_quickmemo
+  let num = a:0 ? a:1 : count
+  if count
+    exe 'let file = g:qfixmemo_quickmemo'.count
+    let s:qfixmemo_quickmemo = file
+  endif
+  call qfixmemo#Edit(file)
 endfunction
 
 " 日記を開く

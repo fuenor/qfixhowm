@@ -1238,8 +1238,11 @@ endfunction
 
 function! qfixmemo#Rename()
   let from = substitute(fnamemodify(expand('%'), ':p'), '\\', '/', 'g')
+  let tpattern = qfixmemo#TitleRegxp()
+  let [title, flnum, llnum] = QFixMRUGet('title', '%', 1, tpattern)
+  let title = s:formatFileName(title, g:qfixmemo_rename_length)
   while 1
-    let to = input('Rename to : ')
+    let to = input('Rename to : ', title)
     if to == ''
       return
     endif

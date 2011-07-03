@@ -1183,7 +1183,7 @@ function! qfixmemo#Glob(path, file, mode)
     return qflist
   elseif mode =~ 'copen'
     call qfixlist#copen(qflist, path)
-  elseif
+  else
     call qfixlist#open(qflist, path)
   endif
 endfunction

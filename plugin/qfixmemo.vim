@@ -1209,6 +1209,7 @@ function! qfixmemo#ListRenameFile(file)
   nnoremap <silent> <buffer> !     :<C-u>call qfixmemo#RenameAll()<CR>
   nnoremap <silent> <buffer> <C-g> :<C-u>call qfixmemo#RenameAll()<CR>
   redraw| echo ' <C-g> or ! : Rename all files.'
+  setlocal modifiable
 endfunction
 
 function! s:formatFileName(fname, len)

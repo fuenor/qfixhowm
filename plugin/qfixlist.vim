@@ -198,6 +198,7 @@ function! s:BufWinEnter(preview)
   call QFixAltWincmdMap()
   nnoremap <buffer> <silent> q :<C-u>call <SID>Close()<CR>
   nnoremap <buffer> <silent> <CR> :<C-u>call <SID>CR()<CR>
+  " nnoremap <buffer> <silent> <F5> :<C-u>call <SID>reopen()<CR>
 
   nnoremap <buffer> <silent> i :<C-u>call <SID>TogglePreview()<CR>
   nnoremap <buffer> <silent> I :<C-u>call <SID>TogglePreview()<CR>
@@ -230,6 +231,11 @@ function! s:BufWinEnter(preview)
   hi def link qfError	Error
 
   silent exec 'lchdir ' . escape(s:QFixList_dir, ' ')
+endfunction
+
+function! s:reopen()
+  close
+  call qfixlist#open()
 endfunction
 
 function! s:BufEnter()

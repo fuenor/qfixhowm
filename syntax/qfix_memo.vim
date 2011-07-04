@@ -17,7 +17,7 @@ highlight link txtQuote Comment
 syntax region txtList start='^[-+]\+\s*' end='\s:' end='$' contains=txtListBullet,txtListDefinition,txtUrl,txtFile keepend
 syntax match txtListBullet contained '^\s*[-+*]\+\s*'
 syntax match txtListColon  contained '\s:'
-syntax match txtListDefinition '\s:' contains=txtListColon
+syntax match txtListDefinition contained '\s:' contains=txtListColon
 
 highlight link txtList       Constant
 highlight link txtListBullet Statement

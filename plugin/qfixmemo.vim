@@ -125,6 +125,11 @@ if !exists('g:qfixmemo_timestamp_recentdays')
   let g:qfixmemo_timestamp_recentdays = 5
 endif
 
+" メニューバーへ登録
+if !exists('g:qfixmemo_menubar')
+  let g:qfixmemo_menubar       = 1
+endif
+
 " フォールディングパターン
 if !exists('g:qfixmemo_folding_pattern')
   let g:qfixmemo_folding_pattern = '^=[^=]'
@@ -389,7 +394,9 @@ let g:mapleader = g:qfixmemo_mapleader
 call QFixMemoKeymap()
 call QFixMemoKeymapPost()
 
-call QFixMemoMenubar('Memo(&M)', g:mapleader)
+if g:qfixmemo_menubar
+  call QFixMemoMenubar('Memo(&M)', g:mapleader)
+endif
 
 if exists('s:mapleader')
   let g:mapleader = s:mapleader

@@ -206,7 +206,11 @@ if exists('g:QFixHowm_VimEnterFile')
   let g:qfixmemo_vimenter_file = g:QFixHowm_VimEnterFile
 endif
 if exists('g:QFixHowm_VimEnterMsg')
-  let g:qfixmemo_vimenter_msg = g:QFixHowm_VimEnterMsg
+  let g:qfixmemo_vimenter_msg  = g:QFixHowm_VimEnterMsg
+endif
+" メニューバーへ登録
+if exists('g:QFixHowm_MenuBar')
+  let g:qfixmemo_menubar = g:QFixHowm_MenuBar
 endif
 
 function! QFixHowmSetup()

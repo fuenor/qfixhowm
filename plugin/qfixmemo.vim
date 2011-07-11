@@ -1079,10 +1079,11 @@ function! qfixmemo#ListRecentTimeStamp(...)
   let fmt = fmt . '\([^-@!+~.]*\|$\)'
 
   if findstr
+    " TODO: findstrでもタイムスタンプ検索にする
     let pattern = QFixMRUGetTitleGrepRegxp(g:qfixmemo_ext)
-    let qflist = qfixlist#search(pattern, g:qfixmemo_dir, 'none', g:qfixmemo_recentdays, g:qfixmemo_fileencoding, '**/*')
+    let qflist = qfixlist#search(pattern, g:qfixmemo_dir, 'mtime', g:qfixmemo_recentdays, g:qfixmemo_fileencoding, '**/*')
   else
-    let qflist = qfixlist#search(tregxp, g:qfixmemo_dir, 'none', 0, g:qfixmemo_fileencoding, '**/*')
+    let qflist = qfixlist#search(tregxp, g:qfixmemo_dir, 'rtext', 0, g:qfixmemo_fileencoding, '**/*')
   endif
 
   let tpattern = qfixmemo#TitleRegxp()

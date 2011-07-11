@@ -29,6 +29,8 @@ endif
 " doc/qfixmemo.txt
 " (Vimで閲覧するとヘルプとしてハイライトされます)
 " http://github.com/fuenor/qfixmemo/blob/master/doc/qfixmemo.txt
+"
+" CAUTION: ファイルの読み込み順がファイル名順である事に依存しています。
 "-----------------------------------------------------------------------------
 
 " howmファイルの自動整形を使用する

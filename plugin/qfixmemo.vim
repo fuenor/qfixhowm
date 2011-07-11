@@ -879,6 +879,7 @@ function! qfixmemo#Template(cmd)
   let tag    = g:qfixmemo_template_tag
 
   call map(tmpl, 'substitute(v:val, "%TITLE%", title, "g")')
+  call map(tmpl, 'substitute(v:val, "%DATE%", g:qfixmemo_timeformat, "g")')
   if tag != ''
     let tag = tag . ' '
   endif

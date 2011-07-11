@@ -132,6 +132,12 @@ function! qfixlist#copen(...)
   if a:0 > 1
     let s:QFixList_dir = a:2
   endif
+  if len(s:QFixListCache) == 0
+    echohl ErrorMsg
+    redraw | echo 'QFixList : Nothing in list!'
+    echohl None
+    return
+  endif
   let g:QFix_SearchPath = s:QFixList_dir
   call QFixSetqflist(s:QFixListCache)
   QFixCopen
@@ -143,8 +149,20 @@ function! qfixlist#copen(...)
 endfunction
 
 function! qfixlist#open(...)
+  if a:0 > 0
+    let s:QFixListCache = deepcopy(a:1)
+  endif
+  if a:0 > 1
+    let s:QFixList_dir = a:2
+  endif
+  if len(s:QFixListCache) == 0
+    echohl ErrorMsg
+    redraw | echo 'QFixList : Nothing in list!'
+    echohl None
+    return
+  endif
   let path = s:QFixList_dir
-  let file = path.'/__QFix_Files__'
+  let file = fnamemodify(tempname(), ':p:h').'/__QFix_Files__'
   let mode = 'split'
   call QFixEditFile(file, mode)
   silent exec 'lchdir ' . escape(path, ' ')
@@ -156,12 +174,6 @@ function! qfixlist#open(...)
   setlocal cursorline
   wincmd J
 
-  if a:0 > 0
-    let s:QFixListCache = deepcopy(a:1)
-  endif
-  if a:0 > 1
-    let s:QFixList_dir = a:2
-  endif
   silent exec 'lchdir ' . escape(s:QFixList_dir, ' ')
   let g:QFix_SearchPath = s:QFixList_dir
 

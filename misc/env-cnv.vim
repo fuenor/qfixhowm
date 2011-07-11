@@ -172,6 +172,12 @@ if !exists('g:QFixHowm_Replace_Title_Len')
   let g:QFixHowm_Replace_Title_Len = 64
 endif
 
+" タイムスタンプ
+if !exists('g:QFixHowm_DatePattern')
+  let g:QFixHowm_DatePattern = '%Y-%m-%d'
+endif
+let g:qfixmemo_timeformat = '['. g:QFixHowm_DatePattern . ' %H:%M]'
+
 " howmテンプレート
 if !exists('g:QFixHowm_Template')
   let g:QFixHowm_Template = [

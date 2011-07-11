@@ -29,7 +29,47 @@ endif
 " doc/qfixmemo.txt
 " (Vimで閲覧するとヘルプとしてハイライトされます)
 " http://github.com/fuenor/qfixmemo/blob/master/doc/qfixmemo.txt
+"
+" CAUTION: ファイルの読み込み順がファイル名順である事に依存しています。
 "-----------------------------------------------------------------------------
+
+" howmファイルの自動整形を使用する
+if !exists('g:QFixHowm_Autoformat')
+  let g:QFixHowm_Autoformat = 1
+endif
+"更新時間を管理する
+if !exists('g:QFixHowm_RecentMode')
+  let g:QFixHowm_RecentMode = 0
+endif
+" 更新時間埋め込み
+if !exists('g:QFixHowm_SaveTime')
+  let g:QFixHowm_SaveTime = 0
+endif
+if g:QFixHowm_RecentMode == 2
+  let g:QFixHowm_SaveTime = 2
+endif
+
+" BufWritePre
+silent! function! QFixMemoBufWritePre()
+  if g:QFixHowm_Autoformat > 0
+    " タイトル行付加
+    call qfixmemo#AddTitle()
+    if g:QFixHowm_SaveTime > -1
+      " タイムスタンプ付加
+      call qfixmemo#AddTime()
+    endif
+    if g:QFixHowm_SaveTime == 2
+      " タイムスタンプアップデート
+      call qfixmemo#UpdateTime()
+    endif
+  endif
+  " キーワード作成
+  call qfixmemo#AddKeyword()
+  " ファイル末の空行を削除
+  if g:QFixHowm_Autoformat > 0
+    call qfixmemo#DeleteNullLines()
+  endif
+endfunction
 
 " BufEnter
 function! QFixMemoBufEnterPre()
@@ -206,7 +246,11 @@ if exists('g:QFixHowm_VimEnterFile')
   let g:qfixmemo_vimenter_file = g:QFixHowm_VimEnterFile
 endif
 if exists('g:QFixHowm_VimEnterMsg')
-  let g:qfixmemo_vimenter_msg = g:QFixHowm_VimEnterMsg
+  let g:qfixmemo_vimenter_msg  = g:QFixHowm_VimEnterMsg
+endif
+" メニューバーへ登録
+if exists('g:QFixHowm_MenuBar')
+  let g:qfixmemo_menubar = g:QFixHowm_MenuBar
 endif
 
 function! QFixHowmSetup()
@@ -288,4 +332,23 @@ function! QFixHowmSetup()
   let g:qfixmemo_keyword_file = g:QFixHowm_keywordfile
   let g:qfixmemo_keyword_dir  = g:QFixHowm_WikiDir
 endfunction
+
+""""""""""""""""""""""""""""""
+" global keymap
+""""""""""""""""""""""""""""""
+if exists('g:mapleader')
+  let s:mapleader = g:mapleader
+endif
+let g:mapleader = g:qfixmemo_mapleader
+
+if g:QFixHowm_RecentMode == 2
+  silent! nnoremap <silent> <Leader>L :<C-u>call qfixmemo#ListRecent()<CR>
+  silent! nnoremap <silent> <Leader>l :<C-u>call qfixmemo#ListRecentTimeStamp()<CR>
+endif
+
+if exists('s:mapleader')
+  let g:mapleader = s:mapleader
+else
+  unlet g:mapleader
+endif
 

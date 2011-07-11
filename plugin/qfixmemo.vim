@@ -1100,7 +1100,7 @@ function! qfixmemo#ListRecentTimeStamp(...)
       let idx += 1
     endfor
   endif
-
+  redraw | echo ''
   call qfixlist#copen(qflist, g:qfixmemo_dir)
 endfunction
 

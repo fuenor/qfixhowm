@@ -1088,16 +1088,17 @@ function! qfixmemo#ListRecentTimeStamp(...)
   if findstr
     let saved_grepprg = &grepprg
     let tregxp = '"'.substitute(tregxp, '|', ' ', 'g').'"'
+    redraw | echo 'QFixMemo : (findstr) Searching...'
     let prevPath = escape(getcwd(), ' ')
     exe 'lchdir ' . expand(g:qfixmemo_dir)
     let cmd = 'grep! /n /p /r /s ' . tregxp . ' *.*'
-    redraw | echo 'QFixMemo : (findstr) Searching...'
     silent! exe cmd
     silent! exec 'lchdir ' . prevPath
     let &grepprg = saved_grepprg
-    let qflist = getqflist()
-    redraw | echo 'QFixMemo : Sorting...'
+    let qflist = QFixGetqflist()
+    " redraw | echo 'QFixMemo : Sorting...'
     let qflist = QFixSort('text')
+    call QFixSetqflist([])
     let qflist = reverse(qflist)
     " FIXME: 内部エンコーディングが utf-8 だと日本語ファイル名が処理できない
     for idx in range(len(qflist))

@@ -249,7 +249,12 @@ endfunction
 silent! function QFixMemoTitleRegxp()
   " 使用するgrepに合わせて設定します
   let l:qfixmemo_title = escape(g:qfixmemo_title, g:qfixmemo_escape)
-  let g:QFixMRU_Title[g:qfixmemo_ext.'_regxp'] = '^'.l:qfixmemo_title. '[^'.g:qfixmemo_title[0].']'
+  if !exists('g:QFixMRU_Title["'.g:qfixmemo_ext.'"]')
+    let g:QFixMRU_Title[g:qfixmemo_ext] = '^'.l:qfixmemo_title. '\([^'.g:qfixmemo_title[0].']\|$\)'
+  endif
+  if !exists('g:QFixMRU_Title["'.g:qfixmemo_ext.'_regxp"]')
+    let g:QFixMRU_Title[g:qfixmemo_ext.'_regxp'] = '^'.l:qfixmemo_title. '[^'.g:qfixmemo_title[0].']'
+  endif
 endfunction
 
 " デフォルトキーマップ
@@ -692,6 +697,7 @@ endfunction
 
 let s:init = 0
 function! qfixmemo#Init()
+  call QFixMemoTitleRegxp()
   if s:init
     return
   endif
@@ -1028,7 +1034,6 @@ function! qfixmemo#ListMru()
   endif
   redraw | echo 'QFixMemo : Read MRU...'
   call QFixMRU(g:qfixmemo_dir)
-  redraw | echo ''
 endfunction
 
 " 最近編集されたファイル内のエントリ一覧

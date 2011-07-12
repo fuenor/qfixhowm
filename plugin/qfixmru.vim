@@ -139,7 +139,9 @@ augroup END
 " MRU表示
 function! QFixMRU(...)
   if len(s:MruDic) == 0
+    echohl ErrorMsg
     redraw|echo 'QFixMRU: MRU is empty!'
+    echohl None
     return
   endif
   let dirmode = g:QFixMRU_DirMode
@@ -166,6 +168,7 @@ function! QFixMRU(...)
   call QFixMRUOpenPre(s:MruDic, entries, dir)
   let sq = QFixMRUPrecheck(s:MruDic, entries, dir)
   call QFixMRUOpen(sq, basedir)
+  redraw | echo ''
 endfunction
 
 function! QFixMRUPrecheck(sq, entries, dir)
@@ -307,6 +310,10 @@ function! QFixMRURead(...)
   let file = g:QFixMRU_Filename
   let basedir = ''
   let merge = 0
+  if g:QFixMRU_state == 0
+    let g:QFixMRU_state = 1
+    let merge = 1
+  endif
   for index in range (1, a:0)
     if a:{index} =~ '^/merge$'
       let merge = 1

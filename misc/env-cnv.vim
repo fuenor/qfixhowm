@@ -215,6 +215,11 @@ if !exists('g:QFixHowm_WikiDir')
   let g:QFixHowm_WikiDir = ''
 endif
 
+"rel://
+if !exists('g:QFixHowm_RelPath')
+  let g:QFixHowm_RelPath = g:howm_dir
+endif
+
 " 基準ディレクトリ
 if !exists('g:QFixMRU_RootDir') && exists('g:QFixHowm_RootDir')
   let g:QFixMRU_RootDir = g:QFixHowm_RootDir
@@ -258,6 +263,9 @@ endif
 if exists('g:QFixHowm_MenuBar')
   let g:qfixmemo_menubar = g:QFixHowm_MenuBar
 endif
+
+" 日付のデフォルトアクションロックを無効化
+let g:QFixHowm_DateActionLockDefault = 0
 
 function! QFixHowmSetup()
   let g:qfixmemo_dir           = g:howm_dir

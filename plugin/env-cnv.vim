@@ -215,6 +215,11 @@ if !exists('g:QFixHowm_WikiDir')
   let g:QFixHowm_WikiDir = ''
 endif
 
+"rel://
+if !exists('g:QFixHowm_RelPath')
+  let g:QFixHowm_RelPath = g:howm_dir
+endif
+
 " 基準ディレクトリ
 if !exists('g:QFixMRU_RootDir') && exists('g:QFixHowm_RootDir')
   let g:QFixMRU_RootDir = g:QFixHowm_RootDir

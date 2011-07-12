@@ -311,6 +311,8 @@ silent! function QFixMemoLocalKeymap()
 
   if exists("*QFixHowmUserModeCR")
     nnoremap <silent> <buffer> <CR> :call QFixHowmUserModeCR()<CR>
+  else
+    nnoremap <silent> <buffer> <CR> :call QFixMemoUserModeCR()<CR>
   endif
 endfunction
 
@@ -1908,8 +1910,16 @@ function! qfixmemo#RebuildKeyword()
   endif
 endfunction
 
+silent! function QFixMemoUserModeCR(...)
+  if QFixMemoOpenKeywordLink() != "\<CR>"
+    return
+  endif
+  let cmd = a:0 ? a:1 : "normal! \n"
+  exe cmd
+endfunction
+
 " オートリンクを開く
-function! QFixHowmOpenKeywordLink()
+function! QFixMemoOpenKeywordLink()
   let save_cursor = getpos('.')
   let col = col('.')
   let lstr = getline('.')
@@ -1966,6 +1976,11 @@ function! QFixHowmOpenKeywordLink()
     endif
   endfor
   return "\<CR>"
+endfunction
+
+" QFixHowmモード用
+function! QFixHowmOpenKeywordLink()
+  return QFixMemoOpenKeywordLink()
 endfunction
 
 """"""""""""""""""""""""""""""

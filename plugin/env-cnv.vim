@@ -259,6 +259,9 @@ if exists('g:QFixHowm_MenuBar')
   let g:qfixmemo_menubar = g:QFixHowm_MenuBar
 endif
 
+" 日付のデフォルトアクションロックを無効化
+let g:QFixHowm_DateActionLockDefault = 0
+
 function! QFixHowmSetup()
   let g:qfixmemo_dir           = g:howm_dir
   let g:qfixmemo_fileencoding  = g:howm_fileencoding

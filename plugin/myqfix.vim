@@ -3,10 +3,10 @@
 "                 Preview, sortings and advanced search for Quickfix.
 "         Author: Futoshi Ueno <fuenor@gmail.com>
 "                 http://sites.google.com/site/fudist/Home  (Japanese)
-"  Last Modified: 2011-06-26 11:30
+"  Last Modified: 2011-07-12 11:50
 "=============================================================================
 scriptencoding utf-8
-let s:Version = 2.81
+let s:Version = 2.82
 
 "What Is This:
 "  This plugin adds preview, sortings and advanced search to your quickfix window.

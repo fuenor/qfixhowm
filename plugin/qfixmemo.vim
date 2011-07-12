@@ -1096,6 +1096,9 @@ function! qfixmemo#ListRecentTimeStamp(...)
     silent! exec 'lchdir ' . prevPath
     let &grepprg = saved_grepprg
     let qflist = getqflist()
+    redraw | echo 'QFixMemo : Sorting...'
+    let qflist = QFixSort('text')
+    let qflist = reverse(qflist)
     " FIXME: 内部エンコーディングが utf-8 だと日本語ファイル名が処理できない
     for idx in range(len(qflist))
       let file = bufname(qflist[idx]['bufnr'])

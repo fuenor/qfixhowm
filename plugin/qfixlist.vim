@@ -103,7 +103,7 @@ function! s:CompareText(v1, v2)
   if a:v1.text == a:v2.text
     return 0
   endif
-  return (a:v1.text < a:v2.text?1:-1)
+  return (a:v1.text > a:v2.text?1:-1)
 endfunction
 
 """"""""""""""""""""""""""""""

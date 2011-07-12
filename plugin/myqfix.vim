@@ -641,7 +641,7 @@ function! QFixSort(cmd)
   elseif a:cmd =~ 'text'
     let save_qflist = sort(save_qflist, "QFixCompareText")
   endif
-  if g:QFix_Sort =~ 'r.*'
+  if a:cmd =~ 'r.*'
     let save_qflist = reverse(save_qflist)
   endif
   let g:QFix_SearchResult = []
@@ -670,7 +670,7 @@ function! QFixCompareText(v1, v2)
   if a:v1.text == a:v2.text
     return (bufname(a:v1.bufnr) < bufname(a:v2.bufnr)?1:-1)
   endif
-  return (a:v1.text < a:v2.text?1:-1)
+  return (a:v1.text > a:v2.text?1:-1)
 endfunction
 
 """"""""""""""""""""""""""""""

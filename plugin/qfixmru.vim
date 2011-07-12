@@ -307,6 +307,10 @@ function! QFixMRURead(...)
   let file = g:QFixMRU_Filename
   let basedir = ''
   let merge = 0
+  if g:QFixMRU_state == 0
+    let g:QFixMRU_state = 1
+    let merge = 1
+  endif
   for index in range (1, a:0)
     if a:{index} =~ '^/merge$'
       let merge = 1

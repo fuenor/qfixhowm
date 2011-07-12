@@ -1117,12 +1117,12 @@ function! qfixmemo#ListRecentTimeStamp(...)
     let file = d['filename']
     let lnum = d['lnum']
     let [entry, flnum, llnum] = QFixMRUGet('entry', file, lnum, tpattern)
-    let qflist[idx]['text'] = entry[0]
     " echoe "List=".string(entry)
     if len(entry) == 0
       call remove(qflist, idx)
       continue
     endif
+    let qflist[idx]['text'] = entry[0]
     let idx += 1
   endfor
   redraw | echo ''

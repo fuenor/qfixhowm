@@ -670,7 +670,7 @@ function! QFixCompareText(v1, v2)
   if a:v1.text == a:v2.text
     return (bufname(a:v1.bufnr) < bufname(a:v2.bufnr)?1:-1)
   endif
-  return (a:v1.text > a:v2.text?1:-1)
+  return (a:v1.text < a:v2.text?1:-1)
 endfunction
 
 """"""""""""""""""""""""""""""

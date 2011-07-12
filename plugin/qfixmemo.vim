@@ -1096,8 +1096,8 @@ function! qfixmemo#ListRecentTimeStamp(...)
     silent! exec 'lchdir ' . prevPath
     let &grepprg = saved_grepprg
     let qflist = QFixGetqflist()
+    let qflist = qfixlist#Sort('rtext', qflist)
     " redraw | echo 'QFixMemo : Sorting...'
-    let qflist = QFixSort('text')
     call QFixSetqflist([])
     let qflist = reverse(qflist)
     " FIXME: 内部エンコーディングが utf-8 だと日本語ファイル名が処理できない

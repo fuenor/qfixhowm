@@ -101,9 +101,9 @@ endfunction
 
 function! s:CompareText(v1, v2)
   if a:v1.text == a:v2.text
-    return (a:v1.filename < a:v2.filename?1:-1)
+    return 0
   endif
-  return (a:v1.text > a:v2.text?1:-1)
+  return (a:v1.text < a:v2.text?1:-1)
 endfunction
 
 """"""""""""""""""""""""""""""
@@ -397,7 +397,7 @@ function! qfixlist#Sort(cmd, sq)
   elseif a:cmd =~ 'text'
     let sq = sort(a:sq, "s:CompareText")
   endif
-  if g:QFix_Sort =~ 'r.*'
+  if a:cmd =~ 'r.*'
     let sq = reverse(a:sq)
   endif
   return sq

@@ -1047,14 +1047,22 @@ function! qfixmemo#ListRecentTimeStamp(...)
     let g:qfixmemo_recentdays = count
   endif
   let days = g:qfixmemo_recentdays
+
+  " findstrは特別扱い
+  let findstr = (g:mygrepprg == '') + (g:mygrepprg == 'findstr') + (a:0)
+
   let fmt = g:qfixmemo_timeformat
+  if findstr
+    let fmt = substitute(fmt, ' .*$', '', '')
+    if exists('g:qfixmemo_timeformat_findstr')
+      let fmt = g:qfixmemo_timeformat_findstr
+    endif
+  endif
   let fmt = '^' . escape(fmt, '[~*.#')
   let fmt = substitute(fmt, '\C%H', '[0-2][0-9]', 'g')
   let fmt = substitute(fmt, '\C%M', '[0-5][0-9]', 'g')
   let fmt = substitute(fmt, '\C%S', '[0-5][0-9]', 'g')
 
-  " findstrは特別扱い
-  let findstr = (g:mygrepprg == '') + (g:mygrepprg == 'findstr') + (a:0)
   let tregxp = ''
   let ltime = localtime()
   for n in range(days)
@@ -1078,29 +1086,42 @@ function! qfixmemo#ListRecentTimeStamp(...)
   let fmt = fmt . '\([^-@!+~.]\|$\)'
 
   if findstr
-    " TODO: findstrでもタイムスタンプ検索にする
-    let pattern = QFixMRUGetTitleGrepRegxp(g:qfixmemo_ext)
-    let qflist = qfixlist#search(pattern, g:qfixmemo_dir, 'mtime', g:qfixmemo_recentdays, g:qfixmemo_fileencoding, '**/*')
+    let saved_grepprg = &grepprg
+    let tregxp = '"'.substitute(tregxp, '|', ' ', 'g').'"'
+    let prevPath = escape(getcwd(), ' ')
+    exe 'lchdir ' . expand(g:qfixmemo_dir)
+    let cmd = 'grep! /n /p /r /s ' . tregxp . ' *.*'
+    redraw | echo 'QFixMemo : (findstr) Searching...'
+    silent! exe cmd
+    silent! exec 'lchdir ' . prevPath
+    let &grepprg = saved_grepprg
+    let qflist = getqflist()
+    " FIXME: 内部エンコーディングが utf-8 だと日本語ファイル名が処理できない
+    for idx in range(len(qflist))
+      let file = bufname(qflist[idx]['bufnr'])
+      let file = substitute(fnamemodify(file, ':p'), '\\', '/', 'g')
+      let qflist[idx]['filename'] = file
+    endfor
   else
     let qflist = qfixlist#search(tregxp, g:qfixmemo_dir, 'rtext', 0, g:qfixmemo_fileencoding, '**/*')
     call filter(qflist, "v:val['text'] =~ '" . fmt . "'")
-
-    redraw | echo 'QFixMemo : Add summary...'
-    let tpattern = qfixmemo#TitleRegxp()
-    let idx = 0
-    for d in qflist
-      let file = d['filename']
-      let lnum = d['lnum']
-      let [entry, flnum, llnum] = QFixMRUGet('entry', file, lnum, tpattern)
-      let qflist[idx]['text'] = entry[0]
-      " echoe "List=".string(entry)
-      if len(entry) == 0
-        call remove(qflist, idx)
-        continue
-      endif
-      let idx += 1
-    endfor
   endif
+
+  redraw | echo 'QFixMemo : Add summary...'
+  let tpattern = qfixmemo#TitleRegxp()
+  let idx = 0
+  for d in qflist
+    let file = d['filename']
+    let lnum = d['lnum']
+    let [entry, flnum, llnum] = QFixMRUGet('entry', file, lnum, tpattern)
+    let qflist[idx]['text'] = entry[0]
+    " echoe "List=".string(entry)
+    if len(entry) == 0
+      call remove(qflist, idx)
+      continue
+    endif
+    let idx += 1
+  endfor
   redraw | echo ''
   call qfixlist#copen(qflist, g:qfixmemo_dir)
 endfunction

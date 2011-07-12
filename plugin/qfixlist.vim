@@ -140,6 +140,7 @@ function! qfixlist#copen(...)
   endif
   let g:QFix_SearchPath = s:QFixList_dir
   call QFixSetqflist(s:QFixListCache)
+  call QFixPclose()
   QFixCopen
   if a:0
     call cursor(1, 1)
@@ -161,6 +162,7 @@ function! qfixlist#open(...)
     echohl None
     return
   endif
+  call QFixPclose()
   let path = s:QFixList_dir
   let file = fnamemodify(tempname(), ':p:h').'/__QFix_Files__'
   let mode = 'split'
@@ -364,11 +366,11 @@ function! s:SortExec(...)
   endfor
 
   if g:QFix_Sort =~ 'mtime'
-    let sq = s:Sort(g:QFix_Sort, sq)
+    let sq = qfixlist#Sort(g:QFix_Sort, sq)
   elseif g:QFix_Sort =~ 'name'
-    let sq = s:Sort(g:QFix_Sort, sq)
+    let sq = qfixlist#Sort(g:QFix_Sort, sq)
   elseif g:QFix_Sort =~ 'text'
-    let sq = s:Sort(g:QFix_Sort, sq)
+    let sq = qfixlist#Sort(g:QFix_Sort, sq)
   elseif g:QFix_Sort == 'reverse'
     let sq = reverse(sq)
   endif
@@ -387,7 +389,7 @@ function! s:SortExec(...)
   redraw|echo 'Sorted by '.g:QFix_Sort.'.'
 endfunction
 
-function! s:Sort(cmd, sq)
+function! qfixlist#Sort(cmd, sq)
   if a:cmd =~ 'mtime'
     let sq = sort(a:sq, "s:CompareTime")
   elseif a:cmd =~ 'name'

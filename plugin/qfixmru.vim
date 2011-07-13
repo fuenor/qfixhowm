@@ -127,6 +127,7 @@ endif
 
 command! -count -nargs=* QFixMRU call QFixMRU(<f-args>)
 command! -nargs=* QFixMRUread call QFixMRURead(<f-args>)
+command! -nargs=* QFixMRURead call QFixMRURead(<f-args>)
 
 augroup QFixMRU
   autocmd!

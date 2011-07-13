@@ -255,6 +255,9 @@ silent! function QFixMemoTitleRegxp()
   if !exists('g:QFixMRU_Title["'.g:qfixmemo_ext.'_regxp"]')
     let g:QFixMRU_Title[g:qfixmemo_ext.'_regxp'] = '^'.l:qfixmemo_title. '[^'.g:qfixmemo_title[0].']'
   endif
+  if exists('g:QFixMRU_RegisterFile') && g:QFixMRU_RegisterFile !~ g:qfixmemo_ext
+    let g:QFixMRU_RegisterFile = '\.'.g:qfixmemo_ext.'$'
+  endif
 endfunction
 
 " デフォルトキーマップ
@@ -2083,11 +2086,8 @@ if !exists('g:qfixmemo_vimenter_file')
 endif
 
 function! qfixmemo#VimEnterCmd()
-  if exists('g:QFixMRU_RegisterFile') && g:QFixMRU_RegisterFile == ''
-    let g:QFixMRU_RegisterFile = '\.\(howm\|txt\|mkd\|wiki\)$'
-  endif
-  if exists('g:QFixMRU_Title') && g:QFixMRU_Title == {}
-    let g:QFixMRU_Title = {'mkd' : '^#',  'wiki' : '^='}
+  if exists('g:QFixMRU_RegisterFile') && g:QFixMRU_RegisterFile !~ g:qfixmemo_ext
+    let g:QFixMRU_RegisterFile = '\.'.g:qfixmemo_ext.'$'
   endif
   if !exists('g:qfixmemo_vimenter_cmd')
     return

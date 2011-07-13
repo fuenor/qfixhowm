@@ -2,9 +2,9 @@
 "    Description: MRU entry list (with QFixPreview)
 "         Author: fuenor <fuenor@gmail.com>
 "                 http://sites.google.com/site/fudist/Home  (Japanese)
-"  Last Modified: 2011-07-01 19:13
+"  Last Modified: 2011-07-13 18:04
 "=============================================================================
-let s:Version = 1.04
+let s:Version = 1.05
 scriptencoding utf-8
 
 "What Is This:
@@ -90,11 +90,13 @@ if !exists('g:QFixMRU_IgnoreTitle')
 endif
 " MRUに登録するファイル名
 if !exists('g:QFixMRU_RegisterFile')
-  let g:QFixMRU_RegisterFile = '\.\(howm\|txt\|mkd\|wiki\)$'
+  " let g:QFixMRU_RegisterFile = '\.\(howm\|txt\|mkd\|wiki\)$'
+  let g:QFixMRU_RegisterFile = ''
 endif
 " MRUタイトルの正規表現リスト
 if !exists('g:QFixMRU_Title')
-  let g:QFixMRU_Title = {'mkd' : '^#',  'wiki' : '^='}
+  " let g:QFixMRU_Title = {'mkd' : '^#',  'wiki' : '^='}
+  let g:QFixMRU_Title = {}
 endif
 " 任意の拡張子のタイトルを追加設定
 " 拡張子hogeのファイルの「行頭のfuga」をタイトルと見なす設定
@@ -613,7 +615,7 @@ function! QFixMRUWrite(write, ...)
   if g:QFixMRU_IgnoreFile != '' && mfile =~ g:QFixMRU_IgnoreFile
     return
   endif
-  if g:QFixMRU_RegisterFile != '' && mfile !~ g:QFixMRU_RegisterFile
+  if g:QFixMRU_RegisterFile == '' || mfile !~ g:QFixMRU_RegisterFile
     return
   endif
   if !bufexists(mfile) && !filereadable(mfile)
@@ -638,7 +640,7 @@ function! s:Register(mru)
   if g:QFixMRU_IgnoreFile != '' && mfile =~ g:QFixMRU_IgnoreFile
     return
   endif
-  if g:QFixMRU_RegisterFile != '' && mfile !~ g:QFixMRU_RegisterFile
+  if g:QFixMRU_RegisterFile == '' || mfile !~ g:QFixMRU_RegisterFile
     return
   endif
   if g:QFixMRU_IgnoreTitle != '' && text =~ g:QFixMRU_IgnoreTitle

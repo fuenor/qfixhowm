@@ -2083,10 +2083,15 @@ if !exists('g:qfixmemo_vimenter_file')
 endif
 
 function! qfixmemo#VimEnterCmd()
+  if exists('g:QFixMRU_RegisterFile') && g:QFixMRU_RegisterFile == ''
+    let g:QFixMRU_RegisterFile = '\.\(howm\|txt\|mkd\|wiki\)$'
+  endif
+  if exists('g:QFixMRU_Title') && g:QFixMRU_Title == {}
+    let g:QFixMRU_Title = {'mkd' : '^#',  'wiki' : '^='}
+  endif
   if !exists('g:qfixmemo_vimenter_cmd')
     return
   endif
-
   let cmd   = g:qfixmemo_mapleader . g:qfixmemo_vimenter_cmd
   let file  = fnamemodify(g:qfixmemo_vimenter_file, ':p')
   let tstr  = substitute(g:qfixmemo_vimenter_time, '[^0-9]', '', 'g')

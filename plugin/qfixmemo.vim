@@ -2087,10 +2087,10 @@ endif
 
 function! qfixmemo#VimEnterCmd()
   if exists('g:QFixMRU_RegisterFile') && g:QFixMRU_RegisterFile !~ g:qfixmemo_ext
-    let g:QFixMRU_RegisterFile = '\.'.g:qfixmemo_ext.'$'
+    " let g:QFixMRU_RegisterFile = '\.'.g:qfixmemo_ext.'$'
   endif
   if exists('g:QFixMRU_Title') && g:QFixMRU_Title == {}
-    let g:QFixMRU_Title = {'mkd' : '^#',  'wiki' : '^='}
+    " let g:QFixMRU_Title = {'mkd' : '^#',  'wiki' : '^='}
   endif
   if !exists('g:qfixmemo_vimenter_cmd')
     return

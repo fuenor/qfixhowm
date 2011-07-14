@@ -131,6 +131,7 @@ endif
 if !exists('g:QFixHowm_RecentDays')
   let g:QFixHowm_RecentDays = 5
 endif
+let g:qfixmemo_recentdays = g:QFixHowm_RecentDays
 
 " 折りたたみのパターン
 if !exists('g:QFixHowm_FoldingPattern')
@@ -153,6 +154,8 @@ endif
 if !exists('g:QFixHowm_RandomWalkColumns')
   let g:QFixHowm_RandomWalkColumns = 10
 endif
+let g:qfixmemo_random_columns = g:QFixHowm_RandomWalkColumns
+
 " ランダム表示しない正規表現
 if !exists('g:QFixHowm_RandomWalkExclude')
   let g:QFixHowm_RandomWalkExclude = ''
@@ -304,9 +307,6 @@ function! QFixHowmSetup()
   let g:qfixmemo_template_keycmd = g:QFixHowm_Cmd_NewEntry
   let g:qfixmemo_template_tag    = g:QFixHowm_DefaultTag
 
-  " 最近更新したエントリ一覧の日数
-  let g:qfixmemo_recentdays = g:QFixHowm_RecentDays
-
   " フォールディングパターン
   let g:qfixmemo_folding_pattern = g:QFixHowm_FoldingPattern
 
@@ -323,9 +323,7 @@ function! QFixHowmSetup()
   let g:qfixmemo_random_file    = g:QFixHowm_RandomWalkFile
   " ランダム表示ファイル更新時間(秒)
   let g:qfixmemo_random_time    = g:QFixHowm_RandomWalkUpdate*24*60*60
-  " ランダム表示数
-  let g:qfixmemo_random_columns = g:QFixHowm_RandomWalkColumns
-  " ランダムに表示しない正規表現
+  " ランダム表示しない正規表現
   let g:qfixmemo_random_exclude = g:QFixHowm_RandomWalkExclude
 
   " サブウィンドウのファイル名

@@ -1369,7 +1369,7 @@ function! qfixmemo#RandomWalk(file, ...)
   endif
   let columns = g:qfixmemo_random_columns
   if count
-    let g:QFixHowm_RandomWalkColumns = count
+    let g:qfixmemo_random_columns = count
   endif
   if &ft == 'qf'
     let columns = winheight(0)
@@ -2063,7 +2063,7 @@ endfunction
 """"""""""""""""""""""""""""""
 " help
 function! qfixmemo#Help()
-  let file = 'QFixHowmHelp'
+  let file = 'QFixMemoHelp'
   let hdir = escape(expand(g:qfixmemo_dir), ' ')
   silent! exec 'split '
   silent! exec 'edit ' . hdir .'/'. file

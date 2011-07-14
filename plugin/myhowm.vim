@@ -442,7 +442,7 @@ function! s:QFixHowmListReminder_(mode)
   if g:QFixHowm_RemovePriority > -1
     let ext = substitute(ext, '\.', '', '')
   endif
-  if !exists('g:mygrepprg') || g:mygrepprg == 'internal' || g:mygrepprg == '' || g:QFixHowm_ScheduleSearchVimgrep 
+  if !exists('g:mygrepprg') || g:mygrepprg == 'internal' || g:mygrepprg == '' || g:QFixHowm_ScheduleSearchVimgrep
     let g:MyGrep_UseVimgrep = 1
     let searchWord = '^\s*'.s:sch_dateT.ext
   elseif g:mygrepprg == 'findstr'

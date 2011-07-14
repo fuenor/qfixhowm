@@ -4,7 +4,7 @@
 "                 http://sites.google.com/site/fudist/Home  (Japanese)
 "  Last Modified: 2011-07-13 18:04
 "=============================================================================
-let s:Version = 1.05
+let s:Version = 1.06
 scriptencoding utf-8
 
 "What Is This:
@@ -141,6 +141,10 @@ augroup END
 
 " MRU表示
 function! QFixMRU(...)
+  if g:QFixMRU_state == 0
+    call QFixMRURead()
+    call QFixMRUWrite(0)
+  endif
   if len(s:MruDic) == 0
     echohl ErrorMsg
     redraw|echo 'QFixMRU: MRU is empty!'
@@ -616,7 +620,7 @@ function! QFixMRUWrite(write, ...)
   if g:QFixMRU_IgnoreFile != '' && mfile =~ g:QFixMRU_IgnoreFile
     return
   endif
-  if g:QFixMRU_RegisterFile == '' || mfile !~ g:QFixMRU_RegisterFile
+  if g:QFixMRU_RegisterFile != '' && mfile !~ g:QFixMRU_RegisterFile
     return
   endif
   if !bufexists(mfile) && !filereadable(mfile)
@@ -638,13 +642,13 @@ function! s:Register(mru)
   let text = mru['text']
   let lnum = mru['lnum']
 
-  if g:QFixMRU_IgnoreFile != '' && mfile =~ g:QFixMRU_IgnoreFile
+  if g:QFixMRU_RegisterFile != '' && mfile !~ g:QFixMRU_RegisterFile
     return
   endif
-  if g:QFixMRU_RegisterFile == '' || mfile !~ g:QFixMRU_RegisterFile
+  if g:QFixMRU_IgnoreFile   != '' && mfile =~ g:QFixMRU_IgnoreFile
     return
   endif
-  if g:QFixMRU_IgnoreTitle != '' && text =~ g:QFixMRU_IgnoreTitle
+  if g:QFixMRU_IgnoreTitle  != '' && text =~ g:QFixMRU_IgnoreTitle
     return
   endif
 

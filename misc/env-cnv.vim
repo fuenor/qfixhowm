@@ -352,20 +352,9 @@ function! QFixHowmSetup()
   let g:qfixmemo_keyword_dir  = g:QFixHowm_WikiDir
 endfunction
 
-" タイトル検索用正規表現設定
-silent! function QFixMemoTitleRegxp()
-  " 使用するgrepに合わせて設定します
-  let l:qfixmemo_title = escape(g:qfixmemo_title, g:qfixmemo_escape)
-  if !exists('g:QFixMRU_Title["'.g:qfixmemo_ext.'"]')
-    let g:QFixMRU_Title[g:qfixmemo_ext] = '^'.l:qfixmemo_title. '\([^'.g:qfixmemo_title[0].']\|$\)'
-  endif
-  if !exists('g:QFixMRU_Title["'.g:qfixmemo_ext.'_regxp"]')
-    let g:QFixMRU_Title[g:qfixmemo_ext.'_regxp'] = '^'.l:qfixmemo_title. '[^'.g:qfixmemo_title[0].']'
-  endif
-  if exists('g:QFixMRU_RegisterFile') && g:QFixMRU_RegisterFile !~ g:qfixmemo_ext
-    let g:QFixMRU_RegisterFile = '\.'.g:qfixmemo_ext.'$'
-  endif
-endfunction
+if exists('g:QFixMRU_RegisterFile') && g:QFixMRU_RegisterFile == ''
+  let g:QFixMRU_RegisterFile = '\.\(howm\|txt\|mkd\|wiki\)$'
+endif
 
 """"""""""""""""""""""""""""""
 " global keymap

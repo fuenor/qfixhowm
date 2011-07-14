@@ -230,7 +230,7 @@ silent! function QFixMemoBufWritePre()
   call qfixmemo#AddTime()
   " タイムスタンプアップデート
   " call qfixmemo#UpdateTime()
-  " Wikiスタイルのキーワードリンク作成
+  " キーワードリンク
   call qfixmemo#AddKeyword()
   " ファイル末の空行を削除
   call qfixmemo#DeleteNullLines()
@@ -247,15 +247,15 @@ endfunction
 
 " タイトル検索用正規表現設定
 silent! function QFixMemoTitleRegxp()
-  " 使用するgrepに合わせて設定します
   let l:qfixmemo_title = escape(g:qfixmemo_title, g:qfixmemo_escape)
   if !exists('g:QFixMRU_Title["'.g:qfixmemo_ext.'"]')
     let g:QFixMRU_Title[g:qfixmemo_ext] = '^'.l:qfixmemo_title. '\([^'.g:qfixmemo_title[0].']\|$\)'
   endif
+  " 使用するgrepに合わせて設定します
   if !exists('g:QFixMRU_Title["'.g:qfixmemo_ext.'_regxp"]')
     let g:QFixMRU_Title[g:qfixmemo_ext.'_regxp'] = '^'.l:qfixmemo_title. '[^'.g:qfixmemo_title[0].']'
   endif
-  if exists('g:QFixMRU_RegisterFile') && g:QFixMRU_RegisterFile !~ g:qfixmemo_ext
+  if exists('g:QFixMRU_RegisterFile') && '.'.g:qfixmemo_ext !~ g:QFixMRU_RegisterFile
     let g:QFixMRU_RegisterFile = '\.'.g:qfixmemo_ext.'$'
   endif
 endfunction

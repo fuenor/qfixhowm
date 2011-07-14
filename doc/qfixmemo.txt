@@ -120,13 +120,18 @@ Windowsでファイルエンコーディングを 'utf-8' に設定したい場�
 http://sites.google.com/site/fudist/Home/grep/install
 ファイルフォーマット(改行コード)についてはWindowsでも 'unix' に設定可能です。
 
-Windowsのデフォルトで使用されるfindstrは正規表現の関係でタイムスタンプ検索に制
-限があります。タイムスタンプに空白を含むとうまく検索できない事がありますので、
-なるべくデフォルトのままか - を / に変える程度で使用して下さい。
+予定・TODOにはQFixHowmのソースがそのまま使用されていますので、タイムスタンプ
+フォーマットはなるべくデフォルトのままか - を / に変える程度で使用して下さい。
+またWindowsのデフォルトで使用されるfindstrは正規表現の関係で制限があり、タイム
+スタンプフォーマットを変更すると検索できなくなる事があります。
 
-Windows: >
+タイムスタンプ: >
   let g:qfixmemo_timeformat = '[%Y-%m-%d %H:%M]'
-  let g:qfixmemo_timeformat = '[%Y/%m/%d %H:%M]'
+
+  " タイムスタンプフォーマットの日付部分を変更する場合 QFixHowm_DatePatternも
+  " 変更する必要があります。
+  let g:qfixmemo_timeformat  = '[%Y/%m/%d %H:%M]'
+  let g:QFixHowm_DatePattern = '%Y/%m/%d'
 
 ==============================================================================
 3. メモファイルを開く					*qfixmemo-file*
@@ -155,7 +160,6 @@ Windows: >
 保存時にタイトル行が空ならタイトルは本文から適当に作成されます。
 
 "Note"
-
 メモファイル中に [[キーワード]] のように [[ と ]] でWikiスタイルのキーワードを
 作成するとオートリンク化され、キーワード上で<CR>を押すと対応するファイルを開く
 ことが出来ます。
@@ -325,7 +329,7 @@ u                   ソートや絞り込みのアンドゥ
 U                   絞り込み全てをアンドゥ
 
 ------------------------------------------------------------------------------
-5.2 エントリフィルタと連結表示			*qfixmemo-entry-filter*
+5.2 エントリフィルタと連結表示				*qfixmemo-entry-filter*
 
 @                   連結表示
 #                   エントリフィルタ
@@ -459,6 +463,11 @@ qfixmemo/misc/user-func.vim にまとめてあります。
       \""
     \]
 
+テンプレート        置換オプション
+%TITLE%             qfixmemo_title
+%DATE%              qfixmemo_timeformat
+%TAG%               qfixmemo_template_tag
+
 テンプレートは |strftime()|で整形されるのであらかじめタイムスタンプを埋め込む
 ことも出来ます。
 .vimrc >
@@ -494,6 +503,7 @@ QFixMemoのタイトル検索用正規表現は QFixMemoTitleRegxp()でも独自
 
     " タイトル行検索の正規表現
     function! QFixMemoTitleRegxp()
+      let g:QFixMRU_Title[g:qfixmemo_ext]            = '^###[^#]'
       let g:QFixMRU_Title[g:qfixmemo_ext . '_regxp'] = '^###[^#]'
     endfunction
 <

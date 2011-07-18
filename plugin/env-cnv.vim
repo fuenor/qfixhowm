@@ -194,6 +194,19 @@ endif
 if !exists('g:QFixHowm_Cmd_NewEntry')
   let g:QFixHowm_Cmd_NewEntry = "$a"
 endif
+
+"mkdテンプレート
+if !exists('g:QFixHowm_Template_mkd')
+  let g:QFixHowm_Template_mkd = [
+    \ "%TITLE% %TAG%",
+    \ ""
+  \]
+endif
+"mkdテンプレート(カーソル移動)
+if !exists('g:QFixHowm_Cmd_NewEntry_mkd')
+  let g:QFixHowm_Cmd_NewEntry_mkd = "$a"
+endif
+
 if !exists('g:QFixHowm_DefaultTag')
   let g:QFixHowm_DefaultTag = ''
 endif
@@ -306,6 +319,9 @@ function! QFixHowmSetup()
   let g:qfixmemo_template        = g:QFixHowm_Template
   let g:qfixmemo_template_keycmd = g:QFixHowm_Cmd_NewEntry
   let g:qfixmemo_template_tag    = g:QFixHowm_DefaultTag
+
+  silent! exe 'let qfixmemo_template_'.g:qfixmemo_ext.' = deepcopy(g:QFixHowm_Template_'.g:qfixmemo_ext . ')'
+  silent! exe 'let qfixmemo_template_keycmd_'.g:qfixmemo_ext.' = g:QFixHowm_Cmd_NewEntry_'.g:qfixmemo_ext
 
   " フォールディングパターン
   let g:qfixmemo_folding_pattern = g:QFixHowm_FoldingPattern

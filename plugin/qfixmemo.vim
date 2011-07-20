@@ -1601,6 +1601,8 @@ function! s:qfBufWinEnter()
   nnoremap <buffer> <silent> @    :call qfixmemo#Cmd_AT('normal')<CR><ESC>
   vnoremap <buffer> <silent> @    :call qfixmemo#Cmd_AT('visual')<CR><ESC>
   nnoremap <buffer> <silent> #    :call qfixmemo#Cmd_Replace('remove')<CR>
+  nnoremap <buffer> <silent> R    :call qfixmemo#Cmd_RD('Remove')<CR>
+  vnoremap <buffer> <silent> R    :call qfixmemo#Cmd_RD('Remove')<CR>
   nnoremap <buffer> <silent> D    :call qfixmemo#Cmd_RD('Delete')<CR>
   vnoremap <buffer> <silent> D    :call qfixmemo#Cmd_RD('Delete')<CR>
   nnoremap <buffer> <silent> <F5> :call qfixmemo#RandomWalk(g:qfixmemo_random_file)<CR>

@@ -2099,10 +2099,10 @@ function! qfixmemo#VimEnterCmd()
   endif
   let cmd   = g:qfixmemo_mapleader . g:qfixmemo_vimenter_cmd
   let file  = fnamemodify(g:qfixmemo_vimenter_file, ':p')
-  let tstr  = substitute(g:qfixmemo_vimenter_time, '[^0-9]', '', 'g')
+  let tstr  = substitute(g:qfixmemo_vimenter_time, '[^0-9]', '', 'g') . '00'
 
   let ltime = localtime()
-  let lstr  = strftime('%Y%m%d%H%M', ltime)
+  let lstr  = strftime('%Y%m%d%H%M%S', ltime)
   let estr  = strftime('%Y%m%d', ltime) . tstr
   if lstr < estr
     let ltime -= 24*60*60
@@ -2110,7 +2110,7 @@ function! qfixmemo#VimEnterCmd()
   endif
 
   let ftime = getftime(file)
-  let fstr = strftime('%Y%m%d%H%M', ftime)
+  let fstr = strftime('%Y%m%d%H%M%S', ftime)
   if ftime > 0 && fstr > estr
     return
   endif

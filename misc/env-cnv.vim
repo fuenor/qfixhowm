@@ -15,8 +15,8 @@ endif
 " このファイルでオプションのコンバートを行っているため、QFixMemoはQFixHowmとオ
 " プション互換のプラグインとして動作しています。
 "
-" Vimの設定ファイルへ設定追加するとQFixHowmオプションのコンバートを行わなくな
-" ります。
+" 以下をVimの設定ファイルへ設定追加するとQFixHowmオプションのコンバートを行わ
+" なくなります。
 "
 " " QFixHowmとのオプションコンバートを行わない
 " let QFixHowm_Convert = 0
@@ -381,6 +381,17 @@ let g:mapleader = g:qfixmemo_mapleader
 if g:QFixHowm_RecentMode == 2
   silent! nnoremap <silent> <Leader>L :<C-u>call qfixmemo#ListRecent()<CR>
   silent! nnoremap <silent> <Leader>l :<C-u>call qfixmemo#ListRecentTimeStamp()<CR>
+
+  function! QFixMemoMenubarPost(menu, leader)
+    silent! exe 'aunmenu Memo(&M).ListRecent(&L)'
+    silent! exe 'aunmenu Memo(&M).ListRecent(Stamp)(&2)'
+    let menucmd = 'amenu <silent> 41.333 '.a:menu.'.%s<Tab>'.a:leader.'%s :call feedkeys("'.a:leader.'%s","t")<CR>'
+    call s:addMenu(menucmd, 'ListRecent(Stamp)(&l)', 'l')
+    call s:addMenu(menucmd, 'ListRecent(&2)'       , 'L')
+  endfunction
+  function! s:addMenu(menu, acc, cmd)
+    exe printf(a:menu, a:acc, a:cmd, a:cmd)
+  endfunction
 endif
 
 if exists('s:mapleader')

@@ -334,6 +334,8 @@ silent! function QFixMemoMenubar(menu, leader)
   call s:addMenu(menucmd, 'PairFile(&J)'       , 'j')
   exe printf(sepcmd, 1)
   call s:addMenu(menucmd, 'MRU(&M)'              , 'm')
+  let menucmd = 'amenu <silent> 41.334 '.a:menu.'.%s<Tab>'.a:leader.'%s :call feedkeys("'.a:leader.'%s","t")<CR>'
+  let sepcmd  = 'amenu <silent> 41.334 '.a:menu.'.-sep%d-			<Nop>'
   call s:addMenu(menucmd, 'ListRecent(&L)'       , 'l')
   call s:addMenu(menucmd, 'ListRecent(Stamp)(&2)', 'L')
   call s:addMenu(menucmd, 'ListAll(&A)'          , 'a')
@@ -360,8 +362,8 @@ silent! function QFixMemoMenubar(menu, leader)
   call s:addMenu(menucmd, 'Help(&H)', 'H')
   exe printf(sepcmd, 8)
   let submenu = '.Buffer[Local]\ (&B)'
-  let sepcmd  = 'amenu <silent> 41.333 '.a:menu.submenu.'.-sep%d-			<Nop>'
-  let menucmd = 'amenu <silent> 41.333 '.a:menu.submenu.'.%s<Tab>'.a:leader.'%s :call feedkeys("'.a:leader.'%s","t")<CR>'
+  let sepcmd  = 'amenu <silent> 41.335 '.a:menu.submenu.'.-sep%d-			<Nop>'
+  let menucmd = 'amenu <silent> 41.335 '.a:menu.submenu.'.%s<Tab>'.a:leader.'%s :call feedkeys("'.a:leader.'%s","t")<CR>'
   exe printf(sepcmd, 1)
   call s:addMenu(menucmd, 'Outline(&O)', 'o')
   exe printf(sepcmd, 2)
@@ -379,6 +381,11 @@ silent! function QFixMemoMenubar(menu, leader)
   call s:addMenu(menucmd, 'DivideEntry(&W)', 'W')
   exe printf(sepcmd, 5)
   call s:addMenu(menucmd, 'Rename(&Z)', 'rn')
+
+  call QFixMemoMenubarPost(a:menu, a:leader)
+endfunction
+
+silent! function QFixMemoMenubarPost(menu, leader)
 endfunction
 
 function! s:addMenu(menu, acc, cmd)

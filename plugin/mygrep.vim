@@ -2,9 +2,9 @@
 "    Description: 日本語Grepヘルパー
 "         Author: fuenor <fuenor@gmail.com>
 "                 http://sites.google.com/site/fudist/Home/grep
-"  Last Modified: 2011-05-17 00:02
+"  Last Modified: 2011-07-24 22:26
 "================================================================================
-let s:Version = 2.80
+let s:Version = 2.81
 scriptencoding utf-8
 
 if exists('enable_MyGrep')
@@ -204,6 +204,7 @@ if MyGrep_MenuBar
   exec 'amenu <silent> 41.331 '.s:menu.'.Vimgrepadd(&V)<Tab>'.s:MyGrep_Key.'V  :QFVGrepadd!<CR>'
   exec 'amenu <silent> 41.331 '.s:menu.'.-sep2-			<Nop>'
   exec 'amenu <silent> 41.331 '.s:menu.'.CurrentDirMode(&M)<Tab>'.s:MyGrep_Key.'rM  :ToggleGrepCurrentDirMode<CR>'
+  exec 'amenu <silent> 41.331 '.s:menu.'.RecursiveMode(&D)<Tab>'.s:MyGrep_Key.'rD  :ToggleGrepRecursiveMode<CR>'
   exec 'amenu <silent> 41.331 '.s:menu.'.SetFileEncoding(&S)<Tab>'.s:MyGrep_Key.'rS  :call s:SetFileEncoding()<CR>'
   exec 'amenu <silent> 41.331 '.s:menu.'.-sep3-			<Nop>'
   exec 'amenu <silent> 41.331 '.s:menu.'.Load\ Quickfix(&L)<Tab>'.s:MyGrep_Key.'k  :MyGrepReadResult<CR>\|:QFixCopen<CR>'
@@ -232,6 +233,7 @@ exec 'silent! nnoremap <unique> <silent> '.s:MyGrep_Key.'v  :QFVGrep!<CR>'
 exec 'silent! vnoremap <unique> <silent> '.s:MyGrep_Key.'v  :call VGrep("", -1, 0)<CR>'
 
 exec 'silent! nnoremap <unique> <silent> '.s:MyGrep_Key.'rM  :ToggleGrepCurrentDirMode<CR>'
+exec 'silent! nnoremap <unique> <silent> '.s:MyGrep_Key.'rD  :ToggleGrepRecursiveMode<CR>'
 exec 'silent! nnoremap <unique> <silent> '.s:MyGrep_Key.'rS  :call <SID>SetFileEncoding()<CR>'
 
 exec 'silent! nnoremap <unique> <silent> '.s:MyGrep_Key.'B  :BGrepadd<CR>'
@@ -259,6 +261,7 @@ autocmd BufWinEnter quickfix exec 'silent! nnoremap <unique> <buffer> <silent> '
 """"""""""""""""""""""""""""""
 command! -bang ToggleDamemoji let MyGrep_Damemoji = <bang>0?2:!MyGrep_Damemoji|echo 'QFixGrep : Damemoji = '.(MyGrep_Damemoji?'ON':'OFF')
 command! -bang ToggleGrepCurrentDirMode let MyGrep_CurrentDirMode = <bang>0?1:!MyGrep_CurrentDirMode|echo 'QFixGrep : CurrentDirMode = '.(MyGrep_CurrentDirMode?'ON':'OFF')
+command! -bang ToggleGrepRecursiveMode let MyGrep_RecursiveMode = <bang>0?1:!MyGrep_RecursiveMode|echo 'QFixGrep : RecursiveMode = '.(MyGrep_RecursiveMode?'ON':'OFF')
 
 """"""""""""""""""""""""""""""
 function! VGrep(word, mode, addflag)
@@ -558,6 +561,9 @@ endif
 if !exists('g:MyGrep_Recursive')
   let g:MyGrep_Recursive = 0
 endif
+if !exists('g:MyGrep_RecursiveMode')
+  let g:MyGrep_RecursiveMode = 0
+endif
 if !exists('g:MyGrep_RecOpt')
   let g:MyGrep_RecOpt = '-r'
 endif
@@ -810,7 +816,7 @@ function! s:ExecGrep(cmd, prg, searchPath, searchWord, from_encoding, to_encodin
   let opt = ''
 
   " 検索パス設定
-  if match(a:filepattern, '^\*\*/') != -1
+  if match(a:filepattern, '^\*\*/') != -1 || g:MyGrep_RecursiveMode
     let g:MyGrep_Recursive = 1
   endif
   if s:debug

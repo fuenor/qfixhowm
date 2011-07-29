@@ -480,9 +480,14 @@ function! s:BufRead()
   if g:qfixmemo_folding_pattern != ''
     setlocal nofoldenable
     setlocal foldmethod=expr
-    exec "setlocal foldexpr=getline(v:lnum)=~'".g:qfixmemo_folding_pattern."'?'>1':'1'"
+    setlocal foldexpr=QFixMemoFoldingLevel(v:lnum)
   endif
   call QFixMemoBufRead()
+endfunction
+
+"フォールディングレベル計算
+silent! function QFixMemoFoldingLevel(lnum)
+  return getline(a:lnum) =~ g:qfixmemo_folding_pattern ? '>1' : '1'
 endfunction
 
 function! s:BufEnter()

@@ -1,8 +1,5 @@
 scriptencoding utf-8
 
-" howmの予定・TODO
-" runtime! syntax/howm_schedule.vim
-
 " URLとファイル
 syntax match txtUrl display '\(http\|https\|ftp\|file\):[-0-9a-zA-Z;/?:@&=+$,_.!~*'()%#]\+'
 highlight link txtUrl Underlined
@@ -166,4 +163,6 @@ hi link WikiBoldItalicConceal WikiIgnore
 hi link WikiDelConceal    WikiIgnore
 hi link WikiSuperConceal  WikiIgnore
 hi link WikiSubConceal    WikiIgnore
+
+" runtime! syntax/howm_memo.vim
 

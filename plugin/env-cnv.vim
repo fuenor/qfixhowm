@@ -370,6 +370,12 @@ if exists('g:QFixMRU_RegisterFile') && g:QFixMRU_RegisterFile == ''
   let g:QFixMRU_RegisterFile = '\.\(howm\|txt\|mkd\|wiki\)$'
 endif
 
+if exists('*QFixHowmFoldingLevel')
+  silent function QFixMemoFoldingLevel(lnum)
+    return QFixHowmFoldingLevel(a:lnum)
+  endfunction
+endif
+
 """"""""""""""""""""""""""""""
 " global keymap
 """"""""""""""""""""""""""""""

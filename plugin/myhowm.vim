@@ -2056,7 +2056,7 @@ function! s:openstr(str)
   let pathhead = '\([A-Za-z]:[/\\]\|\~/\|/\)'
   if str =~ '^'.pathhead
     if str !~ l:MyOpenVim_ExtReg
-      let ext = fnamemodify(str, ':e')
+      let ext = tolower(fnamemodify(str, ':e'))
       if exists('g:QFixHowm_Opencmd_'.ext)
         exec 'let cmd = g:QFixHowm_Opencmd_'.ext
         let str = expand(str)

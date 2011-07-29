@@ -1622,6 +1622,10 @@ function! s:qfBufWinEnter()
   " vnoremap <buffer> <silent> x  :call QFixHowmCmd_X()<CR>
   nnoremap <buffer> <silent> X  :call qfixmemo#Cmd_X('move')<CR>
   " vnoremap <buffer> <silent> X  :call QFixHowmCmd_X('move')<CR>
+  call QFixMemoQFBufWinEnterPost()
+endfunction
+
+silent! function QFixMemoQFBufWinEnterPost()
 endfunction
 
 function! QFixPreviewReadOpt(file)

@@ -2411,6 +2411,139 @@ function! QFixHowmRepeatDateActionLock()
   return ":call cursor(line('.'),".start.")\<CR>:exec 'normal! c".len."l".cpattern."'\<CR>:call cursor(".prevline.",".prevcol.")\<CR>"
 endfunction
 
+""""""""""""""""""""""""""""""
+"Quickfixウィンドウの定義部分を取り出す
+"休日・祝日の予定もエクスポート対象にする
+if !exists('g:QFixHowmExportHoliday')
+  let g:QFixHowmExportHoliday = 0
+endif
+function! QFixHowmCmd_ScheduleList(...) range
+  if !exists("*QFixHowmExportSchedule")
+    return
+  endif
+  let prevPath = escape(getcwd(), ' ')
+
+  let firstline = 1
+  let cnt = line('$')
+  if a:firstline != a:lastline || a:0 > 0
+    let cnt = a:lastline - a:firstline + 1
+    let firstline = a:firstline
+  endif
+
+  let schlist = []
+  let l:QFixHowm_Title = '\d\+| '.s:sch_dateT.s:sch_Ext
+  let save_cursor = getpos('.')
+  for n in range(cnt)
+    call cursor(firstline+n, 1)
+    let qfline = getline('.')
+    if qfline !~ l:QFixHowm_Title
+      continue
+    endif
+    let holiday = g:QFixHowm_ReminderHolidayName
+    if exists('g:QFixHowm_UserHolidayName')
+      let holiday = g:QFixHowm_ReminderHolidayName . '\|' .g:QFixHowm_UserHolidayName
+    endif
+    let hdreg = '^'.s:sch_dateTime .'@ '.g:QFixHowm_DayOfWeekReg.' \?'.'\('.holiday.'\)'
+    if qfline =~ holiday && g:QFixHowmExportHoliday == 0
+      continue
+    endif
+    let file = QFixGet('file')
+    let lnum = QFixGet('lnum')
+    let ddat = {"qffile": file, "qflnum": lnum, "qfline": qfline}
+    call add(schlist, ddat)
+  endfor
+  call setpos('.', save_cursor)
+
+  QFixCclose
+  let h = g:QFix_Height
+  for d in schlist
+    call s:QFixHowmMakeScheduleList(d)
+  endfor
+  let g:QFix_Height = h
+  if schlist != []
+    call s:QFixHowmParseScheduleList(schlist)
+    call QFixHowmExportSchedule(schlist)
+  else
+    QFixCopen
+  endif
+  return schlist
+endfunction
+
+function! s:QFixHowmMakeScheduleList(sdic)
+  let file = a:sdic['qffile']
+  let lnum = a:sdic['qflnum']
+  let tpattern = qfixmemo#TitleRegxp()
+  let [entry, flnum, llnum] = QFixMRUGet('entry', file, lnum, tpattern)
+  let a:sdic['orgline'] = entry[0]
+  call remove(entry, 0)
+  let a:sdic['Description'] = entry
+  return a:sdic['Description']
+endfunction
+
+function! s:QFixHowmParseScheduleList(sdic)
+  for d in a:sdic
+    let pattern = '.*'.s:sch_dateT.s:sch_Ext.'\d*\s*'.g:QFixHowm_DayOfWeekReg.'\?\s*'
+    let d['Summary'] = substitute(d['qfline'], pattern, '', '')
+    let pattern = '\['.s:sch_date
+    let d['StartDate'] = strpart(matchstr(d['qfline'], pattern), 1)
+    let d['StartDate'] = substitute(d['StartDate'], '[/]', '-', 'g')
+    let pattern = '\['.s:sch_date . ' '. s:sch_time
+    let d['StartTime'] = strpart(matchstr(d['qfline'], pattern), 12)
+    let pattern = '&\['.s:sch_date
+    let d['EndDate'] = strpart(matchstr(d['orgline'], pattern), 2)
+    let d['EndDate'] = substitute(d['EndDate'], '[/]', '-', 'g')
+    let pattern = '&\['.s:sch_date.' '. s:sch_time
+    let d['EndTime'] = strpart(matchstr(d['orgline'], pattern), 13)
+    if d['EndTime'] == ''
+      let d['EndDate'] = QFixHowmAddDate(d['EndDate'], g:QFixHowm_EndDateOffset)
+    endif
+
+    let pattern = s:sch_dateCmd
+    let d['define']  = strpart(matchstr(d['orgline'], pattern), 0)
+    let pattern = ']'.s:sch_cmd
+    let d['command'] = strpart(matchstr(d['orgline'], pattern), 1)
+    let d['duration'] = matchstr(d['command'], '\d\+$')
+
+    let duration = d['duration']
+    let cmd = d['command'][0]
+    if duration == ''
+      if cmd == '@'
+        "@のデフォルトオプションは表示だけに関係する
+        let duration = 1
+      elseif cmd == '!'
+        let duration = g:QFixHowm_ReminderDefault_Deadline
+      elseif cmd == '-'
+        let duration = g:QFixHowm_ReminderDefault_Reminder
+      elseif cmd == '+'
+        let duration = g:QFixHowm_ReminderDefault_Todo
+      elseif cmd == '~'
+        let duration = g:QFixHowm_ReminderDefault_UD
+      else
+        let duration = 0
+      endif
+    else
+      "@のオプションは0,1の継続期間が同じ
+      if cmd == '@'
+        if duration < 2
+          let duration = 1
+        endif
+      endif
+    endif
+    "-の継続期間は duration+1日
+    if cmd == '-'
+      let duration = duration + g:QFixHowm_ReminderOffset
+    endif
+    let d['duration'] = duration
+  endfor
+endfunction
+
+function! QFixHowmAddDate(date, param)
+  let day = QFixHowmDate2Int(a:date) + a:param
+  let sttime = (day - g:DateStrftime) * 24 * 60 * 60 + g:QFixHowm_ST * (60 * 60)
+  let str = strftime(s:hts_date, sttime)
+  return matchstr(str, s:sch_date)
+endfunction
+
 let loaded_HowmSchedule = 1
 
 " 予定・TODOのみ使用したい場合

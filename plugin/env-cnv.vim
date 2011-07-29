@@ -375,10 +375,16 @@ if exists('g:QFixMRU_RegisterFile') && g:QFixMRU_RegisterFile == ''
 endif
 
 if exists('*QFixHowmFoldingLevel')
-  silent function QFixMemoFoldingLevel(lnum)
+  silent! function QFixMemoFoldingLevel(lnum)
     return QFixHowmFoldingLevel(a:lnum)
   endfunction
 endif
+silent! function QFixMemoQFBufWinEnterPost()
+  if exists("*QFixHowmExportSchedule")
+    nnoremap <buffer> <silent> !  :call QFixHowmCmd_ScheduleList()<CR>
+    vnoremap <buffer> <silent> !  :call QFixHowmCmd_ScheduleList('visual')<CR>
+  endif
+endfunction
 
 """"""""""""""""""""""""""""""
 " global keymap

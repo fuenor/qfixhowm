@@ -485,7 +485,7 @@ function! s:BufRead()
   call QFixMemoBufRead()
 endfunction
 
-"フォールディングレベル計算
+" フォールディングレベル計算
 silent! function QFixMemoFoldingLevel(lnum)
   return getline(a:lnum) =~ g:qfixmemo_folding_pattern ? '>1' : '1'
 endfunction

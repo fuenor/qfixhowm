@@ -328,7 +328,9 @@ function! QFixHowmSetup()
   silent! exe 'let qfixmemo_template_keycmd_'.g:qfixmemo_ext.' = g:QFixHowm_Cmd_NewEntry_'.g:qfixmemo_ext
 
   " フォールディングパターン
-  let g:qfixmemo_folding_pattern = g:QFixHowm_FoldingPattern
+  if g:QFixHowm_Folding
+    let g:qfixmemo_folding_pattern = g:QFixHowm_FoldingPattern
+  endif
 
   " 自動タイトル行の文字数
   let g:qfixmemo_title_length = g:QFixHowm_Replace_Title_Len
@@ -385,6 +387,14 @@ silent! function QFixMemoQFBufWinEnterPost()
     vnoremap <buffer> <silent> !  :call QFixHowmCmd_ScheduleList('visual')<CR>
   endif
 endfunction
+
+" 折りたたみを有効にする。
+if !exists('g:QFixHowm_Folding')
+  let g:QFixHowm_Folding = 1
+endif
+if g:QFixHowm_Folding == 0
+  let g:qfixmemo_folding_pattern = ''
+endif
 
 """"""""""""""""""""""""""""""
 " global keymap

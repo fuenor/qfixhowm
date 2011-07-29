@@ -24,6 +24,11 @@ endif
 if v:version < 700 || &cp
   finish
 endif
+
+if !exists('g:qfixlist_close_on_jump')
+  let g:qfixlist_close_on_jump = 0
+endif
+
 let loaded_QFixList = 1
 let g:QFixList_version = s:Version
 if !has('quickfix')
@@ -215,6 +220,7 @@ function! s:BufWinEnter(preview)
   " nnoremap <buffer> <silent> <F5> :<C-u>call <SID>reopen()<CR>
 
   nnoremap <buffer> <silent> i :<C-u>call <SID>TogglePreview()<CR>
+  nnoremap <buffer> <silent> J :<C-u>call <SID>ListCmd_J()<CR>
   nnoremap <buffer> <silent> I :<C-u>call <SID>TogglePreview()<CR>
   nnoremap <buffer> <silent> D :call <SID>Exec('delete','Delete')<CR>
   nnoremap <buffer> <silent> R :call <SID>Exec('delete','Remove')<CR>
@@ -245,6 +251,11 @@ function! s:BufWinEnter(preview)
   hi def link qfError	Error
 
   silent exec 'lchdir ' . escape(s:QFixList_dir, ' ')
+endfunction
+
+function! s:ListCmd_J()
+  let g:qfixlist_close_on_jump = !g:qfixlist_close_on_jump
+  echo 'Close on jump : ' . (g:qfixlist_close_on_jump? 'ON' : 'OFF')
 endfunction
 
 function! s:reopen()
@@ -278,7 +289,12 @@ endfunction
 
 function! s:CR()
   let [file, lnum] = s:Getfile('.')
-  call QFixEditFile(file)
+  if g:qfixlist_close_on_jump
+    silent! close
+    exec 'edit '.escape(file, ' %#')
+  else
+    call QFixEditFile(file)
+  endif
   call cursor(lnum, 1)
   exec 'normal! zz'
 endfunction

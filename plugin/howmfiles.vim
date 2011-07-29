@@ -550,6 +550,11 @@ function! HowmMenuCR() range
   return ''
 endfunction
 
+function! s:MenuCmd_J()
+  let g:QFixHowm_MenuCloseOnJump = !g:QFixHowm_MenuCloseOnJump
+  echo 'Close on jump : ' . (g:QFixHowm_MenuCloseOnJump? 'ON' : 'OFF')
+endfunction
+
 function! HowmMenuClose()
   if winnr('$') == 1 || (winnr('$') == 2 && g:QFix_Win > 0)
     exec 'silent! b#'
@@ -590,6 +595,7 @@ function! s:BufWinEnterMenu(preview, head)
   hi link qfError Error
   call QFixHowmQFsyntax()
 
+  nnoremap <buffer> <silent> J :<C-u>call <SID>MenuCmd_J()<CR>
   nnoremap <buffer> <silent> q :<C-u>call <SID>Close()<CR>
   nnoremap <buffer> <silent> i :<C-u>call <SID>TogglePreview('menu')<CR>
   call QFixAltWincmdMap()

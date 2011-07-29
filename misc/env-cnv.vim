@@ -279,6 +279,10 @@ endif
 if exists('g:QFixHowm_MenuBar')
   let g:qfixmemo_menubar = g:QFixHowm_MenuBar
 endif
+if !exists('g:QFixHowm_ListCloseOnJump')
+  let g:QFixHowm_ListCloseOnJump = 0
+endif
+let g:qfixlist_close_on_jump = g:QFixHowm_ListCloseOnJump
 
 " 日付のデフォルトアクションロックを無効化
 let g:QFixHowm_DateActionLockDefault = 0

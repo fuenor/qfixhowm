@@ -330,6 +330,8 @@ function! QFixHowmSetup()
   " フォールディングパターン
   if g:QFixHowm_Folding
     let g:qfixmemo_folding_pattern = g:QFixHowm_FoldingPattern
+  else
+    let g:qfixmemo_folding_pattern = ''
   endif
 
   " 自動タイトル行の文字数

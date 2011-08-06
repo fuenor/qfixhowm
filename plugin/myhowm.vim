@@ -326,6 +326,7 @@ function! s:makeRegxp(dpattern)
   let s:sch_dateCmd  = s:sch_dateT . s:sch_Ext . '\{1,3}\(([0-9]*[-+*]\?'.s:sch_dow.'\?)\)\?[0-9]*'
   let s:sch_cmd      = s:sch_Ext . '\{1,3}\(([0-9]*[-+*]\?'.s:sch_dow.'\?\([-+]\d\+\)\?)\)\?[0-9]*'
   let s:Recentmode_Date   = '(\d\{12})'
+  let g:qfixmemo_scheduleformat = s:sch_dateCmd
 endfunction
 call s:makeRegxp(g:QFixHowm_DatePattern)
 

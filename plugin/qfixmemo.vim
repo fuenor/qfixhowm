@@ -90,16 +90,23 @@ if !exists('g:qfixmemo_timeformat')
   let g:qfixmemo_timeformat = '[%Y-%m-%d %H:%M]'
 endif
 function! qfixmemo#SetTimeFormatRegxp(fmt)
-  let s:qfixmemo_timeformat = a:fmt
-  let s:qfixmemo_timeformat = '^' . escape(s:qfixmemo_timeformat, '[~*.#')
-  let s:qfixmemo_timeformat = substitute(s:qfixmemo_timeformat, '\C%Y', '[0-9][0-9][0-9][0-9]', 'g')
-  let s:qfixmemo_timeformat = substitute(s:qfixmemo_timeformat, '\C%m', '[0-1][0-9]', 'g')
-  let s:qfixmemo_timeformat = substitute(s:qfixmemo_timeformat, '\C%d', '[0-3][0-9]', 'g')
-  let s:qfixmemo_timeformat = substitute(s:qfixmemo_timeformat, '\C%H', '[0-2][0-9]', 'g')
-  let s:qfixmemo_timeformat = substitute(s:qfixmemo_timeformat, '\C%M', '[0-5][0-9]', 'g')
-  let s:qfixmemo_timeformat = substitute(s:qfixmemo_timeformat, '\C%S', '[0-5][0-9]', 'g')
+  let regxp = a:fmt
+  let regxp = '^'.escape(regxp, '[~*.#')
+  let regxp = substitute(regxp, '\C%Y', '[0-9][0-9][0-9][0-9]', 'g')
+  let regxp = substitute(regxp, '\C%m', '[0-1][0-9]', 'g')
+  let regxp = substitute(regxp, '\C%d', '[0-3][0-9]', 'g')
+  let regxp = substitute(regxp, '\C%H', '[0-2][0-9]', 'g')
+  let regxp = substitute(regxp, '\C%M', '[0-5][0-9]', 'g')
+  let regxp = substitute(regxp, '\C%S', '[0-5][0-9]', 'g')
+  return regxp
 endfunction
-call qfixmemo#SetTimeFormatRegxp(g:qfixmemo_timeformat)
+let s:qfixmemo_timeformat = qfixmemo#SetTimeFormatRegxp(g:qfixmemo_timeformat)
+
+if exists('g:qfixmemo_scheduleformat')
+  let s:qfixmemo_scheduleformat = g:qfixmemo_scheduleformat
+else
+  let s:qfixmemo_scheduleformat = s:qfixmemo_timeformat . '[-@!+~.]'
+endif
 
 " 新規エントリテンプレート
 if !exists('g:qfixmemo_template')
@@ -528,18 +535,20 @@ function! qfixmemo#AddTitle()
   let save_cursor = getpos('.')
 
   let tpattern = qfixmemo#TitleRegxp()
-  call cursor(1, 1)
-  let fline = 1
-  let tpattern = qfixmemo#TitleRegxp()
   " 一行目は必ずタイトル
+  let fline = 1
+  call cursor(1, 1)
   let str = getline(fline)
-  if str !~ tpattern && str !~ l:qfixmemo_title
-    if str =~ s:qfixmemo_timeformat . '[-@!+~.]'
-      let [entry, fline, lline] = QFixMRUGet('entry', '%', fline, tpattern)
-      let fline = lline + 1
-    else
-      exe "0put='".g:qfixmemo_title . " '"
+  " 一行目が予定・TODOなら次エントリへ
+  if str =~ s:qfixmemo_scheduleformat
+    let [entry, fline, lline] = QFixMRUGet('entry', '%', fline, tpattern)
+    let fline = lline + 1
+    if fline >= line('$')
+      call setpos('.', save_cursor)
+      return
     endif
+  elseif str !~ tpattern && str !~ l:qfixmemo_title
+    exe "0put='".g:qfixmemo_title . " '"
   endif
   while 1
     let [entry, fline, lline] = QFixMRUGet('entry', '%', fline, tpattern)
@@ -550,7 +559,7 @@ function! qfixmemo#AddTitle()
     if title =~ rpattern
       call remove(entry, 0)
       for str in entry
-        if str != '' && str !~ s:qfixmemo_timeformat
+        if str != '' && str !~ s:qfixmemo_scheduleformat
           let len = strlen(str)
           let str = substitute(str, '\%>' . g:qfixmemo_title_length .'v.*','','')
           if strlen(str) != len

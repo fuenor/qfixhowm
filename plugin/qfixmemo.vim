@@ -1383,9 +1383,9 @@ function! qfixmemo#RandomWalk(file, ...)
   let ftime = getftime(file)
   let ftime = ftime < 0 ? 0 : ftime
   let ltime = localtime() - ftime
-  if ftime == 0
+  if ftime == 0 || ltime > g:qfixmemo_random_time
     let s:rwalk = s:randomWriteFile(file)
-  elseif s:rwalk == [] || ltime > g:qfixmemo_random_time
+  elseif s:rwalk == []
     let s:rwalk = s:randomReadFile(file)
   endif
   let columns = g:qfixmemo_random_columns

@@ -926,6 +926,8 @@ function! qfixmemo#Template(cmd)
   let nl = ""
   let len = len(tmpl)
   let l = line('.')
+  " for patch 270-280 (bug?)
+  call remove(tmpl, -1)
   if cmd =~ 'next'
     if getline(line('.')) != ''
       silent! put=nl

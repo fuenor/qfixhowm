@@ -897,7 +897,7 @@ function! qfixmemo#Template(cmd)
   if exists('g:qfixmemo_template_'.g:qfixmemo_ext)
     exe 'let tmpl = deepcopy(g:qfixmemo_template_'.g:qfixmemo_ext . ')'
   else
-    let tmpl   = deepcopy(g:qfixmemo_template)
+    let tmpl = deepcopy(g:qfixmemo_template)
   endif
   if len(tmpl) == 0
     return
@@ -917,26 +917,23 @@ function! qfixmemo#Template(cmd)
   endif
   call map(tmpl, 'substitute(v:val, "%TAG%"  , tag,   "g")')
   call map(tmpl, 'strftime(v:val)')
-  call add(tmpl, "")
   if cmd == 'New'
     silent! call setline(1, tmpl)
-    $delete _
     call cursor(1, 1)
   endif
+  let tmpl = s:patch73_272(tmpl)
   let nl = ""
   let len = len(tmpl)
   let l = line('.')
-  " for patch 270-280 (bug?)
-  call remove(tmpl, -1)
   if cmd =~ 'next'
     if getline(line('.')) != ''
       silent! put=nl
     endif
     silent! put=tmpl
-    call cursor(line('.')-len+2, 1)
+    call cursor(l+1, 1)
   elseif cmd == 'prev'
     silent! -1put=tmpl
-    call cursor(line('.')-len+2, 1)
+    call cursor(l, 1)
   elseif cmd == 'top'
     silent! -1put=tmpl
     call cursor(1, 1)
@@ -945,7 +942,7 @@ function! qfixmemo#Template(cmd)
       silent! put=nl
     endif
     silent! $put=tmpl
-    call cursor(line('.')-len+2, 1)
+    call cursor(l+1, 1)
   endif
   let saved_ve = &virtualedit
   silent setlocal virtualedit+=onemore
@@ -963,6 +960,20 @@ function! qfixmemo#Template(cmd)
     startinsert
   endif
   silent exec 'setlocal virtualedit='.saved_ve
+endfunction
+
+" Vim 7.3patch272の:put=listバグ修正による挙動の違いを吸収する
+" 7.3.272  ":put =list" does not add empty line for trailing empty item
+if !exists('qfixmemo_patch73_272')
+  let qfixmemo_patch73_272 = v:version > 703 || (v:version == 703 && has('patch272'))
+endif
+function! s:patch73_272(list)
+  if g:qfixmemo_patch73_272
+    return a:list
+  endif
+  let list = deepcopy(a:list)
+  call add(list, "")
+  return list
 endfunction
 
 function! qfixmemo#DeleteEntry(...)

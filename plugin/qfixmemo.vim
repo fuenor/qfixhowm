@@ -876,7 +876,7 @@ endfunction
 
 function! s:isQFixMemo(file)
   let file = fnamemodify(a:file, ':p')
-  if file =~ substitute(expand(g:qfixmemo_submenu_title), '\\', '/', 'g')
+  if file == expand(g:qfixmemo_submenu_title)
     return 1
   endif
   if fnamemodify(file, ':e') != g:qfixmemo_ext

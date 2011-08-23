@@ -662,7 +662,7 @@ function! MyGrep(pattern, searchPath, filepattern, fenc, addflag, ...)
       return save_qflist
     endif
     call QFixEnable(searchPath)
-    return
+    return []
   endif
 
   let ccmd = g:QFix_UseLocationList ? 'lexpr ""' : 'cexpr ""'
@@ -677,7 +677,7 @@ function! MyGrep(pattern, searchPath, filepattern, fenc, addflag, ...)
     let g:MyGrep_Ignorecase = 1
     let g:MyGrep_Recursive  = 0
     let g:MyGrep_UseVimgrep = 0
-    return
+    return []
   endif
   if g:MyGrep_ShellEncoding =~ 'utf8\c'
     let g:MyGrep_ShellEncoding = 'utf-8'
@@ -695,20 +695,22 @@ function! MyGrep(pattern, searchPath, filepattern, fenc, addflag, ...)
   else
     "だめ文字対策
     if g:MyGrep_Damemoji != 0 && a:fenc =~ 'cp932\c'
-      let pp = substitute(pattern, g:MyGrep_DamemojiReplaceDefault[2], '', 'g')
-      let pp = substitute(pp, '[\\.()?+{}\[\]*]', '', 'g')
-      if pp =~ '^\s*$'
-        let g:MyGrep_ErrorMes = "ダメ文字しか含まれていません!"
-        silent! exec ccmd
-        let g:MyGrep_Regexp = 1
-        let g:MyGrep_Ignorecase = 1
-        let g:MyGrep_Recursive  = 0
-        let g:MyGrep_UseVimgrep = 0
-        call s:SetFindstr('restore')
-        return
-      endif
+      let pp = match(pattern, g:MyGrep_DamemojiReplaceDefault[2])
       let pattern = substitute(pattern, g:MyGrep_DamemojiReplaceDefault[g:MyGrep_Damemoji], g:MyGrep_DamemojiReplaceReg, 'g')
       let pattern = substitute(pattern, g:MyGrep_DamemojiReplace, g:MyGrep_DamemojiReplaceReg, 'g')
+      if pp > -1
+        let g:MyGrep_ErrorMes = printf("QFixGrep : ダメ文字が含まれていました! regxp = %s", pattern)
+        if pattern =~ '^[.*]\+$'
+          let g:MyGrep_ErrorMes = "QFixGrep : ダメ文字しか含まれていません!"
+          silent! exec ccmd
+          let g:MyGrep_Regexp = 1
+          let g:MyGrep_Ignorecase = 1
+          let g:MyGrep_Recursive  = 0
+          let g:MyGrep_UseVimgrep = 0
+          call s:SetFindstr('restore')
+          return []
+        endif
+      endif
     endif
   endif
   if g:MyGrep_Ignorecase > 0
@@ -749,6 +751,7 @@ function! MyGrep(pattern, searchPath, filepattern, fenc, addflag, ...)
     redraw | echo g:MyGrep_ErrorMes
     echohl None
   endif
+  return []
 endfunction
 
 let g:MyGrep_ErrorMes = ''

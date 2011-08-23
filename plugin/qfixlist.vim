@@ -49,8 +49,7 @@ function! qfixlist#search(pattern, dir, cmd, days, fenc, file)
   silent exec 'lchdir ' . escape(expand(a:dir), ' ')
   let head = fnamemodify(a:dir, ':p')
   for d in list
-    " let file = fnamemodify(d['filename'], ':p')
-    let file = head. d['filename']
+    let file = fnamemodify(d['filename'], ':p')
     let d['filename'] = substitute(file, '\\', '/', 'g')
     let d['lnum'] = d['lnum'] + 0
   endfor
@@ -125,6 +124,7 @@ augroup END
 let s:lnum = line('.')
 let s:QFixListCache = []
 let s:QFixList_dir = ''
+let g:MyGrep_ErrorMes = ''
 
 function! qfixlist#GetList()
   return s:QFixListCache
@@ -139,7 +139,12 @@ function! qfixlist#copen(...)
   endif
   if len(s:QFixListCache) == 0
     echohl ErrorMsg
-    redraw | echo 'QFixList : Nothing in list!'
+    if g:MyGrep_ErrorMes != ''
+      redraw | echo g:MyGrep_ErrorMes
+      let g:MyGrep_ErrorMes = ''
+    else
+      redraw | echo 'QFixList : Nothing in list!'
+    endif
     echohl None
     return
   endif
@@ -152,6 +157,12 @@ function! qfixlist#copen(...)
   else
     call cursor(s:lnum, 1)
   endif
+  if g:MyGrep_ErrorMes != ''
+    echohl ErrorMsg
+    redraw | echo g:MyGrep_ErrorMes
+    let g:MyGrep_ErrorMes = ''
+    echohl None
+  endif
 endfunction
 
 function! qfixlist#open(...)
@@ -163,7 +174,12 @@ function! qfixlist#open(...)
   endif
   if len(s:QFixListCache) == 0
     echohl ErrorMsg
-    redraw | echo 'QFixList : Nothing in list!'
+    if g:MyGrep_ErrorMes != ''
+      redraw | echo g:MyGrep_ErrorMes
+      let g:MyGrep_ErrorMes = ''
+    else
+      redraw | echo 'QFixList : Nothing in list!'
+    endif
     echohl None
     return
   endif
@@ -205,6 +221,13 @@ function! qfixlist#open(...)
     call cursor(1, 1)
   else
     call cursor(s:lnum, 1)
+  endif
+  if g:MyGrep_ErrorMes != ''
+    echohl ErrorMsg
+    redraw | echo g:MyGrep_ErrorMes
+    let g:MyGrep_ErrorMes = ''
+    echohl None
+    let g:MyGrep_ErrorMes = ''
   endif
 endfunction
 

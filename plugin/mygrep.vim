@@ -662,7 +662,7 @@ function! MyGrep(pattern, searchPath, filepattern, fenc, addflag, ...)
       return save_qflist
     endif
     call QFixEnable(searchPath)
-    return
+    return []
   endif
 
   let ccmd = g:QFix_UseLocationList ? 'lexpr ""' : 'cexpr ""'
@@ -677,7 +677,7 @@ function! MyGrep(pattern, searchPath, filepattern, fenc, addflag, ...)
     let g:MyGrep_Ignorecase = 1
     let g:MyGrep_Recursive  = 0
     let g:MyGrep_UseVimgrep = 0
-    return
+    return []
   endif
   if g:MyGrep_ShellEncoding =~ 'utf8\c'
     let g:MyGrep_ShellEncoding = 'utf-8'
@@ -705,7 +705,7 @@ function! MyGrep(pattern, searchPath, filepattern, fenc, addflag, ...)
         let g:MyGrep_Recursive  = 0
         let g:MyGrep_UseVimgrep = 0
         call s:SetFindstr('restore')
-        return
+        return []
       endif
       let pattern = substitute(pattern, g:MyGrep_DamemojiReplaceDefault[g:MyGrep_Damemoji], g:MyGrep_DamemojiReplaceReg, 'g')
       let pattern = substitute(pattern, g:MyGrep_DamemojiReplace, g:MyGrep_DamemojiReplaceReg, 'g')
@@ -749,6 +749,7 @@ function! MyGrep(pattern, searchPath, filepattern, fenc, addflag, ...)
     redraw | echo g:MyGrep_ErrorMes
     echohl None
   endif
+  return []
 endfunction
 
 let g:MyGrep_ErrorMes = ''

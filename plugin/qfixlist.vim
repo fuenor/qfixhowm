@@ -49,8 +49,7 @@ function! qfixlist#search(pattern, dir, cmd, days, fenc, file)
   silent exec 'lchdir ' . escape(expand(a:dir), ' ')
   let head = fnamemodify(a:dir, ':p')
   for d in list
-    " let file = fnamemodify(d['filename'], ':p')
-    let file = head. d['filename']
+    let file = fnamemodify(d['filename'], ':p')
     let d['filename'] = substitute(file, '\\', '/', 'g')
     let d['lnum'] = d['lnum'] + 0
   endfor

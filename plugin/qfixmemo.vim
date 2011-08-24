@@ -1102,7 +1102,7 @@ function! qfixmemo#ListRecentTimeStamp(...)
       let fmt = g:qfixmemo_timeformat_findstr
     endif
   endif
-  let fmt = '^' . escape(fmt, '[~*.#')
+  let fmt = '^' . escape(fmt, '[]~*.#')
   let fmt = substitute(fmt, '\C%H', '[0-2][0-9]', 'g')
   let fmt = substitute(fmt, '\C%M', '[0-5][0-9]', 'g')
   let fmt = substitute(fmt, '\C%S', '[0-5][0-9]', 'g')

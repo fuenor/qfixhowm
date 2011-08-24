@@ -2,9 +2,9 @@
 "    Description: 日本語Grepヘルパー
 "         Author: fuenor <fuenor@gmail.com>
 "                 http://sites.google.com/site/fudist/Home/grep
-"  Last Modified: 2011-07-24 22:26
+"  Last Modified: 2011-08-23 19:00
 "================================================================================
-let s:Version = 2.81
+let s:Version = 2.82
 scriptencoding utf-8
 
 if exists('enable_MyGrep')
@@ -763,7 +763,7 @@ endif
 "findstr用に環境設定
 """"""""""""""""""""""""""""""
 function! s:SetFindstr(mode)
-  if g:mygrepprg != 'findstr'
+  if g:mygrepprg != 'findstr' && g:mygrepprg !~ 'jvgrep'
     return
   endif
   if a:mode == 'set'
@@ -774,17 +774,29 @@ function! s:SetFindstr(mode)
     let s:MyGrepcmd_fix_ignore      = g:MyGrepcmd_fix_ignore
     let s:MyGrepcmd_useropt         = g:MyGrepcmd_useropt
     let s:MyGrep_RecOpt             = g:MyGrep_RecOpt
+    let s:MyGrep_Damemoji           = g:MyGrep_Damemoji
     let s:MyGrep_DamemojiReplaceReg = g:MyGrep_DamemojiReplaceReg
     let s:MyGrep_ShellEncoding      = g:MyGrep_ShellEncoding
 
-    let g:MyGrepcmd                 = '#prg# #defopt# #recopt# #opt# #useropt# /G:#searchWordFile# #searchPath#'
-    let g:MyGrepcmd_regexp          = '/n /p /r'
-    let g:MyGrepcmd_regexp_ignore   = '/n /p /r /i'
-    let g:MyGrepcmd_fix             = '/n /p /l'
-    let g:MyGrepcmd_fix_ignore      = '/n /p /l /i'
-    let g:MyGrep_RecOpt             = '/s'
-    let g:MyGrep_DamemojiReplaceReg = '..'
-    let g:MyGrep_ShellEncoding      = 'cp932'
+    if g:mygrepprg == 'findstr'
+      let g:MyGrepcmd                 = '#prg# #defopt# #recopt# #opt# #useropt# /G:#searchWordFile# #searchPath#'
+      let g:MyGrepcmd_regexp          = '/n /p /r'
+      let g:MyGrepcmd_regexp_ignore   = '/n /p /r /i'
+      let g:MyGrepcmd_fix             = '/n /p /l'
+      let g:MyGrepcmd_fix_ignore      = '/n /p /l /i'
+      let g:MyGrep_RecOpt             = '/s'
+      let g:MyGrep_DamemojiReplaceReg = '..'
+      let g:MyGrep_ShellEncoding      = 'cp932'
+    elseif g:mygrepprg =~ 'jvgrep'
+      let g:MyGrepcmd                 = '#prg# #defopt# #recopt# #opt# #useropt# #searchWord# #searchPath#'
+      let g:MyGrepcmd_regexp          = ''
+      let g:MyGrepcmd_regexp_ignore   = ''
+      let g:MyGrepcmd_fix             = ''
+      let g:MyGrepcmd_fix_ignore      = ''
+      let g:MyGrep_RecOpt             = '-R'
+      let g:MyGrep_Damemoji           = 0
+      " let g:MyGrep_ShellEncoding      = 'cp932'
+    endif
   elseif a:mode == 'restore'
     let g:MyGrepcmd                 = s:MyGrepcmd
     let g:MyGrepcmd_regexp          = s:MyGrepcmd_regexp
@@ -793,6 +805,7 @@ function! s:SetFindstr(mode)
     let g:MyGrepcmd_fix_ignore      = s:MyGrepcmd_fix_ignore
     let g:MyGrepcmd_useropt         = s:MyGrepcmd_useropt
     let g:MyGrep_RecOpt             = s:MyGrep_RecOpt
+    let g:MyGrep_Damemoji           = s:MyGrep_Damemoji
     let g:MyGrep_DamemojiReplaceReg = s:MyGrep_DamemojiReplaceReg
     let g:MyGrep_ShellEncoding      = s:MyGrep_ShellEncoding
   endif
@@ -864,7 +877,13 @@ function! s:ExecGrep(cmd, prg, searchPath, searchWord, from_encoding, to_encodin
     let cmd = substitute(cmd, '#searchWordFile#', s:GrepEscapeVimPattern(g:qfixtempname), 'g')
   endif
   if match(cmd, '#searchWord#') != -1
-    let searchWord = iconv(a:searchWord, a:from_encoding, a:to_encoding)
+    let to_encoding = g:MyGrep_ShellEncoding
+    let searchWord = iconv(a:searchWord, a:from_encoding, to_encoding)
+    if g:mygrepprg =~ 'jvgrep'
+      if match(searchWord, ' ')
+        let searchWord = '"' . searchWord . '"'
+      endif
+    endif
     let cmd = substitute(cmd, '#searchWord#', s:GrepEscapeVimPattern(searchWord), 'g')
   endif
 
@@ -916,13 +935,16 @@ function! s:ParseSearchResult(searchPath, searchResult, filepattern, shellenc, f
   let wipetime = g:MyGrep_FileListWipeTime
   let g:MyGrep_FileListWipeTime = 0
   let fe=a:fenc
+  if g:mygrepprg =~ 'jvgrep'
+    let fe = g:MyGrep_ShellEncoding
+  endif
   let parseResult = ''
   let searchResult = a:searchResult
   let prevfname = ''
   let qfmtime = -1
   let mtime = 0
   let fcnv = a:shellenc != &enc
-  let ccnv = a:fenc != &enc
+  let ccnv = fe != &enc
   let qflist = []
   let recheck = 0
   let prevPath = escape(getcwd(), ' ')
@@ -951,7 +973,7 @@ function! s:ParseSearchResult(searchPath, searchResult, filepattern, shellenc, f
       let lnum = strpart(buf, extidx+1, bufidx-extidx-2)
       let text = strpart(buf, bufidx)
       if ccnv
-        let text = iconv(text, a:fenc, &enc)
+        let text = iconv(text, fe, &enc)
       endif
       let lst = split(text, '\n')
       if lst == []
@@ -965,7 +987,7 @@ function! s:ParseSearchResult(searchPath, searchResult, filepattern, shellenc, f
       endif
       if lst[0] != text
         if ccnv
-          let text = iconv(lst[0], &enc, a:fenc)
+          let text = iconv(lst[0], &enc, fe)
         endif
         let buf = strpart(buf, bufidx + strlen(text))
         let buf = substitute(buf, '^\n', '', '')

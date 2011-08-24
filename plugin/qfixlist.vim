@@ -150,8 +150,10 @@ function! qfixlist#copen(...)
     return
   endif
   let g:QFix_SearchPath = s:QFixList_dir
+  redraw | echo 'QFixList : Set quickfix list...'
   call QFixSetqflist(s:QFixListCache)
   call QFixPclose()
+  redraw | echo ''
   QFixCopen
   if a:0
     call cursor(1, 1)

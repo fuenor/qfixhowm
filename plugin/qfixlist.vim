@@ -47,10 +47,8 @@ function! qfixlist#search(pattern, dir, cmd, days, fenc, file)
 
   redraw | echo 'QFixList : Formatting...'
   silent exec 'lchdir ' . escape(expand(a:dir), ' ')
-  let head = fnamemodify(a:dir, ':p')
   for d in list
-    " let file = fnamemodify(d['filename'], ':p')
-    let file = head. d['filename']
+    let file = fnamemodify(d['filename'], ':p')
     let d['filename'] = substitute(file, '\\', '/', 'g')
     let d['lnum'] = d['lnum'] + 0
   endfor
@@ -203,13 +201,9 @@ function! qfixlist#open(...)
   silent exec 'lchdir ' . escape(s:QFixList_dir, ' ')
   let g:QFix_SearchPath = s:QFixList_dir
 
-  let head = fnamemodify(s:QFixList_dir, ':p')
-  let head = substitute(head, '\\', '/', 'g')
   let glist = []
   for n in s:QFixListCache
-    let file = n['filename']
-    " let file = fnamemodify(file, ':.')
-    let file = substitute(file, '^'.head, '', '')
+    let file = fnamemodify(n['filename'], ':.')
     let lnum = n['lnum']
     let text = n['text']
     let res = file.'|'.lnum.'| '.text

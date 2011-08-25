@@ -789,9 +789,9 @@ function! s:SetFindstr(mode)
       let g:MyGrep_ShellEncoding      = 'cp932'
     elseif g:mygrepprg =~ 'jvgrep'
       let g:MyGrepcmd_regexp          = ''
-      let g:MyGrepcmd_regexp_ignore   = ''
+      let g:MyGrepcmd_regexp_ignore   = '-i' " TODO: works fixed match only.
       let g:MyGrepcmd_fix             = '-F'
-      let g:MyGrepcmd_fix_ignore      = '-F'
+      let g:MyGrepcmd_fix_ignore      = '-i -F'
       let g:MyGrep_RecOpt             = '-R'
       let g:MyGrep_Damemoji           = 0
     endif

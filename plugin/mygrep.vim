@@ -788,14 +788,12 @@ function! s:SetFindstr(mode)
       let g:MyGrep_DamemojiReplaceReg = '..'
       let g:MyGrep_ShellEncoding      = 'cp932'
     elseif g:mygrepprg =~ 'jvgrep'
-      let g:MyGrepcmd                 = '#prg# #defopt# #recopt# #opt# #useropt# #searchWord# #searchPath#'
       let g:MyGrepcmd_regexp          = ''
       let g:MyGrepcmd_regexp_ignore   = ''
-      let g:MyGrepcmd_fix             = ''
-      let g:MyGrepcmd_fix_ignore      = ''
+      let g:MyGrepcmd_fix             = '-F'
+      let g:MyGrepcmd_fix_ignore      = '-F'
       let g:MyGrep_RecOpt             = '-R'
       let g:MyGrep_Damemoji           = 0
-      " let g:MyGrep_ShellEncoding      = 'cp932'
     endif
   elseif a:mode == 'restore'
     let g:MyGrepcmd                 = s:MyGrepcmd

@@ -275,7 +275,7 @@ silent! function QFixMemoKeymap()
   silent! nnoremap <silent> <unique> <Leader>U       :<C-u>call qfixmemo#Quickmemo(0)<CR>
   silent! nnoremap <silent> <unique> <Leader><Space> :<C-u>call qfixmemo#Edit(g:qfixmemo_diary)<CR>
   silent! nnoremap <silent> <unique> <Leader>j       :<C-u>call qfixmemo#PairFile('%')<CR>
-  silent! nnoremap <silent> <unique> <Leader>i       :<C-u>call qfixmemo#ToggleSubWindow('%')<CR>
+  silent! nnoremap <silent> <unique> <Leader>i       :<C-u>call qfixmemo#ToggleSubWindow()<CR>
 
   silent! nnoremap <silent> <unique> <Leader>m       :<C-u>call qfixmemo#ListMru()<CR>
   silent! nnoremap <silent> <unique> <Leader>l       :<C-u>call qfixmemo#ListRecent()<CR>

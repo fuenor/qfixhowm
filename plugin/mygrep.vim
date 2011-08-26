@@ -42,6 +42,10 @@ if !exists('mygrepprg')
     let mygrepprg = 'grep'
   endif
 endif
+" 日本語が含まれる場合のgrep指定
+if !exists('myjpgrepprg')
+  let myjpgrepprg = ''
+endif
 "使用するgrepのエンコーディング指定
 if !exists('g:MyGrep_ShellEncoding')
   let g:MyGrep_ShellEncoding = 'utf-8'
@@ -687,7 +691,7 @@ function! MyGrep(pattern, searchPath, filepattern, fenc, addflag, ...)
       let g:MyGrep_Damemoji = 0
     endif
   endif
-  call s:SetFindstr('set')
+  call s:SetGrepEnv('set', pattern)
   let _grepcmd = 'g:MyGrepcmd_regexp'
   if g:MyGrep_Regexp == 0
     let _grepcmd = 'g:MyGrepcmd_fix'
@@ -707,7 +711,7 @@ function! MyGrep(pattern, searchPath, filepattern, fenc, addflag, ...)
           let g:MyGrep_Ignorecase = 1
           let g:MyGrep_Recursive  = 0
           let g:MyGrep_UseVimgrep = 0
-          call s:SetFindstr('restore')
+          call s:SetGrepEnv('restore')
           return []
         endif
       endif
@@ -721,11 +725,11 @@ function! MyGrep(pattern, searchPath, filepattern, fenc, addflag, ...)
   let grepcmd = substitute(grepcmd, '#useropt#', g:MyGrepcmd_useropt, '')
   silent exec 'lchdir ' . escape(searchPath, ' ')
   let retval = s:ExecGrep(grepcmd, g:mygrepprg, searchPath, pattern, &enc, a:fenc, a:filepattern)
-  call s:SetFindstr('restore')
   let pattern = s:ParseFilepattern(a:filepattern)
   let file = ''
   redraw|echo 'QFixGrep : Parsing...'
   let g:MyGrep_qflist = s:ParseSearchResult(searchPath, retval, pattern, g:MyGrep_ShellEncoding, a:fenc)
+  call s:SetGrepEnv('restore')
   if g:MyGrep_Return
     let g:MyGrep_Return = 0
     if g:MyGrep_StayGrepDir == 0
@@ -760,9 +764,16 @@ if !exists('g:qfixtempname')
 endif
 
 """"""""""""""""""""""""""""""
-"findstr用に環境設定
+"findstr/jvgrep用に環境設定
 """"""""""""""""""""""""""""""
-function! s:SetFindstr(mode)
+function! s:SetGrepEnv(mode, ...)
+  if a:mode == 'set'
+    let s:mygrepprg = ''
+    if g:myjpgrepprg != '' && a:0 && match(a:1, '[^[:print:]]') > -1
+      let s:mygrepprg = g:mygrepprg
+      let g:mygrepprg = g:myjpgrepprg
+    endif
+  endif
   if g:mygrepprg != 'findstr' && g:mygrepprg !~ 'jvgrep'
     return
   endif
@@ -796,6 +807,10 @@ function! s:SetFindstr(mode)
       let g:MyGrep_Damemoji           = 0
     endif
   elseif a:mode == 'restore'
+    if s:mygrepprg != ''
+      let g:mygrepprg = s:mygrepprg
+      let s:mygrepprg = ''
+    endif
     let g:MyGrepcmd                 = s:MyGrepcmd
     let g:MyGrepcmd_regexp          = s:MyGrepcmd_regexp
     let g:MyGrepcmd_regexp_ignore   = s:MyGrepcmd_regexp_ignore

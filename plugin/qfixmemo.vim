@@ -1264,7 +1264,7 @@ function! qfixmemo#Glob(path, file, mode)
   let to   = &enc
   redraw | echo 'QFixMemo : Read firstline'
   for n in files
-    let n = path . '/'. n
+    let n = path . n
     let n = fnamemodify(n, ':p')
     if !isdirectory(n)
       let lnum = 1

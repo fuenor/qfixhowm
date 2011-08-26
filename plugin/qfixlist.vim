@@ -214,12 +214,13 @@ function! qfixlist#open(...)
   silent exec 'lchdir ' . escape(s:QFixList_dir, ' ')
   let g:QFix_SearchPath = s:QFixList_dir
 
+	let g:hoge = deepcopy(s:QFixListCache)
   let glist = []
   if g:qfixlist_use_fnamemodify == 0
     let head = fnamemodify(expand(s:QFixList_dir), ':p')
     let head = substitute(head, '\\', '/', 'g')
     for n in s:QFixListCache
-      let file = n['filename'][len(head)+1:]
+      let file = n['filename'][len(head):]
       "let file = substitute(file, '^'.head, '', '')
       " let file = fnamemodify(n['filename'], ':.')
       let lnum = n['lnum']

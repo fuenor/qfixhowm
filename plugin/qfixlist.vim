@@ -28,6 +28,9 @@ endif
 if !exists('g:qfixlist_close_on_jump')
   let g:qfixlist_close_on_jump = 0
 endif
+if !exists('g:qfixlist_use_fnamemodify')
+  let g:qfixlist_use_fnamemodify = 0
+endif
 
 let loaded_QFixList = 1
 let g:QFixList_version = s:Version
@@ -47,7 +50,7 @@ function! qfixlist#search(pattern, dir, cmd, days, fenc, file)
 
   redraw | echo 'QFixList : Formatting...'
   silent exec 'lchdir ' . escape(expand(a:dir), ' ')
-  if 1
+  if g:qfixlist_use_fnamemodify == 0
     let head = fnamemodify(a:dir, ':p')
     for d in list
       let file = head. d['filename']
@@ -212,7 +215,7 @@ function! qfixlist#open(...)
   let g:QFix_SearchPath = s:QFixList_dir
 
   let glist = []
-  if 1
+  if g:qfixlist_use_fnamemodify == 0
     let head = fnamemodify(s:QFixList_dir, ':p')
     let head = substitute(head, '\\', '/', 'g')
     for n in s:QFixListCache

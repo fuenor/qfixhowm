@@ -51,7 +51,7 @@ function! qfixlist#search(pattern, dir, cmd, days, fenc, file)
   redraw | echo 'QFixList : Formatting...'
   silent exec 'lchdir ' . escape(expand(a:dir), ' ')
   if g:qfixlist_use_fnamemodify == 0
-    let head = fnamemodify(a:dir, ':p')
+    let head = fnamemodify(expand(a:dir), ':p')
     for d in list
       let file = head. d['filename']
       " let file = fnamemodify(d['filename'], ':p')
@@ -216,7 +216,7 @@ function! qfixlist#open(...)
 
   let glist = []
   if g:qfixlist_use_fnamemodify == 0
-    let head = fnamemodify(s:QFixList_dir, ':p')
+    let head = fnamemodify(expand(s:QFixList_dir), ':p')
     let head = substitute(head, '\\', '/', 'g')
     for n in s:QFixListCache
       let file = n['filename']

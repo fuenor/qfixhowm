@@ -36,6 +36,7 @@ if !has('quickfix')
 endif
 
 function! qfixlist#search(pattern, dir, cmd, days, fenc, file)
+  call FudistPerf('')
   let cmd = a:cmd
   redraw | echo 'QFixList : Searching...'
   if a:days
@@ -47,11 +48,21 @@ function! qfixlist#search(pattern, dir, cmd, days, fenc, file)
 
   redraw | echo 'QFixList : Formatting...'
   silent exec 'lchdir ' . escape(expand(a:dir), ' ')
-  for d in list
-    let file = fnamemodify(d['filename'], ':p')
-    let d['filename'] = substitute(file, '\\', '/', 'g')
-    let d['lnum'] = d['lnum'] + 0
-  endfor
+  if exists('g:fudist') && g:fudist == 1
+    let head = fnamemodify(a:dir, ':p')
+    for d in list
+      let file = head. d['filename']
+      " let file = fnamemodify(d['filename'], ':p')
+      let d['filename'] = substitute(file, '\\', '/', 'g')
+      let d['lnum'] = d['lnum'] + 0
+    endfor
+  else
+    for d in list
+      let file = fnamemodify(d['filename'], ':p')
+      let d['filename'] = substitute(file, '\\', '/', 'g')
+      let d['lnum'] = d['lnum'] + 0
+    endfor
+  endif
   silent exec 'lchdir ' . prevPath
 
   redraw | echo 'QFixList : Sorting...'
@@ -79,6 +90,7 @@ function! qfixlist#search(pattern, dir, cmd, days, fenc, file)
   let s:QFixList_dir = a:dir
   let s:QFixListCache = list
   redraw | echo ''
+  call FudistPerf('#search')
   return list
 endfunction
 
@@ -202,13 +214,28 @@ function! qfixlist#open(...)
   let g:QFix_SearchPath = s:QFixList_dir
 
   let glist = []
-  for n in s:QFixListCache
-    let file = fnamemodify(n['filename'], ':.')
-    let lnum = n['lnum']
-    let text = n['text']
-    let res = file.'|'.lnum.'| '.text
-    call add(glist, res)
-  endfor
+  call FudistPerf('')
+  if exists('g:fudist') && g:fudist == 1
+    let head = fnamemodify(s:QFixList_dir, ':p')
+    let head = substitute(head, '\\', '/', 'g')
+    for n in s:QFixListCache
+      let file = n['filename']
+      let file = substitute(file, '^'.head, '', '')
+      " let file = fnamemodify(n['filename'], ':.')
+      let lnum = n['lnum']
+      let text = n['text']
+      let res = file.'|'.lnum.'| '.text
+      call add(glist, res)
+    endfor
+  else
+    for n in s:QFixListCache
+      let file = fnamemodify(n['filename'], ':.')
+      let lnum = n['lnum']
+      let text = n['text']
+      let res = file.'|'.lnum.'| '.text
+      call add(glist, res)
+    endfor
+  endif
 
   setlocal modifiable
   silent! %delete _
@@ -226,6 +253,7 @@ function! qfixlist#open(...)
     echohl None
     let g:MyGrep_ErrorMes = ''
   endif
+  call FudistPerf('#open')
 endfunction
 
 function! s:BufWinEnter(preview)

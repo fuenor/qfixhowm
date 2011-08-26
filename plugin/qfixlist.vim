@@ -219,8 +219,8 @@ function! qfixlist#open(...)
     let head = fnamemodify(expand(s:QFixList_dir), ':p')
     let head = substitute(head, '\\', '/', 'g')
     for n in s:QFixListCache
-      let file = n['filename']
-      let file = substitute(file, '^'.head, '', '')
+      let file = n['filename'][len(head)+1:]
+      "let file = substitute(file, '^'.head, '', '')
       " let file = fnamemodify(n['filename'], ':.')
       let lnum = n['lnum']
       let text = n['text']

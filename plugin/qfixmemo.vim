@@ -1253,6 +1253,9 @@ function! qfixmemo#Glob(path, file, mode)
   call qfixmemo#Init()
   let prevPath = escape(getcwd(), ' ')
   let path = expand(a:path)
+  if path !~ '[\\/]$'
+    let path .= '/'
+  endif
   let mode = a:mode
   exec 'lchdir ' . escape(path, ' ')
   redraw | echo 'QFixMemo : glob...'

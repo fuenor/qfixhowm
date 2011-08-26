@@ -157,6 +157,21 @@ if !exists('g:qfixmemo_separator')
   let g:qfixmemo_separator = '>>> %s'
 endif
 
+" goto link syntax highlight
+if !exists('g:qfixmemo_gotolink_pattern')
+  let g:qfixmemo_gotolink_pattern = ''
+  if exists('g:howm_glink_pattern')
+    let g:qfixmemo_gotolink_pattern = g:howm_glink_pattern . '.*'
+  endif
+endif
+" come-from link syntax highlight
+if !exists('g:qfixmemo_comefromlink_pattern')
+  let g:qfixmemo_comefromlink_pattern = ''
+  if exists('g:howm_clink_pattern')
+    let g:qfixmemo_comefromlink_pattern = g:howm_clink_pattern . '.*'
+  endif
+endif
+
 " サブウィンドウを出す方向
 if !exists('g:qfixmemo_submenu_dir')
   let g:qfixmemo_submenu_dir = "topleft vertical"
@@ -675,6 +690,12 @@ function! s:syntaxHighlight()
   endif
   silent! syn clear qfixmemoGotolink
   exe "syn match qfixmemoGotolink '" . '^' . matchstr(g:qfixmemo_separator, '^\S\+') . ".*'"
+  if g:qfixmemo_gotolink_pattern != ''
+    exe "syn match qfixmemoGotolink '" . g:qfixmemo_gotolink_pattern    . "'" . '"'
+  endif
+  if g:qfixmemo_comefromlink_pattern != ''
+    exe "syn match qfixmemoGotolink '" . g:qfixmemo_comefromlink_pattern . "'" . '"'
+  endif
   hi link qfixmemoGotolink  Underlined
   silent! syntax clear qfixmemoKeyword
   if s:KeywordHighlight != ''

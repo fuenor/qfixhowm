@@ -36,7 +36,6 @@ if !has('quickfix')
 endif
 
 function! qfixlist#search(pattern, dir, cmd, days, fenc, file)
-  call FudistPerf('')
   let cmd = a:cmd
   redraw | echo 'QFixList : Searching...'
   if a:days
@@ -48,7 +47,7 @@ function! qfixlist#search(pattern, dir, cmd, days, fenc, file)
 
   redraw | echo 'QFixList : Formatting...'
   silent exec 'lchdir ' . escape(expand(a:dir), ' ')
-  if exists('g:fudist') && g:fudist == 1
+  if 1
     let head = fnamemodify(a:dir, ':p')
     for d in list
       let file = head. d['filename']
@@ -90,7 +89,6 @@ function! qfixlist#search(pattern, dir, cmd, days, fenc, file)
   let s:QFixList_dir = a:dir
   let s:QFixListCache = list
   redraw | echo ''
-  call FudistPerf('#search')
   return list
 endfunction
 
@@ -214,8 +212,7 @@ function! qfixlist#open(...)
   let g:QFix_SearchPath = s:QFixList_dir
 
   let glist = []
-  call FudistPerf('')
-  if exists('g:fudist') && g:fudist == 1
+  if 1
     let head = fnamemodify(s:QFixList_dir, ':p')
     let head = substitute(head, '\\', '/', 'g')
     for n in s:QFixListCache
@@ -253,7 +250,6 @@ function! qfixlist#open(...)
     echohl None
     let g:MyGrep_ErrorMes = ''
   endif
-  call FudistPerf('#open')
 endfunction
 
 function! s:BufWinEnter(preview)

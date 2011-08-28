@@ -574,7 +574,7 @@ function! qfixmemo#AddTitle()
     if title =~ rpattern
       call remove(entry, 0)
       for str in entry
-        if str != '' && str !~ s:qfixmemo_scheduleformat
+        if str != '' && str !~ s:qfixmemo_scheduleformat && str !~ g:qfixmemo_timeformat
           let len = strlen(str)
           let str = substitute(str, '\%>' . g:qfixmemo_title_length .'v.*','','')
           if strlen(str) != len

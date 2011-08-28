@@ -157,6 +157,21 @@ if !exists('g:qfixmemo_separator')
   let g:qfixmemo_separator = '>>> %s'
 endif
 
+" goto link syntax highlight
+if !exists('g:qfixmemo_gotolink_pattern')
+  let g:qfixmemo_gotolink_pattern = ''
+  if exists('g:howm_glink_pattern')
+    let g:qfixmemo_gotolink_pattern = g:howm_glink_pattern . '.*'
+  endif
+endif
+" come-from link syntax highlight
+if !exists('g:qfixmemo_comefromlink_pattern')
+  let g:qfixmemo_comefromlink_pattern = ''
+  if exists('g:howm_clink_pattern')
+    let g:qfixmemo_comefromlink_pattern = g:howm_clink_pattern . '.*'
+  endif
+endif
+
 " サブウィンドウを出す方向
 if !exists('g:qfixmemo_submenu_dir')
   let g:qfixmemo_submenu_dir = "topleft vertical"
@@ -275,7 +290,7 @@ silent! function QFixMemoKeymap()
   silent! nnoremap <silent> <unique> <Leader>U       :<C-u>call qfixmemo#Quickmemo(0)<CR>
   silent! nnoremap <silent> <unique> <Leader><Space> :<C-u>call qfixmemo#Edit(g:qfixmemo_diary)<CR>
   silent! nnoremap <silent> <unique> <Leader>j       :<C-u>call qfixmemo#PairFile('%')<CR>
-  silent! nnoremap <silent> <unique> <Leader>i       :<C-u>call qfixmemo#ToggleSubWindow('%')<CR>
+  silent! nnoremap <silent> <unique> <Leader>i       :<C-u>call qfixmemo#ToggleSubWindow()<CR>
 
   silent! nnoremap <silent> <unique> <Leader>m       :<C-u>call qfixmemo#ListMru()<CR>
   silent! nnoremap <silent> <unique> <Leader>l       :<C-u>call qfixmemo#ListRecent()<CR>
@@ -675,6 +690,12 @@ function! s:syntaxHighlight()
   endif
   silent! syn clear qfixmemoGotolink
   exe "syn match qfixmemoGotolink '" . '^' . matchstr(g:qfixmemo_separator, '^\S\+') . ".*'"
+  if g:qfixmemo_gotolink_pattern != ''
+    exe "syn match qfixmemoGotolink '" . g:qfixmemo_gotolink_pattern    . "'" . '"'
+  endif
+  if g:qfixmemo_comefromlink_pattern != ''
+    exe "syn match qfixmemoGotolink '" . g:qfixmemo_comefromlink_pattern . "'" . '"'
+  endif
   hi link qfixmemoGotolink  Underlined
   silent! syntax clear qfixmemoKeyword
   if s:KeywordHighlight != ''
@@ -1102,7 +1123,7 @@ function! qfixmemo#ListRecentTimeStamp(...)
       let fmt = g:qfixmemo_timeformat_findstr
     endif
   endif
-  let fmt = '^' . escape(fmt, '[~*.#')
+  let fmt = '^' . escape(fmt, '[]~*.#')
   let fmt = substitute(fmt, '\C%H', '[0-2][0-9]', 'g')
   let fmt = substitute(fmt, '\C%M', '[0-5][0-9]', 'g')
   let fmt = substitute(fmt, '\C%S', '[0-5][0-9]', 'g')
@@ -1232,6 +1253,9 @@ function! qfixmemo#Glob(path, file, mode)
   call qfixmemo#Init()
   let prevPath = escape(getcwd(), ' ')
   let path = expand(a:path)
+  if path !~ '[\\/]$'
+    let path .= '/'
+  endif
   let mode = a:mode
   exec 'lchdir ' . escape(path, ' ')
   redraw | echo 'QFixMemo : glob...'
@@ -1243,7 +1267,7 @@ function! qfixmemo#Glob(path, file, mode)
   let to   = &enc
   redraw | echo 'QFixMemo : Read firstline'
   for n in files
-    let n = path . '/'. n
+    let n = path . n
     let n = fnamemodify(n, ':p')
     if !isdirectory(n)
       let lnum = 1

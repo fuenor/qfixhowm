@@ -3,7 +3,7 @@
 "         Author: fuenor <fuenor@gmail.com>
 "                 http://sites.google.com/site/fudist/Home/qfixhowm
 "  Last Modified: 2011-05-26 22:49
-"        Version: 2.47
+"        Version: 2.48
 "=============================================================================
 scriptencoding utf-8
 "キーマップリーダーが g の場合、「新規ファイルを作成」は g,c です。
@@ -336,6 +336,7 @@ let s:LT_todo = 0
 let s:sq_todo = []
 let s:LT_menu = 0
 let s:sq_menu = []
+let s:howmtempfile = g:qfixtempname
 
 function! QFixHowmInsertDate(fmt)
   let fmt = s:hts_dateTime
@@ -1551,6 +1552,10 @@ endif
 if !exists('g:QFixHowm_UserURIopen_wiki')
   let g:QFixHowm_UserURIopen_wiki = 0
 endif
+" ユーザアクションロックの最大数
+if !exists('g:QFixHowm_UserSwActionLockMax')
+  let g:QFixHowm_UserSwActionLockMax = 8
+endif
 
 function! QFixHowmBufferBufEnter()
   if !IsQFixHowmFile('%')
@@ -1622,11 +1627,30 @@ function! QFixHowmScheduleActionStr()
     endif
   endif
   call setpos('.', save_cursor)
+  for i in range(2, g:QFixHowm_UserSwActionLockMax)
+    if !exists('g:QFixHowm_UserSwActionLock'.i)
+      continue
+    endif
+    call setpos('.', save_cursor)
+    exec 'let action = '.'g:QFixHowm_UserSwActionLock'.i
+    if action != []
+      let ret = QFixHowmSwitchActionLock(action)
+      if ret != "\<CR>"
+        return ret
+      endif
+    endif
+  endfor
+  call setpos('.', save_cursor)
   if col('.') < 36 && getline('.') =~ '^'.s:sch_dateT.s:sch_Ext
     let ret = QFixHowmSwitchActionLock(g:QFixHowm_ScheduleSwActionLock, 1)
     if ret != "\<CR>"
       return ret
     endif
+  endif
+  call setpos('.', save_cursor)
+  let ret = QFixHowmSwitchActionLock(g:QFixHowm_SwitchListActionLock)
+  if ret != "\<CR>"
+    return ret
   endif
   call setpos('.', save_cursor)
   if getline('.') =~ '^'.s:sch_dateT.s:sch_Ext

@@ -198,9 +198,9 @@ function! QFixMRUPrecheck(sq, entries, dir)
 
   let sq = deepcopy(osq)
   if dirmode
-    let dir = fnamemodify(dir, ':p')
+    let dir = fnamemodify(expand(dir), ':p')
     let dir = substitute(dir, '\\', '/', 'g')
-    call filter(sq, "!match(v:val['filename'], dir)")
+    call filter(sq, "stridx(v:val['filename'], dir)==0")
   endif
 
   " 高速化のためtempバッファ使用

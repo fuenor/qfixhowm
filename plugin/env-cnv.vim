@@ -48,6 +48,10 @@ endif
 if g:QFixHowm_RecentMode == 2
   let g:QFixHowm_SaveTime = 2
 endif
+" タイトルリスト(,a)にキャッシュ表示を割り当て
+if !exists('g:QFixHowm_TitleListCache')
+ let g:QFixHowm_TitleListCache = 0
+endif
 
 " BufWritePre
 silent! function! QFixMemoBufWritePre()
@@ -420,6 +424,9 @@ if g:QFixHowm_RecentMode == 2
   function! s:addMenu(menu, acc, cmd)
     exe printf(a:menu, a:acc, a:cmd, a:cmd)
   endfunction
+endif
+if g:QFixHowm_TitleListCache == 1
+  nnoremap <silent> <Leader>a :<C-u>call qfixmemo#ListCache('open')<CR>
 endif
 
 if exists('s:mapleader')

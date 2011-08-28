@@ -28,6 +28,9 @@ endif
 if !exists('g:qfixlist_close_on_jump')
   let g:qfixlist_close_on_jump = 0
 endif
+if !exists('g:qfixlist_use_fnamemodify')
+  let g:qfixlist_use_fnamemodify = 0
+endif
 
 let loaded_QFixList = 1
 let g:QFixList_version = s:Version
@@ -47,13 +50,21 @@ function! qfixlist#search(pattern, dir, cmd, days, fenc, file)
 
   redraw | echo 'QFixList : Formatting...'
   silent exec 'lchdir ' . escape(expand(a:dir), ' ')
-  let head = fnamemodify(a:dir, ':p')
-  for d in list
-    " let file = fnamemodify(d['filename'], ':p')
-    let file = head. d['filename']
-    let d['filename'] = substitute(file, '\\', '/', 'g')
-    let d['lnum'] = d['lnum'] + 0
-  endfor
+  if g:qfixlist_use_fnamemodify == 0
+    let head = fnamemodify(expand(a:dir), ':p')
+    for d in list
+      let file = head. d['filename']
+      " let file = fnamemodify(d['filename'], ':p')
+      let d['filename'] = substitute(file, '\\', '/', 'g')
+      let d['lnum'] = d['lnum'] + 0
+    endfor
+  else
+    for d in list
+      let file = fnamemodify(d['filename'], ':p')
+      let d['filename'] = substitute(file, '\\', '/', 'g')
+      let d['lnum'] = d['lnum'] + 0
+    endfor
+  endif
   silent exec 'lchdir ' . prevPath
 
   redraw | echo 'QFixList : Sorting...'
@@ -125,6 +136,7 @@ augroup END
 let s:lnum = line('.')
 let s:QFixListCache = []
 let s:QFixList_dir = ''
+let g:MyGrep_ErrorMes = ''
 
 function! qfixlist#GetList()
   return s:QFixListCache
@@ -139,18 +151,31 @@ function! qfixlist#copen(...)
   endif
   if len(s:QFixListCache) == 0
     echohl ErrorMsg
-    redraw | echo 'QFixList : Nothing in list!'
+    if g:MyGrep_ErrorMes != ''
+      redraw | echo g:MyGrep_ErrorMes
+      let g:MyGrep_ErrorMes = ''
+    else
+      redraw | echo 'QFixList : Nothing in list!'
+    endif
     echohl None
     return
   endif
   let g:QFix_SearchPath = s:QFixList_dir
+  redraw | echo 'QFixList : Set quickfix list...'
   call QFixSetqflist(s:QFixListCache)
   call QFixPclose()
+  redraw | echo ''
   QFixCopen
   if a:0
     call cursor(1, 1)
   else
     call cursor(s:lnum, 1)
+  endif
+  if g:MyGrep_ErrorMes != ''
+    echohl ErrorMsg
+    redraw | echo g:MyGrep_ErrorMes
+    let g:MyGrep_ErrorMes = ''
+    echohl None
   endif
 endfunction
 
@@ -163,7 +188,12 @@ function! qfixlist#open(...)
   endif
   if len(s:QFixListCache) == 0
     echohl ErrorMsg
-    redraw | echo 'QFixList : Nothing in list!'
+    if g:MyGrep_ErrorMes != ''
+      redraw | echo g:MyGrep_ErrorMes
+      let g:MyGrep_ErrorMes = ''
+    else
+      redraw | echo 'QFixList : Nothing in list!'
+    endif
     echohl None
     return
   endif
@@ -184,18 +214,29 @@ function! qfixlist#open(...)
   silent exec 'lchdir ' . escape(s:QFixList_dir, ' ')
   let g:QFix_SearchPath = s:QFixList_dir
 
-  let head = fnamemodify(s:QFixList_dir, ':p')
-  let head = substitute(head, '\\', '/', 'g')
+	let g:hoge = deepcopy(s:QFixListCache)
   let glist = []
-  for n in s:QFixListCache
-    let file = n['filename']
-    " let file = fnamemodify(file, ':.')
-    let file = substitute(file, '^'.head, '', '')
-    let lnum = n['lnum']
-    let text = n['text']
-    let res = file.'|'.lnum.'| '.text
-    call add(glist, res)
-  endfor
+  if g:qfixlist_use_fnamemodify == 0
+    let head = fnamemodify(expand(s:QFixList_dir), ':p')
+    let head = substitute(head, '\\', '/', 'g')
+    for n in s:QFixListCache
+      let file = n['filename'][len(head):]
+      "let file = substitute(file, '^'.head, '', '')
+      " let file = fnamemodify(n['filename'], ':.')
+      let lnum = n['lnum']
+      let text = n['text']
+      let res = file.'|'.lnum.'| '.text
+      call add(glist, res)
+    endfor
+  else
+    for n in s:QFixListCache
+      let file = fnamemodify(n['filename'], ':.')
+      let lnum = n['lnum']
+      let text = n['text']
+      let res = file.'|'.lnum.'| '.text
+      call add(glist, res)
+    endfor
+  endif
 
   setlocal modifiable
   silent! %delete _
@@ -205,6 +246,13 @@ function! qfixlist#open(...)
     call cursor(1, 1)
   else
     call cursor(s:lnum, 1)
+  endif
+  if g:MyGrep_ErrorMes != ''
+    echohl ErrorMsg
+    redraw | echo g:MyGrep_ErrorMes
+    let g:MyGrep_ErrorMes = ''
+    echohl None
+    let g:MyGrep_ErrorMes = ''
   endif
 endfunction
 

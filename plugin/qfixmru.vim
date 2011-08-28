@@ -200,7 +200,10 @@ function! QFixMRUPrecheck(sq, entries, dir)
   if dirmode
     let dir = fnamemodify(expand(dir), ':p')
     let dir = substitute(dir, '\\', '/', 'g')
-    call filter(sq, "stridx(v:val['filename'], dir)==0")
+    " FIXME: c: と C: で動作が違う。
+    " ['filename']をfnamemodifyで正規化する
+    call filter(sq, "!match(v:val['filename'], dir)")
+    " call filter(sq, "stridx(v:val['filename'], dir)==0")
   endif
 
   " 高速化のためtempバッファ使用

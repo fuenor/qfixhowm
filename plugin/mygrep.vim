@@ -43,13 +43,14 @@ if !exists('mygrepprg')
   endif
 endif
 " 日本語が含まれる場合のgrep指定
+let s:MSWindows = has('win95') + has('win16') + has('win32') + has('win64')
 if !exists('myjpgrepprg')
   let myjpgrepprg = ''
 endif
 "使用するgrepのエンコーディング指定
 if !exists('g:MyGrep_ShellEncoding')
   let g:MyGrep_ShellEncoding = 'utf-8'
-  if has('win32') || has('win64') || has('win16') || has('win95')
+  if s:MSWindows
     let g:MyGrep_ShellEncoding = 'cp932'
   endif
 endif
@@ -121,7 +122,6 @@ endif
 
 "QFixHowm用の行儀の悪いオプション
 let g:MyGrep_FileListWipeTime = 0
-let s:MSWindows = has('win95') + has('win16') + has('win32') + has('win64')
 let g:MyGrep_qflist = []
 
 """"""""""""""""""""""""""""""

@@ -52,8 +52,9 @@ function! qfixlist#search(pattern, dir, cmd, days, fenc, file)
   silent exec 'lchdir ' . escape(expand(a:dir), ' ')
   if g:qfixlist_use_fnamemodify == 0
     let head = fnamemodify(expand(a:dir), ':p')
+    let head = QFixNormalizePath(head)
     for d in list
-      let file = head. d['filename']
+      let file = head . d['filename']
       " let file = fnamemodify(d['filename'], ':p')
       let d['filename'] = substitute(file, '\\', '/', 'g')
       let d['lnum'] = d['lnum'] + 0
@@ -214,14 +215,13 @@ function! qfixlist#open(...)
   silent exec 'lchdir ' . escape(s:QFixList_dir, ' ')
   let g:QFix_SearchPath = s:QFixList_dir
 
-	let g:hoge = deepcopy(s:QFixListCache)
   let glist = []
   if g:qfixlist_use_fnamemodify == 0
     let head = fnamemodify(expand(s:QFixList_dir), ':p')
-    let head = substitute(head, '\\', '/', 'g')
+    let head = QFixNormalizePath(head)
     for n in s:QFixListCache
       let file = n['filename'][len(head):]
-      "let file = substitute(file, '^'.head, '', '')
+      " let file = substitute(file, '^'.head, '', '')
       " let file = fnamemodify(n['filename'], ':.')
       let lnum = n['lnum']
       let text = n['text']
@@ -502,7 +502,9 @@ function! s:Cmd_RD(cmd, fline, lline)
     if a:cmd == 'Delete'
       call delete(file)
     elseif a:cmd == 'Remove'
-      echoe 'Remove' fnamemodify(file, ':t')
+      echohl ErrorMsg
+      echo 'Remove' fnamemodify(file, ':t')
+      echohl None
       call rename(file, dst)
     endif
   endfor

@@ -269,6 +269,7 @@ endfunction
 
 " タイトル検索用正規表現設定
 silent! function QFixMemoTitleRegxp()
+  let g:qfixmemo_ext = tolower(g:qfixmemo_ext)
   let l:qfixmemo_title = escape(g:qfixmemo_title, g:qfixmemo_escape)
   if !exists('g:QFixMRU_Title["'.g:qfixmemo_ext.'"]')
     let g:QFixMRU_Title[g:qfixmemo_ext] = '^'.l:qfixmemo_title. '\([^'.g:qfixmemo_title[0].']\|$\)'
@@ -770,7 +771,7 @@ function! qfixmemo#Edit(...)
   else
     let file = strftime(a:1)
   endif
-  if fnamemodify(file, ':e') != g:qfixmemo_ext
+  if tolower(fnamemodify(file, ':e')) != g:qfixmemo_ext
     let file = file . '.' . g:qfixmemo_ext
   endif
   call qfixmemo#EditFile(file)
@@ -896,20 +897,23 @@ function! s:getEditWinnr()
 endfunction
 
 function! s:isQFixMemo(file)
-  let file = fnamemodify(a:file, ':p')
-  if file == expand(g:qfixmemo_submenu_title)
+  let file = a:file
+  if tolower(fnamemodify(file, ':e')) != g:qfixmemo_ext
+    return 0
+  endif
+  let file = fnamemodify(file, ':p')
+  let file = QFixNormalizePath(file, 'compare')
+  let sfile = expand(g:qfixmemo_submenu_title)
+  let sfile = QFixNormalizePath(sfile, 'compare')
+  if file == sfile
     return 1
   endif
-  if fnamemodify(file, ':e') != g:qfixmemo_ext
-    return 0
+  let head = expand(g:qfixmemo_dir)
+  let head = QFixNormalizePath(head, 'compare')
+  if stridx(file, head) == 0
+    return 1
   endif
-  let mdir = g:qfixmemo_dir
-  let file = substitute(file, '\\', '/', 'g')
-  let head = substitute(expand(mdir), '\\', '/', 'g')
-  if file !~ '^'.head
-    return 0
-  endif
-  return 1
+  return 0
 endfunction
 
 function! qfixmemo#Template(cmd)
@@ -1454,7 +1458,7 @@ function! s:randomList(list, len)
   let list = deepcopy(a:list)
 
   let head = expand(g:qfixmemo_dir)
-  let head = substitute(head, '\\', '/', 'g')
+  let head = QFixNormalizePath(head)
   call filter(list, "v:val['filename'] =~ '".head."'")
 
   let rexclude = g:qfixmemo_random_exclude
@@ -1470,8 +1474,9 @@ function! s:randomList(list, len)
     endif
     let r = s:random(range)
     let file = list[r]['filename']
+    let file = QFixNormalizePath(file)
     let readable = 1
-    if match(file, head) == 0
+    if stridx(file, head) == 0
       let readable = filereadable(file)
       if readable
         call add(result, list[r])
@@ -1504,7 +1509,7 @@ function! s:randomReadFile(file)
   if exists('g:QFixMemo_RootDir')
     let head = expand(g:QFixMemo_RootDir)
   endif
-  let head = substitute(head, '\\', '/', 'g')
+  let head = QFixNormalizePath(head)
   let result = []
   for r in list
     let file = substitute(r, '|.*', '', '')
@@ -1552,7 +1557,7 @@ function! s:randomWriteFile(file)
   silent exec 'lchdir ' . escape(expand(dir), ' ')
   let result = []
   call add(result, dir)
-  let head = substitute(expand(dir), '\\', '/', 'g') . '/'
+  let head = QFixNormalizePath(expand(dir)) . '/'
   for d in sq
     let file = d['filename']
     " let file = fnamemodify(file, ':.')

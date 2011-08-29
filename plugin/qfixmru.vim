@@ -2,9 +2,9 @@
 "    Description: MRU entry list (with QFixPreview)
 "         Author: fuenor <fuenor@gmail.com>
 "                 http://sites.google.com/site/fudist/Home  (Japanese)
-"  Last Modified: 2011-07-13 18:04
+"  Last Modified: 2011-08-29 06:34
 "=============================================================================
-let s:Version = 1.06
+let s:Version = 1.07
 scriptencoding utf-8
 
 "What Is This:
@@ -198,12 +198,8 @@ function! QFixMRUPrecheck(sq, entries, dir)
 
   let sq = deepcopy(osq)
   if dirmode
-    let dir = fnamemodify(expand(dir), ':p')
-    let dir = substitute(dir, '\\', '/', 'g')
-    " FIXME: c: と C: で動作が違う。
-    " ['filename']をfnamemodifyで正規化する
-    call filter(sq, "!match(v:val['filename'], dir)")
-    " call filter(sq, "stridx(v:val['filename'], dir)==0")
+    let dir = QFixNormalizePath(fnamemodify(dir, ':p'))
+    call filter(sq, "stridx(v:val['filename'], dir)==0")
   endif
 
   " 高速化のためtempバッファ使用
@@ -224,7 +220,7 @@ function! QFixMRUPrecheck(sq, entries, dir)
       continue
     endif
     let tpattern = ''
-    silent! let tpattern = g:QFixMRU_Title[fnamemodify(file, ':e')]
+    silent! let tpattern = g:QFixMRU_Title[tolower(fnamemodify(file, ':e'))]
     if tpattern != ''
       let [min, max] = s:QFixMRUEntryRange(file, d['lnum'], d['text'], tpattern)
       if min == 0
@@ -247,6 +243,24 @@ function! QFixMRUPrecheck(sq, entries, dir)
   silent! bd
 
   return mru
+endfunction
+
+" Windowsパス正規化
+let s:MSWindows = has('win95') + has('win16') + has('win32') + has('win64')
+silent! function QFixNormalizePath(path, ...)
+  let path = a:path
+  " let path = expand(a:path)
+  if s:MSWindows
+    if a:0 " 比較しかしないならキャピタライズ
+      let path = toupper(path)
+    else
+      " expand('~') で展開されるとドライブレターは大文字、
+      " expand('c:/')ではそのままなので統一
+      let path = substitute(path, '^\([a-z]\):', '\u\1:', '')
+    endif
+    let path = substitute(path, '\\', '/', 'g')
+  endif
+  return path
 endfunction
 
 function! s:QFixMRUEntryRange(file, lnum, title, tpattern)
@@ -462,7 +476,7 @@ function! QFixMRUGet(mode, mfile, lnum, ...)
   endif
   let lnum = a:lnum
   let tpattern = ''
-  silent! let tpattern = g:QFixMRU_Title[fnamemodify(expand(mfile), ':e')]
+  silent! let tpattern = g:QFixMRU_Title[tolower(fnamemodify(expand(mfile), ':e'))]
   if a:0
     let tpattern = a:1
   endif
@@ -546,8 +560,9 @@ endfunction
 
 "Get mru title regular expression for vim
 function! QFixMRUGetTitleRegxp(suffix)
+  let suffix = tolower(a:suffix)
   let t = ''
-  silent! let t = g:QFixMRU_Title[a:suffix]
+  silent! let t = g:QFixMRU_Title[suffix]
   return t
 endfunction
 
@@ -583,7 +598,7 @@ function! QFixMRUClear()
   let idx = 0
   for d in s:MruDic
     let tpattern = ''
-    silent! let tpattern = g:QFixMRU_Title[fnamemodify(d['filename'], ':e')]
+    silent! let tpattern = g:QFixMRU_Title[tolower(fnamemodify(d['filename'], ':e'))]
     if tpattern != '' && d['text'] =~ tpattern.'\s*$'
       call remove(s:MruDic, idx)
       continue
@@ -642,6 +657,7 @@ endfunction
 function! s:Register(mru)
   let mru = a:mru
   let mfile = mru['filename']
+  let mfile = QFixNormalizePath(fnamemodify(mfile, ':p'))
   let text = mru['text']
   let lnum = mru['lnum']
 
@@ -661,11 +677,12 @@ function! s:Register(mru)
 
   " 重複エントリの削除
   let tpattern = ''
-  silent! let tpattern = g:QFixMRU_Title[fnamemodify(mfile, ':e')]
+  silent! let tpattern = g:QFixMRU_Title[tolower(fnamemodify(mfile, ':e'))]
 
   let idx = 0
   for d in s:MruDic
     let dfile = d['filename']
+    let dfile = QFixNormalizePath(fnamemodify(dfile, ':p'))
     if dfile == mfile
       if tpattern == ''
         silent! call remove(s:MruDic, idx)

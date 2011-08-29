@@ -3,10 +3,10 @@
 "                 Preview, sortings and advanced search for Quickfix.
 "         Author: Futoshi Ueno <fuenor@gmail.com>
 "                 http://sites.google.com/site/fudist/Home  (Japanese)
-"  Last Modified: 2011-07-12 11:50
+"  Last Modified: 2011-08-29 06:01
 "=============================================================================
 scriptencoding utf-8
-let s:Version = 2.82
+let s:Version = 2.83
 
 "What Is This:
 "  This plugin adds preview, sortings and advanced search to your quickfix window.
@@ -229,6 +229,24 @@ let s:tempdir = fnamemodify(tempname(), ':p:h')
 if !exists('g:qfixtempname')
   let g:qfixtempname = tempname()
 endif
+
+" Windowsパス正規化
+let s:MSWindows = has('win95') + has('win16') + has('win32') + has('win64')
+function! QFixNormalizePath(path, ...)
+  let path = a:path
+  " let path = expand(a:path)
+  if s:MSWindows
+    if a:0 " 比較しかしないならキャピタライズ
+      let path = toupper(path)
+    else
+      " expand('~') で展開されるとドライブレターは大文字、
+      " expand('c:/')ではそのままなので統一
+      let path = substitute(path, '^\([a-z]\):', '\u\1:', '')
+    endif
+    let path = substitute(path, '\\', '/', 'g')
+  endif
+  return path
+endfunction
 
 "BufWinEnter
 function! s:QFixSetup(...)

@@ -2021,12 +2021,12 @@ function! QFixMemoOpenKeywordLink()
 
   for word in s:KeywordDic
     let len = strlen(word)
-    let pos = match(lstr, '\V'.word)
+    let pos = stridx(lstr, word)
     if pos == -1 || col < pos+1
       continue
     endif
     let str = strpart(lstr, col-len, 2*len)
-    if matchstr(str, '\V'.word) == word
+    if stridx(str, word) > -1
       let file = word
       if g:qfixmemo_keyword_mode == 0
         let g:MyGrep_Regexp = 0

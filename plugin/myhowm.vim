@@ -288,29 +288,29 @@ function! s:makeRegxp(dpattern)
 
   "let s:sch_date     = '\d\{4}-\d\{2}-\d\{2}'
   let s:sch_date = s:hts_date
-  let s:sch_date = substitute(s:sch_date, '%Y', '\\d\\{4}', '')
-  let s:sch_date = substitute(s:sch_date, '%m', '\\d\\{2}', '')
-  let s:sch_date = substitute(s:sch_date, '%d', '\\d\\{2}', '')
+  let s:sch_date = substitute(s:sch_date, '%Y', '\\d\\{4}', 'g')
+  let s:sch_date = substitute(s:sch_date, '%m', '\\d\\{2}', 'g')
+  let s:sch_date = substitute(s:sch_date, '%d', '\\d\\{2}', 'g')
   let g:QFixHowm_Date = s:sch_date
 
   let s:sch_printfDate = s:hts_date
-  let s:sch_printfDate = substitute(s:sch_printfDate, '%Y', '%4.4d', '')
-  let s:sch_printfDate = substitute(s:sch_printfDate, '%m', '%2.2d', '')
-  let s:sch_printfDate = substitute(s:sch_printfDate, '%d', '%2.2d', '')
+  let s:sch_printfDate = substitute(s:sch_printfDate, '%Y', '%4.4d', 'g')
+  let s:sch_printfDate = substitute(s:sch_printfDate, '%m', '%2.2d', 'g')
+  let s:sch_printfDate = substitute(s:sch_printfDate, '%d', '%2.2d', 'g')
 
   let s:sch_ExtGrep = s:hts_date. ' ' . s:hts_time
-  let s:sch_ExtGrep = substitute(s:sch_ExtGrep, '%Y', '[0-9]{4}', '')
-  let s:sch_ExtGrep = substitute(s:sch_ExtGrep, '%m', '[0-9]{2}', '')
-  let s:sch_ExtGrep = substitute(s:sch_ExtGrep, '%d', '[0-9]{2}', '')
-  let s:sch_ExtGrep = substitute(s:sch_ExtGrep, '%H', '[0-9]{2}', '')
-  let s:sch_ExtGrep = substitute(s:sch_ExtGrep, '%M', '[0-9]{2}', '')
+  let s:sch_ExtGrep = substitute(s:sch_ExtGrep, '%Y', '[0-9][0-9][0-9][0-9]', 'g')
+  let s:sch_ExtGrep = substitute(s:sch_ExtGrep, '%m', '[0-9][0-9]', 'g')
+  let s:sch_ExtGrep = substitute(s:sch_ExtGrep, '%d', '[0-9][0-9]', 'g')
+  let s:sch_ExtGrep = substitute(s:sch_ExtGrep, '%H', '[0-9][0-9]', 'g')
+  let s:sch_ExtGrep = substitute(s:sch_ExtGrep, '%M', '[0-9][0-9]', 'g')
 
   let s:sch_ExtGrepS = s:hts_date. '( ' . s:hts_time . ')?'
-  let s:sch_ExtGrepS = substitute(s:sch_ExtGrepS, '%Y', '[0-9]{4}', '')
-  let s:sch_ExtGrepS = substitute(s:sch_ExtGrepS, '%m', '[0-9]{2}', '')
-  let s:sch_ExtGrepS = substitute(s:sch_ExtGrepS, '%d', '[0-9]{2}', '')
-  let s:sch_ExtGrepS = substitute(s:sch_ExtGrepS, '%H', '[0-9]{2}', '')
-  let s:sch_ExtGrepS = substitute(s:sch_ExtGrepS, '%M', '[0-9]{2}', '')
+  let s:sch_ExtGrepS = substitute(s:sch_ExtGrepS, '%Y', '[0-9][0-9][0-9][0-9]', 'g')
+  let s:sch_ExtGrepS = substitute(s:sch_ExtGrepS, '%m', '[0-9][0-9]', 'g')
+  let s:sch_ExtGrepS = substitute(s:sch_ExtGrepS, '%d', '[0-9][0-9]', 'g')
+  let s:sch_ExtGrepS = substitute(s:sch_ExtGrepS, '%H', '[0-9][0-9]', 'g')
+  let s:sch_ExtGrepS = substitute(s:sch_ExtGrepS, '%M', '[0-9][0-9]', 'g')
 
   "let s:sch_time     = '\d\{2}:\d\{2}'
   let s:sch_time = s:hts_time
@@ -454,7 +454,7 @@ function! s:QFixHowmListReminder_(mode)
     let searchWord = substitute(searchWord, '%d', '[0-9][0-9]', '')
     let searchWord = '^[ \t]*\['.searchWord.'[0-9: ]*\]'.ext
   else
-    let searchWord = '^[ \t]*\['.s:sch_ExtGrepS.']'.ext
+    let searchWord = '^[ \t]*\['.s:sch_ExtGrepS.'\]'.ext
   endif
   let searchPath = l:howm_dir
   if exists('*MultiHowmDirGrep')
@@ -1439,7 +1439,7 @@ function! QFixHowmGenerateRepeatDate()
   endif
 
   let rep = ''
-  if cmd =~ '[-@!+~.]\{2}'
+  if cmd =~ '['.s:sch_ext.']\{2}'
     let rep = substitute(tstr, '^\(\d\{4}.\d\{2}.\)\(\d\{2}\).*', '\2', '')
   endif
   let opt = matchstr(cmd, '[0-9]*$')

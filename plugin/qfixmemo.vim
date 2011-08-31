@@ -89,9 +89,13 @@ endif
 if !exists('g:qfixmemo_timeformat')
   let g:qfixmemo_timeformat = '[%Y-%m-%d %H:%M]'
 endif
+" QFixHowmの予定・TODO識別子
+if !exists('g:qfixmemo_scheduleext')
+  let g:qfixmemo_scheduleext = '-@!+~.'
+endif
 function! qfixmemo#SetTimeFormatRegxp(fmt)
   let regxp = a:fmt
-  let regxp = '^'.escape(regxp, '[~*.#')
+  let regxp = '^'.escape(regxp, '[]~*.#')
   let regxp = substitute(regxp, '\C%Y', '[0-9][0-9][0-9][0-9]', 'g')
   let regxp = substitute(regxp, '\C%m', '[0-1][0-9]', 'g')
   let regxp = substitute(regxp, '\C%d', '[0-3][0-9]', 'g')
@@ -105,7 +109,7 @@ let s:qfixmemo_timeformat = qfixmemo#SetTimeFormatRegxp(g:qfixmemo_timeformat)
 if exists('g:qfixmemo_scheduleformat')
   let s:qfixmemo_scheduleformat = g:qfixmemo_scheduleformat
 else
-  let s:qfixmemo_scheduleformat = s:qfixmemo_timeformat . '[-@!+~.]'
+  let s:qfixmemo_scheduleformat = s:qfixmemo_timeformat . '['.g:qfixmemo_scheduleext.']'
 endif
 
 " 新規エントリテンプレート
@@ -1144,7 +1148,6 @@ function! qfixmemo#ListRecentTimeStamp(...)
     let regxp = substitute(regxp, '\C%m', month, 'g')
     let regxp = substitute(regxp, '\C%d', day, 'g')
 
-    " let tregxp = tregxp . printf('|(%s([^-@!+~.]|$))', regxp)
     let tregxp = tregxp . printf('|%s', regxp)
     let ltime -= 24*60*60
   endfor
@@ -1152,7 +1155,7 @@ function! qfixmemo#ListRecentTimeStamp(...)
   let fmt = substitute(fmt, '\C%Y', '[0-2][0-9][0-9][0-9]', 'g')
   let fmt = substitute(fmt, '\C%m', '[0-1][0-9]', 'g')
   let fmt = substitute(fmt, '\C%d', '[0-3][0-9]', 'g')
-  let fmt = fmt . '\([^-@!+~.]\|$\)'
+  let fmt = fmt . '\([^'.g:qfixmemo_scheduleext.']\|$\)'
 
   if findstr
     let saved_grepprg = &grepprg
@@ -2093,7 +2096,7 @@ function! s:qfixmemoGetEntryList()
 
   let elist = []
   let titlepattern = qfixmemo#TitleRegxp()
-  let timepattern = s:qfixmemo_timeformat . '\([^-@!+~.]\+\|$\)'
+  let timepattern = s:qfixmemo_timeformat . '\([^'.g:qfixmemo_scheduleext.']\+\|$\)'
   let fline = 1
   while 1
     let [entry, fline, lline] = QFixMRUGet('entry', '%', fline, titlepattern)

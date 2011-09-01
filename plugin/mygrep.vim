@@ -995,7 +995,7 @@ function! s:ParseSearchResult(searchPath, searchResult, filepattern, shellenc, f
       let content = lst[0]
       let content = strpart(content, 0, 1024-strlen(fname)-32)
       let content = substitute(content, "[\n\r]", "", "")
-      if fname =~ a:filepattern && fname !~ g:MyGrep_ExcludeReg && outtime == 0
+      if fname !~ '\c\.swp$\|\~$' && fname =~ a:filepattern && fname !~ g:MyGrep_ExcludeReg && outtime == 0
         call add(qflist, {'filename':fname, 'lnum':lnum, 'text':content})
       endif
       if lst[0] != text

@@ -607,7 +607,7 @@ function! qfixmemo#AddTime()
   call cursor(1, 1)
   let tpattern = qfixmemo#TitleRegxp()
   while 1
-    let fline = search('^'.l:qfixmemo_title, 'cW')
+    let fline = search(tpattern, 'cW')
     if fline == 0
       break
     endif

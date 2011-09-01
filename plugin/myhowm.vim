@@ -338,6 +338,11 @@ let s:LT_menu = 0
 let s:sq_menu = []
 let s:howmtempfile = g:qfixtempname
 
+" jvgrep使用時に正規表現[-abc]の - をエスケープして実行
+if !exists('g:QFixHowm_jvgrep_escape_hyphen')
+  let g:QFixHowm_jvgrep_escape_hyphen = 1
+endif
+
 function! QFixHowmInsertDate(fmt)
   let fmt = s:hts_dateTime
   if a:fmt == 'Date'
@@ -455,6 +460,9 @@ function! s:QFixHowmListReminder_(mode)
     let searchWord = '^[ \t]*\['.searchWord.'[0-9: ]*\]'.ext
   else
     let searchWord = '^[ \t]*\['.s:sch_ExtGrepS.'\]'.ext
+    if g:mygrepprg =~ 'jvgrep' && g:QFixHowm_jvgrep_escape_hyphen
+      let searchWord = substitute(searchWord, '\(^\|[^\\]\)[-', '\1[\\-', 'g')
+    endif
   endif
   let searchPath = l:howm_dir
   if exists('*MultiHowmDirGrep')
@@ -464,7 +472,7 @@ function! s:QFixHowmListReminder_(mode)
       let addflag = MultiHowmDirGrep(searchWord, searchPath, l:SearchFile, g:howm_fileencoding, addflag, 'g:QFixHowm_ScheduleSearchDir')
     endif
   endif
-  redraw | echo 'QFixHowm : Seaching...'
+  redraw | echo 'QFixHowm : Searching...'
   call MyGrep(searchWord, searchPath, l:SearchFile, g:howm_fileencoding, addflag)
   let sq = QFixGetqflist()
   call extend(sq, holiday_sq)

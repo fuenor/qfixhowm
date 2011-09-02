@@ -428,7 +428,7 @@ function! s:QFixHowmListReminder_(mode)
   let holiday_sq = s:HolidayVimgrep(l:howm_dir, g:QFixHowm_HolidayFile)
   QFixCclose
   let prevPath = escape(getcwd(), ' ')
-  silent exec 'lchdir ' . escape(l:howm_dir, ' ')
+  silent! exec 'lchdir ' . escape(l:howm_dir, ' ')
   let ext = s:sch_Ext
   if a:mode =~ 'todo'
     let ext = g:QFixHowm_ListReminder_TodoExt
@@ -497,7 +497,7 @@ function! s:QFixHowmListReminder_(mode)
       let g:QFix_PreviewEnable = -1
     endif
   endif
-  silent exec 'lchdir ' . prevPath
+  silent! exec 'lchdir ' . prevPath
   return sq
 endfunction
 
@@ -590,7 +590,7 @@ function! s:HolidayVimgrep(dir, file)
   lexpr ""
   let cmd = 'lvimgrep /' . escape(pattern, '/') . '/j ' . file
   silent! exec cmd
-  silent exec 'lchdir ' . prevPath
+  silent! exec 'lchdir ' . prevPath
   let sq = getloclist(0)
   let sq = s:QFixHowmSortReminder(sq, 'holiday')
   call filter(sq, "v:val['lnum']")
@@ -1602,7 +1602,7 @@ function! QFixHowmScheduleAction()
   endif
   let str = substitute(str, "\<CR>", "|", "g")
   let str = substitute(str, "|$", "", "")
-  silent exec str
+  silent! exec str
   return 1
 endfunction
 
@@ -1740,12 +1740,12 @@ function! QFixHowmActionLock()
   if s:QFixHowmMA
     exec 'normal '. str
   elseif str == "\<CR>"
-    silent exec "normal! \<CR>"
+    silent! exec "normal! \<CR>"
   elseif str == "\<ESC>"
   else
     let str = substitute(str, "\<CR>", "|", "g")
     let str = substitute(str, "|$", "", "")
-    silent exec str
+    silent! exec str
   endif
   for n in range(10)
     silent! exec 'let @'.n.'=RegisterBackup['.n.']'
@@ -1779,7 +1779,7 @@ function! QFixHowmActionLockStr()
       return ":exec 'call QFixHowmEditFile(\"".file."\")'\<CR>"
       return "\<ESC>"
     endif
-    silent exec 'normal! gf'
+    silent! exec 'normal! gf'
     return "\<ESC>"
   endif
   call setpos('.', save_cursor)
@@ -2098,7 +2098,7 @@ function! s:openstr(str)
         endif
         let cmd = substitute(cmd, '%s', escape(str, '&\'), '')
         let cmd = escape(cmd, '%#')
-        silent exec cmd
+        silent! exec cmd
         return 1
       endif
     else
@@ -2174,12 +2174,12 @@ function! s:OpenUri(uri)
       let s:uricmdfile = fnamemodify(s:howmtempfile, ':p:h') . '/uricmd.bat'
       call writefile([cmd], s:uricmdfile)
       let cmd = '!start "'.s:uricmdfile.'"'
-      silent exec cmd
+      silent! exec cmd
       return 1
     endif
     let cmd = substitute(cmd, '%s', escape(uri, '&'), '')
     let cmd = escape(cmd, '%#')
-    silent exec cmd
+    silent! exec cmd
     return 1
   endif
   return 0

@@ -332,7 +332,7 @@ function! UGrep(cmd, args, mode, addflag)
   call QFixPclose()
   call QFixCclose()
   if g:QFix_SearchPath != ''
-"    silent exec 'lchdir ' . escape(g:QFix_SearchPath, ' ')
+"    silent! exec 'lchdir ' . escape(g:QFix_SearchPath, ' ')
   endif
   if addflag
     let g:QFix_SearchPath = disppath
@@ -443,7 +443,7 @@ function! Grep(word, mode, title, addflag)
   call QFixCclose()
   call MyGrep(pattern, searchPath, filepattern, fenc, addflag)
   if g:QFix_SearchPath != ''
-"    silent exec 'lchdir ' . escape(g:QFix_SearchPath, ' ')
+"    silent! exec 'lchdir ' . escape(g:QFix_SearchPath, ' ')
   endif
   let save_qflist = QFixGetqflist()
   if empty(save_qflist)
@@ -464,7 +464,7 @@ function! Grep(word, mode, title, addflag)
     redraw | echo g:MyGrep_ErrorMes
     echohl None
   endif
-"  silent exec 'lchdir ' . prevPath
+"  silent! exec 'lchdir ' . prevPath
 endfunction
 
 function! s:SetFileEncoding()
@@ -629,7 +629,7 @@ function! MyGrep(pattern, searchPath, filepattern, fenc, addflag, ...)
     endif
   endif
   if g:mygrepprg == 'internal' || g:mygrepprg == '' || g:MyGrep_UseVimgrep != 0
-    silent exec 'lchdir ' . escape(searchPath, ' ')
+    silent! exec 'lchdir ' . escape(searchPath, ' ')
     let pattern = escape(pattern, '/')
     let vopt = g:QFix_UseLocationList ? 'l' : ''
     if addflag
@@ -650,7 +650,7 @@ function! MyGrep(pattern, searchPath, filepattern, fenc, addflag, ...)
     endfor
     call QFixSetqflist(save_qflist)
     if g:MyGrep_StayGrepDir == 0
-      silent exec 'lchdir ' . prevPath
+      silent! exec 'lchdir ' . prevPath
     endif
     let g:MyGrep_Regexp = 1
     let g:MyGrep_Ignorecase = 1
@@ -723,7 +723,7 @@ function! MyGrep(pattern, searchPath, filepattern, fenc, addflag, ...)
   let g:MyGrep_Ignorecase = 1
   let grepcmd = substitute(g:MyGrepcmd, '#defopt#', {_grepcmd}, '')
   let grepcmd = substitute(grepcmd, '#useropt#', g:MyGrepcmd_useropt, '')
-  silent exec 'lchdir ' . escape(searchPath, ' ')
+  silent! exec 'lchdir ' . escape(searchPath, ' ')
   let retval = s:ExecGrep(grepcmd, g:mygrepprg, searchPath, pattern, &enc, a:fenc, a:filepattern)
   let pattern = s:ParseFilepattern(a:filepattern)
   let file = ''
@@ -733,7 +733,7 @@ function! MyGrep(pattern, searchPath, filepattern, fenc, addflag, ...)
   if g:MyGrep_Return
     let g:MyGrep_Return = 0
     if g:MyGrep_StayGrepDir == 0
-      silent exec 'lchdir ' . prevPath
+      silent! exec 'lchdir ' . prevPath
     endif
     redraw|echo ''
     return g:MyGrep_qflist
@@ -746,7 +746,7 @@ function! MyGrep(pattern, searchPath, filepattern, fenc, addflag, ...)
     call QFixSetqflist(g:MyGrep_qflist, flag)
   endif
   if g:MyGrep_StayGrepDir == 0
-    silent exec 'lchdir ' . prevPath
+    silent! exec 'lchdir ' . prevPath
   endif
   call QFixEnable(searchPath)
   redraw | echo ''
@@ -828,6 +828,13 @@ endfunction
 "検索語ファイルを作成してgrep
 """"""""""""""""""""""""""""""
 function! s:ExecGrep(cmd, prg, searchPath, searchWord, from_encoding, to_encoding, filepattern)
+  if !isdirectory(expand(a:searchPath))
+    let mes = printf('QFixGrep : %s is not directory!', a:searchPath)
+    let choice = confirm(mes, "&OK")
+    let g:MyGrep_retval = ''
+    return g:MyGrep_retval
+  endif
+
   " iconv が使えない
   "  if a:from_encoding != a:to_encoding && !has('iconv')
   "    echoe 'QFixGrep : not found iconv!'
@@ -902,7 +909,7 @@ function! s:ExecGrep(cmd, prg, searchPath, searchWord, from_encoding, to_encodin
 
   " 検索実行
   let prevPath = escape(getcwd(), ' ')
-  silent exec 'lchdir ' . escape(a:searchPath, ' ')
+  silent! exec 'lchdir ' . escape(a:searchPath, ' ')
   silent! let saved_path = $PATH
   let dir = fnamemodify(a:prg, ':h')
   if dir != '.'
@@ -1009,11 +1016,11 @@ function! s:ParseSearchResult(searchPath, searchResult, filepattern, shellenc, f
       endif
     endwhile
   endfor
-  silent exec 'lchdir ' . prevPath
+  silent! exec 'lchdir ' . prevPath
   if len(qflist) == 0 && a:searchResult != ''
-    " let mes = iconv(g:MyGrep_retval, a:shellenc, &enc)
-    " redraw | echoe string(mes)
-    " let choice = confirm(mes, "&OK")
+    let mes = iconv(g:MyGrep_retval, a:shellenc, &enc)
+    redraw | echoe string(mes)
+    let choice = confirm(mes, "&OK")
   endif
   return qflist
 endfunction

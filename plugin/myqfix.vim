@@ -1120,7 +1120,7 @@ function! QFixPreviewOpen(file, line, ...)
 
   let prevPath = escape(getcwd(), ' ')
   if g:QFix_SearchPath != ''
-    silent exec 'lchdir ' . escape(g:QFix_SearchPath, ' ')
+    silent! exec 'lchdir ' . escape(g:QFix_SearchPath, ' ')
   endif
 
   if g:QFix_PreviewFtypeHighlight != 0
@@ -1147,7 +1147,7 @@ function! QFixPreviewOpen(file, line, ...)
     setlocal nocursorline
   endif
   setlocal nomodifiable
-  silent exec 'lchdir ' . prevPath
+  silent! exec 'lchdir ' . prevPath
   silent! wincmd p
 endfunction
 

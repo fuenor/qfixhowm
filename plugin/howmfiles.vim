@@ -103,7 +103,7 @@ function! s:Getfile(lnum, ...)
     let str = substitute(str, '^'.head, '', '')
   endif
   let file = substitute(str, '|.*$', '', '')
-  silent exec 'lchdir ' . escape(g:qfixmemo_dir, ' ')
+  silent! exec 'lchdir ' . escape(g:qfixmemo_dir, ' ')
   let file = fnamemodify(file, ':p')
   if !filereadable(file)
     return ['', 0]
@@ -178,7 +178,7 @@ function! s:SortExec(...)
   elseif g:QFix_Sort == 'reverse'
     let sq = reverse(sq)
   endif
-  silent exec 'lchdir ' . escape(g:qfixmemo_dir, ' ')
+  silent! exec 'lchdir ' . escape(g:qfixmemo_dir, ' ')
   let s:glist = []
   for d in sq
     let filename = fnamemodify(d['filename'], ':.')
@@ -604,7 +604,7 @@ function! s:BufWinEnterMenu(preview, head)
   call HowmMenuCmd_()
   silent! call HowmMenuCmd()
 
-  silent exec 'lchdir ' . escape(g:qfixmemo_dir, ' ')
+  silent! exec 'lchdir ' . escape(g:qfixmemo_dir, ' ')
 endfunction
 
 let g:HowmMenuLnum = [0, 1, 1, 0]

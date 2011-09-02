@@ -268,7 +268,7 @@ endfunction
 
 " アウトラインコマンド
 silent! function QFixMemoOutline()
-  silent exec "normal! zi"
+  silent! exec "normal! zi"
 endfunction
 
 " タイトル検索用正規表現設定
@@ -988,7 +988,7 @@ function! qfixmemo#Template(cmd)
   elseif keycmd =~ '\Ci$'
     startinsert
   endif
-  silent exec 'setlocal virtualedit='.saved_ve
+  silent! exec 'setlocal virtualedit='.saved_ve
 endfunction
 
 " Vim 7.3patch272の:put=listバグ修正による挙動の違いを吸収する
@@ -1009,7 +1009,7 @@ function! qfixmemo#DeleteEntry(...)
   call qfixmemo#Init()
   let tpattern = qfixmemo#TitleRegxp()
   let [text, startline, endline] = QFixMRUGet('title', '%', line('.'), tpattern)
-  silent exec startline.','.endline.'d'
+  silent! exec startline.','.endline.'d'
   call cursor(startline, 1)
   if &hidden == 0
     write!
@@ -1052,9 +1052,9 @@ function! qfixmemo#DivideEntry() range
     call setline(1, entry)
     silent! $delete _
     call cursor(1,1)
-    silent exec 'w! '
+    silent! exec 'w! '
     exe 'b ' . bufnr
-    " silent exec 'bd'
+    " silent! exec 'bd'
     let fline = lline + 1
     if fline > a:lastline
       break
@@ -1063,7 +1063,7 @@ function! qfixmemo#DivideEntry() range
   endwhile
   stopinsert
   silent! %delete _
-  silent exec 'w! '
+  silent! exec 'w! '
   let g:QFixMRU_Disable = 0
 endfunction
 
@@ -1524,7 +1524,7 @@ function! s:randomReadFile(file)
     let res = {'filename' : file, 'lnum' : lnum, 'text' : text}
     call add(result, res)
   endfor
-  silent exec 'lchdir ' . prevPath
+  silent! exec 'lchdir ' . prevPath
   return result
 endfunction
 
@@ -1557,7 +1557,7 @@ function! s:randomWriteFile(file)
     call filter(sq, "v:val['text']     !~ '".rexclude."'")
     call filter(sq, "v:val['filename'] !~ '".rexclude."'")
   endif
-  silent exec 'lchdir ' . escape(expand(dir), ' ')
+  silent! exec 'lchdir ' . escape(expand(dir), ' ')
   let result = []
   call add(result, dir)
   let head = QFixNormalizePath(expand(dir)) . '/'
@@ -1570,7 +1570,7 @@ function! s:randomWriteFile(file)
     call add(result, res)
   endfor
   call writefile(result, rfile)
-  silent exec 'lchdir ' . prevPath
+  silent! exec 'lchdir ' . prevPath
   return sq
 endfunction
 
@@ -1789,7 +1789,7 @@ function! qfixmemo#Cmd_Replace(mode)
     call add(nsq, sqdat)
   endfor
   call QFixSetqflist(nsq)
-  silent exec 'lchdir ' . prevPath
+  silent! exec 'lchdir ' . prevPath
   QFixCopen
   call cursor(1, 1)
   return

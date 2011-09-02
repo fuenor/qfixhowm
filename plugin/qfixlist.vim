@@ -49,7 +49,7 @@ function! qfixlist#search(pattern, dir, cmd, days, fenc, file)
   let list = MyGrep(a:pattern, a:dir, a:file, a:fenc, 0)
 
   redraw | echo 'QFixList : Formatting...'
-  silent exec 'lchdir ' . escape(expand(a:dir), ' ')
+  silent! exec 'lchdir ' . escape(expand(a:dir), ' ')
   if g:qfixlist_use_fnamemodify == 0
     let head = fnamemodify(expand(a:dir), ':p')
     let head = QFixNormalizePath(head)
@@ -66,7 +66,7 @@ function! qfixlist#search(pattern, dir, cmd, days, fenc, file)
       let d['lnum'] = d['lnum'] + 0
     endfor
   endif
-  silent exec 'lchdir ' . prevPath
+  silent! exec 'lchdir ' . prevPath
 
   redraw | echo 'QFixList : Sorting...'
   if cmd =~ 'mtime'
@@ -203,7 +203,7 @@ function! qfixlist#open(...)
   let file = fnamemodify(tempname(), ':p:h').'/__QFix_Files__'
   let mode = 'split'
   call QFixEditFile(file, mode)
-  silent exec 'lchdir ' . escape(path, ' ')
+  silent! exec 'lchdir ' . escape(path, ' ')
   setlocal buftype=nofile
   setlocal bufhidden=hide
   setlocal noswapfile
@@ -212,7 +212,7 @@ function! qfixlist#open(...)
   setlocal cursorline
   wincmd J
 
-  silent exec 'lchdir ' . escape(s:QFixList_dir, ' ')
+  silent! exec 'lchdir ' . escape(s:QFixList_dir, ' ')
   let g:QFix_SearchPath = s:QFixList_dir
 
   let glist = []
@@ -298,7 +298,7 @@ function! s:BufWinEnter(preview)
   hi def link qfLineNr	LineNr
   hi def link qfError	Error
 
-  silent exec 'lchdir ' . escape(s:QFixList_dir, ' ')
+  silent! exec 'lchdir ' . escape(s:QFixList_dir, ' ')
 endfunction
 
 function! s:ListCmd_J()
@@ -371,7 +371,7 @@ function! s:Getfile(lnum, ...)
     let str = substitute(str, '^'.head, '', '')
   endif
   let file = substitute(str, '|.*$', '', '')
-  silent exec 'lchdir ' . escape(s:QFixList_dir, ' ')
+  silent! exec 'lchdir ' . escape(s:QFixList_dir, ' ')
   let file = fnamemodify(file, ':p')
   if !filereadable(file)
     return ['', 0]
@@ -438,7 +438,7 @@ function! s:SortExec(...)
   elseif g:QFix_Sort == 'reverse'
     let sq = reverse(sq)
   endif
-  silent exec 'lchdir ' . escape(s:QFixList_dir, ' ')
+  silent! exec 'lchdir ' . escape(s:QFixList_dir, ' ')
   let s:glist = []
   for d in sq
     let filename = fnamemodify(d['filename'], ':.')

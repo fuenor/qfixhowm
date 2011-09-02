@@ -417,7 +417,7 @@ function! QFixMRURead(...)
       call s:Register(m)
     endfor
   endif
-  silent exec 'lchdir ' . prevPath
+  silent! exec 'lchdir ' . prevPath
   if basedir != ''
     let g:QFixMRU_BaseDir = basedir
   elseif a:0 > 1
@@ -728,7 +728,7 @@ function! s:WriteMru(mru, mrufile)
     let mline = iconv(mline, from, to)
     call add(mlist, mline)
   endfor
-  silent exec 'lchdir ' . prevPath
+  silent! exec 'lchdir ' . prevPath
   let ostr = []
   silent! let ostr = readfile(mrufile)
   if mlist != ostr

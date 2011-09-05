@@ -320,46 +320,52 @@ silent! function QFixMemoKeymap()
 
   silent! nnoremap <silent> <Leader>H                :<C-u>call qfixmemo#Help()<CR>
 
-  silent! nnoremap <silent> <unique> <Leader>t     :<C-u>call qfixmemo#ListReminderCache("todo")<CR>
-  silent! nnoremap <silent> <unique> <Leader>rt    :<C-u>call qfixmemo#ListReminder("todo")<CR>
-  silent! nnoremap <silent> <unique> <Leader>y     :<C-u>call qfixmemo#ListReminderCache("schedule")<CR>
-  silent! nnoremap <silent> <unique> <Leader><Tab> :<C-u>call qfixmemo#ListReminderCache("schedule")<CR>
-  silent! nnoremap <silent> <unique> <Leader>ry    :<C-u>call qfixmemo#ListReminder("schedule")<CR>
-  silent! nnoremap <silent> <unique> <Leader>rd    :<C-u>call qfixmemo#GenerateRepeatDate()<CR>
-  silent! nnoremap <silent> <unique> <Leader>d     :<C-u>call qfixmemo#InsertDate('Date')<CR>
-  silent! nnoremap <silent> <unique> <Leader>T     :<C-u>call qfixmemo#InsertDate('Time')<CR>
-  silent! nnoremap <silent> <unique> <Leader>,     :<C-u>call qfixmemo#OpenMenu("cache")<CR>
-  silent! nnoremap <silent> <unique> <Leader>r,    :<C-u>call qfixmemo#OpenMenu()<CR>
-endfunction
-
-function! qfixmemo#ListReminderCache(type)
-  call qfixmemo#Init()
-  call QFixHowmListReminderCache(a:type)
-endfunction
-
-function! qfixmemo#ListReminder(type)
-  call qfixmemo#Init()
-  call QFixHowmListReminder(a:type)
-endfunction
-
-function! qfixmemo#GenerateRepeatDate()
-  call qfixmemo#Init()
-  call QFixHowmGenerateRepeatDate()
-endfunction
-
-function! qfixmemo#InsertDate(type)
-  call qfixmemo#Init()
-  call QFixHowmInsertDate(a:type)
-endfunction
-
-function! qfixmemo#OpenMenu(...)
-  call qfixmemo#Init()
-  if a:0
-    call QFixHowmOpenMenu(a:1)
-  else
-    call QFixHowmOpenMenu()
+  if exists('g:QFixHowm_Convert') && g:QFixHowm_Convert == 1
+    silent! nnoremap <silent> <unique> <Leader>t     :<C-u>call qfixmemo#ListReminderCache("todo")<CR>
+    silent! nnoremap <silent> <unique> <Leader>rt    :<C-u>call qfixmemo#ListReminder("todo")<CR>
+    silent! nnoremap <silent> <unique> <Leader>y     :<C-u>call qfixmemo#ListReminderCache("schedule")<CR>
+    silent! nnoremap <silent> <unique> <Leader><Tab> :<C-u>call qfixmemo#ListReminderCache("schedule")<CR>
+    silent! nnoremap <silent> <unique> <Leader>ry    :<C-u>call qfixmemo#ListReminder("schedule")<CR>
+    silent! nnoremap <silent> <unique> <Leader>rd    :<C-u>call qfixmemo#GenerateRepeatDate()<CR>
+    silent! nnoremap <silent> <unique> <Leader>d     :<C-u>call qfixmemo#InsertDate('Date')<CR>
+    silent! nnoremap <silent> <unique> <Leader>T     :<C-u>call qfixmemo#InsertDate('Time')<CR>
+    silent! nnoremap <silent> <unique> <Leader>,     :<C-u>call qfixmemo#OpenMenu("cache")<CR>
+    silent! nnoremap <silent> <unique> <Leader>r,    :<C-u>call qfixmemo#OpenMenu()<CR>
   endif
 endfunction
+
+if exists('g:QFixHowm_Convert') && g:QFixHowm_Convert == 1
+  function! qfixmemo#ListReminderCache(type)
+    call howm_schedule#Init()
+    call QFixHowmListReminderCache(a:type)
+  endfunction
+
+  function! qfixmemo#ListReminder(type)
+    call howm_schedule#Init()
+    call QFixHowmListReminder(a:type)
+  endfunction
+
+  function! qfixmemo#GenerateRepeatDate()
+    call howm_schedule#Init()
+    call QFixHowmGenerateRepeatDate()
+  endfunction
+
+  function! qfixmemo#InsertDate(type)
+    call howm_schedule#Init()
+    call QFixHowmInsertDate(a:type)
+  endfunction
+
+  function! qfixmemo#OpenMenu(...)
+    call howm_menu#Init()
+    call howm_schedule#Init()
+    let g:QFixHowm_KeywordList = deepcopy(s:KeywordDic)
+    if a:0
+      call QFixHowmOpenMenu(a:1)
+    else
+      call QFixHowmOpenMenu()
+    endif
+  endfunction
+endif
 
 " デフォルトローカルキーマップ
 silent! function QFixMemoLocalKeymap()
@@ -2176,6 +2182,7 @@ endfunction
 """"""""""""""""""""""""""""""
 " help
 function! qfixmemo#Help()
+  call myhowm_msg#HelpInit()
   let file = 'QFixMemoHelp'
   let hdir = escape(expand(g:qfixmemo_dir), ' ')
   silent! exec 'split '

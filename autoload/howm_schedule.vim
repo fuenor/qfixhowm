@@ -2,9 +2,9 @@
 "    Description: 拡張Quickfixに対応したhowm
 "         Author: fuenor <fuenor@gmail.com>
 "                 http://sites.google.com/site/fudist/Home/qfixhowm
-"  Last Modified: 2011-05-26 22:49
+"  Last Modified: 2011-09-04 22:33
 "=============================================================================
-let s:Version = 2.48
+let s:Version = 2.49
 scriptencoding utf-8
 "キーマップリーダーが g の場合、「新規ファイルを作成」は g,c です。
 "簡単な使い方はg,Hのヘルプで、詳しい使い方は以下のサイトを参照してください。
@@ -249,9 +249,6 @@ if !exists('g:QFixHowm_TitleFilterReg')
   let g:QFixHowm_TitleFilterReg = ''
 endif
 
-if !exists('howm_glink_pattern')
-  let howm_glink_pattern = '>>>'
-endif
 "タブで編集('tab'を設定)
 if !exists('QFixHowm_Edit')
   let QFixHowm_Edit = ''
@@ -1607,6 +1604,13 @@ endfunction
 
 function! QFixHowmScheduleActionStr()
   let save_cursor = getpos('.')
+  call setpos('.', save_cursor)
+  let s:QFixHowmMA = 0
+  let ret = QFixHowmMacroAction()
+  if ret != "\<CR>"
+    return printf(':call feedkeys("%s", "t")', ret)
+  endif
+  let save_cursor = getpos('.')
   let uriopen = g:QFixHowm_UserURIopen
   silent! exec 'let uriopen = g:QFixHowm_UserURIopen_'.g:QFixHowm_UserFileExt
   if uriopen == 1
@@ -1683,6 +1687,11 @@ endif
 if !exists('howm_clink_pattern')
   let howm_clink_pattern = '<<<'
 endif
+"howmリンクパターン
+if !exists('g:QFixHowm_Link')
+  let g:QFixHowm_Link = '\('.g:howm_clink_pattern.'\|'.g:howm_glink_pattern.'\)'
+endif
+
 silent! function QFixHowmOpenKeywordLink()
   return "\<CR>"
 endfunction
@@ -1761,6 +1770,10 @@ function! QFixHowmActionLockStr()
   let save_cursor = getpos('.')
   call setpos('.', save_cursor)
   let ret = QFixHowmMacroAction()
+  if ret != "\<CR>"
+    let s:QFixHowmMA = 1
+    return ret
+  endif
   if ret != "\<CR>"
     let s:QFixHowmMA = 1
     return ret
@@ -1866,6 +1879,8 @@ endfunction
 if !exists('g:QFixHowm_Wiki')
   let g:QFixHowm_Wiki = 0
 endif
+let g:QFixHowm_KeywordList = []
+
 "キーワードリンク検索
 function! QFixHowmKeywordLinkSearch()
   let save_cursor = getpos('.')
@@ -1875,12 +1890,12 @@ function! QFixHowmKeywordLinkSearch()
 
   for word in g:QFixHowm_KeywordList
     let len = strlen(word)
-    let pos = match(lstr, '\V'.word)
+    let pos = stridx(lstr, word)
     if pos == -1 || col < pos+1
       continue
     endif
     let str = strpart(lstr, col-len, 2*len)
-    if matchstr(str, '\V'.word) == word
+    if stridx(str, word) > -1
       let s:QFixHowmALSPat = word
       if g:QFixHowm_Wiki > 0
         let link = word
@@ -1934,7 +1949,7 @@ function! QFixHowmMacroAction()
   endif
   let text = substitute(text, '.*'.g:QFixHowm_MacroActionPattern, "", "")
   let s:QFixHowm_MacroActionCmd = text
-  exec "nmap <silent> " . s:QFixHowm_Key . g:QFixHowm_MacroActionKey . " " . ":<C-u>:QFixCclose<CR>" .substitute(s:QFixHowm_MacroActionCmd, '^\s*', '', '')
+  exec "nmap <silent> <buffer>" . s:QFixHowm_Key . g:QFixHowm_MacroActionKey . " " . ":<C-u>:QFixCclose<CR>" .substitute(s:QFixHowm_MacroActionCmd, '^\s*', '', '')
   return s:QFixHowm_Key . g:QFixHowm_MacroActionKey
 endfunction
 

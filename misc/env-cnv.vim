@@ -7,6 +7,9 @@
 let s:Version = 1.00
 scriptencoding utf-8
 
+if !exists('g:QFixHowm_Convert')
+  let QFixHowm_Convert = 1
+endif
 if exists('g:QFixHowm_Convert') && g:QFixHowm_Convert == 0
   finish
 endif

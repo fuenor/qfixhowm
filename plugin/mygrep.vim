@@ -1181,6 +1181,7 @@ function! QFixGrepHelp()
 endfunction
 
 function! QFixGrepHelp_()
+  call mygrep_msg#help()
   silent! exec 'split ' . s:QFixGrep_Helpfile
   setlocal buftype=nofile
   setlocal bufhidden=hide

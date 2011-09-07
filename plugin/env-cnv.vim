@@ -268,6 +268,41 @@ endif
 if !exists('g:SubWindow_Width')
   let g:SubWindow_Width = 30
 endif
+"メニューファイル名
+if !exists('g:QFixHowm_Menufile')
+  let g:QFixHowm_Menufile = 'Menu-00-00-000000.'.s:howmsuffix
+endif
+augroup QFixHowmKeyword
+  au!
+  exe 'au BufWritePre '. expand(g:SubWindow_Title)   .' call qfixmemo#AddKeyword()'
+  exe 'au BufWritePre '. expand(g:QFixHowm_Menufile) .' call qfixmemo#AddKeyword()'
+augroup END
+
+if !exists('g:howm_clink_pattern')
+  let g:howm_clink_pattern = '<<<'
+endif
+function! QFixMemoRebuildKeyword(dir, fenc)
+  let extlist = []
+  " return extlist
+  let l:howm_dir = expand(g:howm_dir)
+  let prevPath = escape(getcwd(), ' ')
+  silent! cexpr ''
+  let s:KeywordDic = []
+  let file = g:QFixHowm_Menufile
+  if g:QFixHowm_MenuDir == ''
+    silent! exec 'lchdir ' . escape(l:howm_dir, ' ')
+  else
+    silent! exec 'lchdir ' . escape(expand(g:QFixHowm_MenuDir), ' ')
+  endif
+  silent! exec 'vimgrepadd /\('.g:howm_clink_pattern.'\|'.'\[\[[^\]]\+\]\]'.'\)/j '. file
+  let file = expand(g:SubWindow_Title)
+  silent! exec 'vimgrepadd /\('.g:howm_clink_pattern.'\|'.'\[\[[^\]]\+\]\]'.'\)/j '. file
+  let qflist = getqflist()
+  call extend(extlist, qflist)
+  silent! cexpr ''
+  silent! exec 'lchdir ' . prevPath
+  return extlist
+endfunction
 
 " 起動時コマンド
 if exists('g:QFixHowm_VimEnterCmd')

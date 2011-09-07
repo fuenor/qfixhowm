@@ -162,17 +162,17 @@ if !exists('g:qfixmemo_separator')
 endif
 
 " goto link syntax highlight
-if !exists('g:qfixmemo_gotolink_pattern')
-  let g:qfixmemo_gotolink_pattern = ''
+if !exists('g:qfixmemo_glink_pattern')
+  let g:qfixmemo_glink_pattern = ''
   if exists('g:howm_glink_pattern')
-    let g:qfixmemo_gotolink_pattern = g:howm_glink_pattern . '.*'
+    let g:qfixmemo_glink_pattern = g:howm_glink_pattern
   endif
 endif
 " come-from link syntax highlight
-if !exists('g:qfixmemo_comefromlink_pattern')
-  let g:qfixmemo_comefromlink_pattern = ''
+if !exists('g:qfixmemo_clink_pattern')
+  let g:qfixmemo_clink_pattern = ''
   if exists('g:howm_clink_pattern')
-    let g:qfixmemo_comefromlink_pattern = g:howm_clink_pattern . '.*'
+    let g:qfixmemo_clink_pattern = g:howm_clink_pattern
   endif
 endif
 
@@ -744,11 +744,11 @@ function! s:syntaxHighlight()
   endif
   silent! syn clear qfixmemoGotolink
   exe "syn match qfixmemoGotolink '" . '^' . matchstr(g:qfixmemo_separator, '^\S\+') . ".*'"
-  if g:qfixmemo_gotolink_pattern != ''
-    exe "syn match qfixmemoGotolink '" . g:qfixmemo_gotolink_pattern    . "'" . '"'
+  if g:qfixmemo_glink_pattern != ''
+    exe "syn match qfixmemoGotolink '" . g:qfixmemo_glink_pattern . ".*'" . '"'
   endif
-  if g:qfixmemo_comefromlink_pattern != ''
-    exe "syn match qfixmemoGotolink '" . g:qfixmemo_comefromlink_pattern . "'" . '"'
+  if g:qfixmemo_clink_pattern != ''
+    exe "syn match qfixmemoGotolink '" . g:qfixmemo_clink_pattern . ".*'" . '"'
   endif
   hi link qfixmemoGotolink  Underlined
   silent! syntax clear qfixmemoKeyword
@@ -1912,7 +1912,7 @@ function! qfixmemo#Cmd_X(...) range
 endfunction
 
 """"""""""""""""""""""""""""""
-" howmのキーワードファイル
+" キーワードファイル
 if !exists('g:qfixmemo_keyword_file')
   let g:qfixmemo_keyword_file = '~/.qfixmemo-keys'
 endif
@@ -2010,12 +2010,18 @@ function! qfixmemo#RebuildKeyword()
   redraw | echo 'QFixMemo : Rebuild Keyword...'
   let pattern = '\[\[.*\]\]'
   let qflist = qfixlist#search(pattern, g:qfixmemo_dir, '', 0, g:qfixmemo_fileencoding, '**/*')
-
   if exists('g:howm_clink_pattern')
     let pattern = g:howm_clink_pattern
     let extlist = qfixlist#search(pattern, g:qfixmemo_dir, '', 0, g:qfixmemo_fileencoding, '**/*')
     call extend(qflist, extlist)
   endif
+  let extlist = QFixMemoRebuildKeyword(g:qfixmemo_dir, g:qfixmemo_fileencoding)
+  for n in range(len(extlist))
+    if !exists('extlist[n]["filename"]')
+      let extlist[n]['filename'] = fnamemodify(bufname(extlist[n]['bufnr']), ':p')
+    endif
+  endfor
+  call extend(qflist, extlist)
   let from = g:qfixmemo_fileencoding
   let to   = &enc
   let str = []
@@ -2038,6 +2044,10 @@ function! qfixmemo#RebuildKeyword()
     call qfixmemo#LoadKeyword('highlight')
     redraw | echo 'QFixMemo : no keywords.'
   endif
+endfunction
+
+silent! function QFixMemoRebuildKeyword(dir, fenc)
+  return []
 endfunction
 
 silent! function QFixMemoUserModeCR(...)

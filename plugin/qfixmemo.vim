@@ -418,11 +418,14 @@ silent! function QFixMemoMenubar(menu, leader)
   exe printf(sepcmd, 2)
   call s:addMenu(menucmd, 'FGrep(&S)', 's')
   call s:addMenu(menucmd, 'Grep(&G)' , 'g')
-  exe printf(sepcmd, 3)
-  call s:addMenu(menucmd, 'Schedule(&Y)'        , 'y')
-  call s:addMenu(menucmd, 'Todo(&T)'            , 't')
-  call s:addMenu(menucmd, 'Rebuild-Schedule(&I)', 'ry')
-  call s:addMenu(menucmd, 'Rebuild-Todo(&K)'    , 'rt')
+  if exists('g:QFixHowm_Convert') && g:QFixHowm_Convert == 1
+    exe printf(sepcmd, 3)
+    call s:addMenu(menucmd, 'Schedule(&Y)'        , 'y')
+    call s:addMenu(menucmd, 'Todo(&T)'            , 't')
+    call s:addMenu(menucmd, 'Menu(&,)'            , ',')
+    call s:addMenu(menucmd, 'Rebuild-Schedule(&I)', 'ry')
+    call s:addMenu(menucmd, 'Rebuild-Todo(&K)'    , 'rt')
+  endif
   exe printf(sepcmd, 4)
   call s:addMenu(menucmd, 'RandomWalk(&R)'        , 'rr')
   call s:addMenu(menucmd, 'Rebuild-RandomWalk(&F)', 'rR')
@@ -625,7 +628,7 @@ function! qfixmemo#AddTitle()
     if title =~ rpattern
       call remove(entry, 0)
       for str in entry
-        if str != '' && str !~ s:qfixmemo_scheduleformat && str !~ s:qfixmemo_timeformat
+        if str != '' && str !~ s:qfixmemo_scheduleformat && str !~ s:qfixmemo_timeformat && str !~ '^\[.\{-}]$'
           let len = strlen(str)
           let str = substitute(str, '\%>' . g:qfixmemo_title_length .'v.*','','')
           if strlen(str) != len

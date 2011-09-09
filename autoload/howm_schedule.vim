@@ -2601,3 +2601,128 @@ if exists('g:HowmSchedule_only') && g:HowmSchedule_only
   finish
 endif
 
+"折りたたみに ワイルドカードチャプターを使用する
+if !exists('g:QFixHowm_WildCardChapter')
+  let g:QFixHowm_WildCardChapter = 0
+endif
+"階層付きテキストもワイルドカードチャプター変換の対象にする
+if !exists('g:QFixHowm_WildCardChapterMode')
+  let g:QFixHowm_WildCardChapterMode = 1
+endif
+"チャプターのタイトル行を折りたたみに含める/含めない
+if !exists('g:QFixHowm_FoldingChapterTitle')
+  let g:QFixHowm_FoldingChapterTitle = 0
+endif
+"折りたたみのパターン
+if !exists('g:QFixHowm_FoldingPattern')
+  let g:QFixHowm_FoldingPattern = '^[=.*]'
+endif
+"折りたたみのレベル設定
+if !exists('g:QFixHowm_FoldingMode')
+  let g:QFixHowm_FoldingMode = 0
+endif
+
+silent! function QFixHowmFoldingLevel(lnum)
+  if g:QFixHowm_WildCardChapter
+    return QFixHowmFoldingLevelWCC(a:lnum)
+  else
+    return getline(a:lnum) =~ g:QFixHowm_FoldingPattern ? '>1' : '1'
+  endif
+endfunction
+
+" *. 形式のワイルドカードチャプター対応フォールディング
+let s:schepat = '^\s*'.s:sch_dateT.s:sch_Ext
+silent! function QFixHowmFoldingLevelWCC(lnum)
+  let s:titlepat = '^'.escape(g:QFixHowm_Title, g:QFixHowm_EscapeTitle).'\([^'.g:QFixHowm_Title.']\|$\)'
+  let text = getline(a:lnum)
+  if text =~ s:titlepat || text =~ s:schepat
+    if g:QFixHowm_Folding == 1
+      return '>1'
+    endif
+    return '0'
+  endif
+  "カードチャプターに応じて折りたたみレベルを設定する
+  let wild = '\(\(\d\+\|\*\)\.\)\+\(\d\+\|\*\)\?'
+  let str = matchstr(text, '^\s*'.wild.'\s*')
+  let str = substitute(str, '\d\+', '*', 'g')
+  let level = strlen(substitute(str, '[^*]', '' , 'g'))
+  if level == 0 && g:QFixHowm_FoldingPattern != ""
+    let str = matchstr(text, g:QFixHowm_FoldingPattern.'\+')
+    let str = substitute(str, '[^'.str[0].'].*$', '', 'g')
+    let level = strlen(str)
+  endif
+  if g:QFixHowm_FoldingMode == 0
+    if level
+      if g:QFixHowm_FoldingChapterTitle == 0
+        return '>1'
+      endif
+      return '0'
+    endif
+    return '1'
+  elseif g:QFixHowm_FoldingMode == 1
+    if level
+      return '>'.level
+    endif
+    return 'a'
+  endif
+  return '1'
+endfunction
+
+" *. 形式のワイルドカードチャプターを数字に変換
+silent! function CnvWildcardChapter(...) range
+  let firstline = a:firstline
+  let lastline = a:lastline
+  if a:0 == 0
+    let firstline = 1
+    let lastline = line('$')
+  endif
+  let top = 0
+  let wild = '\(\*\.\)\+\*\?\s*'
+  if g:QFixHowm_WildCardChapterMode
+    let wild = wild . '\|^\.\+\s*'
+  endif
+  let nwild = '\(\d\+\.\)\+\(\d\+\)\?'
+  let chap = [top, 0, 0, 0, 0, 0, 0, 0]
+  let plevel = 1
+  let save_cursor = getpos('.')
+  for l in range(firstline, lastline)
+    let str = matchstr(getline(l), '^\s*'.nwild.'\s*')
+    if str != ''
+      for c in range(8)
+        let ch = matchstr(str,'\d\+', 0 ,c+1)
+        let chap[c] = 0
+        if ch != ''
+          let chap[c] = ch
+        endif
+      endfor
+      continue
+    endif
+    let str = matchstr(getline(l), '^\s*'.wild)
+    let len = strlen(str)
+    if str[0] == '.'
+      let str = substitute(str, '\.', '*.', 'g')
+      if strlen(substitute(str, '\s*$', '', '')) > 2
+        let str = substitute(str, '\.\(\s*\)$', '\1', 'g')
+      endif
+    endif
+    let level = strlen(substitute(str, '[^*]', '' , 'g'))
+    if level == 0
+      continue
+    endif
+    let chap[level-1] = chap[level-1] + 1
+    if level < plevel
+      for n in range(level, 8-1)
+        let chap[n] = 0
+      endfor
+    endif
+    let plevel = level
+    for n in range(level)
+      let str = substitute(str, '\*', chap[n], '')
+    endfor
+    let nstr = str . strpart(getline(l), len)
+    let sline = line('.')
+    call setline(l, [nstr])
+  endfor
+  call setpos('.', save_cursor)
+endfunction
+

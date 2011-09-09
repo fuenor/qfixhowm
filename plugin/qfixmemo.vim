@@ -393,6 +393,11 @@ silent! function QFixMemoLocalKeymap()
   nnoremap <silent> <buffer> <LocalLeader>rn :<C-u>call qfixmemo#Rename()<CR>
 
   nnoremap <silent> <buffer> <CR> :call QFixMemoUserModeCR()<CR>
+
+  if exists('g:QFixHowm_Convert') && g:QFixHowm_Convert == 1
+    nnoremap <silent> <buffer> <LocalLeader>z :<C-u>call CnvWildcardChapter()<CR>
+    vnoremap <silent> <buffer> <LocalLeader>z :<C-u>call CnvWildcardChapter()<CR>
+  endif
 endfunction
 
 silent! function QFixMemoMenubar(menu, leader)

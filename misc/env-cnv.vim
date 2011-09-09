@@ -370,7 +370,6 @@ function! QFixHowmSetup()
 
   " フォールディング
   let g:qfixmemo_folding         = g:QFixHowm_Folding
-  let g:qfixmemo_folding_pattern = g:QFixHowm_FoldingPattern
 
   " 自動タイトル行の文字数
   let g:qfixmemo_title_length = g:QFixHowm_Replace_Title_Len
@@ -427,16 +426,6 @@ endfunction
 if !exists('g:QFixHowm_Folding')
   let g:QFixHowm_Folding = 1
 endif
-" 折りたたみのパターン
-if !exists('g:QFixHowm_FoldingPattern')
-  let g:QFixHowm_FoldingPattern = '^[=.*]'
-endif
-" 折りたたみ関数
-if exists('*QFixHowmFoldingLevel')
-  silent! function QFixMemoFoldingLevel(lnum)
-    return QFixHowmFoldingLevel(a:lnum)
-  endfunction
-endif
 
 """"""""""""""""""""""""""""""
 " global keymap
@@ -474,6 +463,12 @@ endif
 function! QFixMemoUserModeCR(...)
   call howm_schedule#Init()
   call QFixHowmUserModeCR()
+endfunction
+
+" 折りたたみ関数
+function! QFixMemoFoldingLevel(lnum)
+  call howm_schedule#Init()
+  return QFixHowmFoldingLevel(a:lnum)
 endfunction
 
 function! QFixHowmHelp()

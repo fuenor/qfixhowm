@@ -68,17 +68,6 @@ function! s:TogglePreview(...)
   endif
 endfunction
 
-function! s:CR()
-  let [file, lnum] = s:Getfile('.')
-  if !filereadable(file)
-    call QFixHowmActionLock()
-    return
-  endif
-  call QFixEditFile(file)
-  call cursor(lnum, 1)
-  exec 'normal! zz'
-endfunction
-
 function! s:Close()
   if winnr('$') == 1 || (winnr('$') == 2 && b:PreviewEnable == 1)
     if tabpagenr('$') > 1
@@ -539,7 +528,7 @@ function! s:HowmMenuCR() range
   endif
   let [file, lnum] = s:Getfile('.', s:filehead)
   if !filereadable(file)
-    call QFixHowmActionLock()
+    call QFixMemoUserModeCR()
     return ''
   endif
   call QFixPclose()
@@ -585,6 +574,7 @@ function! s:BufWinEnterMenu(preview, head)
   hi link QFMenuButton	Special
   hi link QFMenuSButton	Identifier
   exe 'set ft='.g:qfixmemo_filetype
+  call qfixmemo#Syntax()
   runtime! syntax/howm_schedule.vim
   syn region QFMenuSButton start=+%"\zs+ end=+[^"]\+\ze"\[+ end='$'
   syn region QFMenuButton  start=+"\[\zs+ end=+[^\]]\+\ze\(\s\|]\)+ end='$'

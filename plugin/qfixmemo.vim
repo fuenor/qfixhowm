@@ -1700,7 +1700,7 @@ function! s:OpenQFixSubWin()
 
   let bufnum = bufnr(g:qfixmemo_submenu_title)
   if bufnum == -1
-    let wcmd = g:SubWindow_Title
+    let wcmd = expand(g:SubWindow_Title)
   else
     let wcmd = '+buffer' . bufnum
   endif
@@ -1712,7 +1712,12 @@ function! s:OpenQFixSubWin()
   setlocal foldcolumn=0
   setlocal nolist
   setlocal winfixwidth
-  nnoremap <silent> <buffer> q :close<CR>
+  nnoremap <silent> <buffer> q    :close<CR>
+  nnoremap <silent> <buffer> <CR> :call QFixMemoUserModeCR()<CR>
+  let cmd = g:qfixmemo_mapleader . 'w'
+  exe 'nnoremap <silent> <buffer> ' . cmd . ' :<C-u>call qfixmemo#ForceWrite()<CR>'
+  call qfixmemo#Syntax()
+  echo 'QFixMemo : Use "' . cmd . '" to write this buffer.'
 endfunction
 
 """"""""""""""""""""""""""""""

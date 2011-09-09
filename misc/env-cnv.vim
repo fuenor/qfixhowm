@@ -33,6 +33,9 @@ endif
 " (Vimで閲覧するとヘルプとしてハイライトされます)
 " http://github.com/fuenor/qfixmemo/blob/master/doc/qfixmemo.txt
 "
+" QFixHowm Ver.3の実装概要については以下を参照して下さい
+" https://sites.google.com/site/fudist/Home/qfixdev/ver3
+"
 " CAUTION: ファイルの読み込み順がファイル名順である事に依存しています。
 "-----------------------------------------------------------------------------
 
@@ -140,10 +143,6 @@ if !exists('g:QFixHowm_RecentDays')
 endif
 let g:qfixmemo_recentdays = g:QFixHowm_RecentDays
 
-" 折りたたみのパターン
-if !exists('g:QFixHowm_FoldingPattern')
-  let g:QFixHowm_FoldingPattern = '^[=.*]'
-endif
 " 検索時にカーソル位置の単語を拾う
 if !exists('g:QFixHowm_DefaultSearchWord')
   let g:QFixHowm_DefaultSearchWord = 1
@@ -369,12 +368,9 @@ function! QFixHowmSetup()
   silent! exe 'let qfixmemo_template_'.g:qfixmemo_ext.' = deepcopy(g:QFixHowm_Template_'.g:qfixmemo_ext . ')'
   silent! exe 'let qfixmemo_template_keycmd_'.g:qfixmemo_ext.' = g:QFixHowm_Cmd_NewEntry_'.g:qfixmemo_ext
 
-  " フォールディングパターン
-  if g:QFixHowm_Folding
-    let g:qfixmemo_folding_pattern = g:QFixHowm_FoldingPattern
-  else
-    let g:qfixmemo_folding_pattern = ''
-  endif
+  " フォールディング
+  let g:qfixmemo_folding         = g:QFixHowm_Folding
+  let g:qfixmemo_folding_pattern = g:QFixHowm_FoldingPattern
 
   " 自動タイトル行の文字数
   let g:qfixmemo_title_length = g:QFixHowm_Replace_Title_Len
@@ -420,11 +416,6 @@ if exists('g:QFixMRU_RegisterFile') && g:QFixMRU_RegisterFile == ''
   let g:QFixMRU_RegisterFile = '\.\(howm\|txt\|mkd\|wiki\)$'
 endif
 
-if exists('*QFixHowmFoldingLevel')
-  silent! function QFixMemoFoldingLevel(lnum)
-    return QFixHowmFoldingLevel(a:lnum)
-  endfunction
-endif
 silent! function QFixMemoQFBufWinEnterPost()
   if exists("*QFixHowmExportSchedule")
     nnoremap <buffer> <silent> !  :call QFixHowmCmd_ScheduleList()<CR>
@@ -436,8 +427,15 @@ endfunction
 if !exists('g:QFixHowm_Folding')
   let g:QFixHowm_Folding = 1
 endif
-if g:QFixHowm_Folding == 0
-  let g:qfixmemo_folding_pattern = ''
+" 折りたたみのパターン
+if !exists('g:QFixHowm_FoldingPattern')
+  let g:QFixHowm_FoldingPattern = '^[=.*]'
+endif
+" 折りたたみ関数
+if exists('*QFixHowmFoldingLevel')
+  silent! function QFixMemoFoldingLevel(lnum)
+    return QFixHowmFoldingLevel(a:lnum)
+  endfunction
 endif
 
 """"""""""""""""""""""""""""""
@@ -472,4 +470,26 @@ if exists('s:mapleader')
 else
   unlet g:mapleader
 endif
+
+function! QFixMemoUserModeCR(...)
+  call howm_schedule#Init()
+  call QFixHowmUserModeCR()
+endfunction
+
+function! QFixHowmHelp()
+  call qfixmemo#Init()
+  silent! exec 'split '
+  let file = escape(expand(g:qfixmemo_dir), ' ')
+  let file .= '/' . 'QFixMemoHelp'
+  silent! exec 'edit ' . file
+  setlocal buftype=nofile
+  setlocal bufhidden=hide
+  setlocal noswapfile
+  call myhowm_msg#HelpInit()
+  call setline(1, g:QFixHowmHelpList)
+  call cursor(1,1)
+  call qfixmemo#Syntax()
+  setlocal nomodifiable
+  nnoremap <silent> <buffer> <CR> :call QFixMemoUserModeCR()<CR>
+endfunction
 

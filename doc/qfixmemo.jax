@@ -191,6 +191,9 @@ http://sites.google.com/site/fudist/Home/grep/install
 タイトルを付けるのが面倒なら<CR>を押して本文から書きます。
 保存時にタイトル行が空ならタイトルは本文から適当に作成されます。
 
+テンプレートはqfixmemo_templateで定義可能です。
+詳しくは 11.1章の「新規メモのテンプレート」|qfixmemo-template|を参照して下さい。
+
 "Note"
 メモファイル中に [[キーワード]] のように [[ と ]] でWikiスタイルのキーワードを
 作成するとオートリンク化され、キーワード上で<CR>を押すと対応するファイルを開く
@@ -402,11 +405,12 @@ U                   絞り込み全てをアンドゥ
 
 <Leader>o           フォールディング切替
 
-フォールディングパターンは qfixmemo_folding_pattern で定義され、空文字列を指定す
-ると qfixmemoのフォールディングは無効化されます。 >
+フォールディングパターンは qfixmemo_folding_pattern で定義され、
+qfixmemo_foldingが 0 だと qfixmemoのフォールディングは無効化されます。 >
 デフォルトでは行頭がタイトル記号かどうかで折りたたみます
 
 .vimrc >
+    let qfixmemo_folding         = 1
     let qfixmemo_folding_pattern = '^=[^=]'
 
 フォールディング有効時の評価は QFixMemoFoldingLevel()で行われます。
@@ -419,13 +423,6 @@ U                   絞り込み全てをアンドゥ
     function! QFixMemoFoldingLevel(lnum)
       return getline(a:lnum) =~ g:qfixmemo_folding_pattern ? '>1' : '1'
     endfunction
-
-"Note"
-現在の所QFixMemoFoldingLevel()を有効にするかどうかは qfixmemo_folding_pattern
-が空文字列かどうかで判断しています。QFixMemoFoldingLevel()を独自設定する場合で
-もQFixMemoFoldingLevel()で使用する/しないに関わらずqfixmemo_folding_patternに
-は非空文字列を指定しておいてください。
-(将来的にオプションで有効/無効を判断するようにするかもしれません)
 
 ==============================================================================
 8. ローカルバッファコマンド				*qfixmemo-local-commands*
@@ -459,7 +456,7 @@ g,rN を実行するとqfixmemo_dir内のメモファイルをまとめて「タ
 使用しにくい場合などに使用します。
 
 一括リネームの対象となるのはqfixmemo_filenameで指定した形式のファイル名のみで
-(例 : %Y-%m-%d-%H%M%S.howm)、日記とペアファイルは対象外になります。
+(例 : %Y-%m-%d-%H%M%S.txt)、日記とペアファイルは対象外になります。
 
     1. g,rN を実行すると「現ファイル名」と「新ファイル名」が表示されます。
     2. ddで不要な行を削除します
@@ -490,6 +487,8 @@ g,y                 予定
 g,ry                予定(更新)
 g,t                 Todo
 g,rt                Todo(更新)
+g,,                 メニュー
+g,r,                メニュー(更新)
 g,d                 日付の挿入
 g,T                 日付と時刻の挿入
 g,rd                繰り返しの展開
@@ -542,8 +541,8 @@ qfixmemo/misc/user-func.vim にまとめてあります。
 に依存するため、環境に合わせた設定が必要になることがあります。
 正規表現は QFixMRU_Title[]に「拡張子+_regxp」で設定します。
 
-QFixMemoのタイトル検索用正規表現は QFixMemoTitleRegxp()でも独自設定してくださ
-い。
+必要ならQFixMemoのタイトル検索用正規表現は QFixMemoTitleRegxp()で独自設定して
+ください。
 
 タイトルマーカーに ### を使いたい場合。
 .vimrc >

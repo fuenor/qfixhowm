@@ -89,7 +89,7 @@ endif
 if !exists('g:qfixmemo_timeformat')
   let g:qfixmemo_timeformat = '[%Y-%m-%d %H:%M]'
 endif
-" QFixHowmの予定・TODO識別子
+" 予定・TODO識別子
 if !exists('g:qfixmemo_scheduleext')
   let g:qfixmemo_scheduleext = '-@!+~.'
 endif
@@ -141,6 +141,10 @@ if !exists('g:qfixmemo_menubar')
   let g:qfixmemo_menubar       = 1
 endif
 
+" フォールディング有効
+if !exists('g:qfixmemo_folding')
+  let g:qfixmemo_folding = 1
+endif
 " フォールディングパターン
 if !exists('g:qfixmemo_folding_pattern')
   let g:qfixmemo_folding_pattern = '^=[^=]'
@@ -318,8 +322,6 @@ silent! function QFixMemoKeymap()
 
   silent! nnoremap <silent> <unique> <Leader>o       :<C-u>call QFixMemoOutline()<CR>
 
-  silent! nnoremap <silent> <Leader>H                :<C-u>call qfixmemo#Help()<CR>
-
   if exists('g:QFixHowm_Convert') && g:QFixHowm_Convert == 1
     silent! nnoremap <silent> <unique> <Leader>t     :<C-u>call qfixmemo#ListReminderCache("todo")<CR>
     silent! nnoremap <silent> <unique> <Leader>rt    :<C-u>call qfixmemo#ListReminder("todo")<CR>
@@ -390,11 +392,7 @@ silent! function QFixMemoLocalKeymap()
 
   nnoremap <silent> <buffer> <LocalLeader>rn :<C-u>call qfixmemo#Rename()<CR>
 
-  if exists("*QFixHowmUserModeCR")
-    nnoremap <silent> <buffer> <CR> :call QFixHowmUserModeCR()<CR>
-  else
-    nnoremap <silent> <buffer> <CR> :call QFixMemoUserModeCR()<CR>
-  endif
+  nnoremap <silent> <buffer> <CR> :call QFixMemoUserModeCR()<CR>
 endfunction
 
 silent! function QFixMemoMenubar(menu, leader)
@@ -425,6 +423,7 @@ silent! function QFixMemoMenubar(menu, leader)
     call s:addMenu(menucmd, 'Menu(&,)'            , ',')
     call s:addMenu(menucmd, 'Rebuild-Schedule(&I)', 'ry')
     call s:addMenu(menucmd, 'Rebuild-Todo(&K)'    , 'rt')
+    call s:addMenu(menucmd, 'Rebuild-Menu(&\.)'   , 'r,')
   endif
   exe printf(sepcmd, 4)
   call s:addMenu(menucmd, 'RandomWalk(&R)'        , 'rr')
@@ -434,8 +433,10 @@ silent! function QFixMemoMenubar(menu, leader)
   exe printf(sepcmd, 6)
   " call s:addMenu(menucmd, 'Rename(&Z)'      , 'rn')
   call s:addMenu(menucmd, 'Rename-files(&Z)', 'rN')
-  exe printf(sepcmd, 7)
-  call s:addMenu(menucmd, 'Help(&H)', 'H')
+  if exists('g:QFixHowm_Convert') && g:QFixHowm_Convert == 1
+    exe printf(sepcmd, 7)
+    call s:addMenu(menucmd, 'Help(&H)', 'H')
+  endif
   exe printf(sepcmd, 8)
   let submenu = '.Buffer[Local]\ (&B)'
   let sepcmd  = 'amenu <silent> 41.335 '.a:menu.submenu.'.-sep%d-			<Nop>'
@@ -553,7 +554,7 @@ function! s:BufRead()
   if !s:isQFixMemo(expand('%'))
     return
   endif
-  if g:qfixmemo_folding_pattern != ''
+  if g:qfixmemo_folding
     setlocal nofoldenable
     setlocal foldmethod=expr
     setlocal foldexpr=QFixMemoFoldingLevel(v:lnum)
@@ -800,7 +801,7 @@ function! qfixmemo#Init()
   if s:init
     return
   endif
-  call howm_schedule#Init()
+  silent! call howm_schedule#Init()
   call qfixmemo#MRUInit()
   call qfixmemo#LoadKeyword()
   call QFixMemoInit()
@@ -1222,7 +1223,7 @@ function! qfixmemo#ListRecentTimeStamp(...)
     " redraw | echo 'QFixMemo : Sorting...'
     call QFixSetqflist([])
     let qflist = reverse(qflist)
-    " FIXME: 内部エンコーディングが utf-8 だと日本語ファイル名が処理できない
+    " FIXME: findstrで内部エンコーディングが utf-8 だと日本語ファイル名が処理できない
     for idx in range(len(qflist))
       let file = bufname(qflist[idx]['bufnr'])
       let file = substitute(fnamemodify(file, ':p'), '\\', '/', 'g')
@@ -2194,17 +2195,10 @@ endfunction
 
 """"""""""""""""""""""""""""""
 " help
-function! qfixmemo#Help()
-  call myhowm_msg#HelpInit()
-  let file = 'QFixMemoHelp'
-  let hdir = escape(expand(g:qfixmemo_dir), ' ')
-  silent! exec 'split '
-  silent! exec 'edit ' . hdir .'/'. file
-  setlocal buftype=nofile
-  setlocal bufhidden=hide
-  setlocal noswapfile
-  call setline(1, g:QFixHowmHelpList)
-  call cursor(1,1)
+function! qfixmemo#Syntax()
+  if g:qfixmemo_filetype != ''
+    exe 'setlocal filetype=' . g:qfixmemo_filetype
+  endif
   call s:syntaxHighlight()
 endfunction
 

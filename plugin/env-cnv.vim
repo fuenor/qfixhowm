@@ -92,7 +92,11 @@ function! QFixMemoVimEnter()
 endfunction
 
 " 初期化
-function! QFixMemoInit()
+function! QFixMemoInit(init)
+  if a:init
+    return
+  endif
+  call howm_schedule#Init()
   call QFixHowmSetup()
 endfunction
 

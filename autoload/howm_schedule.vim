@@ -168,6 +168,10 @@ endif
 if !exists('g:QFixHowm_ListReminder_TodoExt')
   let g:QFixHowm_ListReminder_TodoExt = '[-@+!~.]'
 endif
+"メニューファイル名
+if !exists('g:QFixHowm_Menufile')
+  let g:QFixHowm_Menufile = 'Menu-00-00-000000.'.s:howmsuffix
+endif
 "menuで表示する予定・TODO
 if !exists('g:QFixHowm_ListReminder_MenuExt')
   let g:QFixHowm_ListReminder_MenuExt = '[-@+!~.]'

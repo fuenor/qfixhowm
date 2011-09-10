@@ -179,6 +179,10 @@ if !exists('g:qfixmemo_clink_pattern')
     let g:qfixmemo_clink_pattern = g:howm_clink_pattern
   endif
 endif
+" howm_schedule.vimを使用する
+if !exists('g:qfixmemo_use_howm_schedule')
+  let g:qfixmemo_use_howm_schedule = 1
+endif
 
 " サブウィンドウを出す方向
 if !exists('g:qfixmemo_submenu_dir')
@@ -322,7 +326,7 @@ silent! function QFixMemoKeymap()
 
   silent! nnoremap <silent> <unique> <Leader>o       :<C-u>call QFixMemoOutline()<CR>
 
-  if exists('g:QFixHowm_Convert') && g:QFixHowm_Convert == 1
+  if g:qfixmemo_use_howm_schedule
     silent! nnoremap <silent> <unique> <Leader>t     :<C-u>call qfixmemo#ListReminderCache("todo")<CR>
     silent! nnoremap <silent> <unique> <Leader>rt    :<C-u>call qfixmemo#ListReminder("todo")<CR>
     silent! nnoremap <silent> <unique> <Leader>y     :<C-u>call qfixmemo#ListReminderCache("schedule")<CR>
@@ -336,35 +340,53 @@ silent! function QFixMemoKeymap()
   endif
 endfunction
 
-if exists('g:QFixHowm_Convert') && g:QFixHowm_Convert == 1
+if g:qfixmemo_use_howm_schedule
   function! qfixmemo#ListReminderCache(type)
-    call howm_schedule#Init()
+    call <SID>howmScheduleEnv('save')
     call QFixHowmListReminderCache(a:type)
+    call <SID>howmScheduleEnv('restore')
   endfunction
 
   function! qfixmemo#ListReminder(type)
-    call howm_schedule#Init()
+    call <SID>howmScheduleEnv('save')
     call QFixHowmListReminder(a:type)
+    call <SID>howmScheduleEnv('restore')
   endfunction
 
   function! qfixmemo#GenerateRepeatDate()
-    call howm_schedule#Init()
+    call <SID>howmScheduleEnv('save')
     call QFixHowmGenerateRepeatDate()
+    call <SID>howmScheduleEnv('restore')
   endfunction
 
   function! qfixmemo#InsertDate(type)
-    call howm_schedule#Init()
+    call <SID>howmScheduleEnv('save')
     call QFixHowmInsertDate(a:type)
+    call <SID>howmScheduleEnv('restore')
   endfunction
 
   function! qfixmemo#OpenMenu(...)
     call howm_menu#Init()
-    call howm_schedule#Init()
+    call <SID>howmScheduleEnv('save')
     let g:QFixHowm_KeywordList = deepcopy(s:KeywordDic)
     if a:0
       call QFixHowmOpenMenu(a:1)
     else
       call QFixHowmOpenMenu()
+    endif
+    call <SID>howmScheduleEnv('restore')
+  endfunction
+
+  function! s:howmScheduleEnv(mode)
+    call howm_schedule#Init()
+    if a:mode == 'save'
+      let s:howm_dir           = g:howm_dir
+      let s:howm_fileencoding  = g:howm_fileencoding
+      let g:howm_dir           = g:qfixmemo_dir
+      let g:howm_fileencoding  = g:qfixmemo_fileencoding
+    elseif a:mode == 'restore'
+      let g:howm_dir           = s:howm_dir
+      let g:howm_fileencoding  = s:howm_fileencoding
     endif
   endfunction
 endif
@@ -394,7 +416,7 @@ silent! function QFixMemoLocalKeymap()
 
   nnoremap <silent> <buffer> <CR> :call QFixMemoUserModeCR()<CR>
 
-  if exists('g:QFixHowm_Convert') && g:QFixHowm_Convert == 1
+  if g:qfixmemo_use_howm_schedule
     nnoremap <silent> <buffer> <LocalLeader>z :<C-u>call CnvWildcardChapter()<CR>
     vnoremap <silent> <buffer> <LocalLeader>z :<C-u>call CnvWildcardChapter()<CR>
   endif
@@ -421,7 +443,7 @@ silent! function QFixMemoMenubar(menu, leader)
   exe printf(sepcmd, 2)
   call s:addMenu(menucmd, 'FGrep(&S)', 's')
   call s:addMenu(menucmd, 'Grep(&G)' , 'g')
-  if exists('g:QFixHowm_Convert') && g:QFixHowm_Convert == 1
+  if g:qfixmemo_use_howm_schedule
     exe printf(sepcmd, 3)
     call s:addMenu(menucmd, 'Schedule(&Y)'        , 'y')
     call s:addMenu(menucmd, 'Todo(&T)'            , 't')
@@ -438,7 +460,7 @@ silent! function QFixMemoMenubar(menu, leader)
   exe printf(sepcmd, 6)
   " call s:addMenu(menucmd, 'Rename(&Z)'      , 'rn')
   call s:addMenu(menucmd, 'Rename-files(&Z)', 'rN')
-  if exists('g:QFixHowm_Convert') && g:QFixHowm_Convert == 1
+  if g:qfixmemo_use_howm_schedule
     exe printf(sepcmd, 7)
     call s:addMenu(menucmd, 'Help(&H)', 'H')
   endif
@@ -479,7 +501,7 @@ silent! function QFixMemoVimEnter()
 endfunction
 
 " 初期化
-silent! function QFixMemoInit()
+silent! function QFixMemoInit(init)
 endfunction
 
 """"""""""""""""""""""""""""""
@@ -803,13 +825,15 @@ endfunction
 let s:init = 0
 function! qfixmemo#Init()
   call QFixMemoTitleRegxp()
+  call QFixMemoInit(s:init)
   if s:init
     return
   endif
-  silent! call howm_schedule#Init()
+  if g:qfixmemo_use_howm_schedule
+    call howm_schedule#Init()
+  endif
   call qfixmemo#MRUInit()
   call qfixmemo#LoadKeyword()
-  call QFixMemoInit()
   if has('unix') && !has('win32unix')
     silent! call libcallnr("", "srand", localtime())
   else
@@ -2062,6 +2086,10 @@ silent! function QFixMemoRebuildKeyword(dir, fenc)
 endfunction
 
 silent! function QFixMemoUserModeCR(...)
+  if g:qfixmemo_use_howm_schedule
+    call howm_schedule#Init()
+    return QFixHowmUserModeCR()
+  endif
   if QFixMemoOpenKeywordLink() != "\<CR>"
     return
   endif

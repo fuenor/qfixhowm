@@ -298,7 +298,7 @@ endfunction
 " デフォルトキーマップ
 silent! function QFixMemoKeymap()
   silent! nnoremap <silent> <unique> <Leader>C       :<C-u>call qfixmemo#Edit()<CR>
-  silent! nnoremap <silent> <unique> <Leader>c       :<C-u>call qfixmemo#Edit(g:qfixmemo_filename)<CR>
+  silent! nnoremap <silent> <unique> <Leader>c       :<C-u>call qfixmemo#EditNew()<CR>
   silent! nnoremap <silent> <unique> <Leader>u       :<C-u>call qfixmemo#Quickmemo()<CR>
   silent! nnoremap <silent> <unique> <Leader>U       :<C-u>call qfixmemo#Quickmemo(0)<CR>
   silent! nnoremap <silent> <unique> <Leader><Space> :<C-u>call qfixmemo#Edit(g:qfixmemo_diary)<CR>
@@ -871,6 +871,16 @@ function! qfixmemo#EditFile(file)
   let opt = '++enc=' . g:qfixmemo_fileencoding . ' ++ff=' . g:qfixmemo_fileformat . ' '
   let mode = g:qfixmemo_splitmode ? 'split' : ''
   call s:edit(file, opt, mode)
+endfunction
+
+" 新規メモ作成
+" カウント指定で qfixmemo_filename, qfixmemo_filename1, ...を使用する
+function! qfixmemo#EditNew()
+  let file = g:qfixmemo_filename
+  if count
+    exe 'let file = g:qfixmemo_filename'.count
+  endif
+  call qfixmemo#Edit(file)
 endfunction
 
 " クイックメモを開く

@@ -195,6 +195,10 @@ http://sites.google.com/site/fudist/Home/grep/install
 詳しくは 11.1章の「新規メモのテンプレート」|qfixmemo-template|を参照して下さい。
 
 "Note"
+<Leader>cではカウント指定で qfixmemo_filename, qfixmemo_filename1, ...を使用さ
+れます。特定のファイルだけ特定のディレクトリにメモを取りたい場合に使用します。
+
+"Note"
 メモファイル中に [[キーワード]] のように [[ と ]] でWikiスタイルのキーワードを
 作成するとオートリンク化され、キーワード上で<CR>を押すと対応するファイルを開く
 ことが出来ます。

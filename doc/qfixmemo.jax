@@ -398,6 +398,18 @@ U                   絞り込み全てをアンドゥ
     " ランダム表示から除きたいエントリの正規表現
     let qfixmemo_random_exclude = ''
 
+特定のディレクトリのみからランダム表示用のエントリを検索したい場合は
+qfixmemo_random_dirを設定します。
+ランダム表示検索対象ディレクトリは以下のオプションの順番で設定されます。
+  1 : qfixmemo_random_dir
+  2 : qfixmemo_root_dir
+  3 : qfixmemo_dir
+  デフォルトでは1,2が設定されていないので qfixmemo_dirが使用されます
+
+.vimrc >
+    " ランダム表示検索対象ディレクトリ
+    let qfixmemo_random_dir = '~/qfixmemo/random'
+
 ==============================================================================
 7. フォールディング					*qfixmemo-folding*
 

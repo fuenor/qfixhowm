@@ -59,6 +59,7 @@ function! QFixMemoChEnv(dir, fname, title)
     " let g:qfixmemo_ext        = 'txt'
     let g:qfixmemo_filetype    = 'qfix_memo'
   endif
+  let g:qfixmemo_random_dir  = g:qfixmemo_dir
   let g:qfixmemo_random_file = s:qfixmemo_random_file . '-' . a:dir
 
   " タイトルマーカーとタイトル行のタグ設定

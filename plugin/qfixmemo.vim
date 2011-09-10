@@ -1500,6 +1500,7 @@ endfunction
 
 """"""""""""""""""""""""""""""
 let s:rwalk = []
+let s:randomfile = ''
 " ランダム表示
 function! qfixmemo#RandomWalk(file, ...)
   call qfixmemo#Init()
@@ -1507,10 +1508,17 @@ function! qfixmemo#RandomWalk(file, ...)
   let ftime = getftime(file)
   let ftime = ftime < 0 ? 0 : ftime
   let ltime = localtime() - ftime
+  let dir   = g:qfixmemo_dir
+  if exists('g:qfixmemo_root_dir')
+    let dir = g:qfixmemo_root_dir
+  endif
+  if exists('g:qfixmemo_random_dir')
+    let dir = g:qfixmemo_random_dir
+  endif
   if ftime == 0 || ltime > g:qfixmemo_random_time
-    let s:rwalk = s:randomWriteFile(file)
-  elseif s:rwalk == []
-    let s:rwalk = s:randomReadFile(file)
+    let s:rwalk = s:randomWriteFile(file, dir)
+  elseif file != s:randomfile
+    let s:rwalk = s:randomReadFile(file, dir)
   endif
   let columns = g:qfixmemo_random_columns
   if count
@@ -1519,28 +1527,36 @@ function! qfixmemo#RandomWalk(file, ...)
   if &ft == 'qf'
     let columns = winheight(0)
   endif
-  let qflist = s:randomList(s:rwalk, columns)
+  let dir = g:qfixmemo_dir
+  let qflist = s:randomList(s:rwalk, columns, dir)
   if a:0
     return qflist
   endif
-  call qfixlist#copen(qflist, g:qfixmemo_dir)
+  call qfixlist#copen(qflist, dir)
   redraw | echo ''
 endfunction
 
 " ランダムキャッシュ再作成
 function! qfixmemo#RebuildRandomCache(file)
   call qfixmemo#Init()
+  let dir   = g:qfixmemo_dir
+  if exists('g:qfixmemo_root_dir')
+    let dir = g:qfixmemo_root_dir
+  endif
+  if exists('g:qfixmemo_random_dir')
+    let dir = g:qfixmemo_random_dir
+  endif
   let file = a:file
   redraw | echo 'QFixMemo : Rebuild random cache...'
-  let s:rwalk = s:randomWriteFile(file)
+  let s:rwalk = s:randomWriteFile(file, dir)
   call qfixmemo#RandomWalk(file)
 endfunction
 
-function! s:randomList(list, len)
+function! s:randomList(list, len, dir)
   let len  = a:len
   let list = deepcopy(a:list)
 
-  let head = expand(g:qfixmemo_dir)
+  let head = expand(a:dir)
   let head = QFixNormalizePath(head)
   call filter(list, "v:val['filename'] =~ '".head."'")
 
@@ -1583,15 +1599,14 @@ function! s:random(range)
   return r
 endfunction
 
-function! s:randomReadFile(file)
+function! s:randomReadFile(file, dir)
   redraw | echo 'QFixMemo : Read random cache...'
   let prevPath = escape(getcwd(), ' ')
+  let dir = a:dir
+  let s:randomfile = a:file
   let rfile = expand(a:file)
   let list = s:readfile(rfile)
-  let head = expand(g:qfixmemo_dir)
-  if exists('g:QFixMemo_RootDir')
-    let head = expand(g:QFixMemo_RootDir)
-  endif
+  let head = expand(dir)
   let head = QFixNormalizePath(head)
   let result = []
   for r in list
@@ -1621,13 +1636,10 @@ function! s:readfile(file)
   return glist
 endfunction
 
-function! s:randomWriteFile(file)
+function! s:randomWriteFile(file, dir)
   redraw | echo 'QFixMemo : Searching...'
   let prevPath = escape(getcwd(), ' ')
-  let dir = g:qfixmemo_dir
-  if exists('g:QFixMemo_RootDir')
-    let dir = g:QFixMemo_RootDir
-  endif
+  let dir = a:dir
   let rfile = expand(a:file)
   let title = '^'.escape(g:qfixmemo_title, g:qfixmemo_escape)
   let sq = qfixlist#search(title, dir, 'nop', 0, g:qfixmemo_fileencoding, '**/*')

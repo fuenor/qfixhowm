@@ -250,8 +250,8 @@ endif
 if !exists('g:QFixMRU_RootDir') && exists('g:QFixHowm_RootDir')
   let g:QFixMRU_RootDir = g:QFixHowm_RootDir
 endif
-if !exists('g:QFixMemo_RootDir') && exists('g:QFixHowm_RootDir')
-  let g:QFixMemo_RootDir = g:QFixHowm_RootDir
+if !exists('g:qfixmemo_root_dir') && exists('g:QFixHowm_RootDir')
+  let g:qfixmemo_root_dir = g:QFixHowm_RootDir
 endif
 
 " ファイル名をタイトル行から生成したファイル名へ変更する場合の文字数
@@ -390,6 +390,10 @@ function! QFixHowmSetup()
   let g:qfixmemo_random_time    = g:QFixHowm_RandomWalkUpdate*24*60*60
   " ランダム表示しない正規表現
   let g:qfixmemo_random_exclude = g:QFixHowm_RandomWalkExclude
+  " ランダム表示検索対象ディレクトリ(test)
+  if exists('g:fudist') && g:fudist
+    let g:qfixmemo_random_dir     = g:qfixmemo_dir
+  endif
 
   " サブウィンドウのファイル名
   let g:qfixmemo_submenu_title = g:SubWindow_Title
@@ -413,6 +417,7 @@ function! QFixHowmSetup()
   let g:qfixmemo_keyword_mode = g:QFixHowm_Wiki
   let g:qfixmemo_keyword_file = g:QFixHowm_keywordfile
   let g:qfixmemo_keyword_dir  = g:QFixHowm_WikiDir
+
 endfunction
 
 if exists('g:QFixMRU_RegisterFile') && g:QFixMRU_RegisterFile == ''

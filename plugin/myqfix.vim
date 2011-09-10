@@ -1511,7 +1511,9 @@ endfunction
 function! QFdoexec(cmd, fline, lline)
   let qf = QFixGetqflist()
   if len(qf) == 0
-    echoe 'QFdo : nolist!'
+    echohl ErrorMsg
+    redraw|echom 'QFdo : nolist!'
+    echohl None
     return
   endif
   let fline = a:fline

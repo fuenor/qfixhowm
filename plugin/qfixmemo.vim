@@ -1542,6 +1542,12 @@ function! qfixmemo#RandomWalk(file, ...)
   if a:0
     return qflist
   endif
+  if len(qflist) == 0
+    echohl ErrorMsg
+    redraw|echom 'QFixMemo : Nothing in random list!'
+    echohl None
+    return
+  endif
   call qfixlist#copen(qflist, dir)
   redraw | echo ''
 endfunction

@@ -128,10 +128,10 @@ endfunction
 """"""""""""""""""""""""""""""
 augroup QFixFiles
   au!
-  autocmd BufWinEnter __QFix_Files__ call <SID>BufWinEnter(g:QFix_PreviewEnable)
-  autocmd BufEnter    __QFix_Files__ call <SID>BufEnter()
-  autocmd BufLeave    __QFix_Files__ call <SID>BufLeave()
-  autocmd CursorHold  __QFix_Files__ call <SID>Preview()
+  autocmd BufWinEnter __QFix_List__ call <SID>BufWinEnter(g:QFix_PreviewEnable)
+  autocmd BufEnter    __QFix_List__ call <SID>BufEnter()
+  autocmd BufLeave    __QFix_List__ call <SID>BufLeave()
+  autocmd CursorHold  __QFix_List__ call <SID>Preview()
 augroup END
 
 let s:lnum = line('.')
@@ -181,8 +181,10 @@ function! qfixlist#copen(...)
 endfunction
 
 function! qfixlist#open(...)
+  let loaded = 1
   if a:0 > 0
     let s:QFixListCache = deepcopy(a:1)
+    let loaded = 0
   endif
   if a:0 > 1
     let s:QFixList_dir = a:2
@@ -200,17 +202,21 @@ function! qfixlist#open(...)
   endif
   call QFixPclose()
   let path = s:QFixList_dir
-  let file = fnamemodify(tempname(), ':p:h').'/__QFix_Files__'
+  let file = fnamemodify(tempname(), ':p:h').'/__QFix_List__'
   let mode = 'split'
   call QFixEditFile(file, mode)
+  wincmd J
+  if loaded
+    silent! exec 'lchdir ' . escape(s:QFixList_dir, ' ')
+    return
+  endif
   silent! exec 'lchdir ' . escape(path, ' ')
-  setlocal buftype=nofile
+  setlocal buftype=nowrite
   setlocal bufhidden=hide
   setlocal noswapfile
   setlocal nobuflisted
   setlocal nowrap
   setlocal cursorline
-  wincmd J
 
   silent! exec 'lchdir ' . escape(s:QFixList_dir, ' ')
   let g:QFix_SearchPath = s:QFixList_dir
@@ -239,6 +245,7 @@ function! qfixlist#open(...)
   endif
 
   setlocal modifiable
+  exe 'set fenc='.&enc
   silent! %delete _
   call setline(1, glist)
   setlocal nomodifiable

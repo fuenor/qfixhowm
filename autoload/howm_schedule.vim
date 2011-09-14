@@ -2,9 +2,9 @@
 "    Description: 拡張Quickfixに対応したhowm
 "         Author: fuenor <fuenor@gmail.com>
 "                 http://sites.google.com/site/fudist/Home/qfixhowm
-"  Last Modified: 2011-09-04 22:33
+"  Last Modified: 2011-09-14 13:36
 "=============================================================================
-let s:Version = 2.49
+let s:Version = 2.50
 scriptencoding utf-8
 "キーマップリーダーが g の場合、「新規ファイルを作成」は g,c です。
 "簡単な使い方はg,Hのヘルプで、詳しい使い方は以下のサイトを参照してください。
@@ -846,20 +846,12 @@ endfunction
 " 繰り返す予定のプライオリティをセットする。
 function! s:CnvRepeatDate(cmd, opt, str, ...)
   let cmd = a:cmd
-  let sft = ''
-  if cmd =~ '[-+]\d\+)'
-    let sft = substitute(matchstr(cmd, '[-+]\d\+)'), '[^-0-9]', '', 'g')
-    let cmd = substitute(cmd, '[-+]\d\+)', ')', '')
-    if cmd =~ '()$'
-      let cmd = substitute(cmd, '()$', '', '')
-    endif
-  endif
-
   let opt = a:opt
+  let str = a:str
+
   if opt == ''
     let opt = 0
   endif
-  let str = a:str
   let done = 0
   if a:0 > 0
     let done = 1
@@ -868,11 +860,6 @@ function! s:CnvRepeatDate(cmd, opt, str, ...)
     let rstr = s:CnvRepeatDateR(cmd, opt, str, done)
   else
     let rstr = s:CnvRepeatDateN(cmd, opt, str, done)
-  endif
-  if sft != ''
-    let sec = QFixHowmDate2Int(rstr.' 00:00')
-    let sec = sec + sft * 24 *60 *60
-    let rstr = strftime(s:hts_date, sec)
   endif
   return rstr
 endfunction
@@ -897,13 +884,19 @@ function! s:CnvRepeatDateN(cmd, opt, str, done)
   let ttime = (today - g:DateStrftime) * 24 * 60 * 60 + g:QFixHowm_ST * (60 * 60) "JST = -9
 
   let desc  = escape(cmd[0], '~')
-  let desc0 = '^'. desc . '\{1,3}'.'([1-5]\*'.s:sch_dow.')'
+  let desc0 = '^'. desc . '\{1,3}'.'\c([1-5]\*'.s:sch_dow.'\([-+]\d\+\)\?)'
   let desc1 = '^'. desc . '\c([0-9]\+\([-+]\?'.s:sch_dow.'\)\?)'
   let desc2 = '^'. desc . '\{2}'
   let desc3 = '^'. desc . '\{3}'
 
   "曜日指定
   if cmd =~ desc0
+    let ofs = 0
+    if cmd =~ '[-+]\d\+)'
+      let ofs = substitute(matchstr(cmd, '[-+]\d\+)'), '[^-0-9]', '', 'g')
+      let cmd = substitute(cmd, '[-+]\d\+)', ')', '')
+    endif
+
     let ayear  = matchstr(str, '^\d\{4}')
     let amonth = strpart(substitute(str, '[^0-9]', '', 'g'), 4, 2)
     let aday   = matchstr(substitute(a:str, '[^0-9]', '', 'g'), '\d\{2}$')
@@ -941,7 +934,7 @@ function! s:CnvRepeatDateN(cmd, opt, str, done)
       let month = smonth
     endif
 
-    let sday = s:CnvDoW(year, month, sft, dow)
+    let sday = s:CnvDoW(year, month, sft, dow, ofs)
     let sttime = (sday - g:DateStrftime) * 24 * 60 * 60 + g:QFixHowm_ST * (60 * 60)
     let year  = strftime('%Y', sttime)
     let month = strftime('%m', sttime)
@@ -962,7 +955,7 @@ function! s:CnvRepeatDateN(cmd, opt, str, done)
         let year = year + 1
         let month = 1
       endif
-      let sday = s:CnvDoW(year, month, sft, dow)
+      let sday = s:CnvDoW(year, month, sft, dow, ofs)
       let sttime = (sday - g:DateStrftime) * 24 * 60 * 60 + g:QFixHowm_ST * (60 * 60)
       let nstr = strftime(s:hts_date, sttime)
     endif
@@ -1146,7 +1139,7 @@ function! s:CnvRepeatDateR(cmd, opt, str, done)
   let actday = QFixHowmDate2Int(str)
 
   let desc  = escape(cmd[0], '~')
-  let desc0 = '^'. desc . '\{1,3}'.'\c([1-5]\*'.s:sch_dow.')'
+  let desc0 = '^'. desc . '\{1,3}'.'\c([1-5]\*'.s:sch_dow.'\([-+]\d\+\)\?)'
   let desc1 = '^'. desc . '\c([0-9]\+\([-+]\?'.s:sch_dow.'\)\?)'
   let desc2 = '^'. desc . '\{2}'
   let desc3 = '^'. desc . '\{3}'
@@ -1156,6 +1149,11 @@ function! s:CnvRepeatDateR(cmd, opt, str, done)
   let nactday = QFixHowmDate2Int(nstr)
   if cmd =~ desc0
     "曜日指定の繰り返し
+    let ofs = 0
+    if cmd =~ '[-+]\d\+)'
+      let ofs = substitute(matchstr(cmd, '[-+]\d\+)'), '[^-0-9]', '', 'g')
+      let cmd = substitute(cmd, '[-+]\d\+)', ')', '')
+    endif
     let stoday = QFixHowmDate2Int(nstr)
     let sttime = (stoday - g:DateStrftime) * 24 * 60 * 60 + g:QFixHowm_ST * (60 * 60)
     let syear  = strftime('%Y', sttime)
@@ -1178,7 +1176,7 @@ function! s:CnvRepeatDateR(cmd, opt, str, done)
       let sft = 1
     endif
 
-    let sday = s:CnvDoW(syear, smonth, sft, dow)
+    let sday = s:CnvDoW(syear, smonth, sft, dow, ofs)
     let sttime = (sday - g:DateStrftime) * 24 * 60 * 60 + g:QFixHowm_ST * (60 * 60)
     let pstr = strftime(s:hts_date, sttime)
   elseif cmd =~ desc1
@@ -1242,7 +1240,7 @@ function! s:CnvRepeatDateR(cmd, opt, str, done)
       let sft = 1
     endif
 
-    let sday = s:CnvDoW(syear, smonth, sft, dow)
+    let sday = s:CnvDoW(syear, smonth, sft, dow, ofs)
     let sttime = (sday - g:DateStrftime) * 24 * 60 * 60 + g:QFixHowm_ST * (60 * 60)
     let pstr = strftime(s:hts_date, sttime)
     return pstr
@@ -1251,8 +1249,8 @@ function! s:CnvRepeatDateR(cmd, opt, str, done)
   return str
 endfunction
 
-"指定月のsft回目のdow曜日を返す
-function! s:CnvDoW(year, month, sft, dow)
+"指定月のsft回目のdow曜日+ofs日を返す
+function! s:CnvDoW(year, month, sft, dow, ofs)
   let year = a:year
   let month = a:month
   let sft = a:sft
@@ -1260,6 +1258,7 @@ function! s:CnvDoW(year, month, sft, dow)
     let sft = 1
   endif
   let dow = a:dow
+  let ofs = a:ofs
   let sstr = printf(s:sch_printfDate, year, month, 1)
   let pfsec = QFixHowmDate2Int(sstr.' 00:00')
   let sstr = strftime(s:hts_date, pfsec)
@@ -1274,6 +1273,7 @@ function! s:CnvDoW(year, month, sft, dow)
   if month != a:month
     let tday = tday + 7
   endif
+  let tday += ofs
   return tday
 endfunction
 

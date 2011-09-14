@@ -109,7 +109,7 @@ let s:qfixmemo_timeformat = qfixmemo#SetTimeFormatRegxp(g:qfixmemo_timeformat)
 if exists('g:qfixmemo_scheduleformat')
   let s:qfixmemo_scheduleformat = g:qfixmemo_scheduleformat
 else
-  let s:qfixmemo_scheduleformat = s:qfixmemo_timeformat . '['.g:qfixmemo_scheduleext.']'
+  let s:qfixmemo_scheduleformat = '^\s*\[\d\{4}[-/]\d\{2}[-/]\d\{2}\( \d\{2}\(:\d\{2}\)\{1,2}\)\?\]['.g:qfixmemo_scheduleext.']'
 endif
 
 " 新規エントリテンプレート

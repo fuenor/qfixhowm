@@ -848,6 +848,12 @@ function! s:CnvRepeatDate(cmd, opt, str, ...)
   let cmd = a:cmd
   let opt = a:opt
   let str = a:str
+  let sft = ''
+  " 月末指定のオフセットを特別扱い
+  if cmd =~ '([-+]\d\+)'
+    let sft = substitute(matchstr(cmd, '[-+]\d\+)'), '[^-0-9]', '', 'g')
+    let cmd = substitute(cmd, '([-+]\d\+)$', '', '')
+  endif
 
   if opt == ''
     let opt = 0
@@ -860,6 +866,11 @@ function! s:CnvRepeatDate(cmd, opt, str, ...)
     let rstr = s:CnvRepeatDateR(cmd, opt, str, done)
   else
     let rstr = s:CnvRepeatDateN(cmd, opt, str, done)
+  endif
+  if sft != ''
+    let sec = QFixHowmDate2Int(rstr.' 00:00')
+    let sec = sec + sft * 24 *60 *60
+    let rstr = strftime(s:hts_date, sec)
   endif
   return rstr
 endfunction

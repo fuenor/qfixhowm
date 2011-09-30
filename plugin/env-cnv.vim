@@ -504,3 +504,13 @@ function! QFixHowmHelp()
   nnoremap <silent> <buffer> <CR> :call QFixMemoUserModeCR()<CR>
 endfunction
 
+" calendar.vim
+function! QFixHowmCreateNewFile(...)
+  if a:0
+    let hfile = a:1
+  else
+    let hfile = g:qfixmemo_diary
+  endif
+  call qfixmemo#Edit(hfile)
+endfunction
+

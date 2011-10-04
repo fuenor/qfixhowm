@@ -72,7 +72,7 @@ syn match chapterBullet   contained '^\s*[0-9][0-9.]* $'
 syn match chapterBullet   contained '^\s*[*=]\+$'
 syn match chapterBullet   contained '^\s*\([0-9.]\+\|[.*=]\+\)'
 syn match chapterColon    contained ':'
-syn match chapterCategory contained '\[.\{-}]'
+syn match chapterCategory contained '\[.\{-}\]'
 
 hi link chapterTitle    Statement
 hi link chapterBullet   Type

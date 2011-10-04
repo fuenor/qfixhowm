@@ -2,9 +2,9 @@
 "    Description: 拡張Quickfixに対応したhowm
 "         Author: fuenor <fuenor@gmail.com>
 "                 http://sites.google.com/site/fudist/Home/qfixhowm
-"  Last Modified: 2011-09-14 13:36
+"  Last Modified: 2011-10-04 16:28
 "=============================================================================
-let s:Version = 2.50
+let s:Version = 2.51
 scriptencoding utf-8
 "キーマップリーダーが g の場合、「新規ファイルを作成」は g,c です。
 "簡単な使い方はg,Hのヘルプで、詳しい使い方は以下のサイトを参照してください。
@@ -1999,7 +1999,7 @@ if !exists('g:QFixHowm_removeHatenaTag')
   let g:QFixHowm_removeHatenaTag = 1
 endif
 command! QFixHowmOpenCursorline call QFixHowmOpenCursorline()
-function! QFixHowmOpenCursorline()
+silent! function QFixHowmOpenCursorline()
   let prevcol = col('.')
   let prevline = line('.')
   let str = getline('.')
@@ -2016,7 +2016,7 @@ function! QFixHowmOpenCursorline()
     let str = substitute(str, 'rel://', path, 'g')
     let path = l:howm_dir . (str =~ 'howm://[^/\\]' ? '/' : '')
     let str = substitute(str, 'howm://', path, 'g')
-    let imgsfx   = '\(\.jpg\|\.jpeg\|\.png\|\.bmp\|\.gif\)$'
+    let imgsfx = '\(\.jpg\|\.jpeg\|\.png\|\.bmp\|\.gif\)$'
     if str =~ imgsfx
       let str = substitute(str, '^&', '', '')
     endif
@@ -2024,6 +2024,7 @@ function! QFixHowmOpenCursorline()
   endif
 
   "カーソル位置の文字列を拾う[:c:/temp/test.jpg:]や[:http://example.com:(title=hoge)]形式
+  let col = col('.')
   let pathhead = '\([A-Za-z]:[/\\]\|\~/\)'
   let urireg = '\(\(howm\|rel\|http\|https\|file\|ftp\)://\|'.pathhead.'\)'
   let [lnum, colf] = searchpos('\[:\?&\?'.urireg, 'bc', line('.'))
@@ -2038,7 +2039,7 @@ function! QFixHowmOpenCursorline()
       let str = strpart(str, 0, len)
     endif
     call cursor(prevline, prevcol)
-    if str != ''
+    if str != '' && col < (colf + len(str))
       if str =~ '^\[:\?'
         let str = substitute(str, ':\(title=\|image[:=]\)\([^\]]*\)\?]$', ':]', '')
         let str = substitute(str, ':[^:\]]*]$', '', '')
@@ -2054,7 +2055,7 @@ function! QFixHowmOpenCursorline()
 
   "カーソル位置の文字列を拾う
   let urichr  =  "[-0-9a-zA-Z;/?:@&=+$,_.!~*'()%#]"
-  let pathchr =  "[-0-9a-zA-Z;/?:@&=+$,_.!~*'()%{}[\\]\\\\ ]"
+  let pathchr =  "[-0-9a-zA-Z;/?:@&=+$,_.!~*'()%{}[\\]\\\\]"
   let pathhead = '\([A-Za-z]:[/\\]\|\~/\)'
   let urireg = '\(\(howm\|rel\|http\|https\|file\|ftp\)://\|'.pathhead.'\)'
   let [lnum, colf] = searchpos(urireg, 'bc', line('.'))

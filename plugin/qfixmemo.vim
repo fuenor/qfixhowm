@@ -2010,6 +2010,9 @@ function! qfixmemo#LoadKeyword(...)
     if keyword =~ '^\s*$'
       continue
     endif
+    if g:qfixmemo_keyword_exclude != '' && keyword =~ g:qfixmemo_keyword_exclude
+      continue
+    endif
     let keyword = substitute(keyword, '\s*$', '', '')
     let keyword = substitute(keyword, '^\s*', '', '')
     let keyword = escape(keyword, '\\')

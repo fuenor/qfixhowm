@@ -1990,6 +1990,10 @@ endif
 if !exists('g:qfixmemo_keyword_mode')
   let g:qfixmemo_keyword_mode = 1
 endif
+" キーワードに登録しない正規表現
+if !exists('g:qfixmemo_keyword_exclude')
+  let g:qfixmemo_keyword_exclude = ''
+endif
 
 " オートリンク読込
 function! qfixmemo#LoadKeyword(...)
@@ -2039,11 +2043,14 @@ function! qfixmemo#AddKeyword(...)
       let keyword = strpart(text, stridx+2, pairpos-stridx-strlen('[[]]'))
       let keyword = substitute(keyword, '^\s*', '', '')
       let keyword = substitute(keyword, '\s*$', '', '')
+      let text = strpart(text, pairpos)
+      if g:qfixmemo_keyword_exclude != '' && keyword =~ g:qfixmemo_keyword_exclude
+        continue
+      endif
       if count(s:KeywordDic, keyword) == 0 && keyword !~ '^\s*$'
         let addkey += 1
         call add(s:KeywordDic, keyword)
       endif
-      let text = strpart(text, pairpos)
     endwhile
   endfor
 
@@ -2052,6 +2059,9 @@ function! qfixmemo#AddKeyword(...)
     for keyword in list
       let keyword = substitute(keyword, '^.*'.g:howm_clink_pattern.'\s*', '', '')
       let keyword = substitute(keyword, '\s*$', '', '')
+      if g:qfixmemo_keyword_exclude != '' && keyword =~ g:qfixmemo_keyword_exclude
+        continue
+      endif
       if count(s:KeywordDic, keyword) == 0 && keyword !~ '^\s*$'
         let addkey += 1
         call add(s:KeywordDic, keyword)

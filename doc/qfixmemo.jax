@@ -70,14 +70,14 @@ QFixMemoはQFixHowmをよりシンプルにリファクタリングしたプラ�
 予定・TODO部分にはQFixHowmのソースを流用しているため、オプション設定がほぼその
 まま使えますが、メモファイル名等のオプションは若干異なります。 >
 
-このファイルがQFixHowmとして配布されている場合、plugin/env-conv.vimでQFixHowm
-のオプションがQFixMemoのオプションにコンバートされます。不要な場合は.vimrcで無
+このファイルがQFixHowmとして配布されている場合、plugin/env-cnv.vimでQFixHowmの
+オプションがQFixMemoのオプションにコンバートされます。不要な場合は.vimrcで無
 効化してください。 >
     " QFixHowmとのオプションコンバートを行わない
     let QFixHowm_Convert = 0
 
 逆にこのファイルがQFixMemoとして配布されていてQFixHowmとオプション互換にしたい
-場合はmisc/env-conv.vimをpluginディレクトリへコピーしてください。
+場合はmisc/env-cnv.vimをpluginディレクトリへコピーしてください。
 
 基本的な使用方法はQFixHowm(howm)と同じですが、QFixHowmはhowm-mode.vimへのパッ
 チから開発を始めた関係で構造が煩雑になっています。

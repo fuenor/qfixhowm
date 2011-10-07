@@ -39,6 +39,10 @@ endif
 " CAUTION: ファイルの読み込み順がファイル名順である事に依存しています。
 "-----------------------------------------------------------------------------
 
+" howm_schedule.vimをautoloadで読み込む
+if !exists('g:QFixHowm_Autoload')
+  let g:QFixHowm_Autoload = 0
+endif
 " howmファイルの自動整形を使用する
 if !exists('g:QFixHowm_Autoformat')
   let g:QFixHowm_Autoformat = 1
@@ -60,7 +64,7 @@ if !exists('g:QFixHowm_TitleListCache')
 endif
 
 " BufWritePre
-silent! function! QFixMemoBufWritePre()
+function! QFixMemoBufWritePre()
   if g:QFixHowm_Autoformat > 0
     " タイトル行付加
     call qfixmemo#AddTitle()
@@ -83,21 +87,24 @@ endfunction
 
 " BufEnter
 function! QFixMemoBufEnterPre()
-  call QFixHowmSetup()
+  " call QFixHowmSetup()
 endfunction
 
 " VimEnter
 function! QFixMemoVimEnter()
   call QFixHowmSetup()
+  if g:QFixHowm_Autoload == 0
+    call howm_schedule#Init()
+  endif
 endfunction
 
 " 初期化
 function! QFixMemoInit(init)
+  call QFixHowmSetup()
+  call howm_schedule#Init()
   if a:init
     return
   endif
-  call howm_schedule#Init()
-  call QFixHowmSetup()
 endfunction
 
 let s:howmsuffix        = 'howm'
@@ -495,5 +502,15 @@ function! QFixHowmHelp()
   call qfixmemo#Syntax()
   setlocal nomodifiable
   nnoremap <silent> <buffer> <CR> :call QFixMemoUserModeCR()<CR>
+endfunction
+
+" calendar.vim
+function! QFixHowmCreateNewFile(...)
+  if a:0
+    let hfile = a:1
+  else
+    let hfile = g:qfixmemo_diary
+  endif
+  call qfixmemo#Edit(hfile)
 endfunction
 

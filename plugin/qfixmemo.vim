@@ -781,7 +781,7 @@ function! s:syntaxHighlight()
   hi link qfixmemoGotolink  Underlined
   silent! syntax clear qfixmemoKeyword
   if s:KeywordHighlight != ''
-    exe 'syn match qfixmemoKeyword display "\V'.s:KeywordHighlight.'"'
+    exe 'syn match qfixmemoKeyword display "\V'.escape(s:KeywordHighlight, '"').'"'
   endif
   hi link qfixmemoKeyword Underlined
 
@@ -2014,7 +2014,7 @@ function! qfixmemo#LoadKeyword(...)
   silent! syn clear qfixmemoKeyword
   let s:KeywordHighlight = substitute(s:KeywordHighlight, '\\|\s*$', '', '')
   if s:KeywordHighlight != ''
-    exe 'syn match qfixmemoKeyword display "\V'.s:KeywordHighlight.'"'
+    exe 'syn match qfixmemoKeyword display "\V'.escape(s:KeywordHighlight, '"').'"'
   endif
 endfunction
 

@@ -364,6 +364,11 @@ function! QFixHowmSetup()
   let g:qfixmemo_diary         = fnamemodify(g:QFixHowm_DiaryFile, ':r')
   " クイックメモファイル名
   let g:qfixmemo_quickmemo     = fnamemodify(g:QFixHowm_QuickMemoFile, ':r')
+  for i in range(1, 9)
+    if exists('g:QFixHowm_QuickMemoFile'.i)
+      exe printf('let g:qfixmemo_quickmemo%d=fnamemodify(g:QFixHowm_QuickMemoFile%d, ":r")', i, i)
+    endif
+  endfor
   " ペアファイルの作成先ディレクトリ
   let g:qfixmemo_pairfile_dir  = g:QFixHowm_PairLinkDir
 

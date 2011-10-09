@@ -41,7 +41,7 @@ endif
 
 " howm_schedule.vimをautoloadで読み込む
 if !exists('g:QFixHowm_Autoload')
-  let g:QFixHowm_Autoload = 0
+  let g:QFixHowm_Autoload = 1
 endif
 " howmファイルの自動整形を使用する
 if !exists('g:QFixHowm_Autoformat')
@@ -133,6 +133,8 @@ endif
 if !exists('g:QFixHowm_QuickMemoFile')
   let g:QFixHowm_QuickMemoFile = 'Qmem-00-0000-00-00-000000.'.g:QFixHowm_FileExt
 endif
+let g:qfixmemo_quickmemo = fnamemodify(g:QFixHowm_QuickMemoFile, ':r')
+
 " 日記メモファイル名
 if !exists('g:QFixHowm_DiaryFile')
   let g:QFixHowm_DiaryFile = fnamemodify(g:howm_filename, ':h').'/%Y-%m-%d-000000.'.g:QFixHowm_FileExt
@@ -364,6 +366,11 @@ function! QFixHowmSetup()
   let g:qfixmemo_diary         = fnamemodify(g:QFixHowm_DiaryFile, ':r')
   " クイックメモファイル名
   let g:qfixmemo_quickmemo     = fnamemodify(g:QFixHowm_QuickMemoFile, ':r')
+  for i in range(1, 9)
+    if exists('g:QFixHowm_QuickMemoFile'.i)
+      exe printf('let g:qfixmemo_quickmemo%d=fnamemodify(g:QFixHowm_QuickMemoFile%d, ":r")', i, i)
+    endif
+  endfor
   " ペアファイルの作成先ディレクトリ
   let g:qfixmemo_pairfile_dir  = g:QFixHowm_PairLinkDir
 

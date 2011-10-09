@@ -41,7 +41,7 @@ endif
 
 " howm_schedule.vimをautoloadで読み込む
 if !exists('g:QFixHowm_Autoload')
-  let g:QFixHowm_Autoload = 0
+  let g:QFixHowm_Autoload = 1
 endif
 " howmファイルの自動整形を使用する
 if !exists('g:QFixHowm_Autoformat')
@@ -133,6 +133,8 @@ endif
 if !exists('g:QFixHowm_QuickMemoFile')
   let g:QFixHowm_QuickMemoFile = 'Qmem-00-0000-00-00-000000.'.g:QFixHowm_FileExt
 endif
+let g:qfixmemo_quickmemo = fnamemodify(g:QFixHowm_QuickMemoFile, ':r')
+
 " 日記メモファイル名
 if !exists('g:QFixHowm_DiaryFile')
   let g:QFixHowm_DiaryFile = fnamemodify(g:howm_filename, ':h').'/%Y-%m-%d-000000.'.g:QFixHowm_FileExt

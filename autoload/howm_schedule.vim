@@ -1971,6 +1971,10 @@ endfunction
 """"""""""""""""""""""""""""""
 "カーソル位置のファイルを開くアクションロック
 """"""""""""""""""""""""""""""
+"rel://
+if !exists('g:QFixHowm_RelPath')
+  let g:QFixHowm_RelPath = g:howm_dir
+endif
 "カーソル位置のファイルを開くアクションロック
 if !exists('g:QFixHowm_OpenURIcmd')
   if !exists('g:MyOpenURI_cmd')
@@ -2120,6 +2124,9 @@ function! s:openstr(str)
   if str =~ '^'.pathhead
     if str !~ l:MyOpenVim_ExtReg
       let ext = tolower(fnamemodify(str, ':e'))
+      if exists('g:qfixmemo_openuri_'.ext)
+        exec 'let g:QFixHowm_Opencmd_'.ext.' = g:qfixmemo_openuri_'.ext
+      endif
       if exists('g:QFixHowm_Opencmd_'.ext)
         exec 'let cmd = g:QFixHowm_Opencmd_'.ext
         let str = expand(str)

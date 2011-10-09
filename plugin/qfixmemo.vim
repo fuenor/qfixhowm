@@ -180,6 +180,9 @@ if !exists('g:qfixmemo_clink_pattern')
   endif
 endif
 " howm_schedule.vimを使用する
+" 0 : 使用しない
+" 1 : autoload読込
+" 2 : 起動時読込
 if !exists('g:qfixmemo_use_howm_schedule')
   let g:qfixmemo_use_howm_schedule = 1
 endif
@@ -560,6 +563,9 @@ function! s:VimEnter()
   call QFixMemoTitleRegxp()
   call QFixMemoVimEnter()
   call qfixmemo#VimEnterCmd()
+  if g:qfixmemo_use_howm_schedule == 2
+    call howm_schedule#Init()
+  endif
 endfunction
 
 function! s:BufWinEnter()
@@ -2134,8 +2140,16 @@ silent! function QFixMemoUserModeCR(...)
   if QFixMemoOpenKeywordLink() != "\<CR>"
     return
   endif
+  if QFixMemoOpenCursorline() != "\<CR>"
+    return
+  endif
   let cmd = a:0 ? a:1 : "normal! \n"
   exe cmd
+endfunction
+
+" カーソル位置のリンクを開く
+function! QFixMemoOpenCursorline()
+  return openuri#Open()
 endfunction
 
 " オートリンクを開く

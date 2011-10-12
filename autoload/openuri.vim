@@ -13,7 +13,12 @@ function! openuri#Open(...)
 endfunction
 
 function! openuri#Init()
-  let g:howm_dir = g:qfixmemo_dir
+  if exists('g:qfixmemo_dir')
+    let g:howm_dir = g:qfixmemo_dir
+  endif
+  if exists('g:qfixmemo_ext')
+    let g:QFixHowm_FileExt = g:qfixmemo_ext
+  endif
   if exists('g:qfixmemo_openuri_cmd')
     let g:QFixHowm_OpenURIcmd = g:qfixmemo_openuri_cmd
   endif
@@ -22,7 +27,17 @@ function! openuri#Init()
   endif
 endfunction
 
-
+if !exists('howm_dir')
+  let howm_dir          = '~/howm'
+endif
+let s:howmsuffix        = 'howm'
+if !exists('howm_filename')
+  let howm_filename     = '%Y/%m/%Y-%m-%d-%H%M%S.'.s:howmsuffix
+endif
+let g:QFixHowm_FileExt  = fnamemodify(g:howm_filename,':e')
+if !exists('howm_glink_pattern')
+  let howm_glink_pattern = '>>>'
+endif
 "タブで編集('tab'を設定)
 if !exists('QFixHowm_Edit')
   let QFixHowm_Edit = ''

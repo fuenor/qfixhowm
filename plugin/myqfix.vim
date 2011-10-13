@@ -3,10 +3,10 @@
 "                 Preview, sortings and advanced search for Quickfix.
 "         Author: Futoshi Ueno <fuenor@gmail.com>
 "                 http://sites.google.com/site/fudist/Home  (Japanese)
-"  Last Modified: 2011-08-29 06:01
+"  Last Modified: 2011-10-13 21:47
 "=============================================================================
 scriptencoding utf-8
-let s:Version = 2.83
+let s:Version = 2.84
 
 "What Is This:
 "  This plugin adds preview, sortings and advanced search to your quickfix window.
@@ -81,6 +81,10 @@ endif
 "プレビューウィンドウのサイズ指定
 if !exists('g:QFix_PreviewWidth')
   let g:QFix_PreviewWidth = 0
+endif
+"プレビューウィンドウの折り返し
+if !exists('g:QFix_PreviewWrap')
+  let g:QFix_PreviewWrap = 1
 endif
 "プレビューのカーソル強調表示
 if !exists('g:QFix_PreviewCursorLine')
@@ -1098,6 +1102,9 @@ function! QFixPreviewOpen(file, line, ...)
   silent! wincmd P
   let s:QFix_PreviewWin = bufnr('%')
   " set options
+  if g:QFix_PreviewWrap == 0
+    let &wrap = g:QFix_PreviewWrap
+  endif
   setlocal nobuflisted
   setlocal noswapfile
   setlocal buftype=nofile

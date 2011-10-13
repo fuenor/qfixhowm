@@ -1,4 +1,4 @@
-*qfixmemo.jax*	For Vim バージョン 7.2	Last change: 2011 August 23
+*qfixmemo.jax*	For Vim バージョン 7.2	Last change: 2011 October 11
  >
 ==============================================================================
        Description: QFixMemo
@@ -40,6 +40,7 @@ CONTENTS						*qfixmemo-contents*
   11.5 シンタックスハイライト                           |qfixmemo-syntax-highlight|
   11.6 複数のQFixMemoディレクトリ                       |qfixmemo-chenv|
   11.7 calendar.vim                                     |qfixmemo-calendar|
+  11.8 URIを開く                                        |qfixmemo-uri|
 
 ==============================================================================
 1. Intro						*qfixmemo-intro*
@@ -73,8 +74,8 @@ QFixMemoはQFixHowmをよりシンプルにリファクタリングしたプラ�
 このファイルがQFixHowmとして配布されている場合、plugin/env-cnv.vimでQFixHowmの
 オプションがQFixMemoのオプションにコンバートされます。不要な場合は.vimrcで無
 効化してください。 >
-    " QFixHowmとのオプションコンバートを行わない
-    let QFixHowm_Convert = 0
+  " QFixHowmとのオプションコンバートを行わない
+  let QFixHowm_Convert = 0
 
 逆にこのファイルがQFixMemoとして配布されていてQFixHowmとオプション互換にしたい
 場合はmisc/env-cnv.vimをpluginディレクトリへコピーしてください。
@@ -130,21 +131,21 @@ qfixapp内のsyntaxディレクトリにコピーすることも出来ます
 てください。
 
 .vimrc >
-    " ランタイムパスを通す
-    set runtimepath+=path/to/qfixmemo
-    " メモファイルの保存先
-    let qfixmemo_dir           = '~/qfixmemo'
+  " ランタイムパスを通す
+  set runtimepath+=path/to/qfixmemo
+  " メモファイルの保存先
+  let qfixmemo_dir           = '~/qfixmemo'
 
 Windows: >
-    " メモファイルのファイルエンコーディング
-    let qfixmemo_fileencoding  = 'cp932'
-    " メモファイルのファイルフォーマット(改行コード)
-    let qfixmemo_fileformat    = 'dos'
+  " メモファイルのファイルエンコーディング
+  let qfixmemo_fileencoding  = 'cp932'
+  " メモファイルのファイルフォーマット(改行コード)
+  let qfixmemo_fileformat    = 'dos'
 Unix: >
-    " メモファイルのファイルエンコーディング
-    let qfixmemo_fileencoding  = 'utf-8'
-    " メモファイルのファイルフォーマット(改行コード)
-    let qfixmemo_fileformat    = 'unix'
+  " メモファイルのファイルエンコーディング
+  let qfixmemo_fileencoding  = 'utf-8'
+  " メモファイルのファイルフォーマット(改行コード)
+  let qfixmemo_fileformat    = 'unix'
 <
 "Note"
 Windowsでファイルエンコーディングを 'utf-8' に設定したい場合は別途grepを用意し
@@ -310,20 +311,20 @@ Globの場合はタイトル行のないファイルも表示されます。
 初期値は.vimrcでも設定できます。
 
 .vimrc >
-    " MRUの表示数
-    let QFixMRU_Entries   = 20
-    " 最近更新したエントリ一覧の日数
-    let qfixmemo_RecentDays = 10
+  " MRUの表示数
+  let QFixMRU_Entries   = 20
+  " 最近更新したエントリ一覧の日数
+  let qfixmemo_RecentDays = 10
 
 4.2 MRUリスト						*qfixmemo-entry-list-mru*
 
 複数のPCでメモを共有する場合、MRUリストをqfixmemo_dirを基準とした相対パスで保存
 しておくとqfixmemo_dirやOSが異なる環境でもMRUリストを共有する事ができます。
 >
-    " MRU保存ファイル名
-    let QFixMRU_Filename  = '~/.qfixmru'
-    " MRUの基準ディレクトリ
-    let QFixMRU_RootDir   = qfixmemo_dir
+  " MRU保存ファイル名
+  let QFixMRU_Filename  = '~/.qfixmru'
+  " MRUの基準ディレクトリ
+  let QFixMRU_RootDir   = qfixmemo_dir
 <
 4.3 全エントリ一覧					*qfixmemo-entry-list-all*
 
@@ -332,10 +333,10 @@ Globの場合はタイトル行のないファイルも表示されます。
 もしも全エントリ一覧を多用するなら <Leader>a に「エントリ一覧(キャッシュ表示)」
 を割り当てると表示の際に再検索を行わないので高速に表示されます。 >
 .vimrc >
-    " <Leader>a にキャッシュ表示を割り当て
-    function! QFixMemoKeymapPost()
-      nnoremap <silent> <Leader>a       :<C-u>call qfixmemo#ListCache('open')<CR>
-    endfunction
+  " <Leader>a にキャッシュ表示を割り当て
+  function! QFixMemoKeymapPost()
+    nnoremap <silent> <Leader>a       :<C-u>call qfixmemo#ListCache('open')<CR>
+  endfunction
 
 最初の一回だけ <Leader>raで「全エントリ一覧」を実行して、それ以降は <Leader>a
 を使用するというように使います。
@@ -393,14 +394,14 @@ U                   絞り込み全てをアンドゥ
 <Leader>rR          キャッシュをクリアしてランダム表示
 
 .vimrc >
-    " ランダム表示数
-    let qfixmemo_random_columns = 10
-    " ランダム表示のキャッシュファイル名
-    let qfixmemo_random_file = '~/.qfixmemo-random'
-    " 指定秒数が経過していたらキャッシュファイル再作成
-    let qfixmemo_random_time = 10*24*60*60
-    " ランダム表示から除きたいエントリの正規表現
-    let qfixmemo_random_exclude = ''
+  " ランダム表示数
+  let qfixmemo_random_columns = 10
+  " ランダム表示のキャッシュファイル名
+  let qfixmemo_random_file = '~/.qfixmemo-random'
+  " 指定秒数が経過していたらキャッシュファイル再作成
+  let qfixmemo_random_time = 10*24*60*60
+  " ランダム表示から除きたいエントリの正規表現
+  let qfixmemo_random_exclude = ''
 
 特定のディレクトリのみからランダム表示用のエントリを検索したい場合は
 qfixmemo_random_dirを設定します。
@@ -411,8 +412,8 @@ qfixmemo_random_dirを設定します。
   デフォルトでは1,2が設定されていないので qfixmemo_dirが使用されます
 
 .vimrc >
-    " ランダム表示検索対象ディレクトリ
-    let qfixmemo_random_dir = '~/qfixmemo/random'
+  " ランダム表示検索対象ディレクトリ
+  let qfixmemo_random_dir = '~/qfixmemo/random'
 
 ==============================================================================
 7. フォールディング					*qfixmemo-folding*
@@ -426,8 +427,8 @@ qfixmemo_foldingが 0 だと qfixmemoのフォールディングは無効化さ�
 デフォルトでは行頭がタイトル記号かどうかで折りたたみます
 
 .vimrc >
-    let qfixmemo_folding         = 1
-    let qfixmemo_folding_pattern = '^=[^=]'
+  let qfixmemo_folding         = 1
+  let qfixmemo_folding_pattern = '^=[^=]'
 
 フォールディング有効時の評価は QFixMemoFoldingLevel()で行われます。
 .vimrc等でQFixMemoFoldingLevel()を定義すると、そちらが優先されるので必要なら好
@@ -435,10 +436,10 @@ qfixmemo_foldingが 0 だと qfixmemoのフォールディングは無効化さ�
 デフォルトでは以下の関数と同等の式が評価されます。
 
 .vimrc >
-    " フォールディングレベル計算
-    function! QFixMemoFoldingLevel(lnum)
-      return getline(a:lnum) =~ g:qfixmemo_folding_pattern ? '>1' : '1'
-    endfunction
+  " フォールディングレベル計算
+  function! QFixMemoFoldingLevel(lnum)
+    return getline(a:lnum) =~ g:qfixmemo_folding_pattern ? '>1' : '1'
+  endfunction
 
 ==============================================================================
 8. ローカルバッファコマンド				*qfixmemo-local-commands*
@@ -474,12 +475,12 @@ g,rN を実行するとqfixmemo_dir内のメモファイルをまとめて「タ
 一括リネームの対象となるのはqfixmemo_filenameで指定した形式のファイル名のみで
 (例 : %Y-%m-%d-%H%M%S.txt)、日記とペアファイルは対象外になります。
 
-    1. g,rN を実行すると「現ファイル名」と「新ファイル名」が表示されます。
-    2. ddで不要な行を削除します
-    3. 編集し終わったら <C-g> か ! を押すと一括リネームが始まります。
-    4. ファイル名が重複している場合は、重複したファイルのみリストに残ります。
-    5. 残ったリストの「新ファイル名」部分を編集します。
-    6. 2.に戻り変換を繰り返します。
+  1. g,rN を実行すると「現ファイル名」と「新ファイル名」が表示されます。
+  2. ddで不要な行を削除します
+  3. 編集し終わったら <C-g> か ! を押すと一括リネームが始まります。
+  4. ファイル名が重複している場合は、重複したファイルのみリストに残ります。
+  5. 残ったリストの「新ファイル名」部分を編集します。
+  6. 2.に戻り変換を繰り返します。
 
 変換候補一覧は普通のバッファのように編集可能で、「新ファイル名候補」が重複して
 いたり、気に入らない場合に適当に編集可能です。ソートや絞り込み検索等は「通常の
@@ -509,6 +510,15 @@ g,d                 日付の挿入
 g,T                 日付と時刻の挿入
 g,rd                繰り返しの展開
 
+QFixHowm互換の予定・TODOを使用したくない場合は無効化することができます。
+
+.vimrc >
+  " QFixHowm互換の予定・TODO処理を使用しない。
+  let g:qfixmemo_use_howm_schedule = 0
+
+ただしこの場合QFixHowm互換のアクションロック等は使えなくなり、デフォルトの<CR>
+ではキーワードとURI処理のみが行われることになります。
+
 ==============================================================================
 11. カスタマイズ						*qfixmemo-customize*
 
@@ -522,10 +532,10 @@ qfixmemo/misc/user-func.vim にまとめてあります。
 
 新規メモのテンプレートは変更可能です。
 .vimrc >
-    let g:qfixmemo_template = [
-      \'%TITLE% ',
-      \""
-    \]
+  let g:qfixmemo_template = [
+    \'%TITLE% ',
+    \""
+  \]
 
 テンプレート        置換オプション
 %TITLE%             qfixmemo_title
@@ -535,17 +545,23 @@ qfixmemo/misc/user-func.vim にまとめてあります。
 テンプレートは |strftime()|で整形されるのであらかじめタイムスタンプを埋め込む
 ことも出来ます。
 .vimrc >
-    let g:qfixmemo_template = [
-      \'%TITLE% ',
-      \'[%Y-%m-%d %H:%M]',
-      \""
-    \]
+  let g:qfixmemo_template = [
+    \'%TITLE% ',
+    \'[%Y-%m-%d %H:%M]',
+    \""
+  \]
+
+テンプレート挿入後にカーソル移動することも可能です。
+カーソル移動にはノーマルモードの移動コマンドを使用します。
+.vimrc >
+  " テンプレート挿入後に2行下へカーソル移動
+  let g:qfixmemo_template_keycmd = "2j$a"
 
 ------------------------------------------------------------------------------
 11.1.2 タイトルマーカーとタイトル検索の正規表現		*qfixmemo-title*
 
 タイトルマーカーを変更することも可能です。 >
-    let qfixmemo_title    = '#'
+  let qfixmemo_title    = '#'
 <
 タイトルマーカーを変更した場合はタイトル検索正規表現の変更が必要になることがあ
 ります。
@@ -562,14 +578,14 @@ qfixmemo/misc/user-func.vim にまとめてあります。
 
 タイトルマーカーに ### を使いたい場合。
 .vimrc >
-    " タイトルマーカー
-    let qfixmemo_title    = '###'
+  " タイトルマーカー
+  let qfixmemo_title    = '###'
 
-    " タイトル行検索の正規表現
-    function! QFixMemoTitleRegxp()
-      let g:QFixMRU_Title[g:qfixmemo_ext]            = '^###[^#]'
-      let g:QFixMRU_Title[g:qfixmemo_ext . '_regxp'] = '^###[^#]'
-    endfunction
+  " タイトル行検索の正規表現
+  function! QFixMemoTitleRegxp()
+    let g:QFixMRU_Title[g:qfixmemo_ext]            = '^###[^#]'
+    let g:QFixMRU_Title[g:qfixmemo_ext . '_regxp'] = '^###[^#]'
+  endfunction
 <
 デフォルトの外部grep検索用正規表現は、正規表現が貧弱なfindstrでも共通に使えるよ
 うに「行頭のタイトルマーカー」の後に「タイトルマーカー以外の文字」がある行をタ
@@ -581,22 +597,22 @@ qfixmemo/misc/user-func.vim にまとめてあります。
 独自キーマップは .vimrc等に QFixMemoKeymapPost() を作成する事で変更可能です。
 
 .vimrc >
-    " キーマップ
-    function! QFixMemoKeymapPost()
-      nnoremap <silent> <Leader>a :<C-u>call qfixmemo#ListCache('open')<CR>
-    endfunction
+  " キーマップ
+  function! QFixMemoKeymapPost()
+    nnoremap <silent> <Leader>a :<C-u>call qfixmemo#ListCache('open')<CR>
+  endfunction
 
-    " ローカルキーマップ
-    function! QFixMemoLocalKeymapPost()
-      nnoremap <silent> <buffer> <LocalLeader>f :<C-u>call qfixmemo#FGrep()<CR>
-    endfunction
+  " ローカルキーマップ
+  function! QFixMemoLocalKeymapPost()
+    nnoremap <silent> <buffer> <LocalLeader>f :<C-u>call qfixmemo#FGrep()<CR>
+  endfunction
 
 拡張子まで含めて指定ファイルを開く
 
 拡張子がqfixmemo_extのファイルではなく、拡張子まで含めた指定ファイルを開くには
 qfixmemo#EditFile() を使用します。
 g,Jで qfixmemo_dir/example.nvl を開く例 >
-    nnoremap <silent> <Leader>J :<C-u>call qfixmemo#EditFile('example.nvl')<CR>
+  nnoremap <silent> <Leader>J :<C-u>call qfixmemo#EditFile('example.nvl')<CR>
 
 ------------------------------------------------------------------------------
 11.3 保存前処理						*qfixmemo-pre-save*
@@ -605,19 +621,19 @@ g,Jで qfixmemo_dir/example.nvl を開く例 >
 保存前処理は .vimrc等に QFixMemoBufWritePre() を作成する事で変更可能です。
 
 .vimrc >
-    " BufWritePre
-    function! QFixMemoBufWritePre()
-      " タイトル行付加
-      call qfixmemo#AddTitle()
-      " タイムスタンプ付加
-      call qfixmemo#AddTime()
-      " タイムスタンプアップデート
-      " call qfixmemo#UpdateTime()
-      " Wikiスタイルのキーワードリンク作成
-      call qfixmemo#AddKeyword()
-      " ファイル末の空行を削除
-      call qfixmemo#DeleteNullLines()
-    endfunction
+  " BufWritePre
+  function! QFixMemoBufWritePre()
+    " タイトル行付加
+    call qfixmemo#AddTitle()
+    " タイムスタンプ付加
+    call qfixmemo#AddTime()
+    " タイムスタンプアップデート
+    " call qfixmemo#UpdateTime()
+    " Wikiスタイルのキーワードリンク作成
+    call qfixmemo#AddKeyword()
+    " ファイル末の空行を削除
+    call qfixmemo#DeleteNullLines()
+  endfunction
 <
 qfixmemo#UpdateTime()を有効にすると、保存の度にカーソル位置のエントリのタイムス
 タンプが更新されます。
@@ -628,8 +644,8 @@ qfixmemo#UpdateTime()を有効にすると、保存の度にカーソル位置�
 メモファイルに使用するシンタックスハイライトはファイルタイプ指定で変更可能です。
 
 Markdownを使用する例 >
-    " ファイルタイプ
-    let qfixmemo_filetype  = 'markdown'
+  " ファイルタイプ
+  let qfixmemo_filetype  = 'markdown'
 
 通常はqfixmemo_filetype指定で使用してください。
 
@@ -639,24 +655,24 @@ Markdownを使用する例 >
 定を無効にしてください。
 
 Markdownを使用する例 >
-    " メモファイルの拡張子
-    let qfixmemo_ext      = 'mkd'
-    " qfixmemoのファイルタイプ指定を無効
-    let qfixmemo_filetype = ''
+  " メモファイルの拡張子
+  let qfixmemo_ext      = 'mkd'
+  " qfixmemoのファイルタイプ指定を無効
+  let qfixmemo_filetype = ''
 
 ファイルタイプは明示的に指定してもかまいません。
 
 なお拡張子を howm,txt,mkd,wiki以外にする場合は、ファイルがMRUリストに登録されるよ
 うに設定して下さい。 >
-    " MRUに登録するファイル名の正規表現
-    let QFixMRU_RegisterFile = '\.\(howm\|txt\|mkd\|wiki\)$'
+  " MRUに登録するファイル名の正規表現
+  let QFixMRU_RegisterFile = '\.\(howm\|txt\|mkd\|wiki\)$'
 
 ------------------------------------------------------------------------------
 11.5 シンタックスハイライト				*qfixmemo-syntax-highlight*
 
 デフォルトで有効になるシンタックスハイライトは qfixmemo_syntaxで設定します。 >
-    " QFixMemoシンタックスハイライト設定
-    let g:qfixmemo_syntax = 3
+  " QFixMemoシンタックスハイライト設定
+  let g:qfixmemo_syntax = 3
 
 0                   何も設定しない
 1                   タイトル行
@@ -681,18 +697,18 @@ qfixmemo/misc/qfixmemo-chenv.vim をpluginディレクトリにコピーして�
 http://sites.google.com/site/fudist/Home/qfixhowm/option/multi-howm-dir#howm-chenv
 
 .vimrc >
-    " qfixmemo-chenv.vimの基準ディレクトリ設定
-    let qfixmemo_chdir = qfixmemo_dir
+  " qfixmemo-chenv.vimの基準ディレクトリ設定
+  let qfixmemo_chdir = qfixmemo_dir
 
-    function! QFixMemoKeymapPost()
-      nnoremap <silent> <leader>hh :echo qfixmemo_dir<CR>
-      nnoremap <silent> <leader>ha :call QFixMemoChEnv("",         "time", "=")<CR>
-      nnoremap <silent> <leader>hm :call QFixMemoChEnv("main",     "time", "=")<CR>
-      nnoremap <silent> <leader>hd :call QFixMemoChEnv("howm-mkd", "time", "#")<CR>
-      nnoremap <silent> <leader>hc :call QFixMemoChEnv("pc",       "time", "= [:pc]")<CR>
-      nnoremap <silent> <leader>hv :call QFixMemoChEnv("vimwiki",  "time", "=")<CR>
-      nnoremap <silent> <leader>hw :call QFixMemoChEnv("work",     "day",  "=")<CR>
-    endfunction
+  function! QFixMemoKeymapPost()
+    nnoremap <silent> <leader>hh :echo qfixmemo_dir<CR>
+    nnoremap <silent> <leader>ha :call QFixMemoChEnv("",         "time", "=")<CR>
+    nnoremap <silent> <leader>hm :call QFixMemoChEnv("main",     "time", "=")<CR>
+    nnoremap <silent> <leader>hd :call QFixMemoChEnv("howm-mkd", "time", "#")<CR>
+    nnoremap <silent> <leader>hc :call QFixMemoChEnv("pc",       "time", "= [:pc]")<CR>
+    nnoremap <silent> <leader>hv :call QFixMemoChEnv("vimwiki",  "time", "=")<CR>
+    nnoremap <silent> <leader>hw :call QFixMemoChEnv("work",     "day",  "=")<CR>
+  endfunction
 <
 上記の設定では以下のようになります。
 
@@ -712,8 +728,51 @@ qfixmemo/misc/qfixmemo-calendar.vim をpluginディレクトリにコピーし�
 オプション設定を追加してください。
 
 .vimrc >
-    let calendar_action = "QFixMemoCalendarDiary"
-    let calendar_sign   = "QFixMemoCalendarSign"
+  let calendar_action = "QFixMemoCalendarDiary"
+  let calendar_sign   = "QFixMemoCalendarSign"
 
-vim:tw=78:ts=8:ft=qfix_memo.help:norl
+------------------------------------------------------------------------------
+11.8 URIを開く						*qfixmemo-uri*
 
+QFixMemoではURLや画像ファイル等のリンクを外部ブラウザで開くことができます。
+
+デフォルトではQFixHowm互換のURI処理が使用されます。
+Windowsでは既定のブラウザが使用されますが、明示的に指定することも出来ます。
+unix系の場合はfirefoxがデフォルトになります。
+
+.vimrc >
+  " vimで開く拡張子の正規表現
+  let QFixHowm_OpenVimExtReg  = '\.txt$\|\.howm$\|\.vim$'
+
+  " リンクを開くブラウザ指定
+  if has('unix')
+    let QFixHowm_OpenURIcmd = "call system('firefox %s &')"
+  else
+    " Internet explorer
+    let QFixHowm_OpenURIcmd = '!start "C:/Program Files/Internet Explorer/iexplore.exe" %s'
+    " firefox
+    " let QFixHowm_OpenURIcmd  = '!start "C:/Program Files/Mozilla Firefox/firefox.exe" %s'
+  endif
+
+特定の拡張子だけユーザ指定のプログラムで開く事も出来ます。
+たとえば pdfファイルを外部プログラムを指定して開きたい場合は、
+QFixHowm_Opencmd_pdf のように QFixHowm_Opencmd_ の後に拡張子を付加した環境オプ
+ションを設定します。
+
+.vimrc >
+  " 拡張子別の起動プログラムを指定する
+
+  " pdfの指定
+  if has('unix')
+    " Linux(Ubuntu)は evince で開く
+    let QFixHowm_Opencmd_pdf = "call system('evince %s &')"
+  else
+    " Windowsは Acrobat Reader で開く
+    let QFixHowm_Opencmd_pdf = '!start "C:/Program Files/Adobe/Reader 10.0/Reader/AcroRd32.exe" %s'
+  endif
+
+詳しくは以下を参照してください。
+https://sites.google.com/site/fudist/Home/qfixhowm/option#open-uri
+
+
+  vim:tw=78:ts=8:ft=qfix_memo.help:norl

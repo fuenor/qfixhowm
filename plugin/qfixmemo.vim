@@ -186,6 +186,20 @@ endif
 if !exists('g:qfixmemo_use_howm_schedule')
   let g:qfixmemo_use_howm_schedule = 1
 endif
+" URIを開くコマンド指定(howm_schedule未使用時)
+if !exists('g:qfixmemo_openuri_cmd')
+  if has('unix')
+    let g:qfixmemo_openuri_cmd = "call system('firefox %s &')"
+  else
+    "Internet Explorer
+    let g:qfixmemo_openuri_cmd = '!start "C:/Program Files/Internet Explorer/iexplore.exe" %s'
+    let g:qfixmemo_openuri_cmd = '!start "rundll32.exe" url.dll,FileProtocolHandler %s'
+  endif
+endif
+" URIをVimで開く正規表現指定(howm_schedule未使用時)
+if !exists('g:qfixmemo_openuri_vimextreg')
+  let g:qfixmemo_openuri_vimextreg = '\.txt$\|\.vim$'
+endif
 
 " サブウィンドウを出す方向
 if !exists('g:qfixmemo_submenu_dir')

@@ -60,7 +60,7 @@ if g:QFixHowm_RecentMode == 2
 endif
 " タイトルリスト(,a)にキャッシュ表示を割り当て
 if !exists('g:QFixHowm_TitleListCache')
- let g:QFixHowm_TitleListCache = 0
+ let g:QFixHowm_TitleListCache = 1
 endif
 
 " BufWritePre
@@ -398,6 +398,9 @@ function! QFixHowmSetup()
   " 連結表示のセパレータ
   " let g:qfixmemo_separator = '>>> %s'
 
+  " リスト表示にキャッシュを使用する
+  let g:qfixmemo_use_list_cache = g:QFixHowm_TitleListCache
+
   " ランダム表示保存ファイル
   let g:qfixmemo_random_file    = g:QFixHowm_RandomWalkFile
   " ランダム表示ファイル更新時間(秒)
@@ -472,9 +475,6 @@ if g:QFixHowm_RecentMode == 2
   function! s:addMenu(menu, acc, cmd)
     exe printf(a:menu, a:acc, a:cmd, a:cmd)
   endfunction
-endif
-if g:QFixHowm_TitleListCache == 1
-  nnoremap <silent> <Leader>a :<C-u>call qfixmemo#ListCache('open')<CR>
 endif
 
 if exists('s:mapleader')

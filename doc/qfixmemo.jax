@@ -21,7 +21,6 @@ CONTENTS						*qfixmemo-contents*
 4. エントリ一覧                                         |qfixmemo-entry-list|
   4.1 エントリ一覧のオプション                          |qfixmemo-entry-list-option|
   4.2 MRUリスト                                         |qfixmemo-entry-list-mru|
-  4.3 全エントリ一覧                                    |qfixmemo-entry-list-all|
 5. 検索                                                 |qfixmemo-grep|
   5.1 Quickfixウィンドウの編集                          |qfixmemo-quickfix-edit|
   5.2 エントリフィルタと連結表示                        |qfixmemo-entry-filter|
@@ -113,6 +112,7 @@ QFixHowm_FileExtが使用されます。
 ファイルタイプに qfix_memo を設定すると以下とほぼ同等のシンタックスハ
 イライトが有効になります。
 http://sites.google.com/site/fudist/Home/qfixhowm/option/outline-mode#user-syntaxfile
+または|qfixmemo-syntax|を参照してください。
 
 ファイルタイプに qfix_memoを指定する例 >
   let QFixHowm_FileType = 'qfix_memo'
@@ -296,12 +296,24 @@ l a A は外部grepを使用するのでMRUリストより速度的には遅く�
 
 <Leader>m           MRUリスト
 <Leader>l           最近更新したファイルのエントリ一覧
-<Leader>a           全エントリ一覧
+<Leader>a           エントリ一覧(キャッシュ)
 <Leader>ra          全エントリ一覧
 <Leader>A           日記エントリ一覧
 <Leader>rA          Globによる全ファイル一覧
+                    Globの場合はタイトル行のないファイルも表示されます。
 
-Globの場合はタイトル行のないファイルも表示されます。
+<Leader>aでは最後に表示したエントリ一覧がキャッシュ表示されます。
+各エントリ一覧はgrep等の検索処理で速度的に遅いため、最初の一回だけ <Leader>raで
+「全エントリ一覧」を実行して、それ以降は <Leader>aを使用するというように使いま
+す。
+最新の状態を取得したい場合は <Leader>ra等で再検索します。
+
+なおキャッシュの存在しない <Leader>aの初回実行時には <Leader>raが実行されます。
+
+<Leader>a でキャッシュ表示を使用したくない場合は次のように設定してください。
+.vimrc >
+  " <Leader>a に「全エントリ一覧」を割り当て
+  let qfixmemo_use_list_cache = 0
 
 4.1 エントリ一覧のオプション				*qfixmemo-entry-list-option*
 
@@ -326,23 +338,6 @@ Globの場合はタイトル行のないファイルも表示されます。
   " MRUの基準ディレクトリ
   let QFixMRU_RootDir   = qfixmemo_dir
 <
-4.3 全エントリ一覧					*qfixmemo-entry-list-all*
-
-デフォルトでは <Leader>a と <Leader>ra に同じ「全エントリ一覧」がマップされて
-います。
-もしも全エントリ一覧を多用するなら <Leader>a に「エントリ一覧(キャッシュ表示)」
-を割り当てると表示の際に再検索を行わないので高速に表示されます。 >
-.vimrc >
-  " <Leader>a にキャッシュ表示を割り当て
-  function! QFixMemoKeymapPost()
-    nnoremap <silent> <Leader>a       :<C-u>call qfixmemo#ListCache('open')<CR>
-  endfunction
-
-最初の一回だけ <Leader>raで「全エントリ一覧」を実行して、それ以降は <Leader>a
-を使用するというように使います。
-<Leader>aではキャッシュ表示されますが、最新の状態を取得したい場合は <Leader>ra
-を再実行します。
-
 ==============================================================================
 5. 検索							*qfixmemo-grep*
 
@@ -618,6 +613,15 @@ qfixmemo#EditFile() を使用します。
 g,Jで qfixmemo_dir/example.nvl を開く例 >
   nnoremap <silent> <Leader>J :<C-u>call qfixmemo#EditFile('example.nvl')<CR>
 
+"NOTE"
+QFixMemoはキーマップが .vimrcや他のプラグインで定義されていた場合は上書きしま
+せん。このためグローバルキーマップを変更したい場合は .vimrc等でキーマップを直
+接指定することも可能です。
+
+.vimrc >
+  " g,iはサブメニューの代わりにexample.txtを開く
+  nnoremap g,i :<C-u>call qfixmemo#EditFile('example.txt')<CR>
+
 ------------------------------------------------------------------------------
 11.3 保存前処理						*qfixmemo-pre-save*
 
@@ -697,8 +701,6 @@ qfixmemo_filetypeを変更してください。
 QFixHowmの環境変更用スクリプト互換の qfixmemo-chenv.vimもあります。
 qfixmemo/misc/qfixmemo-chenv.vim をpluginディレクトリにコピーして、.vimrcにオ
 プション設定を追加してください。
-使い方については以下を参照してください。
-http://sites.google.com/site/fudist/Home/qfixhowm/option/multi-howm-dir#howm-chenv
 
 .vimrc >
   " qfixmemo-chenv.vimの基準ディレクトリ設定
@@ -774,9 +776,6 @@ QFixHowm_Opencmd_pdf のように QFixHowm_Opencmd_ の後に拡張子を付加�
     " Windowsは Acrobat Reader で開く
     let QFixHowm_Opencmd_pdf = '!start "C:/Program Files/Adobe/Reader 10.0/Reader/AcroRd32.exe" %s'
   endif
-
-詳しくは以下を参照してください。
-https://sites.google.com/site/fudist/Home/qfixhowm/option#open-uri
 
 
   vim:tw=78:ts=8:ft=qfix_memo.help:norl

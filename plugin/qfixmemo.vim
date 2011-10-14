@@ -244,6 +244,11 @@ if !exists('g:qfixmemo_splitmode')
   let g:qfixmemo_splitmode = 0
 endif
 
+" エントリ一覧表示にキャッシュを使用する
+if !exists('g:qfixmemo_use_list_cache')
+  let g:qfixmemo_use_list_cache = 1
+endif
+
 """"""""""""""""""""""""""""""
 " User function
 """"""""""""""""""""""""""""""
@@ -325,14 +330,15 @@ silent! function QFixMemoKeymap()
   silent! nnoremap <silent> <unique> <Leader>m       :<C-u>call qfixmemo#ListMru()<CR>
   silent! nnoremap <silent> <unique> <Leader>l       :<C-u>call qfixmemo#ListRecent()<CR>
   silent! nnoremap <silent> <unique> <Leader>L       :<C-u>call qfixmemo#ListRecentTimeStamp()<CR>
-  silent! nnoremap <silent> <unique> <Leader>a       :<C-u>call qfixmemo#List('open')<CR>
+  if g:qfixmemo_use_list_cache
+    silent! nnoremap <silent> <unique> <Leader>a     :<C-u>call qfixmemo#ListCache('open')<CR>
+  else
+    silent! nnoremap <silent> <unique> <Leader>a     :<C-u>call qfixmemo#List('open')<CR>
+  endif
   silent! nnoremap <silent> <unique> <Leader>ra      :<C-u>call qfixmemo#List('open')<CR>
   silent! nnoremap <silent> <unique> <Leader>A       :<C-u>call qfixmemo#ListFile(g:qfixmemo_diary)<CR>
   silent! nnoremap <silent> <unique> <Leader>rA      :<C-u>call qfixmemo#Glob(g:qfixmemo_dir, '**/*', 'open')<CR>
   silent! nnoremap <silent> <unique> <Leader>rN      :<C-u>call qfixmemo#ListRenameFile(g:qfixmemo_filename)<CR>
-
-  " キャッシュ使用
-  " nnoremap <silent> <Leader>a                        :<C-u>call qfixmemo#ListCache('open')<CR>
 
   silent! nnoremap <silent> <unique> <Leader>rr      :<C-u>call qfixmemo#RandomWalk(g:qfixmemo_random_file)<CR>
   silent! nnoremap <silent> <unique> <Leader>rR      :<C-u>call qfixmemo#RebuildRandomCache(g:qfixmemo_random_file)<CR>
@@ -453,9 +459,15 @@ silent! function QFixMemoMenubar(menu, leader)
   let sepcmd  = 'amenu <silent> 41.334 '.a:menu.'.-sep%d-			<Nop>'
   call s:addMenu(menucmd, 'ListRecent(&L)'       , 'l')
   call s:addMenu(menucmd, 'ListRecent(Stamp)(&2)', 'L')
-  call s:addMenu(menucmd, 'ListAll(&A)'          , 'a')
+
+  if g:qfixmemo_use_list_cache
+    call s:addMenu(menucmd, 'List(cache)(&E)', 'a')
+    call s:addMenu(menucmd, 'ListAll(&A)'    , 'ra')
+  else
+    call s:addMenu(menucmd, 'ListAll(&A)', 'a')
+  endif
   call s:addMenu(menucmd, 'DiaryList(&O)'        , 'A')
-  call s:addMenu(menucmd, 'FileList(&Q)'         , 'rA')
+  call s:addMenu(menucmd, 'FileList(&F)'         , 'rA')
   call s:addMenu(menucmd, 'SubMenu(&I)'          , 'i')
   exe printf(sepcmd, 2)
   call s:addMenu(menucmd, 'FGrep(&S)', 's')
@@ -465,15 +477,15 @@ silent! function QFixMemoMenubar(menu, leader)
     call s:addMenu(menucmd, 'Schedule(&Y)'        , 'y')
     call s:addMenu(menucmd, 'Todo(&T)'            , 't')
     call s:addMenu(menucmd, 'Menu(&,)'            , ',')
-    call s:addMenu(menucmd, 'Rebuild-Schedule(&I)', 'ry')
-    call s:addMenu(menucmd, 'Rebuild-Todo(&K)'    , 'rt')
+    call s:addMenu(menucmd, 'Rebuild-Schedule(&V)', 'ry')
+    call s:addMenu(menucmd, 'Rebuild-Todo(&W)'    , 'rt')
     call s:addMenu(menucmd, 'Rebuild-Menu(&\.)'   , 'r,')
   endif
   exe printf(sepcmd, 4)
   call s:addMenu(menucmd, 'RandomWalk(&R)'        , 'rr')
-  call s:addMenu(menucmd, 'Rebuild-RandomWalk(&F)', 'rR')
+  call s:addMenu(menucmd, 'Rebuild-RandomWalk(&X)', 'rR')
   exe printf(sepcmd, 5)
-  call s:addMenu(menucmd, 'Rebuild-Keyword(&W)', 'rk')
+  call s:addMenu(menucmd, 'Rebuild-Keyword(&K)', 'rk')
   exe printf(sepcmd, 6)
   " call s:addMenu(menucmd, 'Rename(&Z)'      , 'rn')
   call s:addMenu(menucmd, 'Rename-files(&Z)', 'rN')
@@ -1318,9 +1330,11 @@ function! qfixmemo#List(mode, ...)
   let mode = a:mode
   if mode =~ 'cache'
     call qfixlist#open()
+    redraw|echo 'QFixMemo : Cached list.'
     return
   elseif mode =~ 'ccache'
     call qfixlist#copen()
+    redraw|echo 'QFixMemo : Cached list.'
     return
   endif
 

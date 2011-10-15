@@ -292,11 +292,11 @@ http://sites.google.com/site/fudist/Home/grep/install
 
 エントリを一覧表示してメモにアクセス可能です。
 基本はMRUリストを使用し、その他は必要に応じて使用してください。
-l a A は外部grepを使用するのでMRUリストより速度的には遅くなります。
+l ra A は外部grepを使用するのでMRUリストより速度的には遅くなります。
 
 <Leader>m           MRUリスト
-<Leader>l           最近更新したファイルのエントリ一覧
 <Leader>a           エントリ一覧(キャッシュ)
+<Leader>l           最近更新したファイルのエントリ一覧
 <Leader>ra          全エントリ一覧
 <Leader>A           日記エントリ一覧
 <Leader>rA          Globによる全ファイル一覧

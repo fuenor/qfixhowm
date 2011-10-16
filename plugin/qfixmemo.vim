@@ -1327,6 +1327,10 @@ function! qfixmemo#ListRecentTimeStamp(...)
 endfunction
 
 " 全エントリ一覧
+" 'open'   : QFixList再検索表示
+" 'copen'  : QuickFix再検索表示
+" 'cache'  : QFixListキャッシュ表示
+" 'ccache' : QuickFixキャッシュ表示
 function! qfixmemo#List(mode, ...)
   call qfixmemo#Init()
   let mode = a:mode
@@ -1350,13 +1354,15 @@ function! qfixmemo#List(mode, ...)
 endfunction
 
 " キャッシュ表示
+let s:lcinit = 0
 function! qfixmemo#ListCache(mode, ...)
   call qfixmemo#Init()
   let mode = a:mode
-  if qfixlist#GetList() != []
+  if qfixlist#GetList() != [] && s:lcinit
     let mode = substitute(mode, 'open', 'cache', '')
   endif
   call qfixmemo#List(mode)
+  let s:lcinit = 1
 endfunction
 
 " ファイルリスト

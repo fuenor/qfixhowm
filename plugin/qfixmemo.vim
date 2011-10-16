@@ -789,7 +789,9 @@ function! s:BufWritePre()
 endfunction
 
 function! s:filetype()
-  if expand('%') =~ fnamemodify(g:qfixmemo_pairfile_dir, ':p')
+  let file = QFixNormalizePath(expand('%:p'), 'compare')
+  let pdir = QFixNormalizePath(fnamemodify(g:qfixmemo_dir.'/'.g:qfixmemo_pairfile_dir, ':p'), 'compare')
+  if &filetype != '' && stridx(file, pdir) == 0
     return
   endif
   if g:qfixmemo_filetype != ''

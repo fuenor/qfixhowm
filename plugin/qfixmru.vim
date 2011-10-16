@@ -247,7 +247,7 @@ endfunction
 
 " Windowsパス正規化
 let s:MSWindows = has('win95') + has('win16') + has('win32') + has('win64')
-silent! function QFixNormalizePath(path, ...)
+function! QFixNormalizePath(path, ...)
   let path = a:path
   " let path = expand(a:path)
   if s:MSWindows

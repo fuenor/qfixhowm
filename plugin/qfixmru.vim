@@ -2,9 +2,9 @@
 "    Description: MRU entry list (with QFixPreview)
 "         Author: fuenor <fuenor@gmail.com>
 "                 http://sites.google.com/site/fudist/Home  (Japanese)
-"  Last Modified: 2011-08-29 06:34
+"  Last Modified: 2011-10-16 19:27
 "=============================================================================
-let s:Version = 1.07
+let s:Version = 1.08
 scriptencoding utf-8
 
 "What Is This:
@@ -78,7 +78,7 @@ if !exists('g:QFixMRU_DirMode')
 endif
 " MRUに登録しないファイル名
 if !exists('g:QFixMRU_IgnoreNFile')
-  let g:QFixMRU_IgnoreNFile = '//'
+  let g:QFixMRU_IgnoreNFile = '//\|/var/tmp/.*\|/tags$\|[~#]$\|\.bak$\|\.dat$\|\.dll$\|\.exe$\|\.o$\|\.obj$\|\.lnk$\|\.pdf$\|\.xls$'
 endif
 " MRUに登録しないファイル名
 if !exists('g:QFixMRU_IgnoreFile')
@@ -661,6 +661,9 @@ function! s:Register(mru)
   let text = mru['text']
   let lnum = mru['lnum']
 
+  if g:QFixMRU_IgnoreNFile  != '' && mfile =~ g:QFixMRU_IgnoreNFile
+    return
+  endif
   if g:QFixMRU_RegisterFile != '' && mfile !~ g:QFixMRU_RegisterFile
     return
   endif

@@ -2,9 +2,9 @@
 "    Description: 日本語Grepヘルパー
 "         Author: fuenor <fuenor@gmail.com>
 "                 http://sites.google.com/site/fudist/Home/grep
-"  Last Modified: 2011-08-23 19:00
+"  Last Modified: 2011-10-16 21:29
 "================================================================================
-let s:Version = 2.82
+let s:Version = 2.83
 scriptencoding utf-8
 
 if exists('enable_MyGrep')
@@ -56,7 +56,7 @@ if !exists('g:MyGrep_ShellEncoding')
 endif
 "検索対象外のファイル指定
 if !exists('g:MyGrep_ExcludeReg')
-  let g:MyGrep_ExcludeReg = '[~#]$\|\.bak$\|\.o$\|\.obj$\|\.exe$\|\.lnk$\|[/\\]tags$\|^tags$'
+  let g:MyGrep_ExcludeReg = '[~#]$\|\.dll$\|\.exe$\|\.lnk$\|\.o$\|\.obj$\|\.pdf$\|\.xls$'
 endif
 
 "ダメ文字対策

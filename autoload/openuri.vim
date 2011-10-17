@@ -1,6 +1,10 @@
-""""""""""""""""""""""""""""""
-" qfixmemo openuri
-""""""""""""""""""""""""""""""
+"=============================================================================
+"    Description: Open URI
+"         Author: fuenor <fuenor@gmail.com>
+"                 http://sites.google.com/site/fudist/Home  (Japanese)
+"  Last Modified: 2011-10-16 19:06
+"=============================================================================
+let s:Version = 1.00
 scriptencoding utf-8
 
 function! openuri#Open(...)
@@ -69,7 +73,7 @@ endif
 "vimで開くファイルリンク
 if !exists('g:QFixHowm_OpenVimExtReg')
   if !exists('g:MyOpenVim_ExtReg')
-    let g:QFixHowm_OpenVimExtReg = '\.txt$\|\.vim$'
+    let g:QFixHowm_OpenVimExtReg = '\.txt$\|\.vim$\|\.js$\|\.java$\|\.py$\|\.rb$\|\.h$\|\.c$\|\.cpp$\|\.ini$\|\.conf$'
   else
     let g:QFixHowm_OpenVimExtReg = g:MyOpenVim_ExtReg
   endif

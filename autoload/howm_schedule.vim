@@ -473,8 +473,8 @@ function! s:QFixHowmListReminder_(mode)
         let addflag = MultiHowmDirGrep(searchWord, searchPath, l:SearchFile, g:howm_fileencoding, addflag, 'g:QFixHowm_ScheduleSearchDir')
       endif
     endif
-    call MyGrep(searchWord, searchPath, l:SearchFile, g:howm_fileencoding, addflag)
-    let sq = QFixGetqflist()
+    let g:MyGrep_Return = 1
+    let sq = MyGrep(searchWord, searchPath, l:SearchFile, g:howm_fileencoding, addflag)
     call extend(sq, holiday_sq)
     let s:UseTitleFilter = 1
     call QFixHowmTitleFilter(sq)
@@ -643,6 +643,21 @@ function! s:QFixHowmSortReminder(sq, mode)
   let idx = 0
   for d in qflist
     let d.text = substitute(d.text, '\s*', '','')
+    let str = matchstr(d.text, '^\['.s:sch_date)
+    let str = substitute(str, '^\[', '', '')
+    let searchWord = ']'.s:sch_cmd
+    let cmd = matchstr(d.text, searchWord)
+    let cmd = substitute(cmd, '^]', '', '')
+    let opt = matchstr(cmd, '[0-9]*$')
+
+    " 単発予定で非表示を除去
+    if cmd == '@' && opt == '' && str !~ s:sch_date_eom
+      if QFixHowmDate2Int(str) < today - g:QFixHowm_ReminderDefault_Schedule
+        call remove(qflist, idx)
+        continue
+      endif
+    endif
+    " 終了指定対象を除去
     let estr = matchstr(d.text, '&'.s:sch_dateT.'\.')
     let estr = substitute(estr, '^&', '','')
     let elen = strlen(estr)
@@ -660,20 +675,6 @@ function! s:QFixHowmSortReminder(sq, mode)
       endif
     endif
 
-    let str = matchstr(d.text, '^\['.s:sch_date)
-    let str = substitute(str, '^\[', '', '')
-    let searchWord = ']'.s:sch_cmd
-    let cmd = matchstr(d.text, searchWord)
-    let cmd = substitute(cmd, '^]', '', '')
-    let opt = matchstr(cmd, '[0-9]*$')
-
-    " 単発予定で非表示を除去
-    if cmd == '@' && opt == '' && str !~ s:sch_date_eom
-      if QFixHowmDate2Int(str) < today - g:QFixHowm_ReminderDefault_Schedule
-        call remove(qflist, idx)
-        continue
-      endif
-    endif
     let str = s:CnvRepeatDate(cmd, opt, str)
     let d.text = '[' . str . strpart(d.text, 11)
     let desc  = escape(cmd[0], '~')
@@ -757,7 +758,7 @@ function! s:AddTodayLine(qflist)
   endif
   let todayfname = expand(g:howm_dir).'/'.g:QFixHowm_TodayFname
   let todaypriority = g:QFixHowm_ReminderPriority[g:QFixHowm_TodayLineType]
-  let sepdat = {"priority":today, "text": strftime('['.s:hts_dateTime.']$'), "typepriority":todaypriority, "filename":todayfname, "lnum":0, "bufnr":-1}
+  let sepdat = {"priority":today, "text": strftime('['.s:hts_dateTime.']$'), "typepriority":todaypriority, "filename":todayfname, "lnum":0}
   call add(qflist, sepdat)
   let qflist = sort(qflist, "s:QFixComparePriority")
 
@@ -804,18 +805,18 @@ function! s:AddTodayLine(qflist)
   endif
   let str = strftime('['.s:hts_dateTime.']')
   let file = g:howm_dir . '/' . g:QFixHowm_ShowTodayLineStr
-  let lnum = '0'
   let text = str . dow . '||'.g:QFixHowm_ShowTodayLineStr
   let file = todayfname
   let text = g:QFixHowm_ShowTodayLineStr . ' ' . str . dow . g:QFixHowm_ShowTodayLineStr
-  let sep = {"filename": file, "lnum": lnum, "text": text, "bufnr":0}
+  let lnum = '-1'
+  let sep = {"filename": file, "lnum": lnum, "text": text}
   if g:QFixHowm_ShowTodayLine > 0
     call insert(qflist, sep, QFixHowmReminderTodayLine)
   endif
   let QFixHowmReminderTodayLine += 1
   let str = strftime('['.s:hts_date.']')
   let text = g:QFixHowm_ShowTodayLineStr
-  let sep = {"filename": file, "lnum": lnum, "text": text, "bufnr":0}
+  let sep = {"filename": file, "lnum": lnum, "text": text}
   if g:QFixHowm_ShowTodayLine > 0
     call insert(qflist, sep, QFixHowmReminderTodayLineBeg)
   endif
@@ -832,9 +833,8 @@ function! s:AddTodayLine(qflist)
   endfor
   let removebeg = 0
   for idx in range(len(qflist))
-    if qflist[idx].bufnr == -1
+    if qflist[idx].lnum == 0
       if g:QFixHowm_ShowTodayLine >= 2 && hastime > 1 && idx+1 != QFixHowmReminderTodayLine
-        let qflist[idx].bufnr = 0
         let qflist[idx].text = text
         if idx-1 == QFixHowmReminderTodayLineBeg
           let removebeg = 1

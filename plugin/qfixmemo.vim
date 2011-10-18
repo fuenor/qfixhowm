@@ -249,6 +249,11 @@ if !exists('g:qfixmemo_use_list_cache')
   let g:qfixmemo_use_list_cache = 1
 endif
 
+" 自動生成ファイル名(,W ,X)
+if !exists('g:qfixmemo_auto_generate_filename')
+  let g:qfixmemo_auto_generate_filename = '%Y-%m-%d-%H%M%S'
+endif
+
 """"""""""""""""""""""""""""""
 " User function
 """"""""""""""""""""""""""""""
@@ -1139,7 +1144,7 @@ function! qfixmemo#DeleteEntry(...)
     write!
   endif
   if a:0
-    let filename = '%Y-%m-%d-%H%M%S'
+    let filename = g:qfixmemo_auto_generate_filename
     call qfixmemo#Edit(filename)
     silent! %delete _
     silent! 0put
@@ -1161,7 +1166,7 @@ function! qfixmemo#DivideEntry() range
     let lline = line('$')
   endif
 
-  let filename = '%Y-%m-%d-%H%M%S'
+  let filename = g:qfixmemo_auto_generate_filename
   let cnt = 0
   let bufnr = bufnr('%')
   let tpattern = qfixmemo#TitleRegxp()

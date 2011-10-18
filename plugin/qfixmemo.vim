@@ -2077,16 +2077,17 @@ let s:KeywordDic = []
 let s:KeywordHighlight = ''
 function! qfixmemo#AddKeyword(...)
   let addkey = 0
+
   if a:0
     let list = a:1
+    call filter(list, "v:val =~ '\[\[.*\]\]'")
   else
-    let list = getline(1, line('$'))
+    let list = s:GetKeywordStr('\[\[.*\]\]')
   endif
-
   for text in list
     while 1
       let stridx = match(text, '\[\[')
-      let pairpos = matchend(text, ']]')
+      let pairpos = matchend(text, '\]\]')
       if stridx == -1 || pairpos == -1
         break
       endif
@@ -2104,8 +2105,13 @@ function! qfixmemo#AddKeyword(...)
     endwhile
   endfor
 
-  if exists('g:howm_clink_pattern')
+  if a:0
+    let list = a:1
     call filter(list, "v:val =~ '" . g:howm_clink_pattern .".\\+'")
+  else
+    let list = s:GetKeywordStr(g:howm_clink_pattern .'.\+')
+  endif
+  if exists('g:howm_clink_pattern')
     for keyword in list
       let keyword = substitute(keyword, '^.*'.g:howm_clink_pattern.'\s*', '', '')
       let keyword = substitute(keyword, '\s*$', '', '')
@@ -2126,6 +2132,23 @@ function! qfixmemo#AddKeyword(...)
     call writefile(s:KeywordDic, kfile)
     call qfixmemo#LoadKeyword('highlight')
   endif
+endfunction
+
+function! s:GetKeywordStr(regxp)
+  let regxp = a:regxp
+  let glist = []
+  let save_cursor = getpos('.')
+  call cursor(1, 1)
+  let lnum = search(regxp, 'cW')
+  while 1
+    if lnum == 0
+      break
+    endif
+    call add(glist, getline(lnum))
+    let lnum = search(regxp, 'W')
+  endwhile
+  call setpos('.', save_cursor)
+  return glist
 endfunction
 
 " オートリンク再作成

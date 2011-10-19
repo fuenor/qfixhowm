@@ -442,7 +442,8 @@ function! s:HowmMenuReplace(sq, rep, head)
     endif
     let file = fnamemodify(file, ':.')
     let file = a:head.file
-    call add(glist, printf("%s|%d| %s", file, d['lnum'], d['text']))
+    let lnum = d['lnum'] < 1 ? 0 : d['lnum']
+    call add(glist, printf("%s|%d| %s", file, lnum, d['text']))
   endfor
   silent! exec 'lchdir ' . prevPath
   let save_cursor = getpos('.')

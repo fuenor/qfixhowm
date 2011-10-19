@@ -849,8 +849,6 @@ function! s:AddTodayLine(qflist)
         let QFixHowmReminderTodayLine -= 1
         break
       endif
-    elseif qflist[idx].lnum == -1
-      let qflist[idx].lnum = '0'
     endif
   endfor
   if QFixHowmReminderTodayLineBeg+1 == QFixHowmReminderTodayLine || QFixHowmReminderTodayLineBeg == 0 || removebeg || g:QFixHowm_ShowTodayLine < 3

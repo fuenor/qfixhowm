@@ -342,6 +342,7 @@ let g:qfixlist_close_on_jump = g:QFixHowm_ListCloseOnJump
 let g:QFixHowm_DateActionLockDefault = 0
 
 function! QFixHowmSetup()
+  let g:howm_dir = substitute(g:howm_dir, '[/\\]$', '', '')
   let g:qfixmemo_dir           = g:howm_dir
   let g:qfixmemo_fileencoding  = g:howm_fileencoding
   let g:qfixmemo_fileformat    = g:howm_fileformat
@@ -434,7 +435,6 @@ function! QFixHowmSetup()
   let g:qfixmemo_keyword_mode = g:QFixHowm_Wiki
   let g:qfixmemo_keyword_file = g:QFixHowm_keywordfile
   let g:qfixmemo_keyword_dir  = g:QFixHowm_WikiDir
-
 endfunction
 
 if exists('g:QFixMRU_RegisterFile') && g:QFixMRU_RegisterFile == ''
@@ -488,10 +488,23 @@ function! QFixMemoUserModeCR(...)
   call QFixHowmUserModeCR()
 endfunction
 
-" 折りたたみ関数
-function! QFixMemoFoldingLevel(lnum)
+" フォールディングレベル計算
+function! QFixMemoSetFolding()
   call howm_schedule#Init()
-  return QFixHowmFoldingLevel(a:lnum)
+  if exists('*QFixHowmSetFolding')
+    call QFixHowmSetFolding()
+    return
+  endif
+
+  setlocal nofoldenable
+  setlocal foldmethod=expr
+  if g:QFixHowm_WildCardChapter
+    setlocal foldexpr=QFixHowmFoldingLevelWCC(v:lnum)
+  elseif exists('*QFixHowmFoldingLevel')
+    setlocal foldexpr=QFixHowmFoldingLevel(v:lnum)
+  else
+    setlocal foldexpr=getline(v:lnum)=~g:QFixHowm_FoldingPattern?'>1':'1'
+  endif
 endfunction
 
 function! QFixHowmHelp()

@@ -2680,14 +2680,6 @@ if !exists('g:QFixHowm_FoldingMode')
   let g:QFixHowm_FoldingMode = 0
 endif
 
-silent! function QFixHowmFoldingLevel(lnum)
-  if g:QFixHowm_WildCardChapter
-    return QFixHowmFoldingLevelWCC(a:lnum)
-  else
-    return getline(a:lnum) =~ g:QFixHowm_FoldingPattern ? '>1' : '1'
-  endif
-endfunction
-
 " *. 形式のワイルドカードチャプター対応フォールディング
 let s:schepat = '^\s*'.s:sch_dateT.s:sch_Ext
 silent! function QFixHowmFoldingLevelWCC(lnum)

@@ -619,16 +619,20 @@ function! s:BufRead()
     return
   endif
   if g:qfixmemo_folding
-    setlocal nofoldenable
-    setlocal foldmethod=expr
-    setlocal foldexpr=QFixMemoFoldingLevel(v:lnum)
+    call QFixMemoSetFolding()
   endif
   call QFixMemoBufRead()
 endfunction
 
 " フォールディングレベル計算
-silent! function QFixMemoFoldingLevel(lnum)
-  return getline(a:lnum) =~ g:qfixmemo_folding_pattern ? '>1' : '1'
+silent! function QFixMemoSetFolding()
+  setlocal nofoldenable
+  setlocal foldmethod=expr
+  if exists('*QFixMemoFoldingLevel')
+    setlocal foldexpr=QFixMemoFoldingLevel(v:lnum)
+  else
+    setlocal foldexpr=getline(v:lnum)=~g:qfixmemo_folding_pattern?'>1':'1'
+  endif
 endfunction
 
 function! s:BufEnter()

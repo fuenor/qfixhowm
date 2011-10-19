@@ -1651,7 +1651,7 @@ function! s:randomList(list, len, dir)
     endif
     call remove(list, r)
     if !readable
-      call filter(list, "match(v:val['filename'], file)")
+      call filter(list, "stridx(v:val['filename'], file)==-1")
     endif
   endwhile
   return result

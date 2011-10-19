@@ -1018,9 +1018,9 @@ function! s:ParseSearchResult(searchPath, searchResult, filepattern, shellenc, f
   endfor
   silent! exec 'lchdir ' . prevPath
   if s:debug && len(qflist) == 0 && a:searchResult != ''
-    let mes = iconv(g:MyGrep_retval, a:shellenc, &enc)
-    redraw | echoe string(mes)
-    let choice = confirm(mes, "&OK")
+    " let mes = iconv(g:MyGrep_retval, a:shellenc, &enc)
+    " redraw | echoe string(mes)
+    " let choice = confirm(mes, "&OK")
   endif
   return qflist
 endfunction

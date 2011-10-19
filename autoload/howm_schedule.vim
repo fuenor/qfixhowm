@@ -614,7 +614,7 @@ function! s:HolidayVimgrep(dir, file)
   for d in sq
     let d['bufnr'] = ''
     let d['col'] = ''
-    let d['filename'] = a:dir . '/' . file
+    let d['filename'] = file
   endfor
   call setloclist(0, saved_sq)
   return sq
@@ -756,7 +756,12 @@ function! s:AddTodayLine(qflist)
   if exists('g:QFixHowmToday')
     let today = QFixHowmDate2Int(g:QFixHowmToday)
   endif
-  let todayfname = expand(g:howm_dir).'/'.g:QFixHowm_TodayFname
+  let l:howm_dir = expand(g:howm_dir)
+  if g:QFixHowm_ScheduleSearchDir != ''
+    let l:howm_dir = expand(g:QFixHowm_ScheduleSearchDir)
+  endif
+  let l:howm_dir = QFixNormalizePath(l:howm_dir)
+  let todayfname = g:QFixHowm_TodayFname
   let todaypriority = g:QFixHowm_ReminderPriority[g:QFixHowm_TodayLineType]
   let sepdat = {"priority":today, "text": strftime('['.s:hts_dateTime.']$'), "typepriority":todaypriority, "filename":todayfname, "lnum":0}
   call add(qflist, sepdat)
@@ -804,7 +809,7 @@ function! s:AddTodayLine(qflist)
     let str = strftime('['.s:hts_date.']')
   endif
   let str = strftime('['.s:hts_dateTime.']')
-  let file = g:howm_dir . '/' . g:QFixHowm_ShowTodayLineStr
+  let file = l:howm_dir . '/' . g:QFixHowm_ShowTodayLineStr
   let text = str . dow . '||'.g:QFixHowm_ShowTodayLineStr
   let file = todayfname
   let text = g:QFixHowm_ShowTodayLineStr . ' ' . str . dow . g:QFixHowm_ShowTodayLineStr
@@ -844,6 +849,8 @@ function! s:AddTodayLine(qflist)
         let QFixHowmReminderTodayLine -= 1
         break
       endif
+    elseif qflist[idx].lnum == -1
+      let qflist[idx].lnum = '0'
     endif
   endfor
   if QFixHowmReminderTodayLineBeg+1 == QFixHowmReminderTodayLine || QFixHowmReminderTodayLineBeg == 0 || removebeg || g:QFixHowm_ShowTodayLine < 3

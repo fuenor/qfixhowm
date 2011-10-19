@@ -44,7 +44,7 @@ if !exists('g:HowmFiles_Preview')
 endif
 
 let s:howmsuffix = 'howm'
-let s:filehead = 'howm://'
+let s:filehead = '\(howm\|sche\)://'
 
 """"""""""""""""""""""""""""""
 " 高速リスト一覧
@@ -84,15 +84,19 @@ endfunction
 function! s:Getfile(lnum, ...)
   let l = a:lnum
   let str = getline(l)
+  let dir = g:qfixmemo_dir
   if a:0
     let head = a:1
     if str !~ '^'.head
       return ['', 0]
     endif
+    if g:QFixHowm_ScheduleSearchDir != '' && str =~ '^sche://'
+      let dir = g:QFixHowm_ScheduleSearchDir
+    endif
     let str = substitute(str, '^'.head, '', '')
   endif
   let file = substitute(str, '|.*$', '', '')
-  silent! exec 'lchdir ' . escape(g:qfixmemo_dir, ' ')
+  silent! exec 'lchdir ' . escape(dir, ' ')
   let file = fnamemodify(file, ':p')
   if !filereadable(file)
     return ['', 0]
@@ -389,13 +393,13 @@ function! QFixHowmOpenMenu(...)
   endif
   call cursor(1, 1)
   if use_reminder
-    call s:HowmMenuReplace(reminder, '^\s*%reminder')
+    call s:HowmMenuReplace(reminder, '^\s*%reminder', 'sche://')
   endif
   if use_recent
-    call s:HowmMenuReplace(recent, '^\s*%recent')
+    call s:HowmMenuReplace(recent, '^\s*%recent', 'howm://')
   endif
   if use_random
-    call s:HowmMenuReplace(random, '^\s*%random')
+    call s:HowmMenuReplace(random, '^\s*%random', 'howm://')
   endif
   call setpos('.', g:HowmMenuLnum)
   if exists("*QFixHowmOpenMenuPost")
@@ -428,7 +432,7 @@ function! s:GetBufferInfo()
   return 1
 endfunction
 
-function! s:HowmMenuReplace(sq, rep, ...)
+function! s:HowmMenuReplace(sq, rep, head)
   let glist = []
   for d in a:sq
     if exists('d["filename"]')
@@ -437,14 +441,10 @@ function! s:HowmMenuReplace(sq, rep, ...)
       let file = bufname(d['bufnr'])
     endif
     let file = fnamemodify(file, ':.')
-    let file = 'howm://'.file
+    let file = a:head.file
     call add(glist, printf("%s|%d| %s", file, d['lnum'], d['text']))
   endfor
-  if a:0
-    let from = a:1
-    let to   = &enc
-    call map(glist, 'iconv(v:val, from, to)')
-  endif
+  silent! exec 'lchdir ' . prevPath
   let save_cursor = getpos('.')
   call cursor(1,1)
   if search(a:rep, 'cW') > 0

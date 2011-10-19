@@ -345,6 +345,7 @@ function! QFixHowmOpenMenu(...)
     endif
     let g:QFix_UseLocationList = saved_ull
   endif
+  redraw|echo ''
 
   let menubuf = 0
   for i in range(1, winnr('$'))

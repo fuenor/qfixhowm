@@ -2,9 +2,9 @@
 "    Description: 拡張Quickfixに対応したhowm
 "         Author: fuenor <fuenor@gmail.com>
 "                 http://sites.google.com/site/fudist/Home/qfixhowm
-"  Last Modified: 2011-10-04 16:28
+"  Last Modified: 2011-10-18 19:09
 "=============================================================================
-let s:Version = 2.52
+let s:Version = 2.53
 scriptencoding utf-8
 "キーマップリーダーが g の場合、「新規ファイルを作成」は g,c です。
 "簡単な使い方はg,Hのヘルプで、詳しい使い方は以下のサイトを参照してください。
@@ -294,6 +294,11 @@ function! s:makeRegxp(dpattern)
   let s:sch_date = substitute(s:sch_date, '%d', '\\d\\{2}', 'g')
   let g:QFixHowm_Date = s:sch_date
 
+  let s:sch_date_eom = s:hts_date
+  let s:sch_date_eom = substitute(s:sch_date_eom, '%Y', '\\d\\{4}', 'g')
+  let s:sch_date_eom = substitute(s:sch_date_eom, '%m', '\\d\\{2}', 'g')
+  let s:sch_date_eom = substitute(s:sch_date_eom, '%d', '00', 'g')
+
   let s:sch_printfDate = s:hts_date
   let s:sch_printfDate = substitute(s:sch_printfDate, '%Y', '%4.4d', 'g')
   let s:sch_printfDate = substitute(s:sch_printfDate, '%m', '%2.2d', 'g')
@@ -337,6 +342,7 @@ let s:LT_todo = 0
 let s:sq_todo = []
 let s:LT_menu = 0
 let s:sq_menu = []
+let s:sq_reminder = []
 let s:howmtempfile = g:qfixtempname
 
 " jvgrep使用時に正規表現[-abc]の - をエスケープして実行
@@ -355,6 +361,7 @@ function! QFixHowmInsertDate(fmt)
   startinsert
 endfunction
 
+let s:reminder_cache = 0
 function! QFixHowmListReminderCache(mode)
   if count > 0
     if a:mode =~ 'schedule'
@@ -371,21 +378,9 @@ function! QFixHowmListReminderCache(mode)
     let lt = g:QFixHowm_ListReminderCacheTime + 1
   endif
   if g:QFixHowm_ListReminderCacheTime > 0 && lt < g:QFixHowm_ListReminderCacheTime
-    exec 'let sq = s:sq_' . a:mode
-    if a:mode == 'menu'
-      redraw|echo 'QFixHowm : Cached '.a:mode . '. ('.lt/60.' minutes ago)'
-      return sq
-    endif
-    QFixCclose
-    let l:howm_dir = g:howm_dir
-    let g:QFix_SearchPath = l:howm_dir
-    call QFixSetqflist(sq)
-    QFixCopen
-    call cursor(1, 1)
-    redraw|echo 'QFixHowm : Cached '.a:mode . '. ('.lt/60.' minutes ago)'
-    if g:QFixHowm_SchedulePreview == 0 && g:QFix_PreviewEnable == 1
-      let g:QFix_PreviewEnable = -1
-    endif
+    let s:reminder_cache = 1
+    exec 'let sq_reminder = s:sq_' . a:mode
+    return QFixHowmListReminder(a:mode)
   else
     return QFixHowmListReminder(a:mode)
   endif
@@ -426,7 +421,10 @@ function! s:QFixHowmListReminder_(mode)
   if g:QFixHowm_ScheduleSearchFile != ''
     let l:SearchFile = g:QFixHowm_ScheduleSearchFile
   endif
-  let holiday_sq = s:HolidayVimgrep(l:howm_dir, g:QFixHowm_HolidayFile)
+
+  if s:reminder_cache == 0
+    let holiday_sq = s:HolidayVimgrep(l:howm_dir, g:QFixHowm_HolidayFile)
+  endif
   QFixCclose
   let prevPath = escape(getcwd(), ' ')
   silent! exec 'lchdir ' . escape(l:howm_dir, ' ')
@@ -466,29 +464,36 @@ function! s:QFixHowmListReminder_(mode)
     endif
   endif
   let searchPath = l:howm_dir
-  if exists('*MultiHowmDirGrep')
-    if g:QFixHowm_ScheduleSearchDir == ''
-      let addflag = MultiHowmDirGrep(searchWord, searchPath, l:SearchFile, g:howm_fileencoding, addflag)
-    else
-      let addflag = MultiHowmDirGrep(searchWord, searchPath, l:SearchFile, g:howm_fileencoding, addflag, 'g:QFixHowm_ScheduleSearchDir')
+  if s:reminder_cache == 0
+    redraw | echo 'QFixHowm : Searching...'
+    if exists('*MultiHowmDirGrep')
+      if g:QFixHowm_ScheduleSearchDir == ''
+        let addflag = MultiHowmDirGrep(searchWord, searchPath, l:SearchFile, g:howm_fileencoding, addflag)
+      else
+        let addflag = MultiHowmDirGrep(searchWord, searchPath, l:SearchFile, g:howm_fileencoding, addflag, 'g:QFixHowm_ScheduleSearchDir')
+      endif
     endif
+    let g:MyGrep_Return = 1
+    let sq = MyGrep(searchWord, searchPath, l:SearchFile, g:howm_fileencoding, addflag)
+    call extend(sq, holiday_sq)
+    let s:UseTitleFilter = 1
+    call QFixHowmTitleFilter(sq)
+    redraw|echo 'QFixHowm : Sorting...'
+    let sq = s:QFixHowmSortReminder(sq, a:mode)
+    exec 'let s:sq_' . a:mode . ' = deepcopy(sq)'
+    exec 'let s:LT_' . a:mode . ' = localtime()'
+  else
+    exec 'let sq = deepcopy(s:sq_' . a:mode . ')'
   endif
-  redraw | echo 'QFixHowm : Searching...'
-  call MyGrep(searchWord, searchPath, l:SearchFile, g:howm_fileencoding, addflag)
-  let sq = QFixGetqflist()
-  call extend(sq, holiday_sq)
-  let s:UseTitleFilter = 1
-  call QFixHowmTitleFilter(sq)
-  redraw|echo 'QFixHowm : Sorting...'
-  let sq = s:QFixHowmSortReminder(sq, a:mode)
-  " for d in holiday_sq
-  "   call filter(sq, "v:val['text'] == d['text']")
-  " endfor
+  let sq = s:AddTodayLine(sq)
+  let sq = s:CnvDayOfWeek(sq)
+  if a:mode == 'menu'
+    let s:reminder_cache = 0
+    return sq
+  endif
   if empty(sq)
     redraw | echo 'QFixHowm : Not found!'
   else
-    exec 'let s:LT_' . a:mode . ' = localtime()'
-    exec 'let s:sq_' . a:mode . ' = sq'
     redraw|echo 'QFixHowm : Set quickfix list...'
     call QFixSetqflist(sq)
     redraw | echo ''
@@ -497,8 +502,13 @@ function! s:QFixHowmListReminder_(mode)
     if g:QFixHowm_SchedulePreview == 0 && g:QFix_PreviewEnable == 1
       let g:QFix_PreviewEnable = -1
     endif
+    if s:reminder_cache
+      exec 'let lt = localtime() - s:LT_' . a:mode
+      redraw|echo 'QFixHowm : Cached '.a:mode . '. ('.lt/60.' minutes ago)'
+    endif
   endif
   silent! exec 'lchdir ' . prevPath
+  let s:reminder_cache = 0
   return sq
 endfunction
 
@@ -633,6 +643,21 @@ function! s:QFixHowmSortReminder(sq, mode)
   let idx = 0
   for d in qflist
     let d.text = substitute(d.text, '\s*', '','')
+    let str = matchstr(d.text, '^\['.s:sch_date)
+    let str = substitute(str, '^\[', '', '')
+    let searchWord = ']'.s:sch_cmd
+    let cmd = matchstr(d.text, searchWord)
+    let cmd = substitute(cmd, '^]', '', '')
+    let opt = matchstr(cmd, '[0-9]*$')
+
+    " 単発予定で非表示を除去
+    if cmd == '@' && opt == '' && str !~ s:sch_date_eom
+      if QFixHowmDate2Int(str) < today - g:QFixHowm_ReminderDefault_Schedule
+        call remove(qflist, idx)
+        continue
+      endif
+    endif
+    " 終了指定対象を除去
     let estr = matchstr(d.text, '&'.s:sch_dateT.'\.')
     let estr = substitute(estr, '^&', '','')
     let elen = strlen(estr)
@@ -650,12 +675,6 @@ function! s:QFixHowmSortReminder(sq, mode)
       endif
     endif
 
-    let str = matchstr(d.text, '^\['.s:sch_date)
-    let str = substitute(str, '^\[', '', '')
-    let searchWord = ']'.s:sch_cmd
-    let cmd = matchstr(d.text, searchWord)
-    let cmd = substitute(cmd, '^]', '', '')
-    let opt = matchstr(cmd, '[0-9]*$')
     let str = s:CnvRepeatDate(cmd, opt, str)
     let d.text = '[' . str . strpart(d.text, 11)
     let desc  = escape(cmd[0], '~')
@@ -727,9 +746,19 @@ function! s:QFixHowmSortReminder(sq, mode)
     let idx = idx + 1
   endfor
 
+  return qflist
+endfunction
+
+" リマインダーに今日の日付と時刻表示を追加
+function! s:AddTodayLine(qflist)
+  let qflist = a:qflist
+  let today = QFixHowmDate2Int(strftime(s:hts_date))
+  if exists('g:QFixHowmToday')
+    let today = QFixHowmDate2Int(g:QFixHowmToday)
+  endif
   let todayfname = expand(g:howm_dir).'/'.g:QFixHowm_TodayFname
   let todaypriority = g:QFixHowm_ReminderPriority[g:QFixHowm_TodayLineType]
-  let sepdat = {"priority":today, "text": strftime('['.s:hts_dateTime.']$'), "typepriority":todaypriority, "filename":todayfname, "lnum":0, "bufnr":-1}
+  let sepdat = {"priority":today, "text": strftime('['.s:hts_dateTime.']$'), "typepriority":todaypriority, "filename":todayfname, "lnum":0}
   call add(qflist, sepdat)
   let qflist = sort(qflist, "s:QFixComparePriority")
 
@@ -738,7 +767,6 @@ function! s:QFixHowmSortReminder(sq, mode)
   let QFixHowmReminderTodayLine = 0
   let prevtext = ''
   let prevpriority = -1
-
   let tline = 0
   for d in qflist
     if d.priority == prevpriority && d.text == prevtext && g:QFixHowm_RemoveSameSchedule == 1
@@ -748,7 +776,6 @@ function! s:QFixHowmSortReminder(sq, mode)
     let tline += 1
     let prevtext = d.text
     let prevpriority = d.priority
-    "FIXME:
     if g:QFixHowm_ReminderSortMode
       if d.priority > today
         let QFixHowmReminderTodayLineBeg = QFixHowmReminderTodayLineBeg + 1
@@ -778,18 +805,18 @@ function! s:QFixHowmSortReminder(sq, mode)
   endif
   let str = strftime('['.s:hts_dateTime.']')
   let file = g:howm_dir . '/' . g:QFixHowm_ShowTodayLineStr
-  let lnum = '0'
   let text = str . dow . '||'.g:QFixHowm_ShowTodayLineStr
   let file = todayfname
   let text = g:QFixHowm_ShowTodayLineStr . ' ' . str . dow . g:QFixHowm_ShowTodayLineStr
-  let sep = {"filename": file, "lnum": lnum, "text": text, "bufnr":0}
+  let lnum = '-1'
+  let sep = {"filename": file, "lnum": lnum, "text": text}
   if g:QFixHowm_ShowTodayLine > 0
     call insert(qflist, sep, QFixHowmReminderTodayLine)
   endif
   let QFixHowmReminderTodayLine += 1
   let str = strftime('['.s:hts_date.']')
   let text = g:QFixHowm_ShowTodayLineStr
-  let sep = {"filename": file, "lnum": lnum, "text": text, "bufnr":0}
+  let sep = {"filename": file, "lnum": lnum, "text": text}
   if g:QFixHowm_ShowTodayLine > 0
     call insert(qflist, sep, QFixHowmReminderTodayLineBeg)
   endif
@@ -806,9 +833,8 @@ function! s:QFixHowmSortReminder(sq, mode)
   endfor
   let removebeg = 0
   for idx in range(len(qflist))
-    if qflist[idx].bufnr == -1
+    if qflist[idx].lnum == 0
       if g:QFixHowm_ShowTodayLine >= 2 && hastime > 1 && idx+1 != QFixHowmReminderTodayLine
-        let qflist[idx].bufnr = 0
         let qflist[idx].text = text
         if idx-1 == QFixHowmReminderTodayLineBeg
           let removebeg = 1
@@ -825,30 +851,37 @@ function! s:QFixHowmSortReminder(sq, mode)
       call remove(qflist, QFixHowmReminderTodayLineBeg)
     endif
   endif
+  return qflist
+endfunction
 
+" 曜日表示変更
+function! s:CnvDayOfWeek(qf)
   if !exists('g:QFixHowm_DayOfWeekDic')
-    return qflist
+    return a:qf
   endif
   let pattern = '^' . s:sch_dateT . s:sch_Ext . ' '.s:sch_dow.' '
-  for idx in range(len(qflist))
-    let text = qflist[idx].text
+  for idx in range(len(a:qf))
+    let text = a:qf[idx].text
     let dow = matchstr(text, pattern)
     let dow = matchstr(text, s:sch_dow)
     if dow == ''
       continue
     endif
     let to_dow = g:QFixHowm_DayOfWeekDic[dow]
-    let qflist[idx].text = substitute(text, dow, to_dow, '')
+    let a:qf[idx].text = substitute(text, dow, to_dow, '')
   endfor
-
-  return qflist
+  return a:qf
 endfunction
 
 " 繰り返す予定のプライオリティをセットする。
+" FIXME: Too slow!
 function! s:CnvRepeatDate(cmd, opt, str, ...)
   let cmd = a:cmd
   let opt = a:opt
   let str = a:str
+  if len(cmd) == 1 && opt == '' && str !~ s:sch_date_eom
+    return str
+  endif
   let sft = ''
   " 月末指定のオフセットを特別扱い
   if cmd =~ '([-+]\d\+)'
@@ -2625,6 +2658,7 @@ if exists('g:HowmSchedule_only') && g:HowmSchedule_only
   finish
 endif
 
+"=============================================================================
 "折りたたみに ワイルドカードチャプターを使用する
 if !exists('g:QFixHowm_WildCardChapter')
   let g:QFixHowm_WildCardChapter = 0
@@ -2645,14 +2679,6 @@ endif
 if !exists('g:QFixHowm_FoldingMode')
   let g:QFixHowm_FoldingMode = 0
 endif
-
-silent! function QFixHowmFoldingLevel(lnum)
-  if g:QFixHowm_WildCardChapter
-    return QFixHowmFoldingLevelWCC(a:lnum)
-  else
-    return getline(a:lnum) =~ g:QFixHowm_FoldingPattern ? '>1' : '1'
-  endif
-endfunction
 
 " *. 形式のワイルドカードチャプター対応フォールディング
 let s:schepat = '^\s*'.s:sch_dateT.s:sch_Ext

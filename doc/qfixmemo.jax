@@ -425,15 +425,17 @@ qfixmemo_foldingが 0 だと qfixmemoのフォールディングは無効化さ�
   let qfixmemo_folding         = 1
   let qfixmemo_folding_pattern = '^=[^=]'
 
-フォールディング有効時の評価は QFixMemoFoldingLevel()で行われます。
-.vimrc等でQFixMemoFoldingLevel()を定義すると、そちらが優先されるので必要なら好
+フォールディング設定はQFixMemoSetFolding()で行われます。
+.vimrc等でQFixMemoSetFolding()を定義すると、そちらが優先されるので必要なら好
 みの関数を作成してください。
-デフォルトでは以下の関数と同等の式が評価されます。
+デフォルトでは以下の関数と同等の式が設定されます。
 
 .vimrc >
   " フォールディングレベル計算
-  function! QFixMemoFoldingLevel(lnum)
-    return getline(a:lnum) =~ g:qfixmemo_folding_pattern ? '>1' : '1'
+  function! QFixMemoSetFolding()
+    setlocal nofoldenable
+    setlocal foldmethod=expr
+    setlocal foldexpr=getline(v:lnum)=~g:qfixmemo_folding_pattern?'>1':'1'
   endfunction
 
 ==============================================================================

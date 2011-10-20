@@ -375,7 +375,7 @@ function! QFixHowmListReminderCache(mode)
   endif
   exec 'let lt = localtime() - s:LT_' . a:mode
   if count
-    let lt = g:QFixHowm_ListReminderCacheTime + 1
+    " let lt = g:QFixHowm_ListReminderCacheTime + 1
   endif
   if g:QFixHowm_ListReminderCacheTime > 0 && lt < g:QFixHowm_ListReminderCacheTime
     let s:reminder_cache = 1

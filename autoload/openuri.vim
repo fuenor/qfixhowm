@@ -98,9 +98,9 @@ silent! function QFixHowmOpenCursorline()
     let str = substitute(str, '^\s*\|\s*$', '', 'g')
     let str = substitute(str, '^'.g:howm_glink_pattern.'\s*', '', '')
     let path = l:QFixHowm_RelPath . (str =~ 'rel://[^/\\]' ? '/' : '')
-    let str = substitute(str, 'rel://', path, 'g')
+    let str = substitute(str, 'rel://', path, '')
     let path = l:howm_dir . (str =~ 'howm://[^/\\]' ? '/' : '')
-    let str = substitute(str, 'howm://', path, 'g')
+    let str = substitute(str, 'howm://', path, '')
     let imgsfx = '\(\.jpg\|\.jpeg\|\.png\|\.bmp\|\.gif\)$'
     if str =~ imgsfx
       let str = substitute(str, '^&', '', '')
@@ -131,9 +131,9 @@ silent! function QFixHowmOpenCursorline()
       endif
       let str = substitute(str, '^\[:\?&\?', '', '')
       let path = l:QFixHowm_RelPath . (str =~ 'rel://[^/\\]' ? '/' : '')
-      let str = substitute(str, 'rel://', path, 'g')
+      let str = substitute(str, 'rel://', path, '')
       let path = l:howm_dir . (str =~ 'howm://[^/\\]' ? '/' : '')
-      let str = substitute(str, 'howm://', path, 'g')
+      let str = substitute(str, 'howm://', path, '')
       return s:openstr(str)
     endif
   endif
@@ -161,9 +161,9 @@ silent! function QFixHowmOpenCursorline()
   let str = substitute(str, ':$\|\(|:title=\|:image\|:image[:=]\)'.pathchr.'*$', '', '')
   if str != ''
     let path = l:QFixHowm_RelPath . (str =~ 'rel://[^/\\]' ? '/' : '')
-    let str = substitute(str, 'rel://', path, 'g')
+    let str = substitute(str, 'rel://', path, '')
     let path = l:howm_dir . (str =~ 'howm://[^/\\]' ? '/' : '')
-    let str = substitute(str, 'howm://', path, 'g')
+    let str = substitute(str, 'howm://', path, '')
     return s:openstr(str)
   endif
   return "\<CR>"

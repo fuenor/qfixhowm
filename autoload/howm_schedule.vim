@@ -640,6 +640,9 @@ function! s:QFixHowmSortReminder(sq, mode)
     let tsec  = QFixHowmDate2Int(g:QFixHowmToday . ' 00:00')
   endif
 
+  let ttime = (today - g:QFixHowm_ReminderDefault_Schedule - g:DateStrftime) * 24 * 60 * 60 + g:QFixHowm_ST * (60 * 60) "JST = -9
+  let todaychk = strftime(s:hts_date, ttime)
+
   let idx = 0
   for d in qflist
     let d.text = substitute(d.text, '\s*', '','')
@@ -652,7 +655,7 @@ function! s:QFixHowmSortReminder(sq, mode)
 
     " 単発予定で非表示を除去
     if cmd == '@' && opt == '' && str !~ s:sch_date_eom
-      if QFixHowmDate2Int(str) < today - g:QFixHowm_ReminderDefault_Schedule
+      if str < todaychk
         call remove(qflist, idx)
         continue
       endif

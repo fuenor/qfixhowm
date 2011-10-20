@@ -479,12 +479,13 @@ function! s:QFixHowmListReminder_(mode)
     let s:UseTitleFilter = 1
     call QFixHowmTitleFilter(sq)
     redraw|echo 'QFixHowm : Sorting...'
-    let sq = s:QFixHowmSortReminder(sq, a:mode)
+    let sq = s:QFixHowmSortReminderPre(sq)
     exec 'let s:sq_' . a:mode . ' = deepcopy(sq)'
     exec 'let s:LT_' . a:mode . ' = localtime()'
   else
     exec 'let sq = deepcopy(s:sq_' . a:mode . ')'
   endif
+  let sq = s:QFixHowmSortReminder(sq, a:mode)
   let sq = s:AddTodayLine(sq)
   let sq = s:CnvDayOfWeek(sq)
   if a:mode == 'menu'
@@ -502,6 +503,7 @@ function! s:QFixHowmListReminder_(mode)
     if g:QFixHowm_SchedulePreview == 0 && g:QFix_PreviewEnable == 1
       let g:QFix_PreviewEnable = -1
     endif
+    exe 'normal! zz'
     if s:reminder_cache
       exec 'let lt = localtime() - s:LT_' . a:mode
       redraw|echo 'QFixHowm : Cached '.a:mode . '. ('.lt/60.' minutes ago)'
@@ -603,6 +605,7 @@ function! s:HolidayVimgrep(dir, file)
   silent! exec cmd
   silent! exec 'lchdir ' . prevPath
   let sq = getloclist(0)
+  let sq = s:QFixHowmSortReminderPre(sq)
   let sq = s:QFixHowmSortReminder(sq, 'holiday')
   call filter(sq, "v:val['lnum']")
   let s:HolidayList = []
@@ -652,31 +655,6 @@ function! s:QFixHowmSortReminder(sq, mode)
     let cmd = matchstr(d.text, searchWord)
     let cmd = substitute(cmd, '^]', '', '')
     let opt = matchstr(cmd, '[0-9]*$')
-
-    " 単発予定で非表示を除去
-    if cmd == '@' && opt == '' && str !~ s:sch_date_eom
-      if str < todaychk
-        call remove(qflist, idx)
-        continue
-      endif
-    endif
-    " 終了指定対象を除去
-    let estr = matchstr(d.text, '&'.s:sch_dateT.'\.')
-    let estr = substitute(estr, '^&', '','')
-    let elen = strlen(estr)
-    if elen > 14
-      let esec = QFixHowmDate2Int(estr)
-      if estr != '' && tsec > esec
-        call remove(qflist, idx)
-        continue
-      endif
-    else
-      let eday = QFixHowmDate2Int(estr)
-      if estr != '' && today > eday + g:QFixHowm_EndDateOffset
-        call remove(qflist, idx)
-        continue
-      endif
-    endif
 
     let str = s:CnvRepeatDate(cmd, opt, str)
     let d.text = '[' . str . strpart(d.text, 11)
@@ -751,6 +729,58 @@ function! s:QFixHowmSortReminder(sq, mode)
 
   return qflist
 endfunction
+
+function! s:QFixHowmSortReminderPre(sq)
+  let qflist = a:sq
+  let today = QFixHowmDate2Int(strftime(s:hts_date))
+  let tsec = localtime()
+  if exists('g:QFixHowmToday')
+    let today = QFixHowmDate2Int(g:QFixHowmToday)
+    let tsec  = QFixHowmDate2Int(g:QFixHowmToday . ' 00:00')
+  endif
+
+  let ttime = (today - g:QFixHowm_ReminderDefault_Schedule - g:DateStrftime) * 24 * 60 * 60 + g:QFixHowm_ST * (60 * 60) "JST = -9
+  let todaychk = strftime(s:hts_date, ttime)
+
+  let idx = 0
+  for d in qflist
+    let d.text = substitute(d.text, '\s*', '','')
+    let str = matchstr(d.text, '^\['.s:sch_date)
+    let str = substitute(str, '^\[', '', '')
+    let searchWord = ']'.s:sch_cmd
+    let cmd = matchstr(d.text, searchWord)
+    let cmd = substitute(cmd, '^]', '', '')
+    let opt = matchstr(cmd, '[0-9]*$')
+
+    " 単発予定で非表示を除去
+    if cmd == '@' && opt == '' && str !~ s:sch_date_eom
+      if str < todaychk
+        call remove(qflist, idx)
+        continue
+      endif
+    endif
+    " 終了指定対象を除去
+    let estr = matchstr(d.text, '&'.s:sch_dateT.'\.')
+    let estr = substitute(estr, '^&', '','')
+    let elen = strlen(estr)
+    if elen > 14
+      let esec = QFixHowmDate2Int(estr)
+      if estr != '' && tsec > esec
+        call remove(qflist, idx)
+        continue
+      endif
+    else
+      let eday = QFixHowmDate2Int(estr)
+      if estr != '' && today > eday + g:QFixHowm_EndDateOffset
+        call remove(qflist, idx)
+        continue
+      endif
+    endif
+    let idx += 1
+  endfor
+  return qflist
+endfunction
+
 
 " リマインダーに今日の日付と時刻表示を追加
 function! s:AddTodayLine(qflist)

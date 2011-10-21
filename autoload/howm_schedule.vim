@@ -601,7 +601,7 @@ function! s:HolidayVimgrep(dir, file)
   exec 'lchdir ' . escape(dir, ' ')
   let saved_sq = getloclist(0)
   lexpr ""
-  let cmd = 'lvimgrep /' . escape(pattern, '/') . '/j ' . file
+  let cmd = 'lvimgrep /' . escape(pattern, '/') . '/j ' . escape(file, ' ')
   silent! exec cmd
   silent! exec 'lchdir ' . prevPath
   let sq = getloclist(0)

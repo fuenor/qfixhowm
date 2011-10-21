@@ -108,6 +108,8 @@ function! QFixMemoInit(init)
 endfunction
 
 let s:howmsuffix        = 'howm'
+" 常にqfixmemoファイルとして扱うファイルの正規表現
+let g:qfixmemo_isqfixmemo_regxp = '\c\.howm$'
 if !exists('howm_dir')
   let howm_dir          = '~/howm'
 endif
@@ -284,8 +286,16 @@ endif
 if !exists('g:QFixHowm_Menufile')
   let g:QFixHowm_Menufile = 'Menu-00-00-000000.'.s:howmsuffix
 endif
+
+" 折りたたみを有効にする。
+if !exists('g:QFixHowm_Folding')
+  let g:QFixHowm_Folding = 1
+endif
+
 augroup QFixHowmKeyword
   au!
+  exe 'au BufNewFile,BufRead '. expand(g:SubWindow_Title)   .' let b:qfixmemo_bufwrite_pre = 0'
+  exe 'au BufNewFile,BufRead '. expand(g:QFixHowm_Menufile) .' let b:qfixmemo_bufwrite_pre = 0'
   exe 'au BufWritePre '. expand(g:SubWindow_Title)   .' call qfixmemo#AddKeyword()'
   exe 'au BufWritePre '. expand(g:QFixHowm_Menufile) .' call qfixmemo#AddKeyword()'
 augroup END
@@ -295,24 +305,14 @@ if !exists('g:howm_clink_pattern')
 endif
 function! QFixMemoRebuildKeyword(dir, fenc)
   let extlist = []
-  " return extlist
-  let l:howm_dir = expand(g:howm_dir)
-  let prevPath = escape(getcwd(), ' ')
   silent! cexpr ''
-  let s:KeywordDic = []
-  let file = g:QFixHowm_Menufile
-  if g:QFixHowm_MenuDir == ''
-    silent! exec 'lchdir ' . escape(l:howm_dir, ' ')
-  else
-    silent! exec 'lchdir ' . escape(expand(g:QFixHowm_MenuDir), ' ')
-  endif
-  silent! exec 'vimgrepadd /\('.g:howm_clink_pattern.'\|'.'\[\[[^\]]\+\]\]'.'\)/j '. file
-  let file = expand(g:SubWindow_Title)
-  silent! exec 'vimgrepadd /\('.g:howm_clink_pattern.'\|'.'\[\[[^\]]\+\]\]'.'\)/j '. file
+  let file = g:howm_dir
+  let file = g:QFixHowm_MenuDir == '' ? g:howm_dir : g:QFixHowm_MenuDir
+  let file = expand(file) . '/' . g:QFixHowm_Menufile
+  silent! exec 'vimgrepadd /\('.g:howm_clink_pattern.'\|'.'\[\[[^\]]\+\]\]'.'\)/j '. escape(file, ' ')
   let qflist = getqflist()
   call extend(extlist, qflist)
   silent! cexpr ''
-  silent! exec 'lchdir ' . prevPath
   return extlist
 endfunction
 
@@ -437,21 +437,12 @@ function! QFixHowmSetup()
   let g:qfixmemo_keyword_dir  = g:QFixHowm_WikiDir
 endfunction
 
-if exists('g:QFixMRU_RegisterFile') && g:QFixMRU_RegisterFile == ''
-  let g:QFixMRU_RegisterFile = '\.\(howm\|txt\|mkd\|wiki\)$'
-endif
-
 silent! function QFixMemoQFBufWinEnterPost()
   if exists("*QFixHowmExportSchedule")
     nnoremap <buffer> <silent> !  :call QFixHowmCmd_ScheduleList()<CR>
     vnoremap <buffer> <silent> !  :call QFixHowmCmd_ScheduleList('visual')<CR>
   endif
 endfunction
-
-" 折りたたみを有効にする。
-if !exists('g:QFixHowm_Folding')
-  let g:QFixHowm_Folding = 1
-endif
 
 """"""""""""""""""""""""""""""
 " global keymap

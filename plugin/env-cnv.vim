@@ -108,6 +108,8 @@ function! QFixMemoInit(init)
 endfunction
 
 let s:howmsuffix        = 'howm'
+" 常にqfixmemoファイルとして扱うファイルの正規表現
+let g:qfixmemo_isqfixmemo_regxp = '\c\.howm$'
 if !exists('howm_dir')
   let howm_dir          = '~/howm'
 endif
@@ -133,7 +135,7 @@ endif
 if !exists('g:QFixHowm_QuickMemoFile')
   let g:QFixHowm_QuickMemoFile = 'Qmem-00-0000-00-00-000000.'.g:QFixHowm_FileExt
 endif
-let g:qfixmemo_quickmemo = fnamemodify(g:QFixHowm_QuickMemoFile, ':r')
+let g:qfixmemo_quickmemo = g:QFixHowm_QuickMemoFile
 
 " 日記メモファイル名
 if !exists('g:QFixHowm_DiaryFile')
@@ -366,10 +368,10 @@ function! QFixHowmSetup()
   " 日記ファイル名
   let g:qfixmemo_diary         = fnamemodify(g:QFixHowm_DiaryFile, ':r')
   " クイックメモファイル名
-  let g:qfixmemo_quickmemo     = fnamemodify(g:QFixHowm_QuickMemoFile, ':r')
+  let g:qfixmemo_quickmemo     = g:QFixHowm_QuickMemoFile
   for i in range(1, 9)
     if exists('g:QFixHowm_QuickMemoFile'.i)
-      exe printf('let g:qfixmemo_quickmemo%d=fnamemodify(g:QFixHowm_QuickMemoFile%d, ":r")', i, i)
+      exe printf('let g:qfixmemo_quickmemo%d=g:QFixHowm_QuickMemoFile%d', i, i)
     endif
   endfor
   " ペアファイルの作成先ディレクトリ

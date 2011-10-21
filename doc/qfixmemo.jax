@@ -221,6 +221,11 @@ http://sites.google.com/site/fudist/Home/grep/install
 クイックメモが開かれます。
 クイックメモは g,U でデフォルト(qfixmemo_quickmemo)に戻すことが出来ます。
 
+NOTE:
+クイックメモで開くファイル
+- 指定ファイル名に拡張子が存在しない場合はqfixmemo_extを拡張子として付加します
+- フルパスで指定すると qfixmemo_dir外のファイルを開くことができます
+
 ------------------------------------------------------------------------------
 3.2 ペアファイル					*qfixmemo-pairfile*
 
@@ -490,7 +495,7 @@ g,rN を実行するとqfixmemo_dir内のメモファイルをまとめて「タ
 なお i は通常の編集コマンドとして使用するので、プレビューのON/OFFが必要な場合
 は I でトグルを実行してください。
 
-"NOTE"
+NOTE:
 バックアップを取った上で何度か実行してみる事をおすすめします。
 
 ==============================================================================
@@ -615,7 +620,7 @@ qfixmemo#EditFile() を使用します。
 g,Jで qfixmemo_dir/example.nvl を開く例 >
   nnoremap <silent> <Leader>J :<C-u>call qfixmemo#EditFile('example.nvl')<CR>
 
-"NOTE"
+NOTE:
 QFixMemoはキーマップが .vimrcや他のプラグインで定義されていた場合は上書きしま
 せん。このためグローバルキーマップを変更したい場合は .vimrc等でキーマップを直
 接指定することも可能です。

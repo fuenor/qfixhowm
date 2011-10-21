@@ -88,7 +88,11 @@ endif
 " タイムスタンプフォーマット
 if !exists('g:qfixmemo_timeformat')
   let g:qfixmemo_timeformat = '[%Y-%m-%d %H:%M]'
+  if exists('g:QFixHowm_DatePattern')
+    let g:qfixmemo_timeformat = '['. g:QFixHowm_DatePattern . ' %H:%M]'
+  endif
 endif
+
 " 予定・TODO識別子
 if !exists('g:qfixmemo_scheduleext')
   let g:qfixmemo_scheduleext = '-@!+~.'
@@ -252,6 +256,11 @@ endif
 " 自動生成ファイル名(,W ,X)
 if !exists('g:qfixmemo_auto_generate_filename')
   let g:qfixmemo_auto_generate_filename = '%Y-%m-%d-%H%M%S'
+endif
+
+" 常にqfixmemoファイルとして扱うファイルの正規表現
+if !exists('g:qfixmemo_isqfixmemo_regxp')
+  let g:qfixmemo_isqfixmemo_regxp = '\c\.howm$'
 endif
 
 """"""""""""""""""""""""""""""
@@ -904,16 +913,22 @@ function! qfixmemo#Edit(...)
   call qfixmemo#EditFile(file)
 endfunction
 
-" qfixmemo_dir内のファイルを開く
+" qfixmemoファイルを開く
 function! qfixmemo#EditFile(file)
   call qfixmemo#Init()
-  let file = a:file
-  let file = g:qfixmemo_dir . '/' . strftime(file)
-  let file = substitute(fnamemodify(file, ':p'), '\\', '/', 'g')
-
-  let opt = '++enc=' . g:qfixmemo_fileencoding . ' ++ff=' . g:qfixmemo_fileformat . ' '
-  let mode = g:qfixmemo_splitmode ? 'split' : ''
-  call s:edit(file, opt, mode)
+  let prevPath = escape(getcwd(), ' ')
+  exe 'lchdir ' . expand(g:qfixmemo_dir)
+  let file = fnamemodify(strftime(a:file), ':p')
+  silent! exec 'lchdir ' . prevPath
+  if s:isQFixMemo(file)
+    let file = substitute(fnamemodify(file, ':p'), '\\', '/', 'g')
+    let opt = '++enc=' . g:qfixmemo_fileencoding . ' ++ff=' . g:qfixmemo_fileformat . ' '
+    let mode = g:qfixmemo_splitmode ? 'split' : ''
+    call s:edit(file, mode, opt)
+  else
+    let mode = g:qfixmemo_splitmode ? 'split' : ''
+    call QFixEditFile(file, mode)
+  endif
 endfunction
 
 " 新規メモ作成
@@ -938,7 +953,10 @@ function! qfixmemo#Quickmemo(...)
     exe 'let file = g:qfixmemo_quickmemo'.count
     let s:qfixmemo_quickmemo = file
   endif
-  call qfixmemo#Edit(file)
+  if fnamemodify(file, ':e') == ''
+    let file = file . '.' . g:qfixmemo_ext
+  endif
+  call qfixmemo#EditFile(file)
 endfunction
 
 " 日記を開く
@@ -986,8 +1004,8 @@ function! s:edit(file, ...)
     return
   endif
 
-  let opt = a:0 > 0 ? a:1 : ''
-  let mode = a:0 > 1 ? a:2 : ''
+  let mode = a:0 > 0 ? a:1 : ''
+  let opt = a:0 > 1 ? a:2 : ''
   let winnum = bufwinnr(file)
   if winnum == winnr()
     return
@@ -1034,20 +1052,23 @@ function! s:getEditWinnr()
 endfunction
 
 function! s:isQFixMemo(file)
-  let file = a:file
-  if tolower(fnamemodify(file, ':e')) != g:qfixmemo_ext
-    return 0
-  endif
-  let file = fnamemodify(file, ':p')
-  let file = QFixNormalizePath(file, 'compare')
-  let sfile = expand(g:qfixmemo_submenu_title)
-  let sfile = QFixNormalizePath(sfile, 'compare')
-  if file == sfile
+  let file = fnamemodify(a:file, ':p')
+  if g:qfixmemo_isqfixmemo_regxp != '' && file =~ g:qfixmemo_isqfixmemo_regxp
     return 1
   endif
+  let ext = tolower(fnamemodify(file, ':e'))
+  if ext != tolower(g:qfixmemo_ext)
+    return 0
+  endif
+  let file = QFixNormalizePath(file, 'compare')
   let head = expand(g:qfixmemo_dir)
   let head = QFixNormalizePath(head, 'compare')
   if stridx(file, head) == 0
+    return 1
+  endif
+  let sfile = expand(g:qfixmemo_submenu_title)
+  let sfile = QFixNormalizePath(sfile, 'compare')
+  if file == sfile
     return 1
   endif
   return 0

@@ -881,6 +881,10 @@ let s:init = 0
 function! qfixmemo#Init()
   call QFixMemoTitleRegxp()
   call QFixMemoInit(s:init)
+  let dir = expand(g:qfixmemo_dir)
+  if isdirectory(dir) == 0
+    call mkdir(dir, 'p')
+  endif
   if s:init
     return
   endif
@@ -919,6 +923,7 @@ endfunction
 " qfixmemoファイルを開く
 function! qfixmemo#EditFile(file)
   call qfixmemo#Init()
+
   let prevPath = escape(getcwd(), ' ')
   exe 'lchdir ' . expand(g:qfixmemo_dir)
   let file = fnamemodify(strftime(a:file), ':p')

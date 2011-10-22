@@ -4,6 +4,10 @@
 " Maintainer:  fuenor@gmail.com
 " Last Change: 2011-09-04 22:11
 
+if exists("b:howm_schedule_syntax")
+  finish
+endif
+
 if &background == 'dark'
   hi howmTodo     ctermfg=Yellow      guifg=Yellow
   hi howmTodoUD   ctermfg=Magenta     guifg=LightRed
@@ -77,4 +81,6 @@ hi link actionlockList Type
 if exists('b:current_syntax') && b:current_syntax == "changelog"
   syn region changelogFiles start="^\s\+[+*]\s" end=":\s" end="^$" contains=changelogBullet,changelogColon,changelogError,howmSchedule,howmDeadline,howmTodo,howmReminder,howmTodoUD,howmFinished keepend
 endif
+
+let b:howm_schedule_syntax = 1
 

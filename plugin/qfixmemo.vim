@@ -2183,7 +2183,6 @@ endfunction
 function! qfixmemo#RebuildKeyword()
   redraw | echo 'QFixMemo : Rebuild Keyword...'
 
-
   let pattern = '\[\[.*\]\]'
   let qflist = qfixlist#search(pattern, g:qfixmemo_dir, '', 0, g:qfixmemo_fileencoding, '**/*')
   if exists('g:howm_clink_pattern')
@@ -2192,17 +2191,16 @@ function! qfixmemo#RebuildKeyword()
     call extend(qflist, extlist)
   endif
 
+  let extlist = QFixMemoRebuildKeyword(g:qfixmemo_dir, g:qfixmemo_fileencoding)
   let pattern = '\[\[[^\]]\+\]\]'
   if exists('g:howm_clink_pattern')
-    let pattern = '\('.g:howm_clink_pattern.'\|'.'\[\[[^\]]\+\]\]'.'\)'
+    let pattern = '\('.g:howm_clink_pattern.'\|'.pattern.'\)'
   endif
   let file = expand(g:qfixmemo_submenu_title)
   silent! exec 'vimgrep /'.pattern.'/j '. escape(file, ' ')
-  let sblist = getqflist()
+  call extend(extlist, getqflist())
   silent! cexpr ''
 
-  let extlist = QFixMemoRebuildKeyword(g:qfixmemo_dir, g:qfixmemo_fileencoding)
-  call extend(extlist, sblist)
   for n in range(len(extlist))
     if !exists('extlist[n]["filename"]')
       let extlist[n]['filename'] = fnamemodify(bufname(extlist[n]['bufnr']), ':p')
@@ -2233,7 +2231,7 @@ function! qfixmemo#RebuildKeyword()
   endif
 endfunction
 
-" 外部で定義されたキーワードを追加
+" 外部で定義されたキーワードをgetqflist()と同じ形式で返す
 silent! function QFixMemoRebuildKeyword(dir, fenc)
   return []
 endfunction

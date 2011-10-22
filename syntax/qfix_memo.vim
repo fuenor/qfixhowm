@@ -1,32 +1,41 @@
+" Vim syntax file
+"
+" Language:    qfixmemo
+" Maintainer:  fuenor@gmail.com
+" Last Change: 2011-09-04 22:11
 scriptencoding utf-8
 
 " URLとファイル
-syntax match txtUrl display '\(http\|https\|ftp\|file\):[-0-9a-zA-Z;/?:@&=+$,_.!~*'()%#]\+'
-highlight link txtUrl Underlined
-syntax match txtFile '\([A-Za-z]:[/\\]\|\~\/\)[-0-9a-zA-Z;/?:@&=+$,_.!~*'()%{}[\]\\]\+'
-highlight link txtFile Underlined
+syn match txtUrl  '\(http\|https\|ftp\|file\):[-0-9a-zA-Z;/?:@&=+$,_.!~*'()%#]\+'
+syn match txtFile '\(memo\|rel\|howm\):[-0-9a-zA-Z;/?:@&=+$,_.!~*'()%#}[\]\\]\+'
+syn match txtFile '\([A-Za-z]:[/\\]\|\~\/\)[-0-9a-zA-Z;/?:@&=+$,_.!~*'()%{}[\]\\]\+'
+
+syn match txtFile '\[:\?&\?\zs\([A-Za-z]:[/\\]\|\~\/\)[^:]\+\ze:[^\]]*]'
+syn match txtUrl  '\[:\?&\?\zs\(howm\|rel\|https\|http\|ftp\|file\)://[^:]\+\ze:[^\]]*]'
+hi link txtUrl  Underlined
+hi link txtFile Underlined
 
 " 引用文 (行頭の'> ')
-syntax match txtQuote '^\s*>\(\s.*\|$\)'
-highlight link txtQuote Comment
+syn match txtQuote '^\s*>\(\s.*\|$\)'
+hi link txtQuote Comment
 
 " リスト (行頭の '-' '+')
-syntax region txtList start='^[-+]\+\s*' end='\s:' end='$' contains=txtListBullet,txtListDefinition,txtUrl,txtFile keepend
-syntax match txtListBullet contained '^\s*[-+*]\+\s*'
-syntax match txtListColon  contained '\s:'
-syntax match txtListDefinition contained '\s:' contains=txtListColon
+syn region txtList start='^[-+]\+\s*' end='\s:' end='$' contains=txtListBullet,txtListDefinition,txtUrl,txtFile keepend
+syn match txtListBullet contained '^\s*[-+*]\+\s*'
+syn match txtListColon  contained '\s:'
+syn match txtListDefinition contained '\s:' contains=txtListColon
 
-highlight link txtList       Constant
-highlight link txtListBullet Statement
-highlight link txtListColon  Label
+hi link txtList       Constant
+hi link txtListBullet Statement
+hi link txtListColon  Label
 
 " |*テーブル | 項目 |  (セル内で'*'を使うとタイトル)
-syntax match txtTable +^|\(.\{-}|\)\++ contains=txtTableHeader,txtTableSeparator,txtUrl,txtFile
-syntax match txtTableHeader    contained +\s\+\*[^|]\++
-syntax match txtTableSeparator contained +|+
+syn match txtTable +^|\(.\{-}|\)\++ contains=txtTableHeader,txtTableSeparator,txtUrl,txtFile
+syn match txtTableHeader    contained +\s\+\*[^|]\++
+syn match txtTableSeparator contained +|+
 
-highlight link txtTableHeader    Title
-highlight link txtTableSeparator Statement
+hi link txtTableHeader    Title
+hi link txtTableSeparator Statement
 
 " 定義リスト （行頭の':'と' :')
 syn match txtDefinition '^:.\{-}\s:' contains=txtDefColon
@@ -36,13 +45,13 @@ hi link txtDefinition Identifier
 hi link txtDefColon Label
 
 " TODO: FIXME: (行頭の'TODO:' 'FIXME:')
-syntax match txtWarning '^\s*\(TODO\|FIXME\):'
-highlight link txtWarning TODO
+syn match txtWarning '^\s*\(TODO\|FIXME\):'
+hi link txtWarning TODO
 
 " 区切り線
-syntax match txtHLine '-\{20,}'
-syntax match txtHLine '=\{20,}'
-highlight link txtHLine Label
+syn match txtHLine '-\{20,}'
+syn match txtHLine '=\{20,}'
+hi link txtHLine Label
 
 " キーワード ( ' か " で囲まれた文字列)
 " syn region txtKeyword start=+"+ skip=+\\"+ end=+"+ end=+$+

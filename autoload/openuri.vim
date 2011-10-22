@@ -7,16 +7,25 @@
 let s:Version = 1.00
 scriptencoding utf-8
 
-function! openuri#Open(...)
-  call openuri#Init()
-  if a:0
-    return s:openstr(a:1)
+" カーソル位置のURIを開いたら 1 を返す
+" 文字列指定された場合は文字列をURIとして開く
+function! openuri#open(...)
+  call openuri#init()
+  if a:0 && a:1 != ''
+    let ret = s:openstr(a:1)
   else
-    return QFixHowmOpenCursorline()
+    let ret = s:cursorline()
   endif
+  if ret == "\<CR>"
+    return 0
+  endif
+  return ret
 endfunction
 
-function! openuri#Init()
+function! openuri#init()
+  if exists('g:QFixHowm_Convert') && g:QFixHowm_Convert
+    return
+  endif
   if exists('g:qfixmemo_dir')
     let g:howm_dir = g:qfixmemo_dir
   endif
@@ -28,6 +37,9 @@ function! openuri#Init()
   endif
   if exists('g:qfixmemo_openuri_vimextreg')
     let g:QFixHowm_OpenVimExtReg = g:qfixmemo_openuri_vimextreg
+  endif
+  if exists('g:qfixmemo_relpath')
+    let g:QFixHowm_RelPath = g:qfixmemo_relpath
   endif
 endfunction
 
@@ -42,26 +54,28 @@ let g:QFixHowm_FileExt  = fnamemodify(g:howm_filename,':e')
 if !exists('howm_glink_pattern')
   let howm_glink_pattern = '>>>'
 endif
-"タブで編集('tab'を設定)
+" タブで編集('tab'を設定)
 if !exists('QFixHowm_Edit')
   let QFixHowm_Edit = ''
 endif
 
+command! QFixHowmOpenCursorline call QFixHowmOpenCursorline()
+" カーソル位置のURIを開いたら 1 を返す
+silent! function QFixHowmOpenCursorline()
+  return openuri#open()
+endfunction
+
 """"""""""""""""""""""""""""""
-"カーソル位置のファイルを開くアクションロック
+" カーソル位置のファイルを開くアクションロック
 """"""""""""""""""""""""""""""
-"rel://
-if !exists('g:QFixHowm_RelPath')
-  let g:QFixHowm_RelPath = g:howm_dir
-endif
-"カーソル位置のファイルを開くアクションロック
+" カーソル位置のファイルを開くアクションロック
 if !exists('g:QFixHowm_OpenURIcmd')
   if !exists('g:MyOpenURI_cmd')
     let g:QFixHowm_OpenURIcmd = ""
     if has('unix')
       let g:QFixHowm_OpenURIcmd = "call system('firefox %s &')"
     else
-      "Internet Explorer
+      " Internet Explorer
       let g:QFixHowm_OpenURIcmd = '!start "C:/Program Files/Internet Explorer/iexplore.exe" %s'
       let g:QFixHowm_OpenURIcmd = '!start "rundll32.exe" url.dll,FileProtocolHandler %s'
     endif
@@ -70,7 +84,7 @@ if !exists('g:QFixHowm_OpenURIcmd')
   endif
 endif
 
-"vimで開くファイルリンク
+" Vimで開くファイルリンク
 if !exists('g:QFixHowm_OpenVimExtReg')
   if !exists('g:MyOpenVim_ExtReg')
     let g:QFixHowm_OpenVimExtReg = '\.txt$\|\.vim$\|\.js$\|\.java$\|\.py$\|\.rb$\|\.h$\|\.c$\|\.cpp$\|\.ini$\|\.conf$'
@@ -78,13 +92,17 @@ if !exists('g:QFixHowm_OpenVimExtReg')
     let g:QFixHowm_OpenVimExtReg = g:MyOpenVim_ExtReg
   endif
 endif
-"はてなのhttp記法のゴミを取り除く
+" rel://
+if !exists('g:QFixHowm_RelPath')
+  let g:QFixHowm_RelPath = g:howm_dir
+endif
+
+" はてなのhttp記法のゴミを取り除く
 if !exists('g:QFixHowm_removeHatenaTag')
   let g:QFixHowm_removeHatenaTag = 1
 endif
 
-command! QFixHowmOpenCursorline call QFixHowmOpenCursorline()
-silent! function QFixHowmOpenCursorline()
+function! s:cursorline()
   let prevcol = col('.')
   let prevline = line('.')
   let str = getline('.')
@@ -100,6 +118,7 @@ silent! function QFixHowmOpenCursorline()
     let path = l:QFixHowm_RelPath . (str =~ 'rel://[^/\\]' ? '/' : '')
     let str = substitute(str, 'rel://', path, '')
     let path = l:howm_dir . (str =~ 'howm://[^/\\]' ? '/' : '')
+    let str = substitute(str, 'memo://', path, '')
     let str = substitute(str, 'howm://', path, '')
     let imgsfx = '\(\.jpg\|\.jpeg\|\.png\|\.bmp\|\.gif\)$'
     if str =~ imgsfx
@@ -108,10 +127,10 @@ silent! function QFixHowmOpenCursorline()
     return s:openstr(str)
   endif
 
-  "カーソル位置の文字列を拾う[:c:/temp/test.jpg:]や[:http://example.com:(title=hoge)]形式
+  " カーソル位置の文字列を拾う[:c:/temp/test.jpg:]や[:http://example.com:(title=hoge)]形式
   let col = col('.')
   let pathhead = '\([A-Za-z]:[/\\]\|\~/\)'
-  let urireg = '\(\(howm\|rel\|http\|https\|file\|ftp\)://\|'.pathhead.'\)'
+  let urireg = '\(\(memo\|rel\|howm\|http\|https\|file\|ftp\)://\|'.pathhead.'\)'
   let [lnum, colf] = searchpos('\[:\?&\?'.urireg, 'bc', line('.'))
   if lnum != 0 && colf != 0
     let str = strpart(getline('.'), colf-1)
@@ -133,16 +152,17 @@ silent! function QFixHowmOpenCursorline()
       let path = l:QFixHowm_RelPath . (str =~ 'rel://[^/\\]' ? '/' : '')
       let str = substitute(str, 'rel://', path, '')
       let path = l:howm_dir . (str =~ 'howm://[^/\\]' ? '/' : '')
+      let str = substitute(str, 'memo://', path, '')
       let str = substitute(str, 'howm://', path, '')
       return s:openstr(str)
     endif
   endif
 
-  "カーソル位置の文字列を拾う
+  " カーソル位置の文字列を拾う
   let urichr  =  "[-0-9a-zA-Z;/?:@&=+$,_.!~*'()%#]"
   let pathchr =  "[-0-9a-zA-Z;/?:@&=+$,_.!~*'()%{}[\\]\\\\]"
   let pathhead = '\([A-Za-z]:[/\\]\|\~/\)'
-  let urireg = '\(\(howm\|rel\|http\|https\|file\|ftp\)://\|'.pathhead.'\)'
+  let urireg = '\(\(memo\|rel\|howm\|http\|https\|file\|ftp\)://\|'.pathhead.'\)'
   let [lnum, colf] = searchpos(urireg, 'bc', line('.'))
   if colf == 0 && lnum == 0
     return "\<CR>"
@@ -163,33 +183,11 @@ silent! function QFixHowmOpenCursorline()
     let path = l:QFixHowm_RelPath . (str =~ 'rel://[^/\\]' ? '/' : '')
     let str = substitute(str, 'rel://', path, '')
     let path = l:howm_dir . (str =~ 'howm://[^/\\]' ? '/' : '')
+    let str = substitute(str, 'memo://', path, '')
     let str = substitute(str, 'howm://', path, '')
     return s:openstr(str)
   endif
   return "\<CR>"
-endfunction
-
-function! s:EncodeURL(str, ...)
-  let to_enc = 'utf8'
-  if a:0
-    let to_enc = a:1
-  endif
-  let str = iconv(a:str, &enc, to_enc)
-  let save_enc = &enc
-  let &enc = to_enc
-  "FIXME:本当は'[^-0-9a-zA-Z._~]'を変換？
-  let str = substitute(str, '[^[:print:]]', '\=s:URLByte2hex(s:URLStr2byte(submatch(0)))', 'g')
-  let str = substitute(str, ' ', '%20', 'g')
-  let &enc = save_enc
-  return str
-endfunction
-
-function! s:URLStr2byte(str)
-  return map(range(len(a:str)), 'char2nr(a:str[v:val])')
-endfunction
-
-function! s:URLByte2hex(bytes)
-  return join(map(copy(a:bytes), 'printf("%%%02X", v:val)'), '')
 endfunction
 
 function! s:openstr(str)
@@ -200,7 +198,7 @@ function! s:openstr(str)
     let l:MyOpenVim_ExtReg = l:MyOpenVim_ExtReg.'\|'.g:QFixHowm_OpenVimExtReg
   endif
 
-  "vimか指定のプログラムで開く
+  " Vimか指定のプログラムで開く
   let pathhead = '\([A-Za-z]:[/\\]\|\~/\|/\)'
   if str =~ '^'.pathhead
     if str !~ l:MyOpenVim_ExtReg
@@ -241,7 +239,7 @@ function! s:openstr(str)
   if str !~ '^'.urireg
     return "\<CR>"
   endif
-  "あとはブラウザで開く
+  " あとはブラウザで開く
   let uri = str
   if uri =~ '^file://'
     let uri = substitute(uri, '^file://', '', '')
@@ -256,10 +254,10 @@ function! s:openstr(str)
   if uri == ''
     return "\<CR>"
   endif
-  return s:OpenUri(uri)
+  return s:openuri(uri)
 endfunction
 
-function! s:OpenUri(uri)
+function! s:openuri(uri)
   let cmd = ''
   let bat = 0
 
@@ -282,7 +280,7 @@ function! s:OpenUri(uri)
     else
       let uri = s:EncodeURL(uri, &enc)
     endif
-    "Windowsで &encが cp932以外か !start cmd /c が指定されていたらバッチ化して実行
+    " Windowsで &encが cp932以外か !start cmd /c が指定されていたらバッチ化して実行
     if bat || cmd =~ '^!start\s*cmd\(\.exe\)\?\s*/c'
       let cmd = substitute(cmd, '^[^"]\+', '', '')
       let uri = substitute(uri, '&', '"\&"', 'g')
@@ -300,6 +298,29 @@ function! s:OpenUri(uri)
     silent! exec cmd
     return 1
   endif
-  return 0
+  return "\<CR>"
+endfunction
+
+function! s:EncodeURL(str, ...)
+  let to_enc = 'utf8'
+  if a:0
+    let to_enc = a:1
+  endif
+  let str = iconv(a:str, &enc, to_enc)
+  let save_enc = &enc
+  let &enc = to_enc
+  " FIXME:本当は'[^-0-9a-zA-Z._~]'を変換？
+  let str = substitute(str, '[^[:print:]]', '\=s:URLByte2hex(s:URLStr2byte(submatch(0)))', 'g')
+  let str = substitute(str, ' ', '%20', 'g')
+  let &enc = save_enc
+  return str
+endfunction
+
+function! s:URLStr2byte(str)
+  return map(range(len(a:str)), 'char2nr(a:str[v:val])')
+endfunction
+
+function! s:URLByte2hex(bytes)
+  return join(map(copy(a:bytes), 'printf("%%%02X", v:val)'), '')
 endfunction
 

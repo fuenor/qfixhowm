@@ -138,7 +138,7 @@ function! s:cursorline()
   let l:rel_dir  = substitute(g:QFixHowm_RelPath, '\\', '/', 'g')
 
   " >>>
-  if exists('howm_glink_pattern')
+  if exists('g:howm_glink_pattern')
     let pos = match(str, g:howm_glink_pattern)
     if pos > -1 && col('.') >= pos
       let str = strpart(str, pos)

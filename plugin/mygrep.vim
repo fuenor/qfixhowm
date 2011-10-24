@@ -1191,3 +1191,28 @@ function! QFixGrepHelp_()
   call cursor(1,1)
 endfunction
 
+""""""""""""""""""""""""""""""
+" Windowsパス正規化
+" pathは呼び出し側でexpandされていることを前提
+"
+" ドライブレターのみキャピタライズしたpathを返す。
+" 追加オプションに 'compare'を指定すると
+" Windowsのみキャピタライズしたpathを返す。
+" 非Windowsではそのままのpathを返す。
+""""""""""""""""""""""""""""""
+function! QFixNormalizePath(path, ...)
+  let path = a:path
+  " let path = expand(a:path)
+  if s:MSWindows
+    if a:0 " 比較しかしないならキャピタライズ
+      let path = toupper(path)
+    else
+      " expand('~') で展開されるとドライブレターは大文字、
+      " expand('c:/')ではそのままなので統一
+      let path = substitute(path, '^\([a-z]\):', '\u\1:', '')
+    endif
+    let path = substitute(path, '\\', '/', 'g')
+  endif
+  return path
+endfunction
+

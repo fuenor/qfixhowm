@@ -93,6 +93,11 @@ if !exists('s:openuri_memopath')
   let s:openuri_memopath = g:howm_dir
 endif
 
+if !exists('g:qfixtempname')
+  let g:qfixtempname = tempname()
+endif
+let s:howmtempfile = g:qfixtempname
+
 """"""""""""""""""""""""""""""
 " カーソル位置のファイルを開く
 """"""""""""""""""""""""""""""

@@ -6,12 +6,12 @@
 scriptencoding utf-8
 
 " URLとファイル
-syn match txtUrl  '\(http\|https\|ftp\|file\):[-0-9a-zA-Z;/?:@&=+$,_.!~*'()%#]\+'
-syn match txtFile '\(memo\|rel\|howm\):[-0-9a-zA-Z;/?:@&=+$,_.!~*'()%#}[\]\\]\+'
-syn match txtFile '\([A-Za-z]:[/\\]\|\~\/\)[-0-9a-zA-Z;/?:@&=+$,_.!~*'()%{}[\]\\]\+'
+syn match txtUrl  '\(http\|https\|file\|ftp\)://[-0-9a-zA-Z;/?:@&=+$,_.!~*'()%#]*'
+syn match txtFile '\(memo\|rel\|howm\)://[-0-9a-zA-Z;/?:@&=+$,_.!~*'()%#}[\]\\]*'
+syn match txtFile '\([A-Za-z]:[/\\]\|\~[/\\]\|\.\.\?[/\\]\|\\\{2}\)[-0-9a-zA-Z;/?:@&=+$,_.!~*'()%{}[\]\\]\+'
+syn match txtFile '\[:\?&\?\zs\(memo\|rel\|howm\|https\|http\|file\|ftp\)://[^:]\+\ze:[^\]]*]'
+syn match txtFile '\[:\?&\?\zs\([A-Za-z]:[/\\]\|\~[/\\]\|\.\.\?[/\\]\|[/\\]\)[^:]\+\ze:[^\]]*]'
 
-syn match txtFile '\[:\?&\?\zs\([A-Za-z]:[/\\]\|\~\/\)[^:]\+\ze:[^\]]*]'
-syn match txtUrl  '\[:\?&\?\zs\(howm\|rel\|https\|http\|ftp\|file\)://[^:]\+\ze:[^\]]*]'
 hi link txtUrl  Underlined
 hi link txtFile Underlined
 
@@ -99,7 +99,12 @@ hi link escapeTAG Folded
 syn region MyJpKagi start=+「\zs+ end=+\ze」+
 
 " howmの予定・TODO
-runtime! syntax/howm_schedule.vim
+" runtime! syntax/howm_schedule.vim
+
+" for QFixHowm Ver.2
+if exists('g:loaded_MyHowm')
+  runtime! syntax/howm_memo.vim
+endif
 
 finish
 

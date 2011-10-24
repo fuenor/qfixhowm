@@ -5,7 +5,7 @@
 " Last Change: 2011-09-04 22:11
 
 if exists("b:howm_schedule_syntax")
-  finish
+  " finish
 endif
 
 if &background == 'dark'
@@ -54,15 +54,14 @@ if exists('g:QFixHowm_Date')
 endif
 exe 'syn match howmFinished "'.s:pattern.'"'
 
-syn match txtUrl  '\(http\|https\|file\|ftp\):[-0-9a-zA-Z;/?:@&=+$,_.!~*'()%#]\+'
-syn match txtFile '\([A-Za-z]:[/\\]\|\~\/\)[-0-9a-zA-Z;/?:@&=+$,_.!~*'()%{}[\]\\]\+'
-syn match txtFile '\(memo\|rel\|howm\):[-0-9a-zA-Z;/?:@&=+$,_.!~*'()%#}[\]\\]\+'
+syn match txtUrl  '\(http\|https\|file\|ftp\)://[-0-9a-zA-Z;/?:@&=+$,_.!~*'()%#]*'
+syn match txtFile '\(memo\|rel\|howm\)://[-0-9a-zA-Z;/?:@&=+$,_.!~*'()%#}[\]\\]*'
+syn match txtFile '\([A-Za-z]:[/\\]\|\~[/\\]\|\.\.\?[/\\]\|\\\{2}\)[-0-9a-zA-Z;/?:@&=+$,_.!~*'()%{}[\]\\]\+'
+syn match txtFile '\[:\?&\?\zs\(memo\|rel\|howm\|https\|http\|file\|ftp\)://[^:]\+\ze:[^\]]*]'
+syn match txtFile '\[:\?&\?\zs\([A-Za-z]:[/\\]\|\~[/\\]\|\.\.\?[/\\]\|[/\\]\)[^:]\+\ze:[^\]]*]'
 
-syn match txtUrl  '\[:\?&\?\zs\(memo\|rel\|howm\|https\|http\|file\|ftp\)://[^:]\+\ze:[^\]]*]'
-syn match txtFile '\[:\?&\?\zs\([A-Za-z]:[/\\]\|\~\/\)[^:]\+\ze:[^\]]*]'
-
-hi link txtUrl  Underlined
 hi link txtFile Underlined
+hi link txtUrl  Underlined
 
 " macro action
 if exists('g:QFixHowm_MacroActionKey') && exists('g:QFixHowm_MacroActionPattern')

@@ -40,6 +40,7 @@ CONTENTS						*qfixmemo-contents*
   11.6 複数のQFixMemoディレクトリ                       |qfixmemo-chenv|
   11.7 calendar.vim                                     |qfixmemo-calendar|
   11.8 URIを開く                                        |qfixmemo-uri|
+    11.8.1 ファイルリンク                               |qfixmemo-link|
 
 ==============================================================================
 1. Intro						*qfixmemo-intro*
@@ -750,42 +751,8 @@ qfixmemo/misc/qfixmemo-calendar.vim をpluginディレクトリにコピーし�
 ------------------------------------------------------------------------------
 11.8 URIを開く						*qfixmemo-uri*
 
-QFixMemoではURLや画像ファイル等のリンクを外部ブラウザで開くことができます。
-
-デフォルトではQFixHowm互換のURI処理が使用されます。
-Windowsでは既定のブラウザが使用されますが、明示的に指定することも出来ます。
-unix系の場合はfirefoxがデフォルトになります。
-
-.vimrc >
-  " vimで開く拡張子の正規表現
-  let QFixHowm_OpenVimExtReg  = '\.txt$\|\.howm$\|\.vim$'
-
-  " リンクを開くブラウザ指定
-  if has('unix')
-    let QFixHowm_OpenURIcmd = "call system('firefox %s &')"
-  else
-    " Internet explorer
-    let QFixHowm_OpenURIcmd = '!start "C:/Program Files/Internet Explorer/iexplore.exe" %s'
-    " firefox
-    " let QFixHowm_OpenURIcmd  = '!start "C:/Program Files/Mozilla Firefox/firefox.exe" %s'
-  endif
-
-特定の拡張子だけユーザ指定のプログラムで開く事も出来ます。
-たとえば pdfファイルを外部プログラムを指定して開きたい場合は、
-QFixHowm_Opencmd_pdf のように QFixHowm_Opencmd_ の後に拡張子を付加した環境オプ
-ションを設定します。
-
-.vimrc >
-  " 拡張子別の起動プログラムを指定する
-
-  " pdfの指定
-  if has('unix')
-    " Linux(Ubuntu)は evince で開く
-    let QFixHowm_Opencmd_pdf = "call system('evince %s &')"
-  else
-    " Windowsは Acrobat Reader で開く
-    let QFixHowm_Opencmd_pdf = '!start "C:/Program Files/Adobe/Reader 10.0/Reader/AcroRd32.exe" %s'
-  endif
-
+QFixMemoではURLや画像ファイル等のリンクを記述すると自動でリンク化され<CR>を押
+すと外部ブラウザで開くことができます。
+詳しいことは doc/openuri.jaxを参照してください。
 
   vim:tw=78:ts=8:ft=qfix_memo.help:norl

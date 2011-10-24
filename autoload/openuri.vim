@@ -68,17 +68,6 @@ function! openuri#init()
   endif
 endfunction
 
-if !exists('s:openuri_memopath')
-  let s:openuri_memopath = g:howm_dir
-endif
-" UNCパスを使用する
-if !exists('g:openuri_use_UNC')
-  let g:openuri_use_UNC = 1
-  if has('unix')
-    let g:openuri_use_UNC = 0
-  endif
-endif
-
 let s:howmsuffix        = 'howm'
 if !exists('howm_dir')
   let howm_dir = '~/howm'
@@ -87,9 +76,21 @@ if !exists('howm_dir')
   endif
 endif
 
+" UNCパスを使用する
+if !exists('g:openuri_use_UNC')
+  let g:openuri_use_UNC = 1
+  if has('unix')
+    let g:openuri_use_UNC = 0
+  endif
+endif
+
 " タブで編集('tab'を設定)
 if !exists('QFixHowm_Edit')
   let QFixHowm_Edit = ''
+endif
+
+if !exists('s:openuri_memopath')
+  let s:openuri_memopath = g:howm_dir
 endif
 
 """"""""""""""""""""""""""""""

@@ -355,6 +355,9 @@ let s:sq_todo = []
 let s:LT_menu = 0
 let s:sq_menu = []
 let s:sq_reminder = []
+if !exists('g:qfixtempname')
+  let g:qfixtempname = tempname()
+endif
 let s:howmtempfile = g:qfixtempname
 
 " jvgrep使用時に正規表現[-abc]の - をエスケープして実行

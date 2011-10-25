@@ -1829,6 +1829,9 @@ function! s:OpenQFixSubWin()
   let cmd = g:qfixmemo_mapleader . 'w'
   exe 'nnoremap <silent> <buffer> ' . cmd . ' :<C-u>call qfixmemo#ForceWrite()<CR>'
   call qfixmemo#Syntax()
+  if exists('*QFixMemoSubWindowBufEnter')
+    call QFixMemoSubWindowBufEnter()
+  endif
   echo 'QFixMemo : Use "' . cmd . '" to write this buffer.'
 endfunction
 

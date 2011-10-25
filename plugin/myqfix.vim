@@ -3,10 +3,10 @@
 "                 Preview, sortings and advanced search for Quickfix.
 "         Author: Futoshi Ueno <fuenor@gmail.com>
 "                 http://sites.google.com/site/fudist/Home  (Japanese)
-"  Last Modified: 2011-10-13 21:47
+"  Last Modified: 2011-10-25 21:51
 "=============================================================================
 scriptencoding utf-8
-let s:Version = 2.84
+let s:Version = 2.85
 
 "What Is This:
 "  This plugin adds preview, sortings and advanced search to your quickfix window.
@@ -1087,6 +1087,7 @@ function! QFixPreviewOpen(file, line, ...)
   if g:QFix_PreviewWrap == 0
     let &wrap = g:QFix_PreviewWrap
   endif
+  setlocal nofoldenable
   setlocal nobuflisted
   setlocal noswapfile
   setlocal buftype=nofile

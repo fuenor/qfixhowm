@@ -1,5 +1,4 @@
 "=============================================================================
-"
 "    Description: Open URI
 "         Author: fuenor <fuenor@gmail.com>
 "                 http://sites.google.com/site/fudist/Home  (Japanese)
@@ -120,7 +119,7 @@ endif
 " Vimで開くファイル指定
 if !exists('g:QFixHowm_OpenVimExtReg')
   if !exists('g:MyOpenVim_ExtReg')
-    let g:QFixHowm_OpenVimExtReg = '\.\(txt\|mkd\|wiki\|rd\|vim\|js\|java\|py\|rb\|h\|c\|cpp\|ini\|conf\)'
+    let g:QFixHowm_OpenVimExtReg = '\.\(txt\|mkd\|wiki\|rd\|vim\|js\|java\|py\|rb\|h\|c\|cpp\|ini\|conf\)$'
   else
     let g:QFixHowm_OpenVimExtReg = g:MyOpenVim_ExtReg
   endif
@@ -180,10 +179,13 @@ function! s:cursorline()
     endif
     if str != '' && col < (colf + len(str))
       if str =~ '^\[:\?'
-        let str = substitute(str, ':\(title=\|image[:=]\)\([^\]]*\)\?]$', ':]', '')
+        if g:QFixHowm_removeHatenaTag
+          let str = substitute(str, ':\(title=\|image[:=]\)\([^\]]*\)\?]$', ':]', '')
+        endif
         let str = substitute(str, ':[^:\]]*]$', '', '')
       endif
       let str = substitute(str, '^\[:\?&\?', '', '')
+
       let path = l:rel_dir . (str =~ 'rel://[^/\\]' ? '/' : '')
       let str = substitute(str, 'rel://', path, '')
       let path = l:memo_dir . (str =~ 'memo://[^/\\]' ? '/' : '')
@@ -195,8 +197,8 @@ function! s:cursorline()
   endif
 
   " カーソル位置の文字列を拾う
-  let urichr  =  "[-0-9a-zA-Z;/?:@&=+$,_.!~*'()%#]"
-  let pathchr =  "[-0-9a-zA-Z;/?:@&=+$,_.!~*'()%{}[\\]\\\\]"
+  let urichr  =  "[-0-9a-zA-Z;/?@&=+$,_.!~*'()%:#]"
+  let pathchr =  "[-0-9a-zA-Z;/?@&=+$,_.!~*'()%:{}[\\]\\\\]"
   let pathhead = '\([A-Za-z]:[/\\]\|\~[/\\]\|\.\.\?[/\\]\|\\\{2}\)'
   let urireg = '\(\(memo\|rel\|howm\|http\|https\|file\|ftp\)://\|'.pathhead.'\)'
   let [lnum, colf] = searchpos(urireg, 'nbc', line('.'))
@@ -213,7 +215,7 @@ function! s:cursorline()
     return "\<CR>"
   endif
 
-  let str = substitute(str, ':$\|\(|:title=\|:image\|:image[:=]\)'.pathchr.'*$', '', '')
+  let str = substitute(str, ':\+$', '', '')
   if str != ''
     let path = l:rel_dir . (str =~ 'rel://[^/\\]' ? '/' : '')
     let str = substitute(str, 'rel://', path, '')
@@ -241,7 +243,7 @@ function! s:openstr(str)
     let l:MyOpenVim_ExtReg = l:MyOpenVim_ExtReg.'\|'.g:QFixHowm_OpenVimExtReg
   endif
 
-  let pathhead = '\([A-Za-z]:[/\\]\|\~[/\\]\|\.\.\?[/\\]\|\\\{2}\)'
+  let pathhead = '\([A-Za-z]:[/\\]\|\~[/\\]\|\.\.\?[/\\]\|\\\{2}\|[/\\]\)'
   if str =~ '^\(\(https\|http\|file\|ftp\)://\|'.pathhead.'\)$'
     return "\<CR>"
   endif
@@ -317,12 +319,9 @@ function! s:openuri(uri)
   let bat = 0
 
   let uri = a:uri
-  if uri =~ '^http[s]\?\|^ftp'
-    let char = "[-A-Za-z0-9-_./~,$!*'();:@=&+]"
-    let uri = substitute(uri, '\s\+.*$', '', '')
-    if g:QFixHowm_removeHatenaTag
-      let uri = substitute(uri, ':\(\(title\|image\)=[^\]]\+\)\?$', '', '')
-    endif
+  if uri =~ '^\(https\?\|ftp\)://'
+    let urichr  = "[-0-9a-zA-Z;/?@&=+$,_.!~*'()%:#]"
+    let uri = matchstr(uri, urichr.'\+')
   endif
   if has('win32') || has('win64')
     if &enc != 'cp932' && uri =~ '^file://' && uri =~ '[^[:print:]]'

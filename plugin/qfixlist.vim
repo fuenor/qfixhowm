@@ -40,7 +40,7 @@ endif
 
 function! qfixlist#search(pattern, dir, cmd, days, fenc, file)
   let cmd = a:cmd
-  redraw | echo 'QFixList : Searching...'
+  redraw | echo 'QFixList : exec grep...'
   if a:days
     let g:MyGrep_FileListWipeTime = localtime() - a:days*24*60*60
   endif

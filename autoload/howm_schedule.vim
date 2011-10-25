@@ -480,7 +480,7 @@ function! s:QFixHowmListReminder_(mode)
   endif
   let searchPath = l:howm_dir
   if s:reminder_cache == 0
-    redraw | echo 'QFixHowm : Searching...'
+    redraw | echo 'QFixHowm : exec grep...'
     if exists('*MultiHowmDirGrep')
       if g:QFixHowm_ScheduleSearchDir == ''
         let addflag = MultiHowmDirGrep(searchWord, searchPath, l:SearchFile, g:howm_fileencoding, addflag)

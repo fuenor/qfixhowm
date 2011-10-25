@@ -61,9 +61,9 @@ endif
 
 " QFixMemoのシンタックスハイライト設定
 " 0 : 何も設定しない
-" 1 : タイトル行
-" 2 : タイトル行、タイムスタンプ
-" 3 : タイトル行、タイムスタンプ、予定・TODO
+" 1 : タイトル行、キーワード
+" 2 : タイトル行、キーワード、タイムスタンプ
+" 3 : タイトル行、キーワード、タイムスタンプ、予定・TODO
 if !exists('g:qfixmemo_syntax')
   let g:qfixmemo_syntax = 3
 endif
@@ -169,20 +169,6 @@ if !exists('g:qfixmemo_separator')
   let g:qfixmemo_separator = '>>> %s'
 endif
 
-" goto link syntax highlight
-if !exists('g:qfixmemo_glink_pattern')
-  let g:qfixmemo_glink_pattern = ''
-  if exists('g:howm_glink_pattern')
-    let g:qfixmemo_glink_pattern = g:howm_glink_pattern
-  endif
-endif
-" come-from link syntax highlight
-if !exists('g:qfixmemo_clink_pattern')
-  let g:qfixmemo_clink_pattern = ''
-  if exists('g:howm_clink_pattern')
-    let g:qfixmemo_clink_pattern = g:howm_clink_pattern
-  endif
-endif
 " howm_schedule.vimを使用する
 " 0 : 使用しない
 " 1 : autoload読込
@@ -190,19 +176,15 @@ endif
 if !exists('g:qfixmemo_use_howm_schedule')
   let g:qfixmemo_use_howm_schedule = 1
 endif
-" URIを開くコマンド指定(howm_schedule未使用時)
-if !exists('g:qfixmemo_openuri_cmd')
-  if has('unix')
-    let g:qfixmemo_openuri_cmd = "call system('firefox %s &')"
-  else
-    "Internet Explorer
-    let g:qfixmemo_openuri_cmd = '!start "C:/Program Files/Internet Explorer/iexplore.exe" %s'
-    let g:qfixmemo_openuri_cmd = '!start "rundll32.exe" url.dll,FileProtocolHandler %s'
-  endif
+
+" キーワードを使用する
+if !exists('g:qfixmemo_use_keyword')
+  let g:qfixmemo_use_keyword = 1
 endif
-" URIをVimで開く正規表現指定(howm_schedule未使用時)
-if !exists('g:qfixmemo_openuri_vimextreg')
-  let g:qfixmemo_openuri_vimextreg = '\.txt$\|\.vim$'
+
+" スイッチアクションの最大数
+if !exists('g:qfixmemo_switch_action_max')
+  let g:qfixmemo_switch_action_max = 8
 endif
 
 " サブウィンドウを出す方向
@@ -258,9 +240,10 @@ if !exists('g:qfixmemo_auto_generate_filename')
   let g:qfixmemo_auto_generate_filename = '%Y-%m-%d-%H%M%S'
 endif
 
+let s:howm_ext = 'howm'
 " 常にqfixmemoファイルとして扱うファイルの正規表現
 if !exists('g:qfixmemo_isqfixmemo_regxp')
-  let g:qfixmemo_isqfixmemo_regxp = '\c\.howm$'
+  let g:qfixmemo_isqfixmemo_regxp = '\c\.'.s:howm_ext.'$'
 endif
 
 """"""""""""""""""""""""""""""
@@ -312,7 +295,7 @@ endfunction
 
 " アウトラインコマンド
 silent! function QFixMemoOutline()
-  silent! exec "normal! zi"
+  silent! exe "normal! zi"
 endfunction
 
 " タイトル検索用正規表現設定
@@ -328,6 +311,13 @@ silent! function QFixMemoTitleRegxp()
   endif
   if exists('g:QFixMRU_RegisterFile') && '.'.g:qfixmemo_ext !~ g:QFixMRU_RegisterFile
     let g:QFixMRU_RegisterFile = '\.'.g:qfixmemo_ext.'$'
+  endif
+  " .howm
+  if !exists("g:QFixMRU_Title['".s:howm_ext."']")
+    let g:QFixMRU_Title[s:howm_ext]          = g:QFixMRU_Title[g:qfixmemo_ext]
+  endif
+  if !exists('g:QFixMRU_Title["howm_regxp"]')
+    let g:QFixMRU_Title[s:howm_ext.'_regxp'] = g:QFixMRU_Title[g:qfixmemo_ext.'_regxp']
   endif
 endfunction
 
@@ -653,7 +643,7 @@ function! s:BufEnter()
   call QFixMemoBufEnterPre()
 
   if g:qfixmemo_forceencoding && &fenc != g:qfixmemo_fileencoding
-    exec 'edit! ++enc='.g:qfixmemo_fileencoding.' ++ff='.g:qfixmemo_fileformat
+    exe 'edit! ++enc='.g:qfixmemo_fileencoding.' ++ff='.g:qfixmemo_fileformat
   endif
   call s:filetype()
   " フォールディングを設定
@@ -778,14 +768,14 @@ function! qfixmemo#DeleteNullLines()
   call cursor(line('$'), 1)
   let endline = line('.')
   if getline('.') !~ '^$'
-    exec "put=''"
+    exe "put=''"
   else
     let firstline = search('^.\+$', 'nbW')
     if firstline == 0
       return
     endif
     if firstline+2 <= endline
-      exec firstline+2.','.endline.'delete _'
+      exe firstline+2.','.endline.'delete _'
     endif
   endif
   call setpos('.', save_cursor)
@@ -825,16 +815,7 @@ function! s:syntaxHighlight()
   if g:qfixmemo_syntax == 0
     return
   endif
-  silent! syn clear qfixmemoGotolink
-  exe "syn match qfixmemoGotolink '" . '^' . matchstr(g:qfixmemo_separator, '^\S\+') . ".*'"
-  if g:qfixmemo_glink_pattern != ''
-    exe "syn match qfixmemoGotolink '" . g:qfixmemo_glink_pattern . ".*'" . '"'
-  endif
-  if g:qfixmemo_clink_pattern != ''
-    exe "syn match qfixmemoGotolink '" . g:qfixmemo_clink_pattern . ".*'" . '"'
-  endif
-  hi link qfixmemoGotolink  Underlined
-  silent! syntax clear qfixmemoKeyword
+  silent! syn clear qfixmemoKeyword
   if s:KeywordHighlight != ''
     exe 'syn match qfixmemoKeyword display "\V'.escape(s:KeywordHighlight, '"').'"'
   endif
@@ -927,7 +908,7 @@ function! qfixmemo#EditFile(file)
   let prevPath = escape(getcwd(), ' ')
   exe 'lchdir ' . expand(g:qfixmemo_dir)
   let file = fnamemodify(strftime(a:file), ':p')
-  silent! exec 'lchdir ' . prevPath
+  silent! exe 'lchdir ' . prevPath
   if s:isQFixMemo(file)
     let file = substitute(fnamemodify(file, ':p'), '\\', '/', 'g')
     let opt = '++enc=' . g:qfixmemo_fileencoding . ' ++ff=' . g:qfixmemo_fileformat . ' '
@@ -1008,7 +989,7 @@ function! s:edit(file, ...)
 
   let winnr = bufwinnr(file)
   if winnr > -1
-    exec winnr.'wincmd w'
+    exe winnr.'wincmd w'
     return
   endif
 
@@ -1019,7 +1000,7 @@ function! s:edit(file, ...)
     return
   endif
   if winnum != -1
-    exec winnum . 'wincmd w'
+    exe winnum . 'wincmd w'
     return
   endif
 
@@ -1027,14 +1008,14 @@ function! s:edit(file, ...)
   if winnr < 1 || mode == 'split'
     split
   else
-    exec winnr.'wincmd w'
+    exe winnr.'wincmd w'
   endif
 
   let dir = fnamemodify(file, ':h')
   if isdirectory(dir) == 0
     call mkdir(dir, 'p')
   endif
-  exec g:qfixmemo_editcmd.' edit ' . opt . escape(file, ' #%')
+  exe g:qfixmemo_editcmd.' edit ' . opt . escape(file, ' #%')
   if !filereadable(file)
     call qfixmemo#Template('New')
   endif
@@ -1046,7 +1027,7 @@ function! s:getEditWinnr()
   let hidden = &hidden
   let w = -1
   for i in range(1, max)
-    exec i . 'wincmd w'
+    exe i . 'wincmd w'
     if &buftype == '' && &previewwindow == 0
       if &modified == 0
         let w = i
@@ -1055,7 +1036,7 @@ function! s:getEditWinnr()
       let w = i
     endif
   endfor
-  exec pwin.'wincmd w'
+  exe pwin.'wincmd w'
   return w
 endfunction
 
@@ -1137,20 +1118,20 @@ function! qfixmemo#Template(cmd)
   endif
   let saved_ve = &virtualedit
   silent setlocal virtualedit+=onemore
-  silent! exec 'normal! '. keycmd
+  silent! exe 'normal! '. keycmd
   if keycmd =~ '\CA$'
-    exec 'normal! l'
+    exe 'normal! l'
     startinsert!
   elseif keycmd =~ '\Ca$'
-    exec 'normal! l'
+    exe 'normal! l'
     startinsert
   elseif keycmd =~ '\CI$'
-    exec 'normal! ^'
+    exe 'normal! ^'
     startinsert
   elseif keycmd =~ '\Ci$'
     startinsert
   endif
-  silent! exec 'setlocal virtualedit='.saved_ve
+  silent! exe 'setlocal virtualedit='.saved_ve
 endfunction
 
 " Vim 7.3patch272の:put=listバグ修正による挙動の違いを吸収する
@@ -1171,7 +1152,7 @@ function! qfixmemo#DeleteEntry(...)
   call qfixmemo#Init()
   let tpattern = qfixmemo#TitleRegxp()
   let [text, startline, endline] = QFixMRUGet('title', '%', line('.'), tpattern)
-  silent! exec startline.','.endline.'d'
+  silent! exe startline.','.endline.'d'
   call cursor(startline, 1)
   if &hidden == 0
     write!
@@ -1214,9 +1195,9 @@ function! qfixmemo#DivideEntry() range
     call setline(1, entry)
     silent! $delete _
     call cursor(1,1)
-    silent! exec 'w! '
+    silent! exe 'w! '
     exe 'b ' . bufnr
-    " silent! exec 'bd'
+    " silent! exe 'bd'
     let fline = lline + 1
     if fline > a:lastline
       break
@@ -1225,7 +1206,7 @@ function! qfixmemo#DivideEntry() range
   endwhile
   stopinsert
   silent! %delete _
-  silent! exec 'w! '
+  silent! exe 'w! '
   let g:QFixMRU_Disable = 0
 endfunction
 
@@ -1327,7 +1308,7 @@ function! qfixmemo#ListRecentTimeStamp(...)
     exe 'lchdir ' . expand(g:qfixmemo_dir)
     let cmd = 'grep! /n /p /r /s ' . tregxp . ' *.*'
     silent! exe cmd
-    silent! exec 'lchdir ' . prevPath
+    silent! exe 'lchdir ' . prevPath
     let &grepprg = saved_grepprg
     let qflist = QFixGetqflist()
     let qflist = qfixlist#Sort('rtext', qflist)
@@ -1352,7 +1333,6 @@ function! qfixmemo#ListRecentTimeStamp(...)
     let file = d['filename']
     let lnum = d['lnum']
     let [entry, flnum, llnum] = QFixMRUGet('entry', file, lnum, tpattern)
-    " echoe "List=".string(entry)
     if len(entry) == 0
       call remove(qflist, idx)
       continue
@@ -1434,7 +1414,7 @@ function! qfixmemo#Glob(path, file, mode)
     let path .= '/'
   endif
   let mode = a:mode
-  exec 'lchdir ' . escape(path, ' ')
+  exe 'lchdir ' . escape(path, ' ')
   redraw | echo 'QFixMemo : glob...'
   let files = split(glob(a:file), '\n')
   let qflist = []
@@ -1454,7 +1434,7 @@ function! qfixmemo#Glob(path, file, mode)
       call insert(qflist, usefile)
     endif
   endfor
-  silent! exec 'lchdir ' . prevPath
+  silent! exe 'lchdir ' . prevPath
   redraw | echo ''
   if mode =~ 'list'
     return qflist
@@ -1547,8 +1527,8 @@ function! qfixmemo#Rename()
   let to = fnamemodify(from, ':p:h') . '/' . to
   update
   call rename(from, to)
-  silent! exec 'silent! edit '.escape(to, ' %#')
-  silent! exec 'silent! bwipeout '.from
+  silent! exe 'silent! edit '.escape(to, ' %#')
+  silent! exe 'silent! bwipeout '.from
 endfunction
 
 function! qfixmemo#RenameAll()
@@ -1715,7 +1695,7 @@ function! s:randomReadFile(file, dir)
     let res = {'filename' : file, 'lnum' : lnum, 'text' : text}
     call add(result, res)
   endfor
-  silent! exec 'lchdir ' . prevPath
+  silent! exe 'lchdir ' . prevPath
   return result
 endfunction
 
@@ -1745,7 +1725,7 @@ function! s:randomWriteFile(file, dir)
     call filter(sq, "v:val['text']     !~ '".rexclude."'")
     call filter(sq, "v:val['filename'] !~ '".rexclude."'")
   endif
-  silent! exec 'lchdir ' . escape(expand(dir), ' ')
+  silent! exe 'lchdir ' . escape(expand(dir), ' ')
   let result = []
   call add(result, dir)
   let head = QFixNormalizePath(expand(dir)) . '/'
@@ -1758,7 +1738,7 @@ function! s:randomWriteFile(file, dir)
     call add(result, res)
   endfor
   call writefile(result, rfile)
-  silent! exec 'lchdir ' . prevPath
+  silent! exe 'lchdir ' . prevPath
   return sq
 endfunction
 
@@ -1786,7 +1766,7 @@ function! qfixmemo#Grep(...)
       let g:MyGrep_Regexp = 0
       let @/ = '\V'.pattern
     endif
-    call s:Grep(pattern)
+    call s:grep(pattern)
     call histadd('/', '\V' . @/)
     call histadd('@', pattern)
   endif
@@ -1801,7 +1781,7 @@ if !exists('g:qfixmemo_grep_title')
   let g:qfixmemo_grep_title = 'QFixMemo %MODE%Grep : '
 endif
 
-function! s:Grep(pattern)
+function! s:grep(pattern)
   let qflist = qfixlist#search(a:pattern, g:qfixmemo_dir, '', 0, g:qfixmemo_fileencoding, '**/*')
   call qfixlist#copen(qflist, g:qfixmemo_dir)
 endfunction
@@ -1813,7 +1793,7 @@ function! qfixmemo#ToggleSubWindow()
   let bufnum = bufnr(g:qfixmemo_submenu_title)
   let winnum = bufwinnr(g:qfixmemo_submenu_title)
   if bufnum != -1 && winnum != -1
-    exec "bd ". bufnum
+    exe "bd ". bufnum
   else
     call s:OpenQFixSubWin()
   endif
@@ -1823,7 +1803,7 @@ function! s:OpenQFixSubWin()
   let winnum = bufwinnr(g:qfixmemo_submenu_title)
   if winnum != -1
     if winnr() != winnum
-      exec winnum . 'wincmd w'
+      exe winnum . 'wincmd w'
     endif
     return
   endif
@@ -1836,7 +1816,7 @@ function! s:OpenQFixSubWin()
   else
     let wcmd = '+buffer' . bufnum
   endif
-  exec 'silent! ' . windir . ' ' . winsize . 'split ' . wcmd
+  exe 'silent! ' . windir . ' ' . winsize . 'split ' . wcmd
   setlocal buftype=nofile
   setlocal bufhidden=hide
   setlocal noswapfile
@@ -1960,7 +1940,7 @@ function! qfixmemo#Cmd_AT(mode) range
   call cursor(1, 1)
 
   call setpos('.', save_cursor)
-  exec 'normal! z.'
+  exe 'normal! z.'
   wincmd p
   let g:QFixMRU_Disable = 0
 endfunction
@@ -1982,7 +1962,7 @@ function! qfixmemo#Cmd_Replace(mode)
     call add(nsq, sqdat)
   endfor
   call QFixSetqflist(nsq)
-  silent! exec 'lchdir ' . prevPath
+  silent! exe 'lchdir ' . prevPath
   QFixCopen
   call cursor(1, 1)
   return
@@ -2077,6 +2057,9 @@ endif
 
 " オートリンク読込
 function! qfixmemo#LoadKeyword(...)
+  if g:qfixmemo_use_keyword == 0
+    return
+  endif
   if a:0 == 0
     let kfile = expand(g:qfixmemo_keyword_file)
     if !filereadable(kfile)
@@ -2109,8 +2092,11 @@ endfunction
 let s:KeywordDic = []
 let s:KeywordHighlight = ''
 function! qfixmemo#AddKeyword(...)
-  let addkey = 0
+  if g:qfixmemo_use_keyword == 0
+    return
+  endif
 
+  let addkey = 0
   if a:0
     let list = a:1
     call filter(list, "v:val =~ '\[\[.*\]\]'")
@@ -2138,13 +2124,13 @@ function! qfixmemo#AddKeyword(...)
     endwhile
   endfor
 
-  if a:0
-    let list = a:1
-    call filter(list, "v:val =~ '" . g:howm_clink_pattern .".\\+'")
-  else
-    let list = s:GetKeywordStr(g:howm_clink_pattern .'.\+')
-  endif
   if exists('g:howm_clink_pattern')
+    if a:0
+      let list = a:1
+      call filter(list, "v:val =~ '" . g:howm_clink_pattern .".\\+'")
+    else
+      let list = s:GetKeywordStr(g:howm_clink_pattern .'.\+')
+    endif
     for keyword in list
       let keyword = substitute(keyword, '^.*'.g:howm_clink_pattern.'\s*', '', '')
       let keyword = substitute(keyword, '\s*$', '', '')
@@ -2189,10 +2175,11 @@ function! qfixmemo#RebuildKeyword()
   redraw | echo 'QFixMemo : Rebuild Keyword...'
 
   let pattern = '\[\[.*\]\]'
-  let qflist = qfixlist#search(pattern, g:qfixmemo_dir, '', 0, g:qfixmemo_fileencoding, '**/*')
+  let kfile = '*.'.s:howm_ext.' *.'.g:qfixmemo_ext
+  let qflist = qfixlist#search(pattern, g:qfixmemo_dir, '', 0, g:qfixmemo_fileencoding, '**/'.kfile)
   if exists('g:howm_clink_pattern')
     let pattern = g:howm_clink_pattern
-    let extlist = qfixlist#search(pattern, g:qfixmemo_dir, '', 0, g:qfixmemo_fileencoding, '**/*')
+    let extlist = qfixlist#search(pattern, g:qfixmemo_dir, '', 0, g:qfixmemo_fileencoding, '**/'.kfile)
     call extend(qflist, extlist)
   endif
 
@@ -2202,7 +2189,7 @@ function! qfixmemo#RebuildKeyword()
     let pattern = '\('.g:howm_clink_pattern.'\|'.pattern.'\)'
   endif
   let file = expand(g:qfixmemo_submenu_title)
-  silent! exec 'vimgrep /'.pattern.'/j '. escape(file, ' ')
+  silent! exe 'vimgrep /'.pattern.'/j '. escape(file, ' ')
   call extend(extlist, getqflist())
   silent! cexpr ''
 
@@ -2246,23 +2233,26 @@ silent! function QFixMemoUserModeCR(...)
     call howm_schedule#Init()
     return QFixHowmUserModeCR()
   endif
-  if QFixMemoOpenKeywordLink() != "\<CR>"
+  if qfixmemo#OpenCursorline()
     return
   endif
-  if QFixMemoOpenCursorline() != "\<CR>"
+  if qfixmemo#SwitchAction()
     return
   endif
-  let cmd = a:0 ? a:1 : "normal! \n"
+  if qfixmemo#OpenKeywordLink()
+    return
+  endif
+  let cmd = a:0 ? a:1 : "normal! \<CR>"
   exe cmd
 endfunction
 
 " カーソル位置のリンクを開く
-function! QFixMemoOpenCursorline()
-  return openuri#Open()
+function! qfixmemo#OpenCursorline()
+  return openuri#open()
 endfunction
 
 " オートリンクを開く
-function! QFixMemoOpenKeywordLink()
+function! qfixmemo#OpenKeywordLink()
   let save_cursor = getpos('.')
   let col = col('.')
   let lstr = getline('.')
@@ -2281,7 +2271,7 @@ function! QFixMemoOpenKeywordLink()
         call QFixSetqflist(qflist)
         QFixCopen
       endif
-      return "\<ESC>"
+      return 1
     endif
   endif
 
@@ -2304,7 +2294,7 @@ function! QFixMemoOpenKeywordLink()
           call QFixSetqflist(qflist)
           QFixCopen
         endif
-        return "\<ESC>"
+        return 1
       elseif g:qfixmemo_keyword_mode == 1
         if g:qfixmemo_keyword_dir != ''
           let file = g:qfixmemo_keyword_dir . '/' . file
@@ -2315,15 +2305,63 @@ function! QFixMemoOpenKeywordLink()
         let subdir = vimwiki#current_subdir()
         call vimwiki#open_link(cmd, subdir.file)
       endif
-      return "\<ESC>"
+      return 1
     endif
   endfor
-  return "\<CR>"
+  return 0
 endfunction
 
-" QFixHowmモード用
+" スイッチアクション
+function! qfixmemo#SwitchAction()
+  let save_cursor = getpos('.')
+  if exists('g:qfixmemo_switch_action')
+    if QFixMemoSwitchAction(g:qfixmemo_switch_action)
+      return 1
+    endif
+  endif
+  for i in range(1, g:qfixmemo_switch_action_max)
+    if !exists('g:qfixmemo_switch_action'.i)
+      continue
+    endif
+    exe 'let action = '.'g:qfixmemo_switch_action'.i
+    if QFixMemoSwitchAction(action)
+      return 1
+    endif
+  endfor
+  call setpos('.', save_cursor)
+  return 0
+endfunction
+
+function! QFixMemoSwitchAction(list, ...)
+  let prevline = line('.')
+  let max = len(a:list)
+  let didx = 0
+  for pattern in a:list
+    let didx = (didx == max-1 ? 0 : didx+1)
+    let nr = strlen(pattern)
+    let cpattern = a:list[didx]
+    let [lnum, start] = searchpos('\V'.escape(pattern, '\'), 'ncb', line('.'))
+    if lnum == 0 || col('.') >= start+nr
+      continue
+    endif
+    if pattern == '{_}'
+      " let cpattern = strftime('['.s:qfixmemo_timeformat.'].')
+    endif
+    let prevcol = (a:0 == 0 ? start : col('.'))
+    call cursor(prevline, start)
+    exe 'normal! c'.nr.'l'.cpattern
+    call cursor(prevline, prevcol)
+    return 1
+  endfor
+  return 0
+endfunction
+
+" howm_schedule.vim用
 function! QFixHowmOpenKeywordLink()
-  return QFixMemoOpenKeywordLink()
+  if qfixmemo#OpenKeywordLink()
+    return "\<ESC>"
+  endif
+  return "\<CR>"
 endfunction
 
 """"""""""""""""""""""""""""""

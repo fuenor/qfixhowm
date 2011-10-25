@@ -1,0 +1,160 @@
+*openuri.jax*	For Vim バージョン 7.2	Last change: 2011 October 24
+==============================================================================
+       Description: open URI
+            Author: fuenor <fuenor@gmail.com>
+            Web(Japanese):
+            http://sites.google.com/site/fudist/Home
+            http://sites.google.com/site/fudist/Home/qfixdev/ver3
+==============================================================================
+
+CONTENTS						*openuri-contents*
+1. Intro                                                |openuri-intro|
+2. インストール                                         |openuri-settings|
+3. コマンド                                             |openuri-command|
+4. URI記述のフォーマット                                |openuri-uri|
+  4.1 パスに空白や日本語を含むリンク			|openuri-path|
+  4.2 基準ディレクトリ                                  |openuri-basedir|
+5. オプション                                           |openuri-option|
+
+==============================================================================
+1. Intro						*openuri-intro*
+
+openuri.vimはURIや画像ファイル等のテキストリンクをVimや外部ブラウザで開くため
+のプラグインです。
+openuri.vimでは直接パスや相対パスはもちろん、空白や日本語を含むパスも開くこと
+が可能です。
+
+==============================================================================
+2. インストール						*openuri-settings*
+openuri.vimをruntimepathの通った場所へコピーしてください。
+
+==============================================================================
+3. コマンド						*openuri-command*
+
+コマンドモードからURIを開きたい場合は直接実行可能です。
+  :call openuri#open('http://www.example.com')
+  :Openuri http://www.example.com
+
+NOTE: Openuriをautoloadで読み込むとOpenuriコマンドは使用できません。
+      そのような場合はopenuri.vimをpluginディレクトリに移動するか、.vimrcでコ
+      マンド定義してください。 >
+      command! -nargs=1 Openuri call openuri#open(<q-args>)
+
+適当なバッファを開いてURLを記述してから、カーソルをURL上に移動しopenuri#open()
+を実行するとURLを開きます。
+(例) カーソルを http://www.example.com 上に移動しコマンドを実行します。
+  :call openuri#open()
+
+<CR>にopenuriをキーマップすることも可能です。 >
+  nnoremap <silent> <CR> :<C-u>call openuri#cursorline()<CR>
+
+openuri.vimで開くことが可能なURIは以下のシンタックスで強調表示できます。 >
+  " URIのシンタックス定義
+  syn match txtUrl  '\(http\|https\|file\|ftp\)://[-0-9a-zA-Z;/?:@&=+$,_.!~*'()%#]*'
+  syn match txtFile '\(memo\|rel\|howm\)://[-0-9a-zA-Z;/?:@&=+$,_.!~*'()%#}[\]\\]*'
+  syn match txtFile '\([A-Za-z]:[/\\]\|\~[/\\]\|\.\.\?[/\\]\|\\\{2}\)[-0-9a-zA-Z;/?:@&=+$,_.!~*'()%{}[\]\\]\+'
+  syn match txtFile '\[:\?&\?\zs\(memo\|rel\|howm\|https\|http\|file\|ftp\)://[^:]\+\ze:[^\]]*]'
+  syn match txtFile '\[:\?&\?\zs\([A-Za-z]:[/\\]\|\~[/\\]\|\.\.\?[/\\]\|[/\\]\)[^:]\+\ze:[^\]]*]'
+
+  hi link txtUrl  Underlined
+  hi link txtFile Underlined
+
+------------------------------------------------------------------------------
+4. URI記述のフォーマット				*openuri-uri*
+
+openuriで使用可能なスキームは以下のとおりです。
+| *スキーム | *基準ディレクトリ |
+| http://   |                   |
+| https://  |                   |
+| ftp://    |                   |
+| file://   |                   |
+| howm://   | howm_dir          |
+| memo://   | openuri_memopath  |
+| rel://    | openuri_relpath   |
+
+(記述例)
+
+http://www.example.com
+http://www.example.com:80
+
+ファイルパスを直接記述してもURIとして認識されます。
+  ~/hoge.txt
+  c:\temp\hoge.txt
+UNCパスも有効です。
+  \\hmsv\share\fuga.txt
+
+相対パスも使用可能です。相対パスは現バッファと関連付けられているファイルのパス
+を基準ディレクトリとして変換されます。
+  ./hoge.txt
+  ../hoge/puyo.txt
+
+4.1 パスに空白や日本語を含むリンク			*openuri-path*
+
+パスに空白や日本語を含んでいたり、 / や \ で始まるパスは [ と :] で囲むことで
+使用可能です。
+  [C:/temp\ho   ge.txt:] [/temp/ふが.txt:]
+
+http:// や画像ファイル等はVimではなくブラウザを起動して開きます。
+  [C:\temp/テスト.jpg:]
+
+NOTE: 記述上の意味はありませんが [ と :] ではなく [: と :]で囲んでも構いません。
+
+4.2 基準ディレクトリ					*openuri-basedir*
+
+openuri.vim独自の基準ディレクトリを指定してファイルパスを記述できます。
+基準ディレクトリを使用するとメモファイルをディレクトリごと移動しても、メモファ
+イル中のファイルパスを書き換える必要なくファイルを参照可能になります。
+
+例えば rel:// を使用したファイルパス rel://puyo.txt は openuri_relpath が
+c:/temp/rel だとすると c:/temp/rel/puyo.txt として扱われます。
+
+.vimrc >
+  " rel:// の基準ディレクトリ
+  let openuri_relpath = 'c:/temp/rel'
+
+| *スキーム | *基準ディレクトリ |
+| howm://   | howm_dir          |
+| memo://   | openuri_memopath  |
+| rel://    | openuri_relpath   |
+
+NOTE: ・qfixmemo_dirを設定していると howm_dirは qfixmemo_dirで上書きされます。
+      ・openuri_memopathを設定しないと memo://の変換にhowm_dir(qfixmemo_dir)が
+        デフォルトとして使用されます。
+
+------------------------------------------------------------------------------
+5. オプション						*openuri-option*
+
+Vimで開くファイルの拡張子とopenuriで開くブラウザをオプションで設定可能です。
+
+.vimrc >
+  " Vimで開く拡張子の正規表現
+  let openuri_vimextreg = '\.\(txt\|mkd\|wiki\|rd\|vim\|js\|java\|py\|rb\|h\|c\|cpp\|ini\|conf\)$'
+
+  " リンクを開くブラウザ指定
+  if has('unix')
+    let openuri_cmd = "call system('firefox %s &')"
+  else
+    let openuri_cmd = '!start "rundll32.exe" url.dll,FileProtocolHandler %s'
+    " Internet explorer
+    " let openuri_cmd = '!start "C:/Program Files/Internet Explorer/iexplore.exe" %s'
+    " firefox
+    " let openuri_cmd = '!start "C:/Program Files/Mozilla Firefox/firefox.exe" %s'
+  endif
+
+特定の拡張子だけユーザ指定のプログラムで開く事も出来ます。
+たとえば pdfファイルを外部プログラムを指定して開きたい場合は、openuri_pdf のよ
+うに openuri_ の後に拡張子を付加した環境オプションを設定します。
+
+.vimrc >
+  " 拡張子別の起動プログラムを指定する
+  " pdfの指定
+  if has('unix')
+    " Linux(Ubuntu)は evince で開く
+    let openuri_pdf = "call system('evince %s &')"
+  else
+    " Windowsは Acrobat Reader で開く
+    let openuri_pdf = '!start "C:/Program Files/Adobe/Reader 10.0/Reader/AcroRd32.exe" %s'
+  endif
+<
+  vim:tw=78:ts=8:ft=qfix_memo.help:norl
+

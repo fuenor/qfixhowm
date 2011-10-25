@@ -6,31 +6,43 @@
 "=============================================================================
 let s:Version = 2.53
 scriptencoding utf-8
-"キーマップリーダーが g の場合、「新規ファイルを作成」は g,c です。
-"簡単な使い方はg,Hのヘルプで、詳しい使い方は以下のサイトを参照してください。
-"http://sites.google.com/site/fudist/Home/qfixhowm
-"
-"----------以下は変更しないで下さい----------
-"
+
 "=============================================================================
-"    Description: howmスタイルの予定・TODOを表示 (要mygrep.vim)
+"    Description: howmスタイルの予定・TODOを表示 (要mygrep.vim, openuri.vim)
 "                 ここから loaded_HowmScheduleまで実行すれば単独で使用可能
 "                 (let g:HowmSchedule_only = 1)
 "                 :call QFixHowmSchedule('schedule', dir, fileencoding)
 "                 :call QFixHowmSchedule('todo',     dir, fileencoding)
 "                 最低限 howm_dir, howm_fileencodingが設定されていれば動作する。
-"                 | g,y  | 予定             |
-"                 | g,ry | 予定(更新)       |
-"                 | g,t  | Todo             |
-"                 | g,rt | Todo(更新)       |
-"                 | g,d  | 日付の挿入       |
-"                 | g,T  | 日付と時刻の挿入 |
-"                 | g,rd | 繰り返しの展開   |
+"                 | ,y  | 予定             |
+"                 | ,ry | 予定(更新)       |
+"                 | ,t  | Todo             |
+"                 | ,rt | Todo(更新)       |
+"                 | ,d  | 日付の挿入       |
+"                 | ,T  | 日付と時刻の挿入 |
+"                 | ,rd | 繰り返しの展開   |
+"                 ・ キーマップリーダーが g の場合、「予定を表示」は g,y です。
 "                 ・syntax表示には howm_schedule.vimをリネームして使用する。
 "                 ・<CR>にアクションロックが必要な場合はキーをマップする
 "                   nnoremap <silent> <buffer> <CR> :call QFixHowmUserModeCR(...)<CR>
 "  Last Modified: 0000-00-00 00:00
 "=============================================================================
+" 詳しい使い方は以下のサイトを参照してください。
+" http://sites.google.com/site/fudist/Home/qfixhowm/howm-reminder
+
+" カーソル位置のURIやファイルリンクを開くためには openuri.vimが必要です。
+" openuri.vim以外のURI処理を使用したい場合は、テキストリンクを開いたら 1 を返す
+" function! QFixHowmOpenCursorline() を .vimrc等で定義してください。
+"
+" """"""""""""""""""""""""""""""
+" " カーソル位置のテキストリンクを開いたら 1 を返す
+" """"""""""""""""""""""""""""""
+" function! QFixHowmOpenCursorline()
+"   return openuri#open()
+" endfunction
+
+"----------以下は変更しないで下さい----------
+
 if exists('disable_MyGrep') && disable_MyGrep == 1
   finish
 endif
@@ -343,6 +355,9 @@ let s:sq_todo = []
 let s:LT_menu = 0
 let s:sq_menu = []
 let s:sq_reminder = []
+if !exists('g:qfixtempname')
+  let g:qfixtempname = tempname()
+endif
 let s:howmtempfile = g:qfixtempname
 
 " jvgrep使用時に正規表現[-abc]の - をエスケープして実行
@@ -1671,7 +1686,7 @@ function! QFixHowmUserModeCR(...)
   if QFixHowmScheduleAction()
     return
   endif
-  let cmd = a:0 ? a:1 : "normal! \n"
+  let cmd = a:0 ? a:1 : "normal! \<CR>"
   exec cmd
 endfunction
 
@@ -1687,6 +1702,10 @@ function! QFixHowmScheduleAction()
   let str = substitute(str, "|$", "", "")
   silent! exec str
   return 1
+endfunction
+
+silent! function QFixHowmOpenCursorline()
+  return openuri#open()
 endfunction
 
 function! QFixHowmScheduleActionStr()
@@ -1725,7 +1744,7 @@ function! QFixHowmScheduleActionStr()
     endif
   endif
   call setpos('.', save_cursor)
-  for i in range(2, g:QFixHowm_UserSwActionLockMax)
+  for i in range(1, g:QFixHowm_UserSwActionLockMax)
     if !exists('g:QFixHowm_UserSwActionLock'.i)
       continue
     endif
@@ -1869,17 +1888,6 @@ function! QFixHowmActionLockStr()
   let ret = QFixHowmOpenCursorline()
   if ret == 1
     return "\<ESC>"
-  elseif ret == -1
-    let glink = g:howm_glink_pattern
-    let file = matchstr(getline('.'), glink.'.*$', '', '')
-    let file = substitute(file, glink.'\s*', '', '')
-    if filereadable(expand(file))
-      let file = escape(file, '\')
-      return ":exec 'call QFixHowmEditFile(\"".file."\")'\<CR>"
-      return "\<ESC>"
-    endif
-    silent! exec 'normal! gf'
-    return "\<ESC>"
   endif
   call setpos('.', save_cursor)
   let text = getline('.')
@@ -1937,7 +1945,7 @@ function! QFixHowmActionLockStr()
   endif
   call setpos('.', save_cursor)
 
-  for i in range(2, g:QFixHowm_UserSwActionLockMax)
+  for i in range(1, g:QFixHowm_UserSwActionLockMax)
     if !exists('g:QFixHowm_UserSwActionLock'.i)
       continue
     endif
@@ -2041,59 +2049,24 @@ function! QFixHowmMacroAction()
 endfunction
 
 """"""""""""""""""""""""""""""
-"カーソル位置のファイルを開くアクションロック
-""""""""""""""""""""""""""""""
-command! QFixHowmOpenCursorline call QFixHowmOpenCursorline()
-silent! function QFixHowmOpenCursorline()
-  " カーソル位置のURIを開いたら 1 を返す
-  " 文字列指定された場合は文字列をURIとして開く
-  return openuri#open()
-endfunction
-
-""""""""""""""""""""""""""""""
 " スイッチアクションロック
 function! QFixHowmSwitchActionLock(list, ...)
   let prevline = line('.')
-  let prevcol = 0
-  if a:0 > 0
-    let prevcol = col('.')
-  endif
   let max = len(a:list)
   let didx = 0
-  for d in a:list
-    let pattern = d
-    let didx = didx + 1
-    if didx >= max
-      let didx = 0
-    endif
+  for pattern in a:list
+    let didx = (didx == max-1 ? 0 : didx+1)
+    let nr = strlen(pattern)
     let cpattern = a:list[didx]
-    let nr = 1
-    while 1
-      if byteidx(pattern, nr) == -1
-        break
-      endif
-      let nr = nr + 1
-    endwhile
-    let nr = nr - 1
-    let pattern = escape(pattern, '*[.~')
-    let start = col('.') - strlen(matchstr(pattern, '^.\{'.nr.'}')) + strlen(matchstr(pattern, '^.\{1}')) - 1
-    if start < 0
-      let start = 0
-    endif
-    let end = col('.') + strlen(matchstr(pattern, '.\{'.nr.'}$'))-1
-    let str = strpart(getline('.'), start, end-start)
-    if str !~ pattern
+    let [lnum, start] = searchpos('\V'.escape(pattern, '\'), 'ncb', line('.'))
+    if lnum == 0 || col('.') >= start+nr
       continue
-      return "\<CR>"
     endif
-    let start = start + match(str, pattern) + 1
-    if a:0 == 0
-      let prevcol = start
-    endif
-    if str =~ '{_}'
+    if pattern == '{_}'
       let cpattern = strftime('['.s:hts_dateTime.'].')
     endif
-    return ":call cursor(line('.'),".start.")\<CR>:exec 'normal! c".nr."l".cpattern."'\<CR>:call cursor(".prevline.",".prevcol.")\<CR>"
+    let prevcol = (a:0 == 0 ? start : col('.'))
+    return ":call cursor(".prevline.",".start.")\<CR>:exec 'normal! c".nr."l".cpattern."'\<CR>:call cursor(".prevline.",".prevcol.")\<CR>"
   endfor
   return "\<CR>"
 endfunction

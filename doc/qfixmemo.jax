@@ -209,6 +209,19 @@ http://sites.google.com/site/fudist/Home/grep/install
 
 <Leader>rk           キーワードファイルを再作成
 
+"Note"
+howmのcome-fromリンクとgotoリンクも定義してあれば使用可能です。
+.vimrc >
+  " howmのリンクパターン
+  let howm_glink_pattern = '>>>'
+  let howm_clink_pattern = '<<<'
+
+"Note"
+キーワード処理は無効化可能です。
+.vimrc >
+  " キーワードを使用しない
+  let qfixmemo_use_keyword = 0
+
 ------------------------------------------------------------------------------
 3.1 クイックメモ					*qfixmemo-quickmemo*
 

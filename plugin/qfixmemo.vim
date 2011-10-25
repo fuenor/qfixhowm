@@ -61,9 +61,9 @@ endif
 
 " QFixMemoのシンタックスハイライト設定
 " 0 : 何も設定しない
-" 1 : タイトル行
-" 2 : タイトル行、タイムスタンプ
-" 3 : タイトル行、タイムスタンプ、予定・TODO
+" 1 : タイトル行、キーワード
+" 2 : タイトル行、キーワード、タイムスタンプ
+" 3 : タイトル行、キーワード、タイムスタンプ、予定・TODO
 if !exists('g:qfixmemo_syntax')
   let g:qfixmemo_syntax = 3
 endif
@@ -169,26 +169,17 @@ if !exists('g:qfixmemo_separator')
   let g:qfixmemo_separator = '>>> %s'
 endif
 
-" goto link syntax highlight
-if !exists('g:qfixmemo_glink_pattern')
-  let g:qfixmemo_glink_pattern = ''
-  if exists('g:howm_glink_pattern')
-    let g:qfixmemo_glink_pattern = g:howm_glink_pattern
-  endif
-endif
-" come-from link syntax highlight
-if !exists('g:qfixmemo_clink_pattern')
-  let g:qfixmemo_clink_pattern = ''
-  if exists('g:howm_clink_pattern')
-    let g:qfixmemo_clink_pattern = g:howm_clink_pattern
-  endif
-endif
 " howm_schedule.vimを使用する
 " 0 : 使用しない
 " 1 : autoload読込
 " 2 : 起動時読込
 if !exists('g:qfixmemo_use_howm_schedule')
   let g:qfixmemo_use_howm_schedule = 1
+endif
+
+" キーワードを使用する
+if !exists('g:qfixmemo_use_keyword')
+  let g:qfixmemo_use_keyword = 1
 endif
 
 " スイッチアクションの最大数
@@ -249,9 +240,10 @@ if !exists('g:qfixmemo_auto_generate_filename')
   let g:qfixmemo_auto_generate_filename = '%Y-%m-%d-%H%M%S'
 endif
 
+let s:howm_ext = 'howm'
 " 常にqfixmemoファイルとして扱うファイルの正規表現
 if !exists('g:qfixmemo_isqfixmemo_regxp')
-  let g:qfixmemo_isqfixmemo_regxp = '\c\.howm$'
+  let g:qfixmemo_isqfixmemo_regxp = '\c\.'.s:howm_ext.'$'
 endif
 
 """"""""""""""""""""""""""""""
@@ -319,6 +311,13 @@ silent! function QFixMemoTitleRegxp()
   endif
   if exists('g:QFixMRU_RegisterFile') && '.'.g:qfixmemo_ext !~ g:QFixMRU_RegisterFile
     let g:QFixMRU_RegisterFile = '\.'.g:qfixmemo_ext.'$'
+  endif
+  " .howm
+  if !exists("g:QFixMRU_Title['".s:howm_ext."']")
+    let g:QFixMRU_Title[s:howm_ext]          = g:QFixMRU_Title[g:qfixmemo_ext]
+  endif
+  if !exists('g:QFixMRU_Title["howm_regxp"]')
+    let g:QFixMRU_Title[s:howm_ext.'_regxp'] = g:QFixMRU_Title[g:qfixmemo_ext.'_regxp']
   endif
 endfunction
 
@@ -816,15 +815,6 @@ function! s:syntaxHighlight()
   if g:qfixmemo_syntax == 0
     return
   endif
-  silent! syn clear qfixmemoGotolink
-  exe "syn match qfixmemoGotolink '" . '^' . matchstr(g:qfixmemo_separator, '^\S\+') . ".*'"
-  if g:qfixmemo_glink_pattern != ''
-    exe "syn match qfixmemoGotolink '" . g:qfixmemo_glink_pattern . ".*'" . '"'
-  endif
-  if g:qfixmemo_clink_pattern != ''
-    exe "syn match qfixmemoGotolink '" . g:qfixmemo_clink_pattern . ".*'" . '"'
-  endif
-  hi link qfixmemoGotolink  Underlined
   silent! syn clear qfixmemoKeyword
   if s:KeywordHighlight != ''
     exe 'syn match qfixmemoKeyword display "\V'.escape(s:KeywordHighlight, '"').'"'
@@ -2067,6 +2057,9 @@ endif
 
 " オートリンク読込
 function! qfixmemo#LoadKeyword(...)
+  if g:qfixmemo_use_keyword == 0
+    return
+  endif
   if a:0 == 0
     let kfile = expand(g:qfixmemo_keyword_file)
     if !filereadable(kfile)
@@ -2099,8 +2092,11 @@ endfunction
 let s:KeywordDic = []
 let s:KeywordHighlight = ''
 function! qfixmemo#AddKeyword(...)
-  let addkey = 0
+  if g:qfixmemo_use_keyword == 0
+    return
+  endif
 
+  let addkey = 0
   if a:0
     let list = a:1
     call filter(list, "v:val =~ '\[\[.*\]\]'")
@@ -2179,10 +2175,11 @@ function! qfixmemo#RebuildKeyword()
   redraw | echo 'QFixMemo : Rebuild Keyword...'
 
   let pattern = '\[\[.*\]\]'
-  let qflist = qfixlist#search(pattern, g:qfixmemo_dir, '', 0, g:qfixmemo_fileencoding, '**/*')
+  let kfile = '*.'.s:howm_ext.' *.'.g:qfixmemo_ext
+  let qflist = qfixlist#search(pattern, g:qfixmemo_dir, '', 0, g:qfixmemo_fileencoding, '**/'.kfile)
   if exists('g:howm_clink_pattern')
     let pattern = g:howm_clink_pattern
-    let extlist = qfixlist#search(pattern, g:qfixmemo_dir, '', 0, g:qfixmemo_fileencoding, '**/*')
+    let extlist = qfixlist#search(pattern, g:qfixmemo_dir, '', 0, g:qfixmemo_fileencoding, '**/'.kfile)
     call extend(qflist, extlist)
   endif
 

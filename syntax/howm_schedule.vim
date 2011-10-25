@@ -63,6 +63,15 @@ syn match txtFile '\[:\?&\?\zs\([A-Za-z]:[/\\]\|\~[/\\]\|\.\.\?[/\\]\|[/\\]\)[^:
 hi link txtFile Underlined
 hi link txtUrl  Underlined
 
+if exists('g:howm_glink_pattern') && g:howm_glink_pattern != ''
+  exe "syn match howmLink '" . g:howm_glink_pattern . ".*'" . '"'
+endif
+if exists('g:howm_clink_pattern') && g:howm_clink_pattern != ''
+  exe "syn match howmLink '" . g:howm_clink_pattern . ".*'" . '"'
+endif
+
+hi link howmLink  Underlined
+
 " macro action
 if exists('g:QFixHowm_MacroActionKey') && exists('g:QFixHowm_MacroActionPattern')
   if g:QFixHowm_MacroActionKey != '' && g:QFixHowm_MacroActionPattern != ''

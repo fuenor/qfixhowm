@@ -187,19 +187,6 @@ if !exists('g:qfixmemo_switch_action_max')
   let g:qfixmemo_switch_action_max = 8
 endif
 
-" サブウィンドウを出す方向
-if !exists('g:qfixmemo_submenu_dir')
-  let g:qfixmemo_submenu_dir = "topleft vertical"
-endif
-" サブウィンドウのファイル名
-if !exists('g:qfixmemo_submenu_title')
-  let g:qfixmemo_submenu_title = '~/__submenu__'
-endif
-" サブウィンドウのサイズ
-if !exists('g:qfixmemo_submenu_width')
-  let g:qfixmemo_submenu_width = 30
-endif
-
 " ランダム表示保存ファイル
 if !exists('g:qfixmemo_random_file')
   let g:qfixmemo_random_file = '~/.qfixmemo-random'
@@ -329,7 +316,8 @@ silent! function QFixMemoKeymap()
   silent! nnoremap <silent> <unique> <Leader>U       :<C-u>call qfixmemo#Quickmemo(0)<CR>
   silent! nnoremap <silent> <unique> <Leader><Space> :<C-u>call qfixmemo#Edit(g:qfixmemo_diary)<CR>
   silent! nnoremap <silent> <unique> <Leader>j       :<C-u>call qfixmemo#PairFile('%')<CR>
-  silent! nnoremap <silent> <unique> <Leader>i       :<C-u>call qfixmemo#ToggleSubWindow()<CR>
+  silent! nnoremap <silent> <unique> <Leader>i       :<C-u>call qfixmemo#SubMenu()<CR>
+  silent! nnoremap <silent> <unique> <Leader>I       :<C-u>call qfixmemo#SubMenu(0)<CR>
 
   silent! nnoremap <silent> <unique> <Leader>m       :<C-u>call qfixmemo#ListMru()<CR>
   silent! nnoremap <silent> <unique> <Leader>l       :<C-u>call qfixmemo#ListRecent()<CR>
@@ -656,7 +644,7 @@ endfunction
 " 強制書込
 function! qfixmemo#ForceWrite()
   let saved_bt = &buftype
-  if &buftype == 'nofile'
+  if &buftype != ''
     setlocal buftype=
   endif
   let s:ForceWrite = 1
@@ -784,6 +772,7 @@ endfunction
 let s:ForceWrite = 0
 function! s:BufWritePre()
   if exists('b:qfixmemo_bufwrite_pre') && b:qfixmemo_bufwrite_pre == 0
+    call qfixmemo#AddKeyword()
     return
   endif
   if !s:isQFixMemo(expand('%'))
@@ -805,10 +794,17 @@ function! s:filetype()
   if &filetype != '' && stridx(file, pdir) == 0
     return
   endif
+  if exists('b:qfixmemo_filetype') && b:qfixmemo_filetype == &filetype
+    return
+  endif
   if g:qfixmemo_filetype != ''
     exe 'setlocal filetype=' . g:qfixmemo_filetype
   endif
   call s:syntaxHighlight()
+  " for myqfix.vim
+  if &previewwindow == 0
+    let b:qfixmemo_filetype = &filetype
+  endif
 endfunction
 
 function! s:syntaxHighlight()
@@ -1045,19 +1041,13 @@ function! s:isQFixMemo(file)
   if g:qfixmemo_isqfixmemo_regxp != '' && file =~ g:qfixmemo_isqfixmemo_regxp
     return 1
   endif
-  let ext = tolower(fnamemodify(file, ':e'))
-  if ext != tolower(g:qfixmemo_ext)
+  if tolower(fnamemodify(file, ':e')) != tolower(g:qfixmemo_ext)
     return 0
   endif
   let file = QFixNormalizePath(file, 'compare')
   let head = expand(g:qfixmemo_dir)
   let head = QFixNormalizePath(head, 'compare')
   if stridx(file, head) == 0
-    return 1
-  endif
-  let sfile = expand(g:qfixmemo_submenu_title)
-  let sfile = QFixNormalizePath(sfile, 'compare')
-  if file == sfile
     return 1
   endif
   return 0
@@ -1787,32 +1777,106 @@ function! s:grep(pattern)
 endfunction
 
 """"""""""""""""""""""""""""""
-" sub window
-function! qfixmemo#ToggleSubWindow()
-  call qfixmemo#Init()
-  let bufnum = bufnr(g:qfixmemo_submenu_title)
-  let winnum = bufwinnr(g:qfixmemo_submenu_title)
-  if bufnum != -1 && winnum != -1
-    exe "bd ". bufnum
-  else
-    call s:OpenQFixSubWin()
-  endif
+" インデント対応アウトライン
+""""""""""""""""""""""""""""""
+" アウトライン(foldenable)
+if !exists('g:qfixmemo_outline_foldenable')
+  let g:qfixmemo_outline_foldenable = 1
+endif
+" アウトライン(foldmethod)
+if !exists('g:qfixmemo_outline_foldmethod')
+  let g:qfixmemo_outline_foldmethod = 'indent'
+endif
+" アウトライン(foldexpr)
+if !exists('g:qfixmemo_outline_foldexpr')
+  let g:qfixmemo_outline_foldexpr = "getline(v:lnum)=~'^[=.*・]'?'>1':'1'"
+endif
+" アウトライン(syntax)
+if !exists('g:qfixmemo_outline_syntax')
+  let g:qfixmemo_outline_syntax = 'ezotl'
+endif
+
+function! qfixmemo#Outline()
+  setlocal noexpandtab
+  let &foldenable          = g:qfixmemo_outline_foldenable
+  exe 'setlocal foldexpr='  .g:qfixmemo_outline_foldexpr
+  exe 'setlocal foldmethod='.g:qfixmemo_outline_foldmethod
+  exe 'runtime! syntax/'    .g:qfixmemo_outline_syntax.'.vim'
 endfunction
 
-function! s:OpenQFixSubWin()
-  let winnum = bufwinnr(g:qfixmemo_submenu_title)
+""""""""""""""""""""""""""""""
+" sub menu
+"
+" サブウィンドウのタイトル
+if !exists('g:qfixmemo_submenu_title')
+  let g:qfixmemo_submenu_title  = '__submenu__'
+endif
+" サブウィンドウのサイズ
+if !exists('g:qfixmemo_submenu_width')
+  let g:qfixmemo_submenu_width = 30
+endif
+" サブウィンドウを出す方向
+if !exists('g:qfixmemo_submenu_direction')
+  let g:qfixmemo_submenu_direction   = 'topleft vertical'
+endif
+" サブウィンドウのwrap
+if !exists('g:qfixmemo_submenu_wrap')
+  let g:qfixmemo_submenu_wrap = 1
+endif
+
+let s:qfixmemo_submenu_title = g:qfixmemo_submenu_title
+function! qfixmemo#SubMenu(...)
+  call qfixmemo#Init()
+  let l:count = count
+  let prevPath = escape(getcwd(), ' ')
+  silent! exec 'lchdir ' . escape(expand(g:qfixmemo_dir), ' ')
+  let file = fnamemodify(s:qfixmemo_submenu_title, ':p')
+  let bufnum = bufnr(file)
+  let winnum = bufwinnr(file)
+  if bufnum != -1 && winnum != -1
+    exe winnum . 'wincmd w'
+    if (a:0 && a:1 == 0) || l:count
+      wincmd c
+    else
+      silent! exec 'lchdir ' . prevPath
+      return
+    endif
+  endif
+  if (a:0 && a:1 == 0) || l:count
+    if a:0 && a:1
+      let s:qfixmemo_submenu_title = g:qfixmemo_submenu_title
+    else
+      exe 'let s:qfixmemo_submenu_title = g:qfixmemo_submenu_title'.l:count
+    endif
+  elseif bufnum != -1 && winnum != -1
+    silent! exec 'lchdir ' . prevPath
+    return
+  endif
+  silent! exec 'lchdir ' . escape(expand(g:qfixmemo_dir), ' ')
+  let file = fnamemodify(s:qfixmemo_submenu_title, ':p')
+  let bufnum = bufnr(file)
+  let winnum = bufwinnr(file)
+  silent! exec 'lchdir ' . prevPath
+  call s:OpenQFixSubWin(file)
+endfunction
+
+function! s:OpenQFixSubWin(file)
+  let file = a:file
+  let winnum = bufwinnr(file)
   if winnum != -1
     if winnr() != winnum
       exe winnum . 'wincmd w'
     endif
     return
   endif
-  let windir = g:qfixmemo_submenu_dir
+  let windir = g:qfixmemo_submenu_direction
   let winsize = g:qfixmemo_submenu_width
 
-  let bufnum = bufnr(g:qfixmemo_submenu_title)
+  let bufnum = bufnr(file)
   if bufnum == -1
-    let wcmd = expand(g:SubWindow_Title)
+    let wcmd = expand(file)
+    exe 'au BufEnter '.fnamemodify(file, ':t').' normal! '.g:qfixmemo_submenu_width ."\<C-W>|"
+    exe 'au BufUnload '.fnamemodify(file, ':t').' call <SID>submenuBufUnload()'
   else
     let wcmd = '+buffer' . bufnum
   endif
@@ -1820,19 +1884,59 @@ function! s:OpenQFixSubWin()
   setlocal buftype=nofile
   setlocal bufhidden=hide
   setlocal noswapfile
-  setlocal nowrap
   setlocal foldcolumn=0
   setlocal nolist
   setlocal winfixwidth
+  exe 'let &wrap='.g:qfixmemo_submenu_wrap
   nnoremap <silent> <buffer> q    :close<CR>
   nnoremap <silent> <buffer> <CR> :call QFixMemoUserModeCR()<CR>
+  if exists('g:qfixmemo_submenu_writekey')
+    let cmd = g:qfixmemo_submenu_writekey
+    exe 'nnoremap <silent> <buffer> ' . cmd . ' :<C-u>call qfixmemo#ForceWrite()<CR>'
+  endif
   let cmd = g:qfixmemo_mapleader . 'w'
   exe 'nnoremap <silent> <buffer> ' . cmd . ' :<C-u>call qfixmemo#ForceWrite()<CR>'
-  call qfixmemo#Syntax()
-  if exists('*QFixMemoSubWindowBufEnter')
-    call QFixMemoSubWindowBufEnter()
+  let b:qfixmemo_bufwrite_pre = 0
+  call s:syntaxHighlight()
+  if bufnum == -1 && !filereadable(expand(file))
+    call qfixmemo_msg#submenu()
   endif
-  echo 'QFixMemo : Use "' . cmd . '" to write this buffer.'
+  call QFixMemoSubMenuOutline()
+  if exists('*QFixMemoSubMenuBufWinEnter')
+    call QFixMemoSubMenuBufWinEnter()
+  endif
+endfunction
+
+let s:qfixmemo_fileencoding = g:qfixmemo_fileencoding
+function! s:submenuBufUnload()
+  let file = expand('<afile>')
+  let str = getbufline(file, 1, '$')
+  if str == ['']
+    call delete(file)
+    return
+  endif
+  let from = &enc
+  let to   = s:qfixmemo_fileencoding
+  call map(str, 'iconv(v:val, from, to)')
+  if filereadable(file) && str == readfile(file)
+    return
+  endif
+  call writefile(str, file)
+endfunction
+
+" サブメニューでアウトラインを使用する
+if !exists('g:qfixmemo_submenu_outline')
+  let g:qfixmemo_submenu_outline = 1
+endif
+
+" デフォルトアウトラインモード
+" 外部で定義されている場合はそちらが優先されます。
+silent! function QFixMemoSubMenuOutline()
+  if !g:qfixmemo_submenu_outline
+    return
+  endif
+  setlocal ts=2 sw=2 sts=2
+  call qfixmemo#Outline()
 endfunction
 
 """"""""""""""""""""""""""""""
@@ -2207,7 +2311,7 @@ function! qfixmemo#RebuildKeyword()
   let str = []
   for d in qflist
     let lnum = d['lnum']
-    let glist = readfile(d['filename'], '', lnum)
+    let glist = readfile(d['filename'])
     call add(str, glist[lnum-1])
   endfor
   call map(str, 'iconv(v:val, from, to)')

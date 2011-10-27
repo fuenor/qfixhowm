@@ -1,5 +1,5 @@
 "=============================================================================
-"    Description: HowmTitlelist for QFixHowm
+"    Description: howm menu for qfixmemo
 "         Author: fuenor <fuenor@gmail.com>
 "  Last Modified: 0000-00-00 00:00
 "        Version: 1.00
@@ -14,8 +14,6 @@ let loaded_HowmMenu = 1
 if v:version < 700
   finish
 endif
-
-let s:howmsuffix = 'howm'
 
 if !exists('g:HowmFiles_Sort')
   let g:HowmFiles_Sort = ''
@@ -47,13 +45,12 @@ let s:howmsuffix = 'howm'
 let s:filehead = '\(howm\|sche\)://'
 
 """"""""""""""""""""""""""""""
-" 高速リスト一覧
-""""""""""""""""""""""""""""""
 augroup HowmFiles
   au!
-  autocmd BufWinEnter __HOWM_MENU__ call <SID>BufWinEnterMenu(g:HowmFiles_Preview, s:filehead)
-  autocmd BufLeave    __HOWM_MENU__ call <SID>BufLeaveMenu()
-  autocmd CursorHold  __HOWM_MENU__ call <SID>PreviewMenu(s:filehead)
+  au BufWinEnter __HOWM_MENU__ call <SID>BufWinEnterMenu(g:HowmFiles_Preview, s:filehead)
+  au BufLeave    __HOWM_MENU__ call <SID>BufLeaveMenu()
+  au CursorHold  __HOWM_MENU__ call <SID>PreviewMenu(s:filehead)
+  exe 'au BufNewFile,BufRead '.g:QFixHowm_Menufile.' let b:qfixmemo_bufwrite_pre = 0'
 augroup END
 
 function! s:TogglePreview(...)

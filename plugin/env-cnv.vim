@@ -271,13 +271,15 @@ if !exists('g:QFixHowm_FilenameLen')
 endif
 
 " サブウィンドウを出す方向
-if !exists('g:SubWindow_Dir')
-  let g:SubWindow_Dir = "topleft vertical"
+if !exists('g:SubWindow_Direction')
+  let g:SubWindow_Direction = "topleft vertical"
 endif
 " サブウィンドウのファイル名
 if !exists('g:SubWindow_Title')
-  let g:SubWindow_Title = '~/__submenu__.'.s:howmsuffix
+  let g:SubWindow_Title = '__submenu__'
 endif
+" サブウィンドウのタイトル名
+let g:qfixmemo_submenu_title  = g:SubWindow_Title
 " サブウィンドウのサイズ
 if !exists('g:SubWindow_Width')
   let g:SubWindow_Width = 30
@@ -292,28 +294,18 @@ if !exists('g:QFixHowm_Folding')
   let g:QFixHowm_Folding = 1
 endif
 
-augroup QFixHowmKeyword
-  au!
-  exe 'au BufNewFile,BufRead '. expand(g:SubWindow_Title)   .' let b:qfixmemo_bufwrite_pre = 0'
-  exe 'au BufNewFile,BufRead '. expand(g:QFixHowm_Menufile) .' let b:qfixmemo_bufwrite_pre = 0'
-  exe 'au BufWritePre '. expand(g:SubWindow_Title)   .' call qfixmemo#AddKeyword()'
-  exe 'au BufWritePre '. expand(g:QFixHowm_Menufile) .' call qfixmemo#AddKeyword()'
-augroup END
-
 if !exists('g:howm_clink_pattern')
   let g:howm_clink_pattern = '<<<'
 endif
 function! QFixMemoRebuildKeyword(dir, fenc)
-  let extlist = []
   silent! cexpr ''
   let file = g:howm_dir
   let file = g:QFixHowm_MenuDir == '' ? g:howm_dir : g:QFixHowm_MenuDir
   let file = expand(file) . '/' . g:QFixHowm_Menufile
-  silent! exec 'vimgrepadd /\('.g:howm_clink_pattern.'\|'.'\[\[[^\]]\+\]\]'.'\)/j '. escape(file, ' ')
+  silent! exec 'vimgrep /\('.g:howm_clink_pattern.'\|'.'\[\[[^\]]\+\]\]'.'\)/j '. escape(file, ' ')
   let qflist = getqflist()
-  call extend(extlist, qflist)
   silent! cexpr ''
-  return extlist
+  return qflist
 endfunction
 
 " 起動時コマンド
@@ -371,6 +363,9 @@ function! QFixHowmSetup()
     if exists('g:QFixHowm_QuickMemoFile'.i)
       exe printf('let g:qfixmemo_quickmemo%d=g:QFixHowm_QuickMemoFile%d', i, i)
     endif
+    if exists('g:SubWindow_Title'.i)
+      exe printf('let g:qfixmemo_submenu_title%d=g:SubWindow_Title%d', i, i)
+    endif
   endfor
   " ペアファイルの作成先ディレクトリ
   let g:qfixmemo_pairfile_dir  = g:QFixHowm_PairLinkDir
@@ -414,11 +409,11 @@ function! QFixHowmSetup()
   endif
 
   " サブウィンドウのファイル名
-  let g:qfixmemo_submenu_title = g:SubWindow_Title
+  let g:qfixmemo_submenu_title     = g:SubWindow_Title
   " サブウィンドウを出す方向
-  let g:qfixmemo_submenu_dir   = g:SubWindow_Dir
+  let g:qfixmemo_submenu_direction = g:SubWindow_Direction
   " サブウィンドウのサイズ
-  let g:qfixmemo_submenu_width = g:SubWindow_Width
+  let g:qfixmemo_submenu_width     = g:SubWindow_Width
 
   " ファイル名をタイトル行から生成したファイル名へ変更する場合の文字数
   let g:qfixmemo_rename_length = g:QFixHowm_FilenameLen

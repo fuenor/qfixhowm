@@ -547,16 +547,16 @@ QFixMemoではサブメニューを開くことができます。
 
 オプション一覧 >
   " サブメニューのタイトル名
-  let qfixmemo_submenu_title  = '__submenu__'
+  let qfixmemo_submenu_title = '__submenu__'
 
   " サブメニューのウィンドウ幅
-  let SubWindow_Width = 30
+  let qfixmemo_submenu_width = 30
 
   " サブメニューのウィンドウ表示方向
-  let qfixmemo_submenu_direction   = 'topleft vertical'
+  let qfixmemo_submenu_direction = 'topleft vertical'
 
   " サブメニューのwrap
-  let qfixmemo_submenu_wrap  = 1
+  let qfixmemo_submenu_wrap = 1
 
   " アウトライン機能の折り畳み初期値
   let qfixmemo_outline_foldenable = 1

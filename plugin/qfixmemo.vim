@@ -442,9 +442,10 @@ silent! function QFixMemoMenubar(menu, leader)
   let sepcmd  = 'amenu <silent> 41.333 '.a:menu.'.-sep%d-			<Nop>'
   call s:addMenu(menucmd, 'CreateNew(&C)'      , 'c')
   call s:addMenu(menucmd, 'CreateNew(Name)(&N)', 'C')
-  call s:addMenu(menucmd, 'Diary(&D)'          , '<Space>')
   call s:addMenu(menucmd, 'QuickMemo(&U)'      , 'u')
+  call s:addMenu(menucmd, 'Diary(&D)'          , '<Space>')
   call s:addMenu(menucmd, 'PairFile(&J)'       , 'j')
+  call s:addMenu(menucmd, 'SubMenu(&I)'        , 'i')
   exe printf(sepcmd, 1)
   call s:addMenu(menucmd, 'MRU(&M)'              , 'm')
   let menucmd = 'amenu <silent> 41.334 '.a:menu.'.%s<Tab>'.a:leader.'%s :call feedkeys("'.a:leader.'%s","t")<CR>'
@@ -460,7 +461,6 @@ silent! function QFixMemoMenubar(menu, leader)
   endif
   call s:addMenu(menucmd, 'DiaryList(&O)'        , 'A')
   call s:addMenu(menucmd, 'FileList(&F)'         , 'rA')
-  call s:addMenu(menucmd, 'SubMenu(&I)'          , 'i')
   exe printf(sepcmd, 2)
   call s:addMenu(menucmd, 'FGrep(&S)', 's')
   call s:addMenu(menucmd, 'Grep(&G)' , 'g')
@@ -1834,16 +1834,21 @@ function! qfixmemo#SubMenu(...)
   let bufnum = bufnr(file)
   let winnum = bufwinnr(file)
   if bufnum != -1 && winnum != -1
-    exe winnum . 'wincmd w'
-    if (a:0 && a:1 == 0) || l:count
+    if bufnum == bufnr('%') && (l:count == 0 && a:0 == 0)
+      wincmd c
+      silent! exec 'lchdir ' . prevPath
+      return
+    elseif (a:0 && a:1 == 0) || l:count
+      exe winnum . 'wincmd w'
       wincmd c
     else
+      exe winnum . 'wincmd w'
       silent! exec 'lchdir ' . prevPath
       return
     endif
   endif
-  if (a:0 && a:1 == 0) || l:count
-    if a:0 && a:1
+  if a:0 || l:count
+    if a:0 && a:1 == 0
       let s:qfixmemo_submenu_title = g:qfixmemo_submenu_title
     else
       exe 'let s:qfixmemo_submenu_title = g:qfixmemo_submenu_title'.l:count

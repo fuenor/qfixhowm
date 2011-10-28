@@ -1933,10 +1933,7 @@ endfunction
 
 let s:qfixmemo_fileencoding = g:qfixmemo_fileencoding
 function! s:SubMenuBufAutoWrite(...)
-  let prevPath = escape(getcwd(), ' ')
-  exe 'lchdir ' . expand(s:submenu_basedir)
   let file = fnamemodify(expand('<afile>'), ':p')
-  silent! exe 'lchdir ' . prevPath
   let str = getbufline(file, 1, '$')
   if str == ['']
     call delete(file)
@@ -1951,10 +1948,6 @@ function! s:SubMenuBufAutoWrite(...)
   let dir = fnamemodify(file, ':h')
   if !isdirectory(dir)
     call mkdir(dir, 'p')
-  endif
-  if s:debug
-    let mes = printf('QFixMemo : %s | %s', fnamemodify(file, ':t'), file)
-    echo mes
   endif
   call writefile(str, file)
 endfunction

@@ -390,6 +390,8 @@ if g:qfixmemo_use_howm_schedule
       call QFixHowmOpenMenu()
     endif
     call <SID>howmScheduleEnv('restore')
+    let lt = localtime() - HowmSchedueCachedTime('menu')
+    echo 'QFixMemo : Cached menu ('.lt/60.' minutes ago)'
   endfunction
 
   function! s:howmScheduleEnv(mode)
@@ -1837,16 +1839,20 @@ if !exists('g:qfixmemo_submenu_wrap')
 endif
 
 let s:qfixmemo_submenu_title = g:qfixmemo_submenu_title
+let s:submenu_basedir = g:qfixmemo_dir
+if exists('g:qfixmemo_root_dir')
+  let s:submenu_basedir = g:qfixmemo_root_dir
+endif
 function! qfixmemo#SubMenu(...)
   call qfixmemo#Init()
-  let basedir = g:qfixmemo_dir
-
+  let basedir = s:submenu_basedir
   let l:count = a:0 && a:1 ? a:1 : count
   let prevPath = escape(getcwd(), ' ')
   silent! exec 'lchdir ' . escape(expand(basedir), ' ')
   let file = fnamemodify(s:qfixmemo_submenu_title, ':p')
   let bufnum = bufnr(file)
   let winnum = bufwinnr(file)
+
   if winnum != -1 && bufnum == bufnr('%')
     wincmd c
     if l:count == 0 && a:0 == 0
@@ -1925,7 +1931,10 @@ endfunction
 
 let s:qfixmemo_fileencoding = g:qfixmemo_fileencoding
 function! s:submenuBufUnload()
-  let file = expand('<afile>')
+  let prevPath = escape(getcwd(), ' ')
+  exe 'lchdir ' . expand(s:submenu_basedir)
+  let file = fnamemodify(expand('<afile>'), ':p')
+  silent! exe 'lchdir ' . prevPath
   let str = getbufline(file, 1, '$')
   if str == ['']
     call delete(file)

@@ -2418,6 +2418,11 @@ endfunction
 silent! function! howm_schedule#Init()
 endfunction
 
+function! HowmSchedueCachedTime(mode)
+  exe 'let time = s:LT_'.a:mode
+  return time
+endfunction
+
 let loaded_HowmSchedule = 1
 
 " 予定・TODOのみ使用したい場合

@@ -27,6 +27,10 @@ CONTENTS						*qfixmemo-contents*
 6. ランダム表示                                         |qfixmemo-random|
 7. フォールディング                                     |qfixmemo-folding|
 8. サブメニュー                                         |qfixmemo-submenu|
+8.1 サブメニュー用アウトライン                          |qfixmemo-sub-outline|
+8.2 アウトラインオプション                              |qfixmemo-sub-outline-option|
+8.3 複数のサブメニュー                                  |qfixmemo-submenu-multi|
+8.4 オプション                                          |qfixmemo-submenu-option|
 9. ローカルバッファコマンド                             |qfixmemo-local-commands|
 10. 予定・TODO                                          |qfixmemo-schedule|
 11. ファイルリネーム                                    |qfixmemo-rename|
@@ -133,8 +137,7 @@ qfixapp内のsyntaxディレクトリにコピーすることも出来ます
 
 以降はディレクトリをqfixmemoとリネームしたとして解説を行いますので適宜読み替え
 てください。
-
-.vimrc >
+>
   " ランタイムパスを通す
   set runtimepath+=path/to/qfixmemo
   " メモファイルの保存先
@@ -214,14 +217,14 @@ NOTE:
 
 NOTE:
 howmのcome-fromリンクとgotoリンクも定義してあれば使用可能です。
-.vimrc >
+ >
   " howmのリンクパターン
   let howm_glink_pattern = '>>>'
   let howm_clink_pattern = '<<<'
 
 NOTE:
 キーワード処理は無効化可能です。
-.vimrc >
+ >
   " キーワードを使用しない
   let qfixmemo_use_keyword = 0
 
@@ -333,7 +336,7 @@ l ra A は外部grepを使用するのでMRUリストより速度的には遅く
 なおキャッシュの存在しない <Leader>aの初回実行時には <Leader>raが実行されます。
 
 <Leader>a でキャッシュ表示を使用したくない場合は次のように設定してください。
-.vimrc >
+ >
   " <Leader>a に「全エントリ一覧」を割り当て
   let qfixmemo_use_list_cache = 0
 
@@ -344,7 +347,7 @@ l ra A は外部grepを使用するのでMRUリストより速度的には遅く
 同様に<Leader>lでは更新日数の指定が可能です。
 初期値は.vimrcでも設定できます。
 
-.vimrc >
+ >
   " MRUの表示数
   let QFixMRU_Entries   = 20
   " 最近更新したエントリ一覧の日数
@@ -410,7 +413,7 @@ U                   絞り込み全てをアンドゥ
 <F5>                ランダム表示(Quickfixウィンドウ上のみ)
 <Leader>rR          キャッシュをクリアしてランダム表示
 
-.vimrc >
+ >
   " ランダム表示数
   let qfixmemo_random_columns = 10
   " ランダム表示のキャッシュファイル名
@@ -428,7 +431,7 @@ qfixmemo_random_dirを設定します。
   3 : qfixmemo_dir
   デフォルトでは1,2が設定されていないので qfixmemo_dirが使用されます
 
-.vimrc >
+ >
   " ランダム表示検索対象ディレクトリ
   let qfixmemo_random_dir = '~/qfixmemo/random'
 
@@ -443,16 +446,16 @@ qfixmemo_random_dirを設定します。
 qfixmemo_foldingが 0 だと qfixmemoのフォールディングは無効化されます。 >
 デフォルトでは行頭がタイトル記号かどうかで折りたたみます
 
-.vimrc >
+>
   let qfixmemo_folding         = 1
   let qfixmemo_folding_pattern = '^=[^=]'
 
 フォールディング設定はQFixMemoSetFolding()で行われます。
-.vimrc等でQFixMemoSetFolding()を定義すると、そちらが優先されるので必要なら好
-みの関数を作成してください。
+設定ファイル等でQFixMemoSetFolding()を定義すると、そちらが優先されるので必要な
+ら好みの関数を作成してください。
 デフォルトでは以下の関数と同等の式が設定されます。
 
-.vimrc >
+ >
   " フォールディングレベル計算
   function! QFixMemoSetFolding()
     setlocal nofoldenable
@@ -465,38 +468,29 @@ qfixmemo_foldingが 0 だと qfixmemoのフォールディングは無効化さ�
 
 QFixMemoではサブメニューを開くことができます。
 サブメニューは自由に編集可能で、変更は自動保存されます。
-単純にキーワードを書いておいて、対応するファイルを開くキーワード一覧のように使
-用したり、簡易なアウトライン機能が付いているので映画や小説の登場人物の解説付き
-一覧表のような解説付き目次を作成することも可能です。
+単純にキーワードを書いておいて、対応するファイルを開く「キーワード一覧」のよう
+に使用したり、簡易なアウトライン機能が付いているので「映画や小説の登場人物の解
+説付き一覧表」のような解説付き目次を作成することも可能です。
 
 <Leader>i           サブメニュー
 <Leader>I           サブメニュー(デフォルト)
-
-サブメニューはカウント指定可能で複数のサブメニューを作成できます。
-カウント指定後は<Leader>iで最後に使用したサブメニューが表示されます。
-また<Leader>Iを実行するとデフォルトのサブメニューを表示します。
-
- .vimrc >
-  " デフォルトのタイトル指定
-  let qfixmemo_submenu_title  = '__submenu__'
-
-  " 複数のサブメニュータイトル指定
-  let qfixmemo_submenu_title1 = '__submenu01__'
-  let qfixmemo_submenu_title2 = '__submenu02__'
-  ...
+>
+  " サブメニューのタイトル指定
+  let qfixmemo_submenu_title = '__submenu__'
 
 タイトルではなくパス付きでファイル名指定も可能です。
 パスは絶対パスだけでなく相対パスも使用可能です。
- .vimrc >
-  let qfixmemo_submenu_title  = '../path/to/__submenu__'
+基準ディレクトリは qfixmemo_dirです。
+>
+  let qfixmemo_submenu_title = '../path/to/__submenu__'
 
-8.1 アウトライン機能					*qfixmemo-submenu-outline*
+
+8.1 サブメニュー用アウトライン				*qfixmemo-sub-outline*
 
 初めてサブメニューを表示したときは、ヘルプが設定されています。
 <Leader>iで実際に表示して試してみてください。
 
-サブメニューを初期化するにはサブメニューの内容をすべて削除してVimを再起動しま
-す。以下に表示されているのはアウトライン機能のヘルプと同じ表示例です。
+以下に表示されているのはアウトライン機能のヘルプと同じ表示例です。
 (実際のサブメニューではタブ幅が2に設定されています)
 
 !!! 折り畳まれた行は !!!
@@ -542,9 +536,42 @@ QFixMemoではサブメニューを開くことができます。
 	# コメント行は
 	# 折り畳まれません。
 
-8.2 オプション						*qfixmemo-submenu-option*
+8.2 アウトラインオプション			*qfixmemo-sub-outline-option*
+
+アウトラインといってもfoldmethodとsyntaxを設定しているだけなので、好みに応じて
+変更してみてください。
+詳しくは|foldmethod|を参照してください。 >
+
+  """""""""""""""""""""""""""
+  " アウトライン
+  """""""""""""""""""""""""""
+  " アウトライン(foldenable)
+  let g:qfixmemo_outline_foldenable = 1
+
+  " アウトライン(foldmethod)
+  let g:qfixmemo_outline_foldmethod = 'indent'
+
+  " アウトライン(foldexpr)
+  let g:qfixmemo_outline_foldexpr = "getline(v:lnum)=~'^[=.*・]'?'>1':'1'"
+
+  " アウトライン(syntax)
+  let g:qfixmemo_outline_syntax = 'ezotl'
+
+8.3 複数のサブメニュー					*qfixmemo-submenu-multi*
+複数のサブメニュー >
+
+  " 複数のサブメニュータイトル指定
+  let qfixmemo_submenu_title1 = '__submenu01__'
+  let qfixmemo_submenu_title2 = '__submenu02__'
+  ...
+
+8.4 オプション						*qfixmemo-submenu-option*
 
 オプション一覧 >
+
+  """""""""""""""""""""""""""
+  " サブメニュー
+  """""""""""""""""""""""""""
   " サブメニューのタイトル名
   let qfixmemo_submenu_title = '__submenu__'
 
@@ -557,8 +584,9 @@ QFixMemoではサブメニューを開くことができます。
   " サブメニューのwrap
   let qfixmemo_submenu_wrap = 1
 
-  " アウトライン機能の折り畳み初期値
-  let qfixmemo_outline_foldenable = 1
+  " サブメニューでアウトラインを使用する
+  let g:qfixmemo_submenu_outline = 1
+
 
 ==============================================================================
 9. ローカルバッファコマンド				*qfixmemo-local-commands*
@@ -603,7 +631,7 @@ g,rd                繰り返しの展開
 
 QFixHowm互換の予定・TODOを使用したくない場合は無効化することができます。
 
-.vimrc >
+ >
   " QFixHowm互換の予定・TODO処理を使用しない。
   let g:qfixmemo_use_howm_schedule = 0
 
@@ -632,7 +660,7 @@ g,rN を実行するとqfixmemo_dir内のメモファイルをまとめて「タ
 いたり、気に入らない場合に適当に編集可能です。ソートや絞り込み検索等は「通常の
 全エントリ一覧」とほぼ同じコマンドが有効です。
 
-.vimrc >
+ >
   " リネームに使用する文字数(半角)
   let qfixmemo_rename_length = 32
 
@@ -654,7 +682,7 @@ qfixmemo/misc/user-func.vim にまとめてあります。
 12.1 新規メモのテンプレート					*qfixmemo-template*
 
 新規メモのテンプレートは変更可能です。
-.vimrc >
+ >
   let g:qfixmemo_template = [
     \'%TITLE% ',
     \""
@@ -667,7 +695,7 @@ qfixmemo/misc/user-func.vim にまとめてあります。
 
 テンプレートは |strftime()|で整形されるのであらかじめタイムスタンプを埋め込む
 ことも出来ます。
-.vimrc >
+ >
   let g:qfixmemo_template = [
     \'%TITLE% ',
     \'[%Y-%m-%d %H:%M]',
@@ -676,7 +704,7 @@ qfixmemo/misc/user-func.vim にまとめてあります。
 
 テンプレート挿入後にカーソル移動することも可能です。
 カーソル移動にはノーマルモードの移動コマンドを使用します。
-.vimrc >
+ >
   " テンプレート挿入後に2行下へカーソル移動
   let g:qfixmemo_template_keycmd = "2j$a"
 
@@ -700,7 +728,7 @@ qfixmemo/misc/user-func.vim にまとめてあります。
 ください。
 
 タイトルマーカーに ### を使いたい場合。
-.vimrc >
+ >
   " タイトルマーカー
   let qfixmemo_title    = '###'
 
@@ -719,7 +747,7 @@ qfixmemo/misc/user-func.vim にまとめてあります。
 
 独自キーマップは .vimrc等に QFixMemoKeymapPost() を作成する事で変更可能です。
 
-.vimrc >
+ >
   " キーマップ
   function! QFixMemoKeymapPost()
     nnoremap <silent> <Leader>a :<C-u>call qfixmemo#ListCache('open')<CR>
@@ -742,7 +770,7 @@ QFixMemoはキーマップが .vimrcや他のプラグインで定義されて�
 せん。このためグローバルキーマップを変更したい場合は .vimrc等でキーマップを直
 接指定することも可能です。
 
-.vimrc >
+ >
   " g,iはサブメニューの代わりにexample.txtを開く
   nnoremap g,i :<C-u>call qfixmemo#EditFile('example.txt')<CR>
 
@@ -752,7 +780,7 @@ QFixMemoはキーマップが .vimrcや他のプラグインで定義されて�
 保存前にタイトル行とタイムスタンプの付加とファイル末の空行削除等が行われます。
 保存前処理は .vimrc等に QFixMemoBufWritePre() を作成する事で変更可能です。
 
-.vimrc >
+ >
   " BufWritePre
   function! QFixMemoBufWritePre()
     " タイトル行付加
@@ -826,7 +854,7 @@ QFixHowmの環境変更用スクリプト互換の qfixmemo-chenv.vimもあり�
 qfixmemo/misc/qfixmemo-chenv.vim をpluginディレクトリにコピーして、.vimrcにオ
 プション設定を追加してください。
 
-.vimrc >
+ >
   " qfixmemo-chenv.vimの基準ディレクトリ設定
   let qfixmemo_chdir = qfixmemo_dir
 
@@ -859,8 +887,7 @@ qfixmemo/misc/qfixmemo-chenv.vim をpluginディレクトリにコピーして�
 calendar.vimでQFixMemoの日記を使用することが出来ます。
 qfixmemo/misc/qfixmemo-calendar.vim をpluginディレクトリにコピーして、.vimrcに
 オプション設定を追加してください。
-
-.vimrc >
+ >
   let calendar_action = "QFixMemoCalendarDiary"
   let calendar_sign   = "QFixMemoCalendarSign"
 

@@ -1897,8 +1897,10 @@ function! s:OpenQFixSubWin(file, id)
   let bufnum = bufnr(file)
   if bufnum == -1
     let wcmd = expand(file)
-    exe 'au BufEnter '.fnamemodify(file, ':t').' normal! '.winsize ."\<C-W>|"
-    exe 'au BufWinLeave '.fnamemodify(file, ':t').' call <SID>SubMenuBufAutoWrite()'
+    augroup QFixMemoSubMenu
+      exe 'au BufEnter '.fnamemodify(file, ':t').' normal! '.winsize ."\<C-W>|"
+      exe 'au BufWinLeave,VimLeave '.fnamemodify(file, ':t').' call <SID>SubMenuBufAutoWrite()'
+    augroup END
   else
     let wcmd = '+buffer' . bufnum
   endif
@@ -1934,11 +1936,7 @@ function! s:SubMenuBufAutoWrite(...)
   return
   let prevPath = escape(getcwd(), ' ')
   exe 'lchdir ' . expand(s:submenu_basedir)
-  if a:0
-    let file = fnamemodify(expand('<afile>'), ':p')
-  else
-    let file = fnamemodify(expand("%"), ":p")
-  endif
+  let file = fnamemodify(expand('<afile>'), ':p')
   silent! exe 'lchdir ' . prevPath
   let str = getbufline(file, 1, '$')
   if str == ['']
@@ -1952,8 +1950,12 @@ function! s:SubMenuBufAutoWrite(...)
     return
   endif
   let dir = fnamemodify(file, ':h')
-  if isdirectory(dir) == 0
+  if !isdirectory(dir)
     call mkdir(dir, 'p')
+  endif
+  if s:debug
+    let mes = printf('QFixMemo : %s | %s', fnamemodify(file, ':t'), file)
+    echo mes
   endif
   call writefile(str, file)
 endfunction

@@ -1898,12 +1898,12 @@ function! s:OpenQFixSubWin(file, id)
   if bufnum == -1
     let wcmd = expand(file)
     exe 'au BufEnter '.fnamemodify(file, ':t').' normal! '.winsize ."\<C-W>|"
-    exe 'au BufUnload '.fnamemodify(file, ':t').' call <SID>submenuBufUnload()'
+    exe 'au VimLeave '.fnamemodify(file, ':t').' call <SID>submenuBufUnload()'
   else
     let wcmd = '+buffer' . bufnum
   endif
   exe 'silent! ' . windir . ' ' . winsize . 'split ' . wcmd
-  setlocal buftype=nofile
+  setlocal buftype=nowrite
   setlocal bufhidden=hide
   setlocal noswapfile
   setlocal foldcolumn=0

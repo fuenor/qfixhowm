@@ -1849,8 +1849,7 @@ function! qfixmemo#SubMenu(...)
   let l:count = a:0 && a:1 ? a:1 : count
   let prevPath = escape(getcwd(), ' ')
   silent! exec 'lchdir ' . escape(expand(basedir), ' ')
-  let title = fnamemodify(s:qfixmemo_submenu_title, ':t')
-  let file = fnamemodify(title, ':p')
+  let file = fnamemodify(s:qfixmemo_submenu_title, ':p')
   let bufnum = bufnr(file)
   let winnum = bufwinnr(file)
 
@@ -1877,8 +1876,7 @@ function! qfixmemo#SubMenu(...)
   elseif l:count
     exe 'let s:qfixmemo_submenu_title = g:qfixmemo_submenu_title'.l:count
   endif
-  let title = fnamemodify(s:qfixmemo_submenu_title, ':t')
-  let file = fnamemodify(title, ':p')
+  let file = fnamemodify(s:qfixmemo_submenu_title, ':p')
   silent! exec 'lchdir ' . prevPath
   call s:OpenQFixSubWin(file, l:count)
 endfunction
@@ -1900,7 +1898,7 @@ function! s:OpenQFixSubWin(file, id)
   if bufnum == -1
     let wcmd = expand(file)
     exe 'au BufEnter '.fnamemodify(file, ':t').' normal! '.winsize ."\<C-W>|"
-    exe 'au BufUnload '.fnamemodify(file, ':t').' call <SID>submenuBufUnload()'
+    exe 'au BufWinLeave '.fnamemodify(file, ':t').' call <SID>SubMenuBufAutoWrite()'
   else
     let wcmd = '+buffer' . bufnum
   endif
@@ -1932,10 +1930,14 @@ function! s:OpenQFixSubWin(file, id)
 endfunction
 
 let s:qfixmemo_fileencoding = g:qfixmemo_fileencoding
-function! s:submenuBufUnload()
+function! s:SubMenuBufAutoWrite(...)
   let prevPath = escape(getcwd(), ' ')
   exe 'lchdir ' . expand(s:submenu_basedir)
-  let file = fnamemodify(expand('<afile>'), ':p')
+  if a:0
+    let file = fnamemodify(expand('<afile>'), ':p')
+  else
+    let file = fnamemodify(expand("%"), ":p")
+  endif
   silent! exe 'lchdir ' . prevPath
   let str = getbufline(file, 1, '$')
   if str == ['']

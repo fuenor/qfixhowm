@@ -1933,7 +1933,6 @@ endfunction
 
 let s:qfixmemo_fileencoding = g:qfixmemo_fileencoding
 function! s:SubMenuBufAutoWrite(...)
-  return
   let prevPath = escape(getcwd(), ' ')
   exe 'lchdir ' . expand(s:submenu_basedir)
   let file = fnamemodify(expand('<afile>'), ':p')

@@ -1849,7 +1849,8 @@ function! qfixmemo#SubMenu(...)
   let l:count = a:0 && a:1 ? a:1 : count
   let prevPath = escape(getcwd(), ' ')
   silent! exec 'lchdir ' . escape(expand(basedir), ' ')
-  let file = fnamemodify(s:qfixmemo_submenu_title, ':p')
+  let title = fnamemodify(s:qfixmemo_submenu_title, ':t')
+  let file = fnamemodify(title, ':p')
   let bufnum = bufnr(file)
   let winnum = bufwinnr(file)
 
@@ -1876,7 +1877,8 @@ function! qfixmemo#SubMenu(...)
   elseif l:count
     exe 'let s:qfixmemo_submenu_title = g:qfixmemo_submenu_title'.l:count
   endif
-  let file = fnamemodify(s:qfixmemo_submenu_title, ':p')
+  let title = fnamemodify(s:qfixmemo_submenu_title, ':t')
+  let file = fnamemodify(title, ':p')
   silent! exec 'lchdir ' . prevPath
   call s:OpenQFixSubWin(file, l:count)
 endfunction

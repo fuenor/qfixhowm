@@ -1898,7 +1898,7 @@ function! s:OpenQFixSubWin(file, id)
   if bufnum == -1
     let wcmd = expand(file)
     exe 'au BufEnter '.fnamemodify(file, ':t').' normal! '.winsize ."\<C-W>|"
-    exe 'au VimLeave '.fnamemodify(file, ':t').' call <SID>submenuBufUnload()'
+    exe 'au BufUnload '.fnamemodify(file, ':t').' call <SID>submenuBufUnload()'
   else
     let wcmd = '+buffer' . bufnum
   endif
@@ -1945,6 +1945,10 @@ function! s:submenuBufUnload()
   call map(str, 'iconv(v:val, from, to)')
   if filereadable(file) && str == readfile(file)
     return
+  endif
+  let dir = fnamemodify(file, ':h')
+  if isdirectory(dir) == 0
+    call mkdir(dir, 'p')
   endif
   call writefile(str, file)
 endfunction

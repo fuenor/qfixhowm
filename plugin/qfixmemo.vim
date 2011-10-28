@@ -1796,12 +1796,24 @@ if !exists('g:qfixmemo_outline_syntax')
   let g:qfixmemo_outline_syntax = 'ezotl'
 endif
 
-function! qfixmemo#Outline()
+function! qfixmemo#EzOutline(...)
   setlocal noexpandtab
-  let &foldenable          = g:qfixmemo_outline_foldenable
-  exe 'setlocal foldexpr='  .g:qfixmemo_outline_foldexpr
-  exe 'setlocal foldmethod='.g:qfixmemo_outline_foldmethod
-  exe 'runtime! syntax/'    .g:qfixmemo_outline_syntax.'.vim'
+
+  let id = a:0 ? a:1 : 0
+  let fen = s:GetOptionWithID('g:qfixmemo_outline_foldenable', id)
+  let fde = s:GetOptionWithID('g:qfixmemo_outline_foldexpr',   id)
+  let fdm = s:GetOptionWithID('g:qfixmemo_outline_foldmethod', id)
+  let syn = s:GetOptionWithID('g:qfixmemo_outline_syntax',     id)
+
+  let &foldenable          = fen
+  exe 'setlocal foldexpr='  .fde
+  exe 'setlocal foldmethod='.fdm
+  exe 'runtime! syntax/'    .syn.'.vim'
+endfunction
+
+function s:GetOptionWithID(opt, id)
+  exe 'let opt='.a:opt.(exists(a:opt.a:id) ? string(a:id) : '')
+  return opt
 endfunction
 
 """"""""""""""""""""""""""""""
@@ -1827,46 +1839,45 @@ endif
 let s:qfixmemo_submenu_title = g:qfixmemo_submenu_title
 function! qfixmemo#SubMenu(...)
   call qfixmemo#Init()
-  let l:count = count
+  let basedir = g:qfixmemo_dir
+
+  let l:count = a:0 && a:1 ? a:1 : count
   let prevPath = escape(getcwd(), ' ')
-  silent! exec 'lchdir ' . escape(expand(g:qfixmemo_dir), ' ')
+  silent! exec 'lchdir ' . escape(expand(basedir), ' ')
   let file = fnamemodify(s:qfixmemo_submenu_title, ':p')
   let bufnum = bufnr(file)
   let winnum = bufwinnr(file)
-  if bufnum != -1 && winnum != -1
-    if bufnum == bufnr('%') && (l:count == 0 && a:0 == 0)
-      wincmd c
-      silent! exec 'lchdir ' . prevPath
-      return
-    elseif (a:0 && a:1 == 0) || l:count
-      exe winnum . 'wincmd w'
-      wincmd c
-    else
-      exe winnum . 'wincmd w'
+  if winnum != -1 && bufnum == bufnr('%')
+    wincmd c
+    if l:count == 0 && a:0 == 0
       silent! exec 'lchdir ' . prevPath
       return
     endif
+    let winnum = -1
   endif
-  if a:0 || l:count
-    if a:0 && a:1 == 0
-      let s:qfixmemo_submenu_title = g:qfixmemo_submenu_title
-    else
-      exe 'let s:qfixmemo_submenu_title = g:qfixmemo_submenu_title'.l:count
+  if winnum != -1
+    exe winnum . 'wincmd w'
+    if l:count == 0 && a:0 == 0
+      silent! exec 'lchdir ' . prevPath
+      return
     endif
-  elseif bufnum != -1 && winnum != -1
-    silent! exec 'lchdir ' . prevPath
-    return
+    wincmd c
   endif
-  silent! exec 'lchdir ' . escape(expand(g:qfixmemo_dir), ' ')
+
+  silent! exec 'lchdir ' . escape(expand(basedir), ' ')
+  if a:0 && l:count == 0
+    let s:qfixmemo_submenu_title = g:qfixmemo_submenu_title
+  elseif l:count
+    exe 'let s:qfixmemo_submenu_title = g:qfixmemo_submenu_title'.l:count
+  endif
   let file = fnamemodify(s:qfixmemo_submenu_title, ':p')
-  let bufnum = bufnr(file)
-  let winnum = bufwinnr(file)
   silent! exec 'lchdir ' . prevPath
-  call s:OpenQFixSubWin(file)
+  call s:OpenQFixSubWin(file, l:count)
 endfunction
 
-function! s:OpenQFixSubWin(file)
+function! s:OpenQFixSubWin(file, id)
   let file = a:file
+  let swid = a:id
   let winnum = bufwinnr(file)
   if winnum != -1
     if winnr() != winnum
@@ -1874,13 +1885,13 @@ function! s:OpenQFixSubWin(file)
     endif
     return
   endif
-  let windir = g:qfixmemo_submenu_direction
-  let winsize = g:qfixmemo_submenu_width
+  let windir  = s:GetOptionWithID('g:qfixmemo_submenu_direction', swid)
+  let winsize = s:GetOptionWithID('g:qfixmemo_submenu_width', swid)
 
   let bufnum = bufnr(file)
   if bufnum == -1
     let wcmd = expand(file)
-    exe 'au BufEnter '.fnamemodify(file, ':t').' normal! '.g:qfixmemo_submenu_width ."\<C-W>|"
+    exe 'au BufEnter '.fnamemodify(file, ':t').' normal! '.winsize ."\<C-W>|"
     exe 'au BufUnload '.fnamemodify(file, ':t').' call <SID>submenuBufUnload()'
   else
     let wcmd = '+buffer' . bufnum
@@ -1892,7 +1903,7 @@ function! s:OpenQFixSubWin(file)
   setlocal foldcolumn=0
   setlocal nolist
   setlocal winfixwidth
-  exe 'let &wrap='.g:qfixmemo_submenu_wrap
+  exe 'let &wrap='.s:GetOptionWithID('g:qfixmemo_submenu_wrap', swid)
   nnoremap <silent> <buffer> q    :close<CR>
   nnoremap <silent> <buffer> <CR> :call QFixMemoUserModeCR()<CR>
   if exists('g:qfixmemo_submenu_writekey')
@@ -1906,7 +1917,7 @@ function! s:OpenQFixSubWin(file)
   if bufnum == -1 && !filereadable(expand(file))
     call qfixmemo_msg#submenu()
   endif
-  call QFixMemoSubMenuOutline()
+  call QFixMemoSubMenuOutline(swid)
   if exists('*QFixMemoSubMenuBufWinEnter')
     call QFixMemoSubMenuBufWinEnter()
   endif
@@ -1936,12 +1947,13 @@ endif
 
 " デフォルトアウトラインモード
 " 外部で定義されている場合はそちらが優先されます。
-silent! function QFixMemoSubMenuOutline()
+silent! function QFixMemoSubMenuOutline(id)
   if !g:qfixmemo_submenu_outline
     return
   endif
+  let id = a:id
   setlocal ts=2 sw=2 sts=2
-  call qfixmemo#Outline()
+  call qfixmemo#EzOutline(id)
 endfunction
 
 """"""""""""""""""""""""""""""

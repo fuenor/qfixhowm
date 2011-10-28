@@ -484,7 +484,6 @@ QFixMemoではサブメニューを開くことができます。
   let qfixmemo_submenu_title1 = '__submenu01__'
   let qfixmemo_submenu_title2 = '__submenu02__'
   ...
-  let qfixmemo_submenu_title9 = '__submenu09__'
 
 タイトルではなくパス付きでファイル名指定も可能です。
 パスは絶対パスだけでなく相対パスも使用可能です。

@@ -318,7 +318,7 @@ function! s:openuri(uri)
   let cmd = ''
   let bat = 0
 
-  let uri = a:uri
+  let uri = substitute(a:uri, '^\s*\|\s*$', '', 'g')
   if uri =~ '^\(https\?\|ftp\)://'
     let urichr  = "[-0-9a-zA-Z;/?@&=+$,_.!~*'()%:#]"
     let uri = matchstr(uri, urichr.'\+')

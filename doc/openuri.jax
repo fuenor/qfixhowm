@@ -27,6 +27,12 @@ openuri.vimでは直接パスや相対パスはもちろん、空白や日本語
 ==============================================================================
 2. インストール						*openuri-settings*
 openuri.vimをruntimepathの通った場所へコピーしてください。
+autoloadでの読み込みにも対応しています。
+
+NOTE:
+openuri.vimをautoloadで読み込むと :Openuri コマンドは使用できません。
+そのような場合は初期化関数を呼び出すとロードされます。
+  :call openuri#init()
 
 ==============================================================================
 3. コマンド						*openuri-command*
@@ -34,11 +40,6 @@ openuri.vimをruntimepathの通った場所へコピーしてください。
 コマンドモードからURIを開きたい場合は直接実行可能です。
   :call openuri#open('http://www.example.com')
   :Openuri http://www.example.com
-
-NOTE: Openuriをautoloadで読み込むとOpenuriコマンドは使用できません。
-      そのような場合はopenuri.vimをpluginディレクトリに移動するか、.vimrcでコ
-      マンド定義してください。 >
-      command! -nargs=1 Openuri call openuri#open(<q-args>)
 
 適当なバッファを開いてURLを記述してから、カーソルをURL上に移動しopenuri#open()
 を実行するとURLを開きます。

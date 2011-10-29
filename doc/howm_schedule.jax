@@ -1,0 +1,134 @@
+*howm-schedule.jax*	For Vim バージョン 7.2	Last change: 2011 October 26
+==============================================================================
+       Description: howm style scheduler
+            Author: fuenor <fuenor@gmail.com>
+            Web(Japanese):
+            http://sites.google.com/site/fudist/Home/qfixhowm
+            http://sites.google.com/site/fudist/Home/qfixdev/ver3
+==============================================================================
+
+CONTENTS					*howm-schedule-contents*
+1. Intro                                        |howm-schedule-intro|
+2. インストール                                 |howm-schedule-settings|
+3. コマンド                                     |howm-schedule-command|
+  3.1 キーマップ                                |howm-schedule-keymap|
+4. シンタックス                                 |howm-schedule-syntax|
+5. URIとテキストリンク                          |howm-schedule-uri|
+
+==============================================================================
+1. Intro						*howm-schedule-intro*
+
+howm_schedule.vimはhowmスタイルの予定・TODOを表示するためのプラグインです。
+QFixHowm用の予定・TODOコマンドを独立動作するようにしたものでオプションは
+QFixHowmと同一です。
+
+howmスタイルの予定・TODO、オプションについては以下を参照してください。
+http://sites.google.com/site/fudist/Home/qfixhowm/howm-reminder
+
+このヘルプでは主にQFixHowm以外のドキュメントに対してhowmスタイルの予定・TODOを
+使用するための方法について記します。
+
+==============================================================================
+2. インストール						*howm-schedule-settings*
+howm_schedule.vimをruntimepathの通った場所へコピーしてください。
+
+動作に必要なその他のファイル
+
+  syntax/howm_schedule.vim (シンタックスファイル)
+  http://sites.google.com/site/fudist/Home/qfixhowm
+  プラグイン本体と同名のシンタックスファイルです。
+  howmスタイルの予定・TODOのシンタックス(色分け)表示が有効になります。
+  なくても動作しますが、色分け表示は有効になりません。
+
+  mygrep.vim
+  https://sites.google.com/site/fudist/Home/grep
+  ファイルをgrepで検索します。
+  ないと動作しません。
+
+  myqfix.vim
+  https://sites.google.com/site/fudist/Home/grep
+  QuickFixウィンドウにプレビューや絞り込みを追加します。
+  なくても動作しますが連携機能もあるため同時使用を推奨します。
+
+  openuri.vim
+  https://github.com/fuenor/openuri.vim
+  カーソル位置のURIやファイルのテキストリンクを開きます。
+  URI等のテキストリンクはopenuri.vim以外の好みのプラグインで開くように設定可能
+  ですが、デフォルトでは存在しないとエラーになります。
+
+すべてのファイルはQFixHowmに同梱されています。
+  http://sites.google.com/site/fudist/Home/qfixhowm
+
+NOTE:
+howm_schedule.vim,openuri.vimはautoloadでの読み込みにも対応しています。
+ただしautoloadディレクトリに置いていると起動直後にはコマンドやキーマップは設定
+されません。必要に応じて初期化関数を呼び出してください。
+  :call howm_schedule#init()
+
+==============================================================================
+3. コマンド						*howm-schedule-command*
+
+コマンドラインから実行してQuickFixウィンドウに予定・TODOを表示することができま
+す。
+
+  :call QFixHowmSchedule('schedule', howm_dir, howm_fileencoding)
+  :call QFixHowmSchedule('todo',     howm_dir, howm_fileencoding)
+
+howm_dirは検索対象ディレクトリ、howm_fileencodingはディレクトリ内のファイルエ
+ンコーディングです。
+'schedule'と'todo'は後述するコマンド <Leader>,y <Leader>,tと対応しています。
+
+------------------------------------------------------------------------------
+3.1 キーマップ						*howm-schedule-keymap*
+
+最低限 howm_dir, howm_fileencodingが設定されていれば動作します。
+
+| <Leader>,y  | 予定             |
+| <Leader>,ry | 予定(更新)       |
+| <Leader>,t  | Todo             |
+| <Leader>,rt | Todo(更新)       |
+| <Leader>,d  | 日付の挿入       |
+| <Leader>,T  | 日付と時刻の挿入 |
+| <Leader>,rd | 繰り返しの展開   |
+
+NOTE:
+<Leader>は QFixHowm_Keyで定義されます。
+デフォルトは g なので、<Leader>,c は g,c になります。
+<Leader>を読み替えてください。
+
+詳しい使い方は以下のサイトを参照してください。
+http://sites.google.com/site/fudist/Home/qfixhowm/howm-reminder
+
+<CR>にアクションロックが必要な場合はマップしてください。
+>
+  nnoremap <silent> <buffer> <CR> :call QFixHowmUserModeCR()<CR>
+
+==============================================================================
+4. シンタックス						*howm-schedule-syntax*
+
+予定・TODOのシンタックスはsyntax/howm_schedule.vimで定義されています。
+ファイルタイプやシンタックス指定等でhowm_schedule.vimを適用してください。
+最も簡単なのは適用したいファイルタイプと同名のファイルにリネームして、
+ユーザーランタイムディレクトリの /syntaxへコピーすることです。
+読み込みの順番が問題になるときは /after/syntaxも良いかもしれません。
+
+コマンドモードから実行しても有効になります。
+  :runtime! syntax/howm_schedule.vim
+
+==============================================================================
+5. URIとテキストリンク					*howm-schedule-uri*
+
+カーソル位置のURIやファイルのテキストリンクを開くためには openuri.vimが必要で
+す。
+openuri.vim以外のURI処理を使用したい場合は、テキストリンクを開いたら 1 を返す
+function! QFixHowmOpenCursorline() を .vimrc等で定義してください。
+>
+  """"""""""""""""""""""""""""""
+  " カーソル位置のテキストリンクを開いたら 1 を返す
+  """"""""""""""""""""""""""""""
+  function! QFixHowmOpenCursorline()
+    return openuri#open()
+  endfunction
+
+  vim:tw=78:ts=8:ft=howm_schedule.help:norl
+

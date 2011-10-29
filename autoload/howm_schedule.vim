@@ -1,5 +1,5 @@
 "=============================================================================
-"    Description: 拡張Quickfixに対応したhowm
+"    Description: howm style scheduler
 "         Author: fuenor <fuenor@gmail.com>
 "                 http://sites.google.com/site/fudist/Home/qfixhowm
 "  Last Modified: 2011-10-18 19:09
@@ -8,40 +8,18 @@ let s:Version = 2.53
 scriptencoding utf-8
 
 "=============================================================================
-"    Description: howmスタイルの予定・TODOを表示 (要mygrep.vim, openuri.vim)
-"                 ここから loaded_HowmScheduleまで実行すれば単独で使用可能
-"                 (let g:HowmSchedule_only = 1)
-"                 :call QFixHowmSchedule('schedule', dir, fileencoding)
-"                 :call QFixHowmSchedule('todo',     dir, fileencoding)
-"                 最低限 howm_dir, howm_fileencodingが設定されていれば動作する。
-"                 | ,y  | 予定             |
-"                 | ,ry | 予定(更新)       |
-"                 | ,t  | Todo             |
-"                 | ,rt | Todo(更新)       |
-"                 | ,d  | 日付の挿入       |
-"                 | ,T  | 日付と時刻の挿入 |
-"                 | ,rd | 繰り返しの展開   |
-"                 ・ キーマップリーダーが g の場合、「予定を表示」は g,y です。
-"                 ・syntax表示には howm_schedule.vimをリネームして使用する。
-"                 ・<CR>にアクションロックが必要な場合はキーをマップする
-"                   nnoremap <silent> <buffer> <CR> :call QFixHowmUserModeCR(...)<CR>
-"  Last Modified: 0000-00-00 00:00
-"=============================================================================
-" 詳しい使い方は以下のサイトを参照してください。
-" http://sites.google.com/site/fudist/Home/qfixhowm/howm-reminder
-
-" カーソル位置のURIやファイルリンクを開くためには openuri.vimが必要です。
-" openuri.vim以外のURI処理を使用したい場合は、テキストリンクを開いたら 1 を返す
-" function! QFixHowmOpenCursorline() を .vimrc等で定義してください。
+"    Description: howmスタイルの予定・TODOを表示
+"                 (必要 mygrep.vim, openuri.vim)
+"                 (推奨 myqfix.vim, /syntax/howm_schedule.vim)
 "
-" """"""""""""""""""""""""""""""
-" " カーソル位置のテキストリンクを開いたら 1 を返す
-" """"""""""""""""""""""""""""""
-" function! QFixHowmOpenCursorline()
-"   return openuri#open()
-" endfunction
-
-"----------以下は変更しないで下さい----------
+"                 詳しい使い方は以下のサイトを参照してください。
+"                 http://sites.google.com/site/fudist/Home/qfixhowm/howm-reminder
+"
+"                 QFixHowm以外でhowmスタイルの予定・TODOを使用したい場合は
+"                 /doc/howm_schedule.jaxを参照してください。
+"
+"                 Ver.2 : let loaded_HowmSchedule = 1 までコピー
+"=============================================================================
 
 if exists('disable_MyGrep') && disable_MyGrep == 1
   finish
@@ -64,6 +42,9 @@ let s:debug = 0
 if exists('g:fudist') && g:fudist
   let s:debug = 1
 endif
+
+" Do you like spagehtti?
+" OK, go ahead. You have been warned!
 
 """"""""""""""""""""""""""""""
 " howmスタイル予定・TODO表示コマンド
@@ -2415,9 +2396,6 @@ function! QFixHowmAddDate(date, param)
   return matchstr(str, s:sch_date)
 endfunction
 
-silent! function! howm_schedule#Init()
-endfunction
-
 function! HowmSchedueCachedTime(mode)
   exe 'let time = s:LT_'.a:mode
   return time
@@ -2429,6 +2407,14 @@ let loaded_HowmSchedule = 1
 if exists('g:HowmSchedule_only') && g:HowmSchedule_only
   finish
 endif
+
+"=============================================================================
+" for autoload
+function! howm_schedule#init()
+endfunction
+
+function! howm_schedule#Init()
+endfunction
 
 "=============================================================================
 "折りたたみに ワイルドカードチャプターを使用する

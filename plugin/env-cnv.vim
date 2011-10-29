@@ -15,8 +15,8 @@ if exists('g:QFixHowm_Convert') && g:QFixHowm_Convert == 0
 endif
 
 "-----------------------------------------------------------------------------
-" このファイルでオプションのコンバートを行っているため、QFixMemoはQFixHowmとオ
-" プション互換のプラグインとして動作しています。
+" このファイルでオプションコンバートを行っているため、QFixMemoはQFixHowmとオプ
+" ション互換のプラグインとして動作しています。
 "
 " 以下をVimの設定ファイルへ設定追加するとQFixHowmオプションのコンバートを行わ
 " なくなります。
@@ -24,21 +24,26 @@ endif
 " " QFixHowmとのオプションコンバートを行わない
 " let QFixHowm_Convert = 0
 "
-" コンバートを切ったとしても基本的なコマンドや動作はほぼ同一に扱えます。
-" メモファイル名などのオプションは一部異なっていますが、予定・TODOについては
-" QFixHowmのオプションがそのまま適用されます。
+" コンバートを切っても基本的なコマンドや動作はほぼ同一に扱えます。
+" 予定・TODOについてはコンバートを切ってもQFixHowmのオプションがそのまま適用さ
+" れます。
+" doc/howm_schedule.jax
 "
-" ドキュメントについては以下を参照してください。
-" doc/qfixmemo.txt
+" ・ドキュメントについては以下を参照してください。
+" doc/qfixmemo.jax
 " (Vimで閲覧するとヘルプとしてハイライトされます)
-" http://github.com/fuenor/qfixmemo/blob/master/doc/qfixmemo.txt
+" http://github.com/fuenor/qfixmemo/blob/master/doc/qfixmemo.jax
 "
-" QFixHowm Ver.3の実装概要については以下を参照して下さい
+" ・QFixHowm Ver.3の実装概要については以下を参照して下さい
 " https://sites.google.com/site/fudist/Home/qfixdev/ver3
 "
 " CAUTION: ファイルの読み込み順がファイル名順である事に依存しています。
+"          (env-cnv.vimの初期化がqfixmemo.vimより先に行われると仮定)
 "-----------------------------------------------------------------------------
 
+""""""""""""""""""""""""""""""
+" イベント処理
+""""""""""""""""""""""""""""""
 " howm_schedule.vimをautoloadで読み込む
 if !exists('g:QFixHowm_Autoload')
   let g:QFixHowm_Autoload = 1
@@ -57,10 +62,6 @@ if !exists('g:QFixHowm_SaveTime')
 endif
 if g:QFixHowm_RecentMode == 2
   let g:QFixHowm_SaveTime = 2
-endif
-" タイトルリスト(,a)にキャッシュ表示を割り当て
-if !exists('g:QFixHowm_TitleListCache')
- let g:QFixHowm_TitleListCache = 1
 endif
 
 " BufWritePre
@@ -85,9 +86,12 @@ function! QFixMemoBufWritePre()
   endif
 endfunction
 
-" BufEnter
-function! QFixMemoBufEnterPre()
-  " call QFixHowmSetup()
+" BufWinEnter quickfix
+silent! function QFixMemoQFBufWinEnterPost()
+  if exists("*QFixHowmExportSchedule")
+    nnoremap <buffer> <silent> !  :call QFixHowmCmd_ScheduleList()<CR>
+    vnoremap <buffer> <silent> !  :call QFixHowmCmd_ScheduleList('visual')<CR>
+  endif
 endfunction
 
 " VimEnter
@@ -107,85 +111,44 @@ function! QFixMemoInit(init)
   endif
 endfunction
 
-let s:howmsuffix        = 'howm'
+""""""""""""""""""""""""""""""
+" オプションコンバート
+""""""""""""""""""""""""""""""
+let s:howmsuffix         = 'howm'
 " 常にqfixmemoファイルとして扱うファイルの正規表現
-let g:qfixmemo_isqfixmemo_regxp = '\c\.howm$'
+let g:qfixmemo_isqfixmemo_regxp = '\c\.'.s:howmsuffix.'$'
 if !exists('howm_dir')
-  let howm_dir          = '~/howm'
+  let howm_dir           = '~/howm'
 endif
 if !exists('howm_filename')
-  let howm_filename     = '%Y/%m/%Y-%m-%d-%H%M%S.'.s:howmsuffix
+  let howm_filename      = '%Y/%m/%Y-%m-%d-%H%M%S.'.s:howmsuffix
 endif
 if !exists('QFixHowm_FileExt')
-  let g:QFixHowm_FileExt  = fnamemodify(g:howm_filename,':e')
+  let g:QFixHowm_FileExt = fnamemodify(g:howm_filename,':e')
 endif
-
 if !exists('howm_fileencoding')
-  let howm_fileencoding = &enc
+  let howm_fileencoding  = &enc
 endif
 if !exists('howm_fileformat')
-  let howm_fileformat   = &ff
+  let howm_fileformat    = &ff
+endif
+" ファイル読込の際に、ファイルエンコーディングを強制する
+if !exists('g:QFixHowm_ForceEncoding')
+  let g:QFixHowm_ForceEncoding = 1
 endif
 " howmファイルタイプ
 if !exists('QFixHowm_FileType')
   let QFixHowm_FileType = 'howm_memo'
 endif
 
-" クイックメモファイル名
-if !exists('g:QFixHowm_QuickMemoFile')
-  let g:QFixHowm_QuickMemoFile = 'Qmem-00-0000-00-00-000000.'.g:QFixHowm_FileExt
+" キーマップリーダー
+if !exists('g:QFixHowm_Key')
+  let g:QFixHowm_Key = 'g'
 endif
-let g:qfixmemo_quickmemo = g:QFixHowm_QuickMemoFile
-
-" 日記メモファイル名
-if !exists('g:QFixHowm_DiaryFile')
-  let g:QFixHowm_DiaryFile = fnamemodify(g:howm_filename, ':h').'/%Y-%m-%d-000000.'.g:QFixHowm_FileExt
+if !exists('g:QFixHowm_KeyB')
+  let g:QFixHowm_KeyB = ','
 endif
-
-" ペアリンクされたhowmファイルの保存場所
-if !exists('g:QFixHowm_PairLinkDir')
-  let g:QFixHowm_PairLinkDir = 'pairlink'
-endif
-
-" ファイル読込の際に、ファイルエンコーディングを強制する
-if !exists('g:QFixHowm_ForceEncoding')
-  let g:QFixHowm_ForceEncoding = 1
-endif
-
-"最近更新ファイル検索日数
-if !exists('g:QFixHowm_RecentDays')
-  let g:QFixHowm_RecentDays = 5
-endif
-let g:qfixmemo_recentdays = g:QFixHowm_RecentDays
-
-" 検索時にカーソル位置の単語を拾う
-if !exists('g:QFixHowm_DefaultSearchWord')
-  let g:QFixHowm_DefaultSearchWord = 1
-endif
-
-" ランダム表示保存ファイル
-if !exists('g:QFixHowm_RandomWalkFile')
-  let g:QFixHowm_RandomWalkFile = '~/.howm-random'
-endif
-" ランダム表示保存ファイル更新間隔
-if !exists('g:QFixHowm_RandomWalkUpdate')
-  let g:QFixHowm_RandomWalkUpdate = 10
-endif
-" ランダム表示数
-if !exists('g:QFixHowm_RandomWalkColumns')
-  let g:QFixHowm_RandomWalkColumns = 10
-endif
-let g:qfixmemo_random_columns = g:QFixHowm_RandomWalkColumns
-
-" ランダム表示しない正規表現
-if !exists('g:QFixHowm_RandomWalkExclude')
-  let g:QFixHowm_RandomWalkExclude = ''
-endif
-
-" スプリットで開く
-if !exists('g:QFixHowm_SplitMode')
-  let g:QFixHowm_SplitMode = 0
-endif
+let g:qfixmemo_mapleader = g:QFixHowm_Key . g:QFixHowm_KeyB
 
 " タイトル行識別子
 if !exists('g:QFixHowm_Title')
@@ -195,13 +158,11 @@ endif
 if !exists('g:QFixHowm_Replace_Title_Len')
   let g:QFixHowm_Replace_Title_Len = 64
 endif
-
 " タイムスタンプ
 if !exists('g:QFixHowm_DatePattern')
   let g:QFixHowm_DatePattern = '%Y-%m-%d'
 endif
 let g:qfixmemo_timeformat = '['. g:QFixHowm_DatePattern . ' %H:%M]'
-
 " howmテンプレート
 if !exists('g:QFixHowm_Template')
   let g:QFixHowm_Template = [
@@ -210,53 +171,102 @@ if !exists('g:QFixHowm_Template')
     \ ""
   \]
 endif
-
 " howmテンプレート(カーソル移動)
 if !exists('g:QFixHowm_Cmd_NewEntry')
   let g:QFixHowm_Cmd_NewEntry = "$a"
 endif
-
-"mkdテンプレート
+" mkdテンプレート
 if !exists('g:QFixHowm_Template_mkd')
   let g:QFixHowm_Template_mkd = [
     \ "%TITLE% %TAG%",
     \ ""
   \]
 endif
-"mkdテンプレート(カーソル移動)
+" mkdテンプレート(カーソル移動)
 if !exists('g:QFixHowm_Cmd_NewEntry_mkd')
   let g:QFixHowm_Cmd_NewEntry_mkd = "$a"
 endif
-
+" デフォルトタグ
 if !exists('g:QFixHowm_DefaultTag')
   let g:QFixHowm_DefaultTag = ''
 endif
 
-"キーマップリーダー
-if !exists('g:QFixHowm_Key')
-  let g:QFixHowm_Key = 'g'
+" クイックメモファイル名
+if !exists('g:QFixHowm_QuickMemoFile')
+  let g:QFixHowm_QuickMemoFile = 'Qmem-00-0000-00-00-000000.'.g:QFixHowm_FileExt
 endif
-if !exists('g:QFixHowm_KeyB')
-  let g:QFixHowm_KeyB = ','
+let g:qfixmemo_quickmemo = g:QFixHowm_QuickMemoFile
+" 日記メモファイル名
+if !exists('g:QFixHowm_DiaryFile')
+  let g:QFixHowm_DiaryFile = fnamemodify(g:howm_filename, ':h').'/%Y-%m-%d-000000.'.g:QFixHowm_FileExt
 endif
-let g:qfixmemo_mapleader = g:QFixHowm_Key . g:QFixHowm_KeyB
+" ペアリンクされたhowmファイルの保存場所
+if !exists('g:QFixHowm_PairLinkDir')
+  let g:QFixHowm_PairLinkDir = 'pairlink'
+endif
+" ファイル名をタイトル行から生成したファイル名へ変更する場合の文字数
+if !exists('g:QFixHowm_FilenameLen')
+  let g:QFixHowm_FilenameLen = len(fnamemodify(strftime(g:howm_filename), ':t:r'))
+endif
+
+" 折りたたみを有効にする。
+if !exists('g:QFixHowm_Folding')
+  let g:QFixHowm_Folding = 1
+endif
+" スプリットで開く
+if !exists('g:QFixHowm_SplitMode')
+  let g:QFixHowm_SplitMode = 0
+endif
+
+" 検索時にカーソル位置の単語を拾う
+if !exists('g:QFixHowm_DefaultSearchWord')
+  let g:QFixHowm_DefaultSearchWord = 1
+endif
+" タイトルリスト(,a)にキャッシュ表示を割り当て
+if !exists('g:QFixHowm_TitleListCache')
+ let g:QFixHowm_TitleListCache = 1
+endif
+" 最近更新したファイル検索日数
+if !exists('g:QFixHowm_RecentDays')
+  let g:QFixHowm_RecentDays = 5
+endif
+let g:qfixmemo_recentdays = g:QFixHowm_RecentDays
+
+" ランダム表示数
+if !exists('g:QFixHowm_RandomWalkColumns')
+  let g:QFixHowm_RandomWalkColumns = 10
+endif
+" ランダム表示しない正規表現
+if !exists('g:QFixHowm_RandomWalkExclude')
+  let g:QFixHowm_RandomWalkExclude = ''
+endif
+" ランダム表示保存ファイル
+if !exists('g:QFixHowm_RandomWalkFile')
+  let g:QFixHowm_RandomWalkFile = '~/.howm-random'
+endif
+" ランダム表示保存ファイル更新間隔
+if !exists('g:QFixHowm_RandomWalkUpdate')
+  let g:QFixHowm_RandomWalkUpdate = 10
+endif
+let g:qfixmemo_random_columns = g:QFixHowm_RandomWalkColumns
 
 " キーワードリンク
 if !exists('g:QFixHowm_keywordfile')
   let g:QFixHowm_keywordfile = '~/.howm-keys'
 endif
+" キーワードをgrepするのではなく対応するファイルを開く
 if !exists('g:QFixHowm_Wiki')
   let g:QFixHowm_Wiki = 0
 endif
+" キーワードに対応するファイルで開く場合のディレクトリ
 if !exists('g:QFixHowm_WikiDir')
-  let g:QFixHowm_WikiDir = ''
+  let g:QFixHowm_WikiDir = 'wikidir'
 endif
 
-"rel://
+" rel://
 if !exists('g:QFixHowm_RelPath')
   let g:QFixHowm_RelPath = g:howm_dir
 endif
-
 " 基準ディレクトリ
 if !exists('g:QFixMRU_RootDir') && exists('g:QFixHowm_RootDir')
   let g:QFixMRU_RootDir = g:QFixHowm_RootDir
@@ -265,17 +275,10 @@ if !exists('g:qfixmemo_root_dir') && exists('g:QFixHowm_RootDir')
   let g:qfixmemo_root_dir = g:QFixHowm_RootDir
 endif
 
-" ファイル名をタイトル行から生成したファイル名へ変更する場合の文字数
-if !exists('g:QFixHowm_FilenameLen')
-  let g:QFixHowm_FilenameLen = len(fnamemodify(strftime(g:howm_filename), ':t:r'))
-endif
-
-" サブウィンドウのファイル名
+" サブウィンドウのタイトル
 if !exists('g:SubWindow_Title')
   let g:SubWindow_Title = '__submenu__'
 endif
-" サブウィンドウのタイトル名
-let g:qfixmemo_submenu_title  = g:SubWindow_Title
 " サブウィンドウのサイズ
 if !exists('g:SubWindow_Size')
   let g:SubWindow_Size = 30
@@ -292,29 +295,6 @@ endif
 if !exists('g:SubWindow_SingleMode')
   let g:SubWindow_SingleMode = 1
 endif
-"メニューファイル名
-if !exists('g:QFixHowm_Menufile')
-  let g:QFixHowm_Menufile = 'Menu-00-00-000000.'.s:howmsuffix
-endif
-
-" 折りたたみを有効にする。
-if !exists('g:QFixHowm_Folding')
-  let g:QFixHowm_Folding = 1
-endif
-
-if !exists('g:howm_clink_pattern')
-  let g:howm_clink_pattern = '<<<'
-endif
-function! QFixMemoRebuildKeyword(dir, fenc)
-  silent! cexpr ''
-  let file = g:howm_dir
-  let file = g:QFixHowm_MenuDir == '' ? g:howm_dir : g:QFixHowm_MenuDir
-  let file = expand(file) . '/' . g:QFixHowm_Menufile
-  silent! exec 'vimgrep /\('.g:howm_clink_pattern.'\|'.'\[\[[^\]]\+\]\]'.'\)/j '. escape(file, ' ')
-  let qflist = getqflist()
-  silent! cexpr ''
-  return qflist
-endfunction
 
 " 起動時コマンド
 if exists('g:QFixHowm_VimEnterCmd')
@@ -329,10 +309,12 @@ endif
 if exists('g:QFixHowm_VimEnterMsg')
   let g:qfixmemo_vimenter_msg  = g:QFixHowm_VimEnterMsg
 endif
+
 " メニューバーへ登録
 if exists('g:QFixHowm_MenuBar')
   let g:qfixmemo_menubar = g:QFixHowm_MenuBar
 endif
+" リストからファイルを開いたらファイルを閉じる
 if !exists('g:QFixHowm_ListCloseOnJump')
   let g:QFixHowm_ListCloseOnJump = 0
 endif
@@ -342,31 +324,40 @@ let g:qfixlist_close_on_jump = g:QFixHowm_ListCloseOnJump
 let g:QFixHowm_DateActionLockDefault = 0
 
 function! QFixHowmSetup()
+  " ファイル/ディレクトリ設定
   let g:howm_dir = substitute(g:howm_dir, '[/\\]$', '', '')
   let g:qfixmemo_dir           = g:howm_dir
+  let g:qfixmemo_filename      = fnamemodify(g:howm_filename, ':r')
   let g:qfixmemo_fileencoding  = g:howm_fileencoding
   let g:qfixmemo_fileformat    = g:howm_fileformat
   let g:qfixmemo_ext           = g:QFixHowm_FileExt
+  let g:qfixmemo_filetype      = g:QFixHowm_FileType
+  let g:qfixmemo_forceencoding = g:QFixHowm_ForceEncoding
+  let g:qfixmemo_title         = g:QFixHowm_Title
+  call QFixMemoTitleRegxp()
+
+  " ファイルタイプに QFixHowm_FileType以外を使用する
   if exists('g:QFixHowm_HowmMode') && g:QFixHowm_HowmMode == 0
     if exists('g:QFixHowm_UserFileExt')
       let g:qfixmemo_ext = g:QFixHowm_UserFileExt
     endif
+    if exists('g:QFixHowm_UserFileType')
+      let g:qfixmemo_filetype = g:QFixHowm_UserFileType
+    endif
   endif
 
-  " タイトルマーカー
-  let g:qfixmemo_title         = g:QFixHowm_Title
-  call QFixMemoTitleRegxp()
-  " ファイルタイプ
-  let g:qfixmemo_filetype      = g:QFixHowm_FileType
-  " ファイルエンコーディング強制
-  let g:qfixmemo_forceencoding = g:QFixHowm_ForceEncoding
-
-  " 新規メモファイル名
-  let g:qfixmemo_filename      = fnamemodify(g:howm_filename, ':r')
-  " 日記ファイル名
   let g:qfixmemo_diary         = fnamemodify(g:QFixHowm_DiaryFile, ':r')
-  " クイックメモファイル名
   let g:qfixmemo_quickmemo     = g:QFixHowm_QuickMemoFile
+  let g:qfixmemo_pairfile_dir  = g:QFixHowm_PairLinkDir
+
+  " サブウィンドウ(デフォルト)
+  let g:qfixmemo_submenu_title       = g:SubWindow_Title
+  let g:qfixmemo_submenu_direction   = g:SubWindow_Direction
+  let g:qfixmemo_submenu_size        = g:SubWindow_Size
+  let g:qfixmemo_submenu_wrap        = g:SubWindow_Wrap
+  let g:qfixmemo_submenu_single_mode = g:SubWindow_SingleMode
+
+  " カウント指定コマンド
   for i in range(1, 9)
     if exists('g:QFixHowm_QuickMemoFile'.i)
       exe printf('let g:qfixmemo_quickmemo%d=g:QFixHowm_QuickMemoFile%d', i, i)
@@ -384,80 +375,33 @@ function! QFixHowmSetup()
       exe printf('let g:qfixmemo_submenu_direction%d=g:SubWindow_Direction%d', i, i)
     endif
   endfor
-  " ペアファイルの作成先ディレクトリ
-  let g:qfixmemo_pairfile_dir  = g:QFixHowm_PairLinkDir
 
-  " タイムスタンプフォーマット
+  " テンプレート
   let g:qfixmemo_timeformat = '['. g:QFixHowm_DatePattern . ' %H:%M]'
   call qfixmemo#SetTimeFormatRegxp(g:qfixmemo_timeformat)
-
-  " " 新規エントリテンプレート
   let g:qfixmemo_template        = g:QFixHowm_Template
   let g:qfixmemo_template_keycmd = g:QFixHowm_Cmd_NewEntry
   let g:qfixmemo_template_tag    = g:QFixHowm_DefaultTag
-
   silent! exe 'let qfixmemo_template_'.g:qfixmemo_ext.' = deepcopy(g:QFixHowm_Template_'.g:qfixmemo_ext . ')'
   silent! exe 'let qfixmemo_template_keycmd_'.g:qfixmemo_ext.' = g:QFixHowm_Cmd_NewEntry_'.g:qfixmemo_ext
 
-  " フォールディング
-  let g:qfixmemo_folding         = g:QFixHowm_Folding
-
-  " 自動タイトル行の文字数
-  let g:qfixmemo_title_length = g:QFixHowm_Replace_Title_Len
-
-  " grep時にカーソル位置の単語を拾う
-  let g:qfixmemo_grep_cword = g:QFixHowm_DefaultSearchWord
-
-  " 連結表示のセパレータ
-  " let g:qfixmemo_separator = '>>> %s'
-
-  " リスト表示にキャッシュを使用する
+  " misc
+  let g:qfixmemo_title_length   = g:QFixHowm_Replace_Title_Len
+  let g:qfixmemo_folding        = g:QFixHowm_Folding
+  let g:qfixmemo_splitmode      = g:QFixHowm_SplitMode
+  let g:qfixmemo_grep_cword     = g:QFixHowm_DefaultSearchWord
+  let g:qfixmemo_rename_length  = g:QFixHowm_FilenameLen
   let g:qfixmemo_use_list_cache = g:QFixHowm_TitleListCache
 
-  " ランダム表示保存ファイル
+  " ランダム
   let g:qfixmemo_random_file    = g:QFixHowm_RandomWalkFile
-  " ランダム表示ファイル更新時間(秒)
   let g:qfixmemo_random_time    = g:QFixHowm_RandomWalkUpdate*24*60*60
-  " ランダム表示しない正規表現
   let g:qfixmemo_random_exclude = g:QFixHowm_RandomWalkExclude
-  " ランダム表示検索対象ディレクトリ(test)
-  if exists('g:fudist') && g:fudist
-    let g:qfixmemo_random_dir     = g:qfixmemo_dir
-  endif
 
-  " サブウィンドウのファイル名
-  let g:qfixmemo_submenu_title       = g:SubWindow_Title
-  " サブウィンドウを出す方向
-  let g:qfixmemo_submenu_direction   = g:SubWindow_Direction
-  " サブウィンドウのサイズ
-  let g:qfixmemo_submenu_size        = g:SubWindow_Size
-  " サブウィンドウのwrap
-  let g:qfixmemo_submenu_wrap        = g:SubWindow_Wrap
-  " サブウィンドウはシングルモード
-  let g:qfixmemo_submenu_single_mode = g:SubWindow_SingleMode
-
-  " ファイル名をタイトル行から生成したファイル名へ変更する場合の文字数
-  let g:qfixmemo_rename_length = g:QFixHowm_FilenameLen
-
-  " 新規ファイル作成時のオプション
-  " let g:qfixmemo_editcmd = ''
-  let g:qfixmemo_splitmode = g:QFixHowm_SplitMode
-
-  if exists('g:QFixHowm_HowmMode') && g:QFixHowm_HowmMode == 0
-    let g:qfixmemo_ext      = g:QFixHowm_UserFileExt
-    let g:qfixmemo_filetype = g:QFixHowm_UserFileType
-  endif
-
+  " キーワード
   let g:qfixmemo_keyword_mode = g:QFixHowm_Wiki
-  let g:qfixmemo_keyword_file = g:QFixHowm_keywordfile
   let g:qfixmemo_keyword_dir  = g:QFixHowm_WikiDir
-endfunction
-
-silent! function QFixMemoQFBufWinEnterPost()
-  if exists("*QFixHowmExportSchedule")
-    nnoremap <buffer> <silent> !  :call QFixHowmCmd_ScheduleList()<CR>
-    vnoremap <buffer> <silent> !  :call QFixHowmCmd_ScheduleList('visual')<CR>
-  endif
+  let g:qfixmemo_keyword_file = g:QFixHowm_keywordfile
 endfunction
 
 """"""""""""""""""""""""""""""
@@ -490,19 +434,47 @@ else
   unlet g:mapleader
 endif
 
+" <CR>アクション
 function! QFixMemoUserModeCR(...)
   call howm_schedule#Init()
   call QFixHowmUserModeCR()
 endfunction
 
+" メニュー画面のcome-fromリンクキーワードを返す
+" メニューファイルディレクトリ
+if !exists('g:QFixHowm_MenuDir')
+  let g:QFixHowm_MenuDir = ''
+endif
+" メニューファイル名
+if !exists('g:QFixHowm_Menufile')
+  let g:QFixHowm_Menufile = 'Menu-00-00-000000.'.s:howmsuffix
+endif
+" come-fromリンク
+if !exists('g:howm_clink_pattern')
+  let g:howm_clink_pattern = '<<<'
+endif
+function! QFixMemoRebuildKeyword(dir, fenc)
+  silent! cexpr ''
+  let file = g:howm_dir
+  let file = g:QFixHowm_MenuDir == '' ? g:howm_dir : g:QFixHowm_MenuDir
+  let file = expand(file) . '/' . g:QFixHowm_Menufile
+  silent! exec 'vimgrep /\('.g:howm_clink_pattern.'\|'.'\[\[[^\]]\+\]\]'.'\)/j '. escape(file, ' ')
+  let qflist = getqflist()
+  silent! cexpr ''
+  return qflist
+endfunction
+
 " フォールディングレベル計算
+" 折りたたみに ワイルドカードチャプターを使用する
+if !exists('g:QFixHowm_WildCardChapter')
+  let g:QFixHowm_WildCardChapter = 0
+endif
 function! QFixMemoSetFolding()
   call howm_schedule#Init()
   if exists('*QFixHowmSetFolding')
     call QFixHowmSetFolding()
     return
   endif
-
   setlocal nofoldenable
   setlocal foldmethod=expr
   if g:QFixHowm_WildCardChapter
@@ -514,6 +486,7 @@ function! QFixMemoSetFolding()
   endif
 endfunction
 
+" ヘルプ
 function! QFixHowmHelp()
   call qfixmemo#Init()
   silent! exec 'split '

@@ -45,16 +45,17 @@ function! openuri#open(...)
 endfunction
 
 function! openuri#init()
+  let s:howm_dir = g:howm_dir
   if exists('g:qfixmemo_dir')
-    let g:howm_dir = g:qfixmemo_dir
-  endif
-  if exists('g:qfixmemo_ext')
-    let g:QFixHowm_FileExt = g:qfixmemo_ext
+    let s:howm_dir = g:qfixmemo_dir
   endif
   if exists('g:openuri_memopath')
     let s:openuri_memopath = g:openuri_memopath
   else
     let s:openuri_memopath = g:howm_dir
+    if exists('g:qfixmemo_dir')
+      let s:openuri_memopath = g:qfixmemo_dir
+    endif
   endif
   if exists('g:openuri_relpath')
     let g:QFixHowm_RelPath = g:openuri_relpath
@@ -67,12 +68,9 @@ function! openuri#init()
   endif
 endfunction
 
-let s:howmsuffix        = 'howm'
-if !exists('howm_dir')
-  let howm_dir = '~/howm'
-  if exists('g:qfixmemo_dir')
-    let g:howm_dir = g:qfixmemo_dir
-  endif
+let s:howmsuffix = 'howm'
+if !exists('g:howm_dir')
+  let g:howm_dir = '~/howm'
 endif
 
 " UNCパスを使用する
@@ -88,14 +86,12 @@ if !exists('QFixHowm_Edit')
   let QFixHowm_Edit = ''
 endif
 
-if !exists('s:openuri_memopath')
-  let s:openuri_memopath = g:howm_dir
-endif
 
 if !exists('g:qfixtempname')
   let g:qfixtempname = tempname()
 endif
 let s:howmtempfile = g:qfixtempname
+let s:openuri_memopath = g:howm_dir
 
 """"""""""""""""""""""""""""""
 " カーソル位置のファイルを開く
@@ -137,7 +133,7 @@ endif
 function! s:cursorline()
   let prevcol = col('.')
   let str = getline('.')
-  let l:howm_dir = substitute(g:howm_dir, '\\', '/', 'g')
+  let l:howm_dir = substitute(s:howm_dir, '\\', '/', 'g')
   let l:memo_dir = substitute(s:openuri_memopath, '\\', '/', 'g')
   let l:rel_dir  = substitute(g:QFixHowm_RelPath, '\\', '/', 'g')
 
@@ -239,8 +235,11 @@ function! s:openstr(str)
   if exists('g:QFixHowm_FileExt')
     let l:MyOpenVim_ExtReg = '\.'.g:QFixHowm_FileExt.'$'.'\|'.l:MyOpenVim_ExtReg
   endif
+  if exists('g:qfixmemo_ext')
+    let l:MyOpenVim_ExtReg = '\.'.g:qfixmemo_ext.'$'.'\|'.l:MyOpenVim_ExtReg
+  endif
   if g:QFixHowm_OpenVimExtReg != ''
-    let l:MyOpenVim_ExtReg = l:MyOpenVim_ExtReg.'\|'.g:QFixHowm_OpenVimExtReg
+    let l:MyOpenVim_ExtReg = '\('.l:MyOpenVim_ExtReg.'\)\|'.g:QFixHowm_OpenVimExtReg
   endif
 
   let pathhead = '\([A-Za-z]:[/\\]\|\~[/\\]\|\.\.\?[/\\]\|\\\{2}\|[/\\]\)'

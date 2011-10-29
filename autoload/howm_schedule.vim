@@ -69,7 +69,9 @@ endif
 if !exists('howm_filename')
   let howm_filename     = '%Y/%m/%Y-%m-%d-%H%M%S.'.s:howmsuffix
 endif
-let g:QFixHowm_FileExt  = fnamemodify(g:howm_filename,':e')
+if !exists('QFixHowm_FileExt')
+  let QFixHowm_FileExt  = fnamemodify(g:howm_filename,':e')
+endif
 if !exists('howm_fileencoding')
   let howm_fileencoding = &enc
 endif

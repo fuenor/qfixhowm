@@ -118,8 +118,7 @@ c:/temp/rel だとすると c:/temp/rel/puyo.txt として扱われます。
 | memo://   | openuri_memopath  |
 | rel://    | openuri_relpath   |
 
-NOTE: ・qfixmemo_dirを設定していると howm_dirは qfixmemo_dirで上書きされます。
-      ・openuri_memopathを設定しないと memo://の変換にhowm_dir(qfixmemo_dir)が
+NOTE: ・openuri_memopathを設定しないと memo://の変換にhowm_dir(qfixmemo_dir)が
         デフォルトとして使用されます。
 
 ------------------------------------------------------------------------------

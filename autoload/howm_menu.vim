@@ -37,6 +37,9 @@ endif
 if !exists('g:QFixHowm_MenuCmd')
   let g:QFixHowm_MenuCmd = ''
 endif
+if !exists('g:QFixHowm_MenuKey')
+  let g:QFixHowm_MenuKey = 1
+endif
 if !exists('g:HowmFiles_Preview')
   let g:HowmFiles_Preview = 1
 endif
@@ -593,7 +596,9 @@ function! s:BufWinEnterMenu(preview, head)
   call QFixAltWincmdMap()
   nnoremap <buffer> <silent> <CR> :<C-u>call <SID>HowmMenuCR()<CR>
   nnoremap <buffer> <silent> <2-LeftMouse> <ESC>:<C-u>call <SID>HowmMenuCR()<CR>
-  call HowmMenuCmd_()
+  if g:QFixHowm_MenuKey
+    call HowmMenuCmd_()
+  endif
   silent! call HowmMenuCmd()
 
   silent! exec 'lchdir ' . escape(g:qfixmemo_dir, ' ')

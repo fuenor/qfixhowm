@@ -1821,21 +1821,25 @@ endfunction
 """"""""""""""""""""""""""""""
 " sub menu
 "
-" サブウィンドウのタイトル
+" サブメニューのタイトル
 if !exists('g:qfixmemo_submenu_title')
-  let g:qfixmemo_submenu_title  = '__submenu__'
+  let g:qfixmemo_submenu_title = '__submenu__'
 endif
-" サブウィンドウのサイズ
-if !exists('g:qfixmemo_submenu_width')
-  let g:qfixmemo_submenu_width = 30
+" サブメニューのサイズ
+if !exists('g:qfixmemo_submenu_size')
+  let g:qfixmemo_submenu_size = 30
 endif
-" サブウィンドウを出す方向
-if !exists('g:qfixmemo_submenu_direction')
-  let g:qfixmemo_submenu_direction   = 'topleft vertical'
-endif
-" サブウィンドウのwrap
+" サブメニューのwrap
 if !exists('g:qfixmemo_submenu_wrap')
   let g:qfixmemo_submenu_wrap = 1
+endif
+" サブメニューを出す方向
+if !exists('g:qfixmemo_submenu_direction')
+  let g:qfixmemo_submenu_direction = 'topleft vertical'
+endif
+" サブメニューのシングルウィンドウモード
+if !exists('g:qfixmemo_submenu_single_mode')
+  let g:qfixmemo_submenu_single_mode = 1
 endif
 
 let s:qfixmemo_submenu_title = g:qfixmemo_submenu_title
@@ -1843,6 +1847,7 @@ let s:submenu_basedir = g:qfixmemo_dir
 if exists('g:qfixmemo_root_dir')
   let s:submenu_basedir = g:qfixmemo_root_dir
 endif
+let s:sb_id = 0
 function! qfixmemo#SubMenu(...)
   call qfixmemo#Init()
   let basedir = s:submenu_basedir
@@ -1850,35 +1855,46 @@ function! qfixmemo#SubMenu(...)
   let prevPath = escape(getcwd(), ' ')
   silent! exec 'lchdir ' . escape(expand(basedir), ' ')
   let file = fnamemodify(s:qfixmemo_submenu_title, ':p')
+  silent! exec 'lchdir ' . prevPath
   let bufnum = bufnr(file)
   let winnum = bufwinnr(file)
 
-  if winnum != -1 && bufnum == bufnr('%')
-    wincmd c
-    if l:count == 0 && a:0 == 0
-      silent! exec 'lchdir ' . prevPath
+  if g:qfixmemo_submenu_single_mode
+    if winnum != -1 && bufnum == bufnr('%')
+      wincmd c
+      if l:count == 0 && a:0 == 0
+        return
+      endif
+      let winnum = -1
+    endif
+    if winnum != -1
+      exe winnum . 'wincmd w'
+      if l:count == 0 && a:0 == 0
+        return
+      endif
+      wincmd c
+    endif
+  else
+    if bufnum == bufnr('%') && l:count == 0 && a:0 == 0
+      wincmd c
+      return
+    elseif winnum != -1 && l:count == 0 && a:0 == 0
+      exe winnum . 'wincmd w'
       return
     endif
-    let winnum = -1
-  endif
-  if winnum != -1
-    exe winnum . 'wincmd w'
-    if l:count == 0 && a:0 == 0
-      silent! exec 'lchdir ' . prevPath
-      return
-    endif
-    wincmd c
   endif
 
-  silent! exec 'lchdir ' . escape(expand(basedir), ' ')
   if a:0 && l:count == 0
     let s:qfixmemo_submenu_title = g:qfixmemo_submenu_title
+    let s:sb_id = 0
   elseif l:count
     exe 'let s:qfixmemo_submenu_title = g:qfixmemo_submenu_title'.l:count
+    let s:sb_id = l:count
   endif
+  silent! exec 'lchdir ' . escape(expand(basedir), ' ')
   let file = fnamemodify(s:qfixmemo_submenu_title, ':p')
   silent! exec 'lchdir ' . prevPath
-  call s:OpenQFixSubWin(file, l:count)
+  call s:OpenQFixSubWin(file, s:sb_id)
 endfunction
 
 function! s:OpenQFixSubWin(file, id)
@@ -1892,19 +1908,27 @@ function! s:OpenQFixSubWin(file, id)
     return
   endif
   let windir  = s:GetOptionWithID('g:qfixmemo_submenu_direction', swid)
-  let winsize = s:GetOptionWithID('g:qfixmemo_submenu_width', swid)
+  let winsize = s:GetOptionWithID('g:qfixmemo_submenu_size', swid)
 
   let bufnum = bufnr(file)
   if bufnum == -1
     let wcmd = expand(file)
-    augroup QFixMemoSubMenu
-      exe 'au BufEnter '.fnamemodify(file, ':t').' normal! '.winsize ."\<C-W>|"
-      exe 'au BufWinLeave,VimLeave '.fnamemodify(file, ':t').' call <SID>SubMenuBufAutoWrite()'
-    augroup END
+      augroup QFixMemoSubMenu
+        if winsize > 0
+          if windir =~ 'vert'
+            exe 'au BufEnter '.fnamemodify(file, ':t').' normal! '.winsize ."\<C-W>|"
+          else
+            exe 'au BufEnter '.fnamemodify(file, ':t').' normal! '.winsize ."\<C-W>_"
+          endif
+        endif
+        " TODO: BufWinLeaveによる不要なロードを修正
+        exe 'au BufWinLeave,VimLeave '.fnamemodify(file, ':t').' call <SID>SubMenuBufAutoWrite()'
+      augroup END
   else
     let wcmd = '+buffer' . bufnum
   endif
-  exe 'silent! ' . windir . ' ' . winsize . 'split ' . wcmd
+
+  exe 'silent! ' . windir . ' ' . (winsize == 0 ? '' : string(winsize)) . 'split ' . wcmd
   setlocal buftype=nowrite
   setlocal bufhidden=hide
   setlocal noswapfile

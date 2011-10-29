@@ -270,10 +270,6 @@ if !exists('g:QFixHowm_FilenameLen')
   let g:QFixHowm_FilenameLen = len(fnamemodify(strftime(g:howm_filename), ':t:r'))
 endif
 
-" サブウィンドウを出す方向
-if !exists('g:SubWindow_Direction')
-  let g:SubWindow_Direction = "topleft vertical"
-endif
 " サブウィンドウのファイル名
 if !exists('g:SubWindow_Title')
   let g:SubWindow_Title = '__submenu__'
@@ -281,8 +277,20 @@ endif
 " サブウィンドウのタイトル名
 let g:qfixmemo_submenu_title  = g:SubWindow_Title
 " サブウィンドウのサイズ
-if !exists('g:SubWindow_Width')
-  let g:SubWindow_Width = 30
+if !exists('g:SubWindow_Size')
+  let g:SubWindow_Size = 30
+endif
+" サブウィンドウを出す方向
+if !exists('g:SubWindow_Direction')
+  let g:SubWindow_Direction = "topleft vertical"
+endif
+" サブウィンドウのwrap
+if !exists('g:SubWindow_Wrap')
+  let g:SubWindow_Wrap = 1
+endif
+" サブメニューのシングルモード
+if !exists('g:SubWindow_SingleMode')
+  let g:SubWindow_SingleMode = 1
 endif
 "メニューファイル名
 if !exists('g:QFixHowm_Menufile')
@@ -366,6 +374,15 @@ function! QFixHowmSetup()
     if exists('g:SubWindow_Title'.i)
       exe printf('let g:qfixmemo_submenu_title%d=g:SubWindow_Title%d', i, i)
     endif
+    if exists('g:SubWindow_Size'.i)
+      exe printf('let g:qfixmemo_submenu_size%d=g:SubWindow_Size%d', i, i)
+    endif
+    if exists('g:SubWindow_Wrap'.i)
+      exe printf('let g:qfixmemo_submenu_wrap%d=g:SubWindow_Wrap%d', i, i)
+    endif
+    if exists('g:SubWindow_Direction'.i)
+      exe printf('let g:qfixmemo_submenu_direction%d=g:SubWindow_Direction%d', i, i)
+    endif
   endfor
   " ペアファイルの作成先ディレクトリ
   let g:qfixmemo_pairfile_dir  = g:QFixHowm_PairLinkDir
@@ -409,11 +426,15 @@ function! QFixHowmSetup()
   endif
 
   " サブウィンドウのファイル名
-  let g:qfixmemo_submenu_title     = g:SubWindow_Title
+  let g:qfixmemo_submenu_title       = g:SubWindow_Title
   " サブウィンドウを出す方向
-  let g:qfixmemo_submenu_direction = g:SubWindow_Direction
+  let g:qfixmemo_submenu_direction   = g:SubWindow_Direction
   " サブウィンドウのサイズ
-  let g:qfixmemo_submenu_width     = g:SubWindow_Width
+  let g:qfixmemo_submenu_size        = g:SubWindow_Size
+  " サブウィンドウのwrap
+  let g:qfixmemo_submenu_wrap        = g:SubWindow_Wrap
+  " サブウィンドウはシングルモード
+  let g:qfixmemo_submenu_single_mode = g:SubWindow_SingleMode
 
   " ファイル名をタイトル行から生成したファイル名へ変更する場合の文字数
   let g:qfixmemo_rename_length = g:QFixHowm_FilenameLen

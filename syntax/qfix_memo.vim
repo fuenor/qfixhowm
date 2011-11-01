@@ -8,7 +8,7 @@ scriptencoding utf-8
 " URLとファイル
 syn match txtUrl  '\(http\|https\|file\|ftp\)://[-0-9a-zA-Z;/?:@&=+$,_.!~*'()%#]*'
 syn match txtFile '\(memo\|rel\|howm\)://[-0-9a-zA-Z;/?:@&=+$,_.!~*'()%#}[\]\\]*'
-syn match txtFile '\([A-Za-z]:[/\\]\|\~[/\\]\|\.\.\?[/\\]\|\\\{2}\)[-0-9a-zA-Z;/?:@&=+$,_.!~*'()%{}[\]\\]\+'
+syn match txtFile '\([A-Za-z]:[/\\]\|\~[/\\]\)[-0-9a-zA-Z;/?:@&=+$,_.!~*'()%{}[\]\\]\+'
 syn match txtFile '\[:\?&\?\zs\(memo\|rel\|howm\|https\|http\|file\|ftp\)://[^:]\+\ze:[^\]]*]'
 syn match txtFile '\[:\?&\?\zs\([A-Za-z]:[/\\]\|\~[/\\]\|\.\.\?[/\\]\|[/\\]\)[^:]\+\ze:[^\]]*]'
 

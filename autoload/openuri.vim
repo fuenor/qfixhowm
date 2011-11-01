@@ -1,8 +1,9 @@
 "=============================================================================
 "    Description: Open URI
+"                 see doc/openuri.jax
 "         Author: fuenor <fuenor@gmail.com>
 "                 http://sites.google.com/site/fudist/Home  (Japanese)
-"  Last Modified: 2011-10-23 22:58
+"  Last Modified: 2011-11-01 12:42
 "=============================================================================
 let s:Version = 1.00
 scriptencoding utf-8
@@ -21,17 +22,6 @@ endif
 let g:loaded_openuri = 1
 let g:openuri_version = s:Version
 
-" コマンドモード用
-command! -count -nargs=1 Openuri call openuri#open(<q-args>)
-" キーマップ用
-" nnoremap <silent> <CR> :<C-u>call openuri#cursorline()<CR>
-function openuri#cursorline()
-  if !openuri#open()
-    exe "normal! \<CR>"
-  endif
-  return ''
-endfunction
-
 " 文字列指定された場合は文字列をURIとして開く
 " カーソル位置のURIを開いたら 1 を返す
 function! openuri#open(...)
@@ -44,33 +34,85 @@ function! openuri#open(...)
   return ret == 1
 endfunction
 
-function! openuri#init()
-  let s:howm_dir = g:howm_dir
-  if exists('g:qfixmemo_dir')
-    let s:howm_dir = g:qfixmemo_dir
+""""""""""""""""""""""""""""""
+command! -nargs=? Openuri call openuri#cursorline(<q-args>)
+function! openuri#cursorline(...)
+  let str = a:0 ? a:1 : ''
+  if !openuri#open(str)
+    exe "normal! \<CR>"
   endif
-  if exists('g:openuri_memopath')
-    let s:openuri_memopath = g:openuri_memopath
-  else
-    let s:openuri_memopath = g:howm_dir
-    if exists('g:qfixmemo_dir')
-      let s:openuri_memopath = g:qfixmemo_dir
-    endif
-  endif
-  if exists('g:openuri_relpath')
-    let g:QFixHowm_RelPath = g:openuri_relpath
-  endif
-  if exists('g:openuri_cmd')
-    let g:QFixHowm_OpenURIcmd = g:openuri_cmd
-  endif
-  if exists('g:openuri_vimextreg')
-    let g:QFixHowm_OpenVimExtReg = g:openuri_vimextreg
-  endif
+  return ''
 endfunction
 
+" default
 let s:howmsuffix = 'howm'
 if !exists('g:howm_dir')
   let g:howm_dir = '~/howm'
+endif
+
+function! openuri#AddScheme(key, path)
+  call openuri#init()
+  let g:openuri_scheme[a:key] = a:path
+  return g:openuri_scheme
+endfunction
+
+function! openuri#init()
+  let l:howm_dir = g:howm_dir
+  if exists('g:qfixmemo_dir')
+    let l:howm_dir = g:qfixmemo_dir
+  endif
+  let l:memo_path = l:howm_dir
+  if exists('g:openuri_memopath')
+    let l:memo_path = g:openuri_memopath
+  endif
+  let l:rel_dir = l:howm_dir
+  if exists('g:openuri_relpath')
+    let l:rel_dir = g:openuri_relpath
+  elseif exists('g:QFixHowm_RelPath')
+    let l:rel_dir = g:QFixHowm_RelPath
+  endif
+
+  let g:openuri_scheme['howm'] = l:howm_dir
+  let g:openuri_scheme['memo'] = l:memo_path
+  let g:openuri_scheme['rel']  = l:rel_dir
+  let g:openuri_schemereg = ''
+  for key in keys(g:openuri_scheme)
+    let g:openuri_schemereg = g:openuri_schemereg.'\|'.key
+  endfor
+
+  if exists('g:QFixHowm_OpenURIcmd')
+    let g:openuri_cmd = g:QFixHowm_OpenURIcmd
+  endif
+  if exists('g:QFixHowm_OpenVimExtReg')
+    let g:openuri_vimextreg = g:QFixHowm_OpenVimExtReg
+  endif
+  if exists('g:QFixHowm_Edit')
+    let g:openuri_edit = g:QFixHowm_Edit
+  endif
+endfunction
+
+""""""""""""""""""""""""""""""
+" カーソル位置のファイルを開く
+""""""""""""""""""""""""""""""
+" カーソル位置のファイルを開くコマンド
+if !exists('g:openuri_cmd')
+  if has('unix')
+    let g:openuri_cmd = "call system('firefox %s &')"
+  else
+    " Internet Explorer
+    " let g:openuri_cmd = '!start "C:/Program Files/Internet Explorer/iexplore.exe" %s'
+    let g:openuri_cmd = '!start "rundll32.exe" url.dll,FileProtocolHandler %s'
+  endif
+endif
+
+" Vimで開くファイル指定
+if !exists('g:openuri_vimextreg')
+  let g:openuri_vimextreg = '\.\(txt\|mkd\|wiki\|rd\|vim\|js\|java\|py\|rb\|h\|c\|cpp\|ini\|conf\)$'
+endif
+
+" scheme:// convert dictionary
+if !exists('g:openuri_scheme')
+  let g:openuri_scheme = {}
 endif
 
 " UNCパスを使用する
@@ -81,61 +123,19 @@ if !exists('g:openuri_use_UNC')
   endif
 endif
 
-" タブで編集('tab'を設定)
-if !exists('QFixHowm_Edit')
-  let QFixHowm_Edit = ''
+" g:openuri_edit = 'tab'
+if !exists('g:openuri_edit')
+  let g:openuri_edit = ''
 endif
 
-
-if !exists('g:qfixtempname')
-  let g:qfixtempname = tempname()
-endif
-let s:howmtempfile = g:qfixtempname
-let s:openuri_memopath = g:howm_dir
-
-""""""""""""""""""""""""""""""
-" カーソル位置のファイルを開く
-""""""""""""""""""""""""""""""
-" カーソル位置のファイルを開くコマンド
-if !exists('g:QFixHowm_OpenURIcmd')
-  if !exists('g:MyOpenURI_cmd')
-    let g:QFixHowm_OpenURIcmd = ""
-    if has('unix')
-      let g:QFixHowm_OpenURIcmd = "call system('firefox %s &')"
-    else
-      " Internet Explorer
-      let g:QFixHowm_OpenURIcmd = '!start "C:/Program Files/Internet Explorer/iexplore.exe" %s'
-      let g:QFixHowm_OpenURIcmd = '!start "rundll32.exe" url.dll,FileProtocolHandler %s'
-    endif
-  else
-    let g:QFixHowm_OpenURIcmd = g:MyOpenURI_cmd
-  endif
-endif
-
-" Vimで開くファイル指定
-if !exists('g:QFixHowm_OpenVimExtReg')
-  if !exists('g:MyOpenVim_ExtReg')
-    let g:QFixHowm_OpenVimExtReg = '\.\(txt\|mkd\|wiki\|rd\|vim\|js\|java\|py\|rb\|h\|c\|cpp\|ini\|conf\)$'
-  else
-    let g:QFixHowm_OpenVimExtReg = g:MyOpenVim_ExtReg
-  endif
-endif
-" rel://
-if !exists('g:QFixHowm_RelPath')
-  let g:QFixHowm_RelPath = g:howm_dir
-endif
-
-" はてなのhttp記法のゴミを取り除く
-if !exists('g:QFixHowm_removeHatenaTag')
-  let g:QFixHowm_removeHatenaTag = 1
+" はてなのhttp記法のゴミ : を取り除く
+if !exists('g:openuri_remove_hatenatag')
+  let g:openuri_remove_hatenatag = 1
 endif
 
 function! s:cursorline()
   let prevcol = col('.')
   let str = getline('.')
-  let l:howm_dir = substitute(s:howm_dir, '\\', '/', 'g')
-  let l:memo_dir = substitute(s:openuri_memopath, '\\', '/', 'g')
-  let l:rel_dir  = substitute(g:QFixHowm_RelPath, '\\', '/', 'g')
 
   " >>>
   if exists('g:howm_glink_pattern')
@@ -144,12 +144,7 @@ function! s:cursorline()
       let str = strpart(str, pos)
       let str = substitute(str, '^\s*\|\s*$', '', 'g')
       let str = substitute(str, '^'.g:howm_glink_pattern.'\s*', '', '')
-      let path = l:rel_dir . (str =~ 'rel://[^/\\]' ? '/' : '')
-      let str = substitute(str, 'rel://', path, '')
-      let path = l:memo_dir . (str =~ 'memo://[^/\\]' ? '/' : '')
-      let str = substitute(str, 'memo://', path, '')
-      let path = l:howm_dir . (str =~ 'howm://[^/\\]' ? '/' : '')
-      let str = substitute(str, 'howm://', path, '')
+      let str = s:cnvScheme(g:openuri_scheme, str)
       let imgsfx = '\.\(jpg\|jpeg\|png\|bmp\|gif\)$'
       if str =~ imgsfx
         let str = substitute(str, '^&', '', '')
@@ -161,7 +156,7 @@ function! s:cursorline()
   " カーソル位置の文字列を拾う[:c:/temp/test.jpg:]や[:http://example.com:(title=hoge)]形式
   let col = col('.')
   let pathhead = '\([A-Za-z]:[/\\]\|\~[/\\]\|\.\.\?[/\\]\|[/\\]\)'
-  let urireg = '\(\(memo\|rel\|howm\|http\|https\|file\|ftp\)://\|'.pathhead.'\)'
+  let urireg = '\(\(http\|https\|file\|ftp'.g:openuri_schemereg.'\)://\|'.pathhead.'\)'
   let [lnum, colf] = searchpos('\[:\?&\?'.urireg, 'nbc', line('.'))
   if lnum != 0 && colf != 0
     let str = strpart(getline('.'), colf-1)
@@ -175,19 +170,12 @@ function! s:cursorline()
     endif
     if str != '' && col < (colf + len(str))
       if str =~ '^\[:\?'
-        if g:QFixHowm_removeHatenaTag
+        if g:openuri_remove_hatenatag
           let str = substitute(str, ':\(title=\|image[:=]\)\([^\]]*\)\?]$', ':]', '')
         endif
         let str = substitute(str, ':[^:\]]*]$', '', '')
       endif
       let str = substitute(str, '^\[:\?&\?', '', '')
-
-      let path = l:rel_dir . (str =~ 'rel://[^/\\]' ? '/' : '')
-      let str = substitute(str, 'rel://', path, '')
-      let path = l:memo_dir . (str =~ 'memo://[^/\\]' ? '/' : '')
-      let str = substitute(str, 'memo://', path, '')
-      let path = l:howm_dir . (str =~ 'howm://[^/\\]' ? '/' : '')
-      let str = substitute(str, 'howm://', path, '')
       return s:openstr(str)
     endif
   endif
@@ -195,8 +183,8 @@ function! s:cursorline()
   " カーソル位置の文字列を拾う
   let urichr  =  "[-0-9a-zA-Z;/?@&=+$,_.!~*'()%:#]"
   let pathchr =  "[-0-9a-zA-Z;/?@&=+$,_.!~*'()%:{}[\\]\\\\]"
-  let pathhead = '\([A-Za-z]:[/\\]\|\~[/\\]\|\.\.\?[/\\]\|\\\{2}\)'
-  let urireg = '\(\(memo\|rel\|howm\|http\|https\|file\|ftp\)://\|'.pathhead.'\)'
+  let pathhead = '\([A-Za-z]:[/\\]\|\~[/\\]\|\\\{2}\)'
+  let urireg = '\(\(http\|https\|file\|ftp'.g:openuri_schemereg.'\)://\|'.pathhead.'\)'
   let [lnum, colf] = searchpos(urireg, 'nbc', line('.'))
   if colf == 0 && lnum == 0
     return "\<CR>"
@@ -213,33 +201,40 @@ function! s:cursorline()
 
   let str = substitute(str, ':\+$', '', '')
   if str != ''
-    let path = l:rel_dir . (str =~ 'rel://[^/\\]' ? '/' : '')
-    let str = substitute(str, 'rel://', path, '')
-    let path = l:memo_dir . (str =~ 'memo://[^/\\]' ? '/' : '')
-    let str = substitute(str, 'memo://', path, '')
-    let path = l:howm_dir . (str =~ 'howm://[^/\\]' ? '/' : '')
-    let str = substitute(str, 'howm://', path, '')
     return s:openstr(str)
   endif
   return "\<CR>"
 endfunction
 
+function! s:cnvScheme(dict, str)
+  let str = a:str
+  let g:openuri_schemereg = ''
+  for key in keys(a:dict)
+    let g:openuri_schemereg = g:openuri_schemereg.'\|'.key
+    let path = fnamemodify(a:dict[key], ':p')
+    let str = substitute(str, '^'.key.'://[/\\]\?', path, '')
+  endfor
+  return str
+endfunction
+
 function! s:openstr(str)
   let str = a:str
 
+  let str = s:cnvScheme(g:openuri_scheme, str)
   if g:openuri_use_UNC == 0 && str =~ '^\\\\'
     return "\<CR>"
   endif
+
   let str = substitute(str, '[[:space:]]*$', '', '')
-  let l:MyOpenVim_ExtReg = '\.'.s:howmsuffix.'$'
+  let l:vimextreg = '\.'.s:howmsuffix.'$'
   if exists('g:QFixHowm_FileExt')
-    let l:MyOpenVim_ExtReg = '\.'.g:QFixHowm_FileExt.'$'.'\|'.l:MyOpenVim_ExtReg
+    let l:vimextreg = '\.'.g:QFixHowm_FileExt.'$'.'\|'.l:vimextreg
   endif
   if exists('g:qfixmemo_ext')
-    let l:MyOpenVim_ExtReg = '\.'.g:qfixmemo_ext.'$'.'\|'.l:MyOpenVim_ExtReg
+    let l:vimextreg = '\.'.g:qfixmemo_ext.'$'.'\|'.l:vimextreg
   endif
-  if g:QFixHowm_OpenVimExtReg != ''
-    let l:MyOpenVim_ExtReg = '\('.l:MyOpenVim_ExtReg.'\)\|'.g:QFixHowm_OpenVimExtReg
+  if g:openuri_vimextreg != ''
+    let l:vimextreg = '\('.l:vimextreg.'\)\|'.g:openuri_vimextreg
   endif
 
   let pathhead = '\([A-Za-z]:[/\\]\|\~[/\\]\|\.\.\?[/\\]\|\\\{2}\|[/\\]\)'
@@ -250,43 +245,46 @@ function! s:openstr(str)
   if str =~ '^'.pathhead
     if str !~ '^\\\\'
       let prevPath = escape(getcwd(), ' ')
-      exe 'lchdir ' . fnamemodify(expand('%'), ':h')
+      exe 'lchdir ' . escape(fnamemodify(expand('%'), ':h'), ' ')
       let str = fnamemodify(str, ':p')
-      silent! exec 'lchdir ' . prevPath
+      silent! exe 'lchdir ' . prevPath
     endif
-    if str !~ l:MyOpenVim_ExtReg
+    if str !~ l:vimextreg
       let ext = tolower(fnamemodify(str, ':e'))
-      if exists('g:openuri_'.ext)
-        exec 'let g:QFixHowm_Opencmd_'.ext.' = g:openuri_'.ext
+      if !exists('g:openuri_'.ext) && exists('g:QFixHowm_Opencmd_'.ext)
+        exe 'let g:openuri_'.ext.' = g:QFixHowm_Opencmd_'.ext
       endif
-      if exists('g:QFixHowm_Opencmd_'.ext)
-        exec 'let cmd = g:QFixHowm_Opencmd_'.ext
+      if exists('g:openuri_'.ext)
+        let str = substitute(str, '\\', '/', 'g')
+        exe 'let cmd = g:openuri_'.ext
         if has('unix')
           let str = escape(str, ' ')
         endif
         let cmd = substitute(cmd, '%s', escape(str, '&\'), '')
         let cmd = escape(cmd, '%#')
-        silent! exec cmd
+        silent! exe cmd
         return 1
       endif
     else
       if str !~ '^\\\\'
         let dir = fnamemodify(str, ':h')
         if isdirectory(dir) == 0
-          call mkdir(dir, 'p')
+          silent! call mkdir(dir, 'p')
         endif
+        let str = substitute(str, '\\', '/', 'g')
       endif
       if has('unix')
         let str = escape(str, ' ')
       endif
-      exec g:QFixHowm_Edit.'edit '. escape(str, '%#')
+      exe g:openuri_edit.'edit '. escape(str, '%#')
       return 1
     endif
     if fnamemodify(str, ':e') == ''
+      let str = substitute(str, '\\', '/', 'g')
       if has('unix')
         let str = escape(str, ' ')
       endif
-      exec g:QFixHowm_Edit.'edit '. escape(str, '%#')
+      exe g:openuri_edit.'edit '. escape(str, '%#')
       return 1
     endif
   endif
@@ -306,7 +304,7 @@ function! s:openstr(str)
     let uri = expand(uri)
     let uri = 'file://'.uri
   endif
-  let uri = substitute(uri, '\', '/', 'g')
+  let uri = substitute(uri, '\\', '/', 'g')
   if uri == ''
     return "\<CR>"
   endif
@@ -327,9 +325,9 @@ function! s:openuri(uri)
       let bat = 1
     endif
   endif
-  if g:QFixHowm_OpenURIcmd != ''
-    let cmd = g:QFixHowm_OpenURIcmd
-    if g:QFixHowm_OpenURIcmd =~ '\(rundll32\|iexplore\(\.exe\)\?\)' && uri =~ '^file://'
+  if g:openuri_cmd != ''
+    let cmd = g:openuri_cmd
+    if g:openuri_cmd =~ '\(rundll32\|iexplore\(\.exe\)\?\)' && uri =~ '^file://'
     else
       let uri = s:EncodeURL(uri, &enc)
     endif
@@ -340,20 +338,23 @@ function! s:openuri(uri)
       let uri = substitute(uri, '%', '%%', 'g')
       let cmd = substitute(cmd, '%s', escape(uri, '&'), '')
       let cmd = iconv(cmd, &enc, 'cp932')
-      let s:uricmdfile = fnamemodify(s:howmtempfile, ':p:h') . '/uricmd.bat'
+      let s:uricmdfile = fnamemodify(s:tempfile, ':p:h') . '/uricmd.bat'
       call writefile([cmd], s:uricmdfile)
       let cmd = '!start "'.s:uricmdfile.'"'
-      silent! exec cmd
+      silent! exe cmd
       return 1
     endif
     let cmd = substitute(cmd, '%s', escape(uri, '&'), '')
     let cmd = escape(cmd, '%#')
-    silent! exec cmd
+    silent! exe cmd
     return 1
   endif
   return "\<CR>"
 endfunction
 
+""""""""""""""""""""""""""""""
+" URL Encode
+""""""""""""""""""""""""""""""
 function! s:EncodeURL(str, ...)
   let to_enc = 'utf8'
   if a:0
@@ -375,5 +376,24 @@ endfunction
 
 function! s:URLByte2hex(bytes)
   return join(map(copy(a:bytes), 'printf("%%%02X", v:val)'), '')
+endfunction
+
+""""""""""""""""""""""""""""""
+" remove tempfile
+""""""""""""""""""""""""""""""
+if !exists('g:qfixtempname')
+  let g:qfixtempname = tempname()
+endif
+let s:tempfile = g:qfixtempname
+
+augroup OpenURI
+  au!
+  au VimLeave * call <SID>VimLeave()
+augroup END
+
+function! s:VimLeave()
+  if exists('s:uricmdfile')
+    call delete(s:uricmdfile)
+  endif
 endfunction
 

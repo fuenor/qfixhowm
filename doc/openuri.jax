@@ -12,7 +12,7 @@ CONTENTS						*openuri-contents*
 2. インストール                                         |openuri-settings|
 3. コマンド                                             |openuri-command|
 4. URI記述のフォーマット                                |openuri-uri|
-  4.1 パスに空白や日本語を含むリンク			|openuri-path|
+  4.1 特殊なパスのテキストリンク                        |openuri-path|
   4.2 基準ディレクトリ                                  |openuri-basedir|
 5. オプション                                           |openuri-option|
 
@@ -29,22 +29,23 @@ openuri.vimでは直接パスや相対パスはもちろん、空白や日本語
 openuri.vimをruntimepathの通った場所へコピーしてください。
 autoloadでの読み込みにも対応しています。
 
-NOTE:
-openuri.vimをautoloadで読み込むと :Openuri コマンドは使用できません。
-そのような場合は初期化関数を呼び出すとロードされます。
-  :call openuri#init()
-
 ==============================================================================
 3. コマンド						*openuri-command*
 
 コマンドモードからURIを開きたい場合は直接実行可能です。
-  :call openuri#open('http://www.example.com')
+  :Openuri
   :Openuri http://www.example.com
+  :call openuri#open('http://www.example.com')
 
-適当なバッファを開いてURLを記述してから、カーソルをURL上に移動しopenuri#open()
-を実行するとURLを開きます。
+NOTE: openuri.vimをautoloadで読み込むと、起動直後は :Openuri コマンドがロード
+      されていません。
+      そのような場合は初期化関数を呼び出すとロードされます。
+        :call openuri#init()
+
+適当なバッファを開いてURIを記述してから、カーソルをURI上に移動し Openuri
+を実行するとURIを開きます。
 (例) カーソルを http://www.example.com 上に移動しコマンドを実行します。
-  :call openuri#open()
+  :Openuri
 
 <CR>にopenuriをキーマップすることも可能です。 >
   nnoremap <silent> <CR> :<C-u>call openuri#cursorline()<CR>
@@ -53,7 +54,7 @@ openuri.vimで開くことが可能なURIは以下のシンタックスで強調
   " URIのシンタックス定義
   syn match txtUrl  '\(http\|https\|file\|ftp\)://[-0-9a-zA-Z;/?:@&=+$,_.!~*'()%#]*'
   syn match txtFile '\(memo\|rel\|howm\)://[-0-9a-zA-Z;/?:@&=+$,_.!~*'()%#}[\]\\]*'
-  syn match txtFile '\([A-Za-z]:[/\\]\|\~[/\\]\|\.\.\?[/\\]\|\\\{2}\)[-0-9a-zA-Z;/?:@&=+$,_.!~*'()%{}[\]\\]\+'
+  syn match txtFile '\([A-Za-z]:[/\\]\|\~[/\\]\)[-0-9a-zA-Z;/?:@&=+$,_.!~*'()%{}[\]\\]\+'
   syn match txtFile '\[:\?&\?\zs\(memo\|rel\|howm\|https\|http\|file\|ftp\)://[^:]\+\ze:[^\]]*]'
   syn match txtFile '\[:\?&\?\zs\([A-Za-z]:[/\\]\|\~[/\\]\|\.\.\?[/\\]\|[/\\]\)[^:]\+\ze:[^\]]*]'
 
@@ -74,26 +75,27 @@ openuriで使用可能なスキームは以下のとおりです。
 | rel://    | openuri_relpath   |
 
 (記述例)
-
 http://www.example.com
 http://www.example.com:80
 
 ファイルパスを直接記述してもURIとして認識されます。
   ~/hoge.txt
   c:\temp\hoge.txt
-UNCパスも有効です。
-  \\hmsv\share\fuga.txt
 
-相対パスも使用可能です。相対パスは現バッファと関連付けられているファイルのパス
-を基準ディレクトリとして変換されます。
-  ./hoge.txt
-  ../hoge/puyo.txt
-
-4.1 パスに空白や日本語を含むリンク			*openuri-path*
+4.1 特殊なパスのテキストリンク				*openuri-path*
 
 パスに空白や日本語を含んでいたり、 / や \ で始まるパスは [ と :] で囲むことで
 使用可能です。
   [C:/temp\ho   ge.txt:] [/temp/ふが.txt:]
+
+相対パスやUNCパス(Windowsの\\で表されるネットワークパス)も使用可能です。
+相対パスは現バッファと関連付けられているファイルのパスを基準ディレクトリとして
+変換されます。
+  相対パス
+  [./hoge.txt:]
+  [../hoge/puyo.txt:]
+  UNCパス
+  [\\hmsv\share\fuga.txt:]
 
 http:// や画像ファイル等はVimではなくブラウザを起動して開きます。
   [C:\temp/テスト.jpg:]
@@ -118,8 +120,12 @@ c:/temp/rel だとすると c:/temp/rel/puyo.txt として扱われます。
 | memo://   | openuri_memopath  |
 | rel://    | openuri_relpath   |
 
-NOTE: ・openuri_memopathを設定しないと memo://の変換にhowm_dir(qfixmemo_dir)が
-        デフォルトとして使用されます。
+NOTE: openuri_memopathを設定しないと memo://の変換にhowm_dir(qfixmemo_dir)が
+      デフォルトとして使用されます。
+
+NOTE: ユーザー独自スキームも追加可能です。
+      たとえば user:// を追加したい場合は openuri#AddSchemeで追加してください。
+      :call openuri#AddScheme('user', "c:/temp/user")
 
 ------------------------------------------------------------------------------
 5. オプション						*openuri-option*

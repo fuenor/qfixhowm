@@ -182,7 +182,7 @@ function! s:SortExec(...)
   silent! %delete _
   call setline(1, s:glist)
   setlocal nomodifiable
-  call cursor(1,1)
+  call cursor(1, 1)
   redraw|echo 'Sorted by '.g:QFix_Sort.'.'
 endfunction
 
@@ -386,7 +386,7 @@ function! QFixHowmOpenMenu(...)
   silent! exec 'silent! -1put=glist'
   silent! $delete _
   exec 'lchdir ' . escape(g:qfixmemo_dir, ' ')
-  call cursor(1,1)
+  call cursor(1, 1)
   if search('%menu%', 'cW') > 0
     let str = substitute(getline('.'), '%menu%', mfile, '')
     call setline(line('.'), str)
@@ -447,7 +447,7 @@ function! s:HowmMenuReplace(sq, rep, head)
   endfor
   silent! exec 'lchdir ' . prevPath
   let save_cursor = getpos('.')
-  call cursor(1,1)
+  call cursor(1, 1)
   if search(a:rep, 'cW') > 0
     silent! delete _
     silent! exec 'silent! -1put=glist'

@@ -6,7 +6,7 @@
 "  Last Modified: 2011-10-25 21:51
 "=============================================================================
 scriptencoding utf-8
-let s:Version = 2.85
+let s:Version = 2.86
 
 "What Is This:
 "  This plugin adds preview, sortings and advanced search to your quickfix window.
@@ -1113,6 +1113,7 @@ function! QFixPreviewOpen(file, line, ...)
     silent! exec 'lchdir ' . escape(g:QFix_SearchPath, ' ')
   endif
 
+  syntax clear
   if g:QFix_PreviewFtypeHighlight != 0
     call s:QFixFtype_(file)
     "BufReadの副作用への安全策
@@ -1158,13 +1159,15 @@ function! s:QFixFtype_(file)
     endif
   endif
   let file = fnamemodify(a:file, ':t')
-  exec 'silent! doau BufNewFile '.file
   "for QFixHowm
-  call QFixFtype(a:file)
+  if !QFixFtype(a:file)
+    exec 'silent! doau BufNewFile '.file
+  endif
   return ''
 endfunction
 
 silent! function QFixFtype(file)
+  return 0
 endfunction
 
 """"""""""""""""""""""""""""""

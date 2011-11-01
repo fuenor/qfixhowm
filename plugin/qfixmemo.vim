@@ -61,11 +61,12 @@ endif
 
 " QFixMemoのシンタックスハイライト設定
 " 0 : 何も設定しない
-" 1 : タイトル行、キーワード
-" 2 : タイトル行、キーワード、タイムスタンプ
-" 3 : タイトル行、キーワード、タイムスタンプ、予定・TODO
+" 1 : キーワード
+" 2 : キーワード、タイトル行
+" 3 : キーワード、タイトル行、タイムスタンプ
+" 4 : キーワード、タイトル行、タイムスタンプ、予定・TODO
 if !exists('g:qfixmemo_syntax')
-  let g:qfixmemo_syntax = 3
+  let g:qfixmemo_syntax = 4
 endif
 
 " 新規メモファイル名
@@ -818,6 +819,9 @@ function! s:syntaxHighlight()
     exe 'syn match qfixmemoKeyword display "\V'.escape(s:KeywordHighlight, '"').'"'
   endif
   hi link qfixmemoKeyword Underlined
+  if g:qfixmemo_syntax == 1
+    return
+  endif
 
   let l:qfixmemo_title = escape(g:qfixmemo_title, g:qfixmemo_escape)
   exe 'syn region qfixmemoTitle start="^'.l:qfixmemo_title.'[^'.g:qfixmemo_title.']'.'" end="$" contains=qfixmemoTitleDesc,qfixmemoCategory'
@@ -828,7 +832,7 @@ function! s:syntaxHighlight()
   hi link qfixmemoTitleDesc Special
   hi link qfixmemoCategory  Label
 
-  if g:qfixmemo_syntax == 1
+  if g:qfixmemo_syntax == 2
     return
   endif
   exe 'syn match qfixmemoDateTime "'.s:qfixmemo_timeformat . '" contains=qfixmemoDate,qfixmemoTime'
@@ -839,7 +843,7 @@ function! s:syntaxHighlight()
   hi link qfixmemoDate Underlined
   hi link qfixmemoTime Constant
 
-  if g:qfixmemo_syntax == 2
+  if g:qfixmemo_syntax == 3
     return
   endif
   runtime! syntax/howm_schedule.vim
@@ -1155,7 +1159,7 @@ function! qfixmemo#DeleteEntry(...)
     silent! %delete _
     silent! 0put
     silent! $delete _
-    call cursor(1,1)
+    call cursor(1, 1)
     stopinsert
     let s:qfixmemoWriteUpdateTime = 0
     write!
@@ -1186,7 +1190,7 @@ function! qfixmemo#DivideEntry() range
     silent! %delete _
     call setline(1, entry)
     silent! $delete _
-    call cursor(1,1)
+    call cursor(1, 1)
     silent! exe 'w! '
     exe 'b ' . bufnr
     " silent! exe 'bd'
@@ -2045,12 +2049,17 @@ endfunction
 
 " for qfixwin
 function! QFixFtype(file)
-  if !s:isQFixMemo(a:file)
-    return
+  if g:qfixmemo_filetype == '' || !s:isQFixMemo(a:file)
+    return 0
   endif
-  if g:qfixmemo_filetype != ''
+  if g:qfixmemo_filetype =~ '\.'
     call s:filetype()
+  else
+    let syn = g:qfixmemo_filetype
+    exe 'runtime! syntax/'.syn.'.vim'
+    call s:syntaxHighlight()
   endif
+  return 1
 endfunction
 
 " for qfixwin

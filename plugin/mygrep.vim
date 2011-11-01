@@ -569,7 +569,7 @@ if !exists('g:MyGrep_RecursiveMode')
   let g:MyGrep_RecursiveMode = 0
 endif
 if !exists('g:MyGrep_RecOpt')
-  let g:MyGrep_RecOpt = '-r'
+  let g:MyGrep_RecOpt = '-R'
 endif
 
 if !exists('g:MyGrep_yagrep_opt')

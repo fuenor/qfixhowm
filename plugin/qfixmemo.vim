@@ -60,13 +60,18 @@ if !exists('g:qfixmemo_forceencoding')
 endif
 
 " QFixMemoのシンタックスハイライト設定
-" 0 : 何も設定しない
-" 1 : キーワード
-" 2 : キーワード、タイトル行
-" 3 : キーワード、タイトル行、タイムスタンプ
-" 4 : キーワード、タイトル行、タイムスタンプ、予定・TODO
-if !exists('g:qfixmemo_syntax')
-  let g:qfixmemo_syntax = 4
+" 0001 : タイトル行
+" 0010 : キーワード
+" 0100 : タイムスタンプ
+" 1000 : デフォルトシンタックス
+" 0000 : 設定しない
+" 上記を組み合わせて指定する
+if !exists('g:qfixmemo_syntax_flag')
+  let g:qfixmemo_syntax_flag = '1111'
+endif
+" デフォルトシンタックスファイル
+if !exists('g:qfixmemo_syntax_file')
+  let g:qfixmemo_syntax_file = 'howm_schedule.vim'
 endif
 
 " 新規メモファイル名
@@ -811,42 +816,35 @@ function! s:filetype()
 endfunction
 
 function! s:syntaxHighlight()
-  if g:qfixmemo_syntax == 0
-    return
+  if g:qfixmemo_syntax_flag =~ '^...1'
+    let l:qfixmemo_title = escape(g:qfixmemo_title, g:qfixmemo_escape)
+    exe 'syn region qfixmemoTitle start="^'.l:qfixmemo_title.'[^'.g:qfixmemo_title.']'.'" end="$" contains=qfixmemoTitleDesc,qfixmemoCategory'
+    exe 'syn match qfixmemoTitleDesc "^'.l:qfixmemo_title.'$"'
+    exe 'syn match qfixmemoTitleDesc contained "^'.l:qfixmemo_title.'"'
+    syn match qfixmemoCategory contained +\(\[.\{-}\]\)\++
+    hi link qfixmemoTitle     Title
+    hi link qfixmemoTitleDesc Special
+    hi link qfixmemoCategory  Label
   endif
-  silent! syn clear qfixmemoKeyword
-  if s:KeywordHighlight != ''
-    exe 'syn match qfixmemoKeyword display "\V'.escape(s:KeywordHighlight, '"').'"'
+  if g:qfixmemo_syntax_flag =~ '^..1.'
+    silent! syn clear qfixmemoKeyword
+    if s:KeywordHighlight != ''
+      exe 'syn match qfixmemoKeyword display "\V'.escape(s:KeywordHighlight, '"').'"'
+    endif
+    hi link qfixmemoKeyword Underlined
   endif
-  hi link qfixmemoKeyword Underlined
-  if g:qfixmemo_syntax == 1
-    return
-  endif
+  if g:qfixmemo_syntax_flag =~ '^.1..'
+    exe 'syn match qfixmemoDateTime "'.s:qfixmemo_timeformat . '" contains=qfixmemoDate,qfixmemoTime'
+    syn match qfixmemoDate contained '\d\{4}-\d\{2}-\d\{2}'
+    syn match qfixmemoDate contained '\d\{4}/\d\{2}/\d\{2}'
+    syn match qfixmemoTime contained '\d\{2}\(:\d\{2}\)\+'
 
-  let l:qfixmemo_title = escape(g:qfixmemo_title, g:qfixmemo_escape)
-  exe 'syn region qfixmemoTitle start="^'.l:qfixmemo_title.'[^'.g:qfixmemo_title.']'.'" end="$" contains=qfixmemoTitleDesc,qfixmemoCategory'
-  exe 'syn match qfixmemoTitleDesc "^'.l:qfixmemo_title.'$"'
-  exe 'syn match qfixmemoTitleDesc contained "^'.l:qfixmemo_title.'"'
-  syn match qfixmemoCategory contained +\(\[.\{-}\]\)\++
-  hi link qfixmemoTitle     Title
-  hi link qfixmemoTitleDesc Special
-  hi link qfixmemoCategory  Label
-
-  if g:qfixmemo_syntax == 2
-    return
+    hi link qfixmemoDate Underlined
+    hi link qfixmemoTime Constant
   endif
-  exe 'syn match qfixmemoDateTime "'.s:qfixmemo_timeformat . '" contains=qfixmemoDate,qfixmemoTime'
-  syn match qfixmemoDate contained '\d\{4}-\d\{2}-\d\{2}'
-  syn match qfixmemoDate contained '\d\{4}/\d\{2}/\d\{2}'
-  syn match qfixmemoTime contained '\d\{2}\(:\d\{2}\)\+'
-
-  hi link qfixmemoDate Underlined
-  hi link qfixmemoTime Constant
-
-  if g:qfixmemo_syntax == 3
-    return
+  if g:qfixmemo_syntax_flag =~ '^1...'
+    exe 'runtime! syntax/'.g:qfixmemo_syntax_file
   endif
-  runtime! syntax/howm_schedule.vim
 endfunction
 
 function! s:BufWritePost()

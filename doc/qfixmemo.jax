@@ -40,7 +40,7 @@ CONTENTS                                                *qfixmemo-contents*
   12.2 キーマップ                                       |qfixmemo-user-keymap|
   12.3 保存前処理                                       |qfixmemo-pre-save|
   12.4 ファイルタイプの指定                             |qfixmemo-filetype|
-  12.5 シンタックスハイライト                           |qfixmemo-syntax-highlight|
+  12.5 デフォルトシンタックス                           |qfixmemo-default-syntax|
   12.6 複数のQFixMemoディレクトリ                       |qfixmemo-chenv|
   12.7 calendar.vim                                     |qfixmemo-calendar|
   12.8 URIを開く                                        |qfixmemo-uri|
@@ -642,7 +642,6 @@ https://sites.google.com/site/fudist/Home/qfixhowm/howm-reminder
 <Leader>rd                繰り返しの展開
 
 QFixHowm互換の予定・TODOを使用したくない場合は無効化することができます。
-
  >
   " QFixHowm互換の予定・TODO処理を使用しない。
   let g:qfixmemo_use_howm_schedule = 0
@@ -840,19 +839,33 @@ Markdownを使用する例 >
   let QFixMRU_RegisterFile = '\.\(howm\|txt\|mkd\|wiki\)$'
 
 ------------------------------------------------------------------------------
-12.5 シンタックスハイライト															*qfixmemo-syntax-highlight*
+12.5 デフォルトシンタックス															*qfixmemo-default-syntax*
 
-デフォルトで有効になるシンタックスハイライトは qfixmemo_syntaxで設定します。 >
-  " QFixMemoシンタックスハイライト設定
-  let g:qfixmemo_syntax = 3
+デフォルトのシンタックスハイライトは qfixmemo_syntax_flagで設定したいフラグを
+組み合わせて指定します。 >
 
-0                   何も設定しない
-1                   タイトル行
-2                   タイトル行、タイムスタンプ
-3                   タイトル行、タイムスタンプ、予定・TODO
+  " QFixMemoのデフォルトシンタックスハイライト指定
+  let qfixmemo_syntax_flag = '1111'
+<
+  0001 : タイトル行
+  0010 : キーワード
+  0100 : タイムスタンプ
+  1000 : デフォルトシンタックス
+  0000 : 設定しない
 
-デフォルト以外のファイルタイプに設定していてハイライトが邪魔な場合は無効化して
-ください。
+たとえば「タイトル行」と「タイムスタンプ」だけハイライトしたい場合は
+0001と0100を組み合わせて 0101 を指定します。
+
+1000を指定したときに読み込まれるファイルは qfixmemo_syntax_fileで指定します。 >
+  " QFixMemoデフォルトシンタックスファイル
+  let qfixmemo_syntax_file = 'howm_schedule.vim'
+
+NOTE: howm_schedule.vimではhowmスタイルの予定・TODOとURI等のテキストリンクが設
+      定されています。
+      このため 1011でタイムスタンプを無効化しても、howm_schedule.vimのタイムス
+      タンプのハイライトが有効なのでタイムスタンプはハイライトされることになり
+      ます。
+      必要に応じてフラグやデフォルトファイル名を適切に設定してください。
 
 ------------------------------------------------------------------------------
 12.6 複数のQFixMemoディレクトリ													*qfixmemo-chenv*

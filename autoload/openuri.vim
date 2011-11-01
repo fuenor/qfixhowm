@@ -144,7 +144,6 @@ function! s:cursorline()
       let str = strpart(str, pos)
       let str = substitute(str, '^\s*\|\s*$', '', 'g')
       let str = substitute(str, '^'.g:howm_glink_pattern.'\s*', '', '')
-      let str = s:cnvScheme(g:openuri_scheme, str)
       let imgsfx = '\.\(jpg\|jpeg\|png\|bmp\|gif\)$'
       if str =~ imgsfx
         let str = substitute(str, '^&', '', '')
@@ -183,7 +182,7 @@ function! s:cursorline()
   " カーソル位置の文字列を拾う
   let urichr  =  "[-0-9a-zA-Z;/?@&=+$,_.!~*'()%:#]"
   let pathchr =  "[-0-9a-zA-Z;/?@&=+$,_.!~*'()%:{}[\\]\\\\]"
-  let pathhead = '\([A-Za-z]:[/\\]\|\~[/\\]\|\\\{2}\)'
+  let pathhead = '\([A-Za-z]:[/\\]\|\~[/\\]\)'
   let urireg = '\(\(http\|https\|file\|ftp'.g:openuri_schemereg.'\)://\|'.pathhead.'\)'
   let [lnum, colf] = searchpos(urireg, 'nbc', line('.'))
   if colf == 0 && lnum == 0

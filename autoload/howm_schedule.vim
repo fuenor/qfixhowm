@@ -2049,6 +2049,7 @@ function! QFixHowmSwitchActionLock(list, ...)
       let cpattern = strftime('['.s:hts_dateTime.'].')
     endif
     let prevcol = (a:0 == 0 ? start : col('.'))
+    let nr = strlen(substitute(pattern, '.', '.', 'g'))
     return ":call cursor(".prevline.",".start.")\<CR>:exec 'normal! c".nr."l".cpattern."'\<CR>:call cursor(".prevline.",".prevcol.")\<CR>"
   endfor
   return "\<CR>"

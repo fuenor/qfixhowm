@@ -6,10 +6,31 @@
 let s:Version = 1.00
 scriptencoding utf-8
 
-"  Usage:
-"    let qflist = qfixlist#search('^=', search_path, 'mtime', 0, 'utf-8', '**/*')
-"    call qfixlist#copen(qflist, search_path)
-"    call qfixlist#open(qflist, search_path)
+" What Is This:
+"   This plugin is grep wrapper.
+"
+" Install:
+"   Put this file and mygrep.vim into your runtime directory.
+"     > vimfiles/plugin or .vim/plugin
+"   (*) addtional myqfix.vim
+"
+"  Usage: qfixlist#grep(pattern, path, filepattern, fileencoding)
+"
+"    " **/ means recursive
+"    :let qflist = qfixlist#grep('^=', '~/usr/txt', '**/*', 'utf-8')
+"    " quickfix
+"    :call qfixlist#copen(qflist, search_path)
+"    " qfixlist window
+"    :call qfixlist#open(qflist, search_path)
+"
+"    also you can use setqflist()
+"
+"    addtinal options
+"    | function     | option                     |
+"    | Grep         | :let MyGrep_Regexp     = 1 |
+"    | FGrep        | :let MyGrep_Regexp     = 0 |
+"    | Ignorecase   | :let MyGrep_Ignorecase = 1 |
+"    | Recursive    | :let MyGrep_Recursive  = 1 |
 
 "=============================================================================
 if exists('disable_QFixList') && disable_QFixList == 1
@@ -37,6 +58,10 @@ let g:QFixList_version = s:Version
 if !has('quickfix')
   finish
 endif
+
+function! qfixlist#grep(pattern, dir, file, fenc)
+  return qfixlist#search(a:pattern, a:dir, '', 0, a:fenc, a:file)
+endfunction
 
 function! qfixlist#search(pattern, dir, cmd, days, fenc, file)
   let cmd = a:cmd
@@ -517,9 +542,4 @@ function! s:Cmd_RD(cmd, fline, lline)
   endfor
   return 1
 endfunction
-
-finish
-let qflist = qfixlist#search('^=', howm_dir, 'mtime', 0, 'utf-8', '**/*')
-call qfixlist#copen(qflist, howm_dir)
-call qfixlist#open(qflist, howm_dir)
 

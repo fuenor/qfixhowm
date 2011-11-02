@@ -28,6 +28,12 @@ if exists('g:fudist') && g:fudist
   let s:debug = 1
 endif
 
+" 表示にQuickFixではなくロケーションリストを使用する
+" 実際にはQFixMemoだけでなくQFixWin全てに影響するので注意
+if !exists('g:qfixmemo_use_location_list')
+  let g:qfixmemo_use_location_list = 0
+endif
+
 if !exists('g:qfixmemo_dir')
   let g:qfixmemo_dir           = '~/qfixmemo'
 endif
@@ -871,6 +877,9 @@ function! qfixmemo#Init()
   endif
   if g:qfixmemo_use_howm_schedule
     call howm_schedule#Init()
+  endif
+  if g:qfixmemo_use_location_list
+    let g:QFix_UseLocationList = g:qfixmemo_use_location_list
   endif
   call qfixmemo#MRUInit()
   call qfixmemo#LoadKeyword()
@@ -1776,7 +1785,7 @@ if !exists('g:qfixmemo_grep_title')
 endif
 
 function! s:grep(pattern)
-  let qflist = qfixlist#search(a:pattern, g:qfixmemo_dir, '', 0, g:qfixmemo_fileencoding, '**/*')
+  let qflist = qfixlist#grep(a:pattern, g:qfixmemo_dir, '**/*', g:qfixmemo_fileencoding)
   call qfixlist#copen(qflist, g:qfixmemo_dir)
 endfunction
 

@@ -2142,7 +2142,7 @@ function! qfixmemo#Cmd_RD(cmd) range
   if a:cmd == 'Delete'
     let mes = "!!!Delete file(s)"
   else
-    let mes = "!!!Remove to (~qfixmemo_dir)"
+    let mes = printf("!!!Remove to (%s)", g:qfixmemo_dir)
   endif
   let choice = confirm(mes, "&Yes\n&Cancel", 2, "W")
   if choice != 1

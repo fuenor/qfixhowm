@@ -22,7 +22,7 @@ scriptencoding utf-8
 " let QFixMRU_RootDir  = '~/mruroot'
 "
 " :QFixMRU {basedir}
-" :QFixMRU all
+" :QFixMRU /:all
 "=============================================================================
 if exists('disable_QFixMRU') && disable_QFixMRU == 1
   finish
@@ -159,9 +159,11 @@ function! QFixMRU(...)
   endif
   for index in range (1, a:0)
     if a:{index} == '^\s*$'
-    elseif a:{index} =~ '^clear$'
+    elseif a:{index} =~ '^/:clear$'
       call QFixMRUClear()
-    elseif a:{index} =~ '^all$'
+    elseif a:{index} =~ '^/:dir$'
+      let dirmode = 1
+    elseif a:{index} =~ '^/:all$'
       let dirmode = 0
       let entries = 0
       let basedir = g:QFixMRU_BaseDir

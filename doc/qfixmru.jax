@@ -58,7 +58,7 @@ MRUを表示するにはQFixMRUを実行します。
 :QFixMRU {basedir}
 
 登録されている全MRUリストを表示するにはallを指定します。
-:QFixMRU all
+:QFixMRU /:all
 
 4.1 使用例
 

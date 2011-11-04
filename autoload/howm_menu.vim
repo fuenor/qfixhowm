@@ -550,7 +550,8 @@ function! s:MenuCmd_J()
 endfunction
 
 function! HowmMenuClose()
-  if winnr('$') == 1 || (winnr('$') == 2 && g:QFix_Win > 0)
+  QFixPclose
+  if winnr('$') == 1
     exec 'silent! b#'
     return
   endif
@@ -578,6 +579,7 @@ function! s:BufWinEnterMenu(preview, head)
   exe 'set ft='.g:qfixmemo_filetype
   call qfixmemo#Syntax()
   runtime! syntax/howm_schedule.vim
+  syn match txtUrl 'sche://'
   syn region QFMenuSButton start=+%"\zs+ end=+[^"]\+\ze"\[+ end='$'
   syn region QFMenuButton  start=+"\[\zs+ end=+[^\]]\+\ze\(\s\|]\)+ end='$'
   exe 'syn match mqfFileName "^'.a:head.'[^|]*"'.' nextgroup=qfSeparator'

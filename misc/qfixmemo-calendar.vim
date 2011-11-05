@@ -25,7 +25,7 @@ endif
 " calendar.vimで使う休日定義ファイル
 " https://sites.google.com/site/fudist/Home/qfixhowm#downloads
 if !exists('g:calendar_holidayfile')
-  " let g:calendar_holidayfile = '~/howm/Sche-Hd-0000-00-00-000000.howm'
+  " let g:calendar_holidayfile = '~/qfixmemo/Sche-Hd-0000-00-00-000000.howm'
   let g:calendar_holidayfile = ''
 endif
 " 休日サインの設定
@@ -41,8 +41,8 @@ endif
 "
 "  Intro:
 "
-"  howm-calendar.vimはQFixMemoをカレンダー(calendar.vim)と連携させるためのプラ
-"  グインです。
+"  qfixmemo-calendar.vimはQFixMemoをカレンダー(calendar.vim)と連携させるための
+"  プラグインです。
 "  またcalendar.vimで休日が強調表示されないのですが、QFixMemoの休日定義ファイ
 "  ルを利用して休日をカレンダー上で強調表示することもできます。
 "  なお休日の強調表示は本プラグイン単独で行うので、QFixMemoは特に必要としませ
@@ -67,7 +67,7 @@ endif
 "    適当なディレクトリにコピーした後、以下を .vimrcへ追加してください。
 "
 "      " calendar.vimで使う休日定義ファイル(パス等は環境に合わせてください)
-"      let calendar_holidayfile = '~/howm/Sche-Hd-0000-00-00-000000.howm'
+"      let calendar_holidayfile = '~/qfixmemo/Sche-Hd-0000-00-00-000000.howm'
 "
 "    以降はサインが次の表のように表示されます。
 "
@@ -84,8 +84,8 @@ endif
 "      変更しているのでCalendarPost()も適切に変更する必要があります。
 "
 "  2.1 休日サインのシンタックス表示
-"     howm-calendar.vimで休日の強調表示を有効にして:Calendarを実行すると若干表
-"     示が変わって、大抵の環境では休日が赤く表示されていると思います。
+"     qfixmemo-calendar.vimで休日の強調表示を有効にして:Calendarを実行すると若
+"     干表示が変わって、大抵の環境では休日が赤く表示されていると思います。
 "     これはCalendarPost()で休日のサイン(@ #)をCalSundayに変更し、CalSundayを
 "     WarningMsgに変更しているからです。
 "     気に入らない場合は次を設定して無効化してください。

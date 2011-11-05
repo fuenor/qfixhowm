@@ -57,6 +57,10 @@ endif
 if !exists('g:qfixmemo_forceencoding')
   let g:qfixmemo_forceencoding = 1
 endif
+" BOMを自動変換
+if !exists('g:qfixmemo_nobomb')
+  let g:qfixmemo_nobomb = 1
+endif
 
 " QFixMemoのシンタックスハイライト設定
 " 0001 : タイトル行
@@ -644,8 +648,31 @@ function! s:BufEnter()
   endif
   call QFixMemoBufEnterPre()
 
-  if g:qfixmemo_forceencoding && &fenc != g:qfixmemo_fileencoding
-    exe 'edit! ++enc='.g:qfixmemo_fileencoding.' ++ff='.g:qfixmemo_fileformat
+  if &readonly == 0 && !exists('b:qfixmemo_fenc')
+    let b:qfixmemo_fenc = &fenc
+    if g:qfixmemo_forceencoding && &fenc != g:qfixmemo_fileencoding
+      let saved_ft = &filetype
+      let saved_syn = &syntax
+      exe 'edit! ++enc='.g:qfixmemo_fileencoding.' ++ff='.g:qfixmemo_fileformat
+      if &readonly
+        edit!
+        let mes= "Invalid qfixmemo_fileencording (".&fenc.")\nConvert to ".g:qfixmemo_fileencoding."?"
+        let choice = g:qfixmemo_forceencoding == 2 ? 1 : confirm(mes, "&Yes\n&Cancel", 1, "W")
+        if choice == 1
+          exec 'set fenc='.g:qfixmemo_fileencoding
+          exec 'set ff='.g:qfixmemo_fileformat
+          write!
+        endif
+      endif
+      let &filetype=saved_ft
+      let &syntax=saved_syn
+    endif
+    if &bomb && g:qfixmemo_nobomb
+      echohl ErrorMsg
+      redraw|echom 'QFixMemo : BOM detected. set nobomb'
+      echohl None
+      set nobomb
+    endif
   endif
   call s:filetype()
   " フォールディングを設定
@@ -808,7 +835,7 @@ function! s:filetype()
   if &filetype != '' && stridx(file, pdir) == 0
     return
   endif
-  if exists('b:qfixmemo_filetype') && b:qfixmemo_filetype == &filetype
+  if exists('b:qfixmemo_filetype')
     return
   endif
   if g:qfixmemo_filetype != ''

@@ -45,6 +45,7 @@ CONTENTS                                                *qfixmemo-contents*
   12.7 calendar.vim                                     |qfixmemo-calendar|
   12.8 URIを開く                                        |qfixmemo-uri|
     12.8.1 ファイルリンク                               |qfixmemo-link|
+  12.9 ロケーションリスト                               |qfixmemo-window|
 
 ==============================================================================
 1. Intro																								*qfixmemo-intro*
@@ -916,6 +917,9 @@ qfixmemo/misc/qfixmemo-calendar.vim をpluginディレクトリにコピーし�
   let calendar_action = "QFixMemoCalendarDiary"
   let calendar_sign   = "QFixMemoCalendarSign"
 
+またQFixMemo/QFixHowmの予定・TODO形式を利用した休日の強調表示も可能です。
+詳しくはqfixmemo-calendar.vim内のドキュメントを参照してください。
+
 ------------------------------------------------------------------------------
 12.8 URIを開く																					*qfixmemo-uri*
 
@@ -923,4 +927,48 @@ QFixMemoではURLや画像ファイル等のリンクを記述すると自動で
 すと外部ブラウザで開くことができます。
 詳しいことは doc/openuri.jaxを参照してください。
 
+------------------------------------------------------------------------------
+12.9 ロケーションリスト																	*qfixmemo-window*
+
+Vimで作業中にmakeなどでQuickFixウィンドウを使用していると、QFixMemo/QFixGrepで
+はQuickFixウィンドウを使用したくない場面もあるかもしれません。
+makeの結果を見ながらソースをgrepして表示したい場合などです。
+そのような場合はQFixMemo/QFixGrep側をロケーションリストを使用して結果を表示す
+るように変更するという方法があります。
+キーマップからも切替可能なので必要に応じて変更してみてください。
+
+QuickFixウィンドウとロケーションリストはどちらも機能的には同じものですが Vimと
+対応しているのが QuickFixウィンドウで、ウィンドウと対応しているのがロケーショ
+ンリストです。
+このためロケーションリストは対応したウィンドウと同時に破棄される一時的なウィン
+ドウ(バッファ)といえます。
+詳しくは|quickfix|や|location-list| を参照してください。
+ >
+  " QFixMemoで使用するロケーションリストの指定
+  let qfixmemo_use_location_list = 0
+<
+| カウント |     QFixMemo       |     QFixQFixGrep   |
+|  0(なし) | QuickFixウィンドウ | QuickFixウィンドウ |
+|    1     | ロケーションリスト | QuickFixウィンドウ |
+|    2     | ロケーションリスト | ロケーションリスト |
+|    3     | QuickFixウィンドウ | ロケーションリスト |
+<Leader>0 <Leader>1 ...でカウント指定して使用するウィンドウを変更可能です。
+カウントはqfixmemo_use_location_listの値と対応しています。
+
+ウィンドウの開き方も個別に指定可能です。
+設定していない場合はデフォルトが使用されます。
+ >
+  " ウィンドウコマンド(デフォルト)
+  let QFix_CopenCmd = ''
+  " QuickFixウィンドウコマンド指定
+  let QFix_CopenCmd0 = 'rightbelow'
+  " ロケーションリストコマンド指定
+  let QFix_CopenCmd1 = 'vertical botright'
+<
+QFixMemoで使用しないウィンドウ(リスト)は|:copen|か|:lopen|で開いてください。
+
+なおロケーションリストで使用する場合、QuickFixウィンドウとは挙動がウィンドウ周
+りで若干異なることがあります。
+
   vim:tw=78:ts=2:syn=qfix_memo.ezotl.help:norl:foldmethod=indent:nofoldenable
+

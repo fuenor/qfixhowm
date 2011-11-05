@@ -315,6 +315,7 @@ function! UGrep(cmd, args, mode, addflag)
     endif
     return Grep('', a:mode, title, a:addflag)
   endif
+  call s:save()
   let addflag = a:addflag
   let g:QFix_SearchPath = getcwd()
   if a:mode
@@ -332,7 +333,7 @@ function! UGrep(cmd, args, mode, addflag)
   call QFixPclose()
   call QFixCclose()
   if g:QFix_SearchPath != ''
-"    silent! exec 'lchdir ' . escape(g:QFix_SearchPath, ' ')
+  " silent! exec 'lchdir ' . escape(g:QFix_SearchPath, ' ')
   endif
   if addflag
     let g:QFix_SearchPath = disppath
@@ -344,7 +345,6 @@ function! UGrep(cmd, args, mode, addflag)
   endif
   let cmd = cmd.' '. a:args
   exec cmd
-  let g:QFix_SelectedLine = 1
   let g:QFix_SearchResult = []
   let save_qflist = QFixGetqflist()
   if empty(save_qflist)
@@ -354,8 +354,10 @@ function! UGrep(cmd, args, mode, addflag)
       let g:QFix_Height = g:QFix_HeightDefault
     endif
     QFixCopen
+    call cursor(1, 1)
     redraw | echo ''
   endif
+  call s:restore()
 endfunction
 
 """"""""""""""""""""""""""""""
@@ -403,11 +405,12 @@ function! Grep(word, mode, title, addflag)
     let filepattern = g:MyGrep_FilePattern
   endif
   if extpattern == ''
-    let filepattern = input("file pattern : ", filepattern)
+    let filepattern = input("filepattern : ", filepattern)
   else
     let filepattern = extpattern
   endif
   if filepattern == '' | return | endif
+  call s:save()
   let @/ = '\V'.pattern
   call histadd('/', @/)
   call histadd('@', pattern)
@@ -443,7 +446,7 @@ function! Grep(word, mode, title, addflag)
   call QFixCclose()
   call MyGrep(pattern, searchPath, filepattern, fenc, addflag)
   if g:QFix_SearchPath != ''
-"    silent! exec 'lchdir ' . escape(g:QFix_SearchPath, ' ')
+  " silent! exec 'lchdir ' . escape(g:QFix_SearchPath, ' ')
   endif
   let save_qflist = QFixGetqflist()
   if empty(save_qflist)
@@ -457,6 +460,7 @@ function! Grep(word, mode, title, addflag)
       let g:QFix_SearchPath = disppath
     endif
     QFixCopen
+    call cursor(1, 1)
     redraw | echo ''
   endif
   if g:MyGrep_ErrorMes != ''
@@ -464,7 +468,8 @@ function! Grep(word, mode, title, addflag)
     redraw | echo g:MyGrep_ErrorMes
     echohl None
   endif
-"  silent! exec 'lchdir ' . prevPath
+  " silent! exec 'lchdir ' . prevPath
+  call s:restore()
 endfunction
 
 function! s:SetFileEncoding()
@@ -472,6 +477,24 @@ function! s:SetFileEncoding()
   let s:MyGrep_Fenc = input(mes, s:MyGrep_Fenc)
 endfunction
 
+function! s:restore()
+  if !exists('g:MyGrep_UseLocationList') || s:QFix_UseLocationList == g:MyGrep_UseLocationList
+    return
+  endif
+  let g:QFix_Win             = s:QFix_Win
+  let g:QFix_SearchPath      = s:QFix_SearchPath
+  let g:QFix_UseLocationList = s:QFix_UseLocationList
+endfunction
+
+function! s:save()
+  let s:QFix_UseLocationList = g:QFix_UseLocationList
+  if !exists('g:MyGrep_UseLocationList') || g:QFix_UseLocationList == g:MyGrep_UseLocationList
+    return
+  endif
+  let s:QFix_Win             = g:QFix_Win
+  let s:QFix_SearchPath      = g:QFix_SearchPath
+  let g:QFix_UseLocationList = g:MyGrep_UseLocationList
+endfunction
 
 """"""""""""""""""""""""""""""
 "バッファのみgrep
@@ -494,6 +517,7 @@ function! BGrep(word, mode, addflag)
     let pattern = input(mes, pattern)
   endif
   if pattern == '' | return | endif
+  call s:save()
   if a:addflag && g:QFix_SearchPath != ''
     let disppath = g:QFix_SearchPath
   else
@@ -507,7 +531,7 @@ function! BGrep(word, mode, addflag)
   let save_cursor = getpos('.')
   if a:addflag == 0
     let ccmd = g:QFix_UseLocationList ? 'lexpr ""' : 'cexpr ""'
-    exec ccmd
+    silent! exec ccmd
   endif
   call QFixPclose()
   call QFixCclose()
@@ -517,7 +541,6 @@ function! BGrep(word, mode, addflag)
   if a:addflag
     let g:QFix_SearchPath = disppath
   endif
-  let g:QFix_SelectedLine = 1
   let g:QFix_SearchResult = []
   let save_qflist = QFixGetqflist()
   if empty(save_qflist)
@@ -527,8 +550,10 @@ function! BGrep(word, mode, addflag)
       let g:QFix_Height = g:QFix_HeightDefault
     endif
     QFixCopen
+    call cursor(1, 1)
     redraw | echo ''
   endif
+  call s:restore()
 endfunction
 
 """"""""""""""""""""""""""""""
@@ -582,6 +607,9 @@ if !exists('g:QFix_UseLocationList')
   let g:QFix_UseLocationList = 0
 endif
 
+if !exists('g:MyGrep_UseLocationList')
+  " let g:MyGrep_UseLocationList = 0
+endif
 let g:MyGrep_cmdopt = ''
 "一時的にvimgrepを使用したいときに非0。使用後リセットされる。
 let g:MyGrep_UseVimgrep = 0
@@ -1093,7 +1121,6 @@ endif
 """"""""""""""""""""""""""""""
 function! QFixEnable(path)
   let g:QFix_SearchPath = a:path
-  let g:QFix_SelectedLine = 1
 endfunction
 
 """"""""""""""""""""""""""""""
@@ -1155,6 +1182,7 @@ function! CGrep(mode, bang, addflag,  arg)
     endif
     return UGrep('grep', pattern, a:bang, addflag)
   endif
+  call s:save()
   if mode
     let g:MyGrep_Regexp = 0
   endif
@@ -1169,7 +1197,9 @@ function! CGrep(mode, bang, addflag,  arg)
       let g:QFix_Height = g:QFix_HeightDefault
     endif
     QFixCopen
+    call cursor(1, 1)
   endif
+  call s:restore()
 endfunction
 
 let s:QFixGrep_Helpfile = 'QFixGrepHelp'

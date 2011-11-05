@@ -13,7 +13,6 @@ endif
 if exists('g:QFixHowm_Convert') && g:QFixHowm_Convert == 0
   finish
 endif
-
 "-----------------------------------------------------------------------------
 " このファイルでオプションコンバートを行っているため、QFixMemoはQFixHowmとオプ
 " ション互換のプラグインとして動作しています。
@@ -24,17 +23,17 @@ endif
 " " QFixHowmとのオプションコンバートを行わない
 " let QFixHowm_Convert = 0
 "
-" コンバートを切っても基本的なコマンドや動作はほぼ同一に扱えます。
-" 予定・TODOについてはコンバートを切ってもQFixHowmのオプションがそのまま適用さ
-" れます。
-" doc/howm_schedule.jax
-"
-" ・ドキュメントについては以下を参照してください。
+" コンバートを切っても基本的なコマンドや動作はQFixMemoとしてほぼ同一に扱えます。
+" QFixMemoのドキュメントについては以下を参照してください。
 " doc/qfixmemo.jax
-" (Vimで閲覧するとヘルプとしてハイライトされます)
 " http://github.com/fuenor/qfixmemo/blob/master/doc/qfixmemo.jax
 "
-" ・QFixHowm Ver.3の実装概要については以下を参照して下さい
+" 予定・TODOについてはコンバートを切ってもQFixHowmのオプションがそのまま適用さ
+" れます。
+" http://sites.google.com/site/fudist/Home/qfixhowm/howm-reminder
+" doc/howm_schedule.jax
+"
+" QFixHowm Ver.3の実装概要については以下を参照して下さい
 " https://sites.google.com/site/fudist/Home/qfixdev/ver3
 "
 " CAUTION: ファイルの読み込み順がファイル名順である事に依存しています。
@@ -114,6 +113,10 @@ endfunction
 """"""""""""""""""""""""""""""
 " オプションコンバート
 """"""""""""""""""""""""""""""
+if exists('g:QFixHowm_UseLocationList')
+  let g:qfixmemo_use_location_list = g:QFixHowm_UseLocationList
+endif
+
 let s:howmsuffix         = 'howm'
 " 常にqfixmemoファイルとして扱うファイルの正規表現
 let g:qfixmemo_isqfixmemo_regxp = '\c\.'.s:howmsuffix.'$'
@@ -434,6 +437,9 @@ else
   unlet g:mapleader
 endif
 
+""""""""""""""""""""""""""""""
+" misc
+""""""""""""""""""""""""""""""
 " <CR>アクション
 function! QFixMemoUserModeCR(...)
   call howm_schedule#Init()
@@ -454,14 +460,42 @@ if !exists('g:howm_clink_pattern')
   let g:howm_clink_pattern = '<<<'
 endif
 function! QFixMemoRebuildKeyword(dir, fenc)
-  silent! cexpr ''
+  let saved_sq = getloclist(0)
   let file = g:howm_dir
   let file = g:QFixHowm_MenuDir == '' ? g:howm_dir : g:QFixHowm_MenuDir
   let file = expand(file) . '/' . g:QFixHowm_Menufile
-  silent! exec 'vimgrep /\('.g:howm_clink_pattern.'\|'.'\[\[[^\]]\+\]\]'.'\)/j '. escape(file, ' ')
-  let qflist = getqflist()
-  silent! cexpr ''
+  silent! exe 'lvimgrep /\('.g:howm_clink_pattern.'\|'.'\[\[[^\]]\+\]\]'.'\)/j '. escape(file, ' ')
+  let qflist = getloclist(0)
+  call setloclist(0, saved_sq)
   return qflist
+endfunction
+
+" ヘルプ
+function! QFixHowmHelp()
+  call qfixmemo#Init()
+  silent! exec 'split '
+  let file = escape(expand(g:qfixmemo_dir), ' ')
+  let file .= '/' . 'QFixMemoHelp'
+  silent! exec 'edit ' . file
+  setlocal buftype=nofile
+  setlocal bufhidden=hide
+  setlocal noswapfile
+  call myhowm_msg#HelpInit()
+  call setline(1, g:QFixHowmHelpList)
+  call cursor(1, 1)
+  call qfixmemo#Syntax()
+  setlocal nomodifiable
+  nnoremap <silent> <buffer> <CR> :call QFixMemoUserModeCR()<CR>
+endfunction
+
+" calendar.vim
+function! QFixHowmCreateNewFile(...)
+  if a:0
+    let hfile = a:1
+  else
+    let hfile = g:qfixmemo_diary
+  endif
+  call qfixmemo#Edit(hfile)
 endfunction
 
 " フォールディングレベル計算
@@ -484,33 +518,5 @@ function! QFixMemoSetFolding()
   else
     setlocal foldexpr=getline(v:lnum)=~g:QFixHowm_FoldingPattern?'>1':'1'
   endif
-endfunction
-
-" ヘルプ
-function! QFixHowmHelp()
-  call qfixmemo#Init()
-  silent! exec 'split '
-  let file = escape(expand(g:qfixmemo_dir), ' ')
-  let file .= '/' . 'QFixMemoHelp'
-  silent! exec 'edit ' . file
-  setlocal buftype=nofile
-  setlocal bufhidden=hide
-  setlocal noswapfile
-  call myhowm_msg#HelpInit()
-  call setline(1, g:QFixHowmHelpList)
-  call cursor(1,1)
-  call qfixmemo#Syntax()
-  setlocal nomodifiable
-  nnoremap <silent> <buffer> <CR> :call QFixMemoUserModeCR()<CR>
-endfunction
-
-" calendar.vim
-function! QFixHowmCreateNewFile(...)
-  if a:0
-    let hfile = a:1
-  else
-    let hfile = g:qfixmemo_diary
-  endif
-  call qfixmemo#Edit(hfile)
 endfunction
 

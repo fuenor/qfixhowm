@@ -4,10 +4,9 @@
 "                 http://sites.google.com/site/fudist/Home  (Japanese)
 "  Last Modified: 0000-00-00 00:00
 "=============================================================================
-let s:Version = 0.01
+let s:Version = 1.00
 scriptencoding utf-8
 
-"=============================================================================
 if exists('g:disable_qfixmemo') && g:disable_qfixmemo == 1
   finish
 endif
@@ -26,12 +25,6 @@ let g:qfixmemo_version = s:Version
 let s:debug = 0
 if exists('g:fudist') && g:fudist
   let s:debug = 1
-endif
-
-" 表示にQuickFixではなくロケーションリストを使用する
-" 実際にはQFixMemoだけでなくQFixWin全てに影響するので注意
-if !exists('g:qfixmemo_use_location_list')
-  let g:qfixmemo_use_location_list = 0
 endif
 
 if !exists('g:qfixmemo_dir')
@@ -365,6 +358,13 @@ silent! function QFixMemoKeymap()
     silent! nnoremap <silent> <unique> <Leader>,     :<C-u>call qfixmemo#OpenMenu("cache")<CR>
     silent! nnoremap <silent> <unique> <Leader>r,    :<C-u>call qfixmemo#OpenMenu()<CR>
   endif
+
+  silent! nnoremap <silent> <unique> <Leader>. :<C-u>call qfixmemo#LocationMode()<CR>
+  silent! nnoremap <silent> <unique> <Leader>0 :<C-u>call qfixmemo#LocationMode(0)<CR>
+  silent! nnoremap <silent> <unique> <Leader>1 :<C-u>call qfixmemo#LocationMode(1)<CR>
+  silent! nnoremap <silent> <unique> <Leader>2 :<C-u>call qfixmemo#LocationMode(2)<CR>
+  silent! nnoremap <silent> <unique> <Leader>3 :<C-u>call qfixmemo#LocationMode(3)<CR>
+  silent! nnoremap <silent> <unique> <Leader>4 :<C-u>call qfixmemo#LocationMode(0)<CR>
 endfunction
 
 if g:qfixmemo_use_howm_schedule
@@ -875,11 +875,9 @@ function! qfixmemo#Init()
   if s:init
     return
   endif
+  call qfixmemo#LocationMode(g:qfixmemo_use_location_list, 'silent')
   if g:qfixmemo_use_howm_schedule
     call howm_schedule#Init()
-  endif
-  if g:qfixmemo_use_location_list
-    let g:QFix_UseLocationList = g:qfixmemo_use_location_list
   endif
   call qfixmemo#MRUInit()
   call qfixmemo#LoadKeyword()
@@ -1245,7 +1243,7 @@ function! qfixmemo#ListMru()
     let g:QFixMRU_Entries = count
   endif
   redraw | echo 'QFixMemo : Read MRU...'
-  call QFixMRU(g:qfixmemo_dir)
+  call QFixMRU(g:qfixmemo_dir, '/:dir')
 endfunction
 
 " 最近編集されたファイル内のエントリ一覧
@@ -1764,12 +1762,17 @@ function! qfixmemo#Grep(...)
   endif
   let pattern = input(title, pattern)
   if pattern != ''
+    let file = '*'
+    let file = input('filepattern : ', file)
+    if file == ''
+      return
+    endif
     let @/ = pattern
     if fixmode
       let g:MyGrep_Regexp = 0
       let @/ = '\V'.pattern
     endif
-    call s:grep(pattern)
+    call s:grep(pattern, file, fixmode)
     call histadd('/', '\V' . @/)
     call histadd('@', pattern)
   endif
@@ -1784,8 +1787,9 @@ if !exists('g:qfixmemo_grep_title')
   let g:qfixmemo_grep_title = 'QFixMemo %MODE%Grep : '
 endif
 
-function! s:grep(pattern)
-  let qflist = qfixlist#grep(a:pattern, g:qfixmemo_dir, '**/*', g:qfixmemo_fileencoding)
+function! s:grep(pattern, file, fixmode)
+  let g:MyGrep_Regexp = !a:fixmode
+  let qflist = qfixlist#grep(a:pattern, g:qfixmemo_dir, '**/'.a:file, g:qfixmemo_fileencoding)
   call qfixlist#copen(qflist, g:qfixmemo_dir)
 endfunction
 
@@ -1824,7 +1828,7 @@ function! qfixmemo#EzOutline(...)
   exe 'runtime! syntax/'    .syn.'.vim'
 endfunction
 
-function s:GetOptionWithID(opt, id)
+function! s:GetOptionWithID(opt, id)
   exe 'let opt='.a:opt.(exists(a:opt.a:id) ? string(a:id) : '')
   return opt
 endfunction
@@ -1864,9 +1868,9 @@ function! qfixmemo#SubMenu(...)
   let basedir = s:submenu_basedir
   let l:count = a:0 && a:1 ? a:1 : count
   let prevPath = escape(getcwd(), ' ')
-  silent! exec 'lchdir ' . escape(expand(basedir), ' ')
+  silent! exe 'lchdir ' . escape(expand(basedir), ' ')
   let file = fnamemodify(s:qfixmemo_submenu_title, ':p')
-  silent! exec 'lchdir ' . prevPath
+  silent! exe 'lchdir ' . prevPath
   let bufnum = bufnr(file)
   let winnum = bufwinnr(file)
 
@@ -1902,9 +1906,9 @@ function! qfixmemo#SubMenu(...)
     exe 'let s:qfixmemo_submenu_title = g:qfixmemo_submenu_title'.l:count
     let s:sb_id = l:count
   endif
-  silent! exec 'lchdir ' . escape(expand(basedir), ' ')
+  silent! exe 'lchdir ' . escape(expand(basedir), ' ')
   let file = fnamemodify(s:qfixmemo_submenu_title, ':p')
-  silent! exec 'lchdir ' . prevPath
+  silent! exe 'lchdir ' . prevPath
   call s:OpenQFixSubWin(file, s:sb_id)
 endfunction
 
@@ -1932,7 +1936,6 @@ function! s:OpenQFixSubWin(file, id)
             exe 'au BufEnter '.fnamemodify(file, ':t').' normal! '.winsize ."\<C-W>_"
           endif
         endif
-        " TODO: BufWinLeaveによる不要なロードを修正
         exe 'au BufWinLeave,VimLeave '.fnamemodify(file, ':t').' call <SID>SubMenuBufAutoWrite()'
       augroup END
   else
@@ -1985,6 +1988,7 @@ function! s:SubMenuBufAutoWrite(...)
     call mkdir(dir, 'p')
   endif
   call writefile(str, file)
+  call qfixmemo#AddKeyword()
 endfunction
 
 " サブメニューでアウトラインを使用する
@@ -2364,10 +2368,15 @@ function! qfixmemo#RebuildKeyword()
   if exists('g:howm_clink_pattern')
     let pattern = '\('.g:howm_clink_pattern.'\|'.pattern.'\)'
   endif
-  let file = expand(g:qfixmemo_submenu_title)
-  silent! exe 'vimgrep /'.pattern.'/j '. escape(file, ' ')
-  call extend(extlist, getqflist())
-  silent! cexpr ''
+
+  let prevPath = escape(getcwd(), ' ')
+  silent! exe 'lchdir ' . escape(expand(s:submenu_basedir), ' ')
+  let file = fnamemodify(g:qfixmemo_submenu_title, ':p')
+  let saved_sq = getloclist(0)
+  silent! exe 'lvimgrep /'.pattern.'/j '. escape(file, ' ')
+  call extend(extlist, getloclist(0))
+  call setloclist(0, saved_sq)
+  silent! exe 'lchdir ' . prevPath
 
   for n in range(len(extlist))
     if !exists('extlist[n]["filename"]')
@@ -2666,5 +2675,33 @@ function! qfixmemo#VimEnterCmd()
     endif
   endif
   call feedkeys(cmd, 't')
+endfunction
+
+""""""""""""""""""""""""""""""
+" 表示にQuickFixではなくロケーションリストを使用する
+if !exists('g:qfixmemo_use_location_list')
+  let g:qfixmemo_use_location_list = 0
+endif
+
+function! qfixmemo#LocationMode(...)
+  let mode = a:0 ? a:1 : count
+  let g:qfixmemo_use_location_list = mode
+  if mode == 0
+    let g:QFix_UseLocationList   = 0
+    let g:MyGrep_UseLocationList = 0
+  elseif mode == 1
+    let g:QFix_UseLocationList   = 1
+    let g:MyGrep_UseLocationList = 0
+  elseif mode == 2
+    let g:QFix_UseLocationList   = 1
+    let g:MyGrep_UseLocationList = 1
+  elseif mode == 3
+    let g:QFix_UseLocationList   = 0
+    let g:MyGrep_UseLocationList = 1
+  endif
+  if a:0 > 1
+    return
+  endif
+  echo printf('QFixWin (%s) : QFixGrep (%s)', (g:QFix_UseLocationList ? 'L' : 'Q'), (g:MyGrep_UseLocationList ? 'L' : 'Q'))
 endfunction
 

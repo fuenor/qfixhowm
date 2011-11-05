@@ -74,9 +74,19 @@ howm_schedule.vim,openuri.vimはautoloadでの読み込みにも対応してい�
   :call QFixHowmSchedule('schedule', howm_dir, howm_fileencoding)
   :call QFixHowmSchedule('todo',     howm_dir, howm_fileencoding)
 
+(実行例) >
+  :call QFixHowmSchedule('schedule', 'c:/temp', 'utf-8')
+
 howm_dirは検索対象ディレクトリ、howm_fileencodingはディレクトリ内のファイルエ
 ンコーディングです。
 'schedule'と'todo'は後述するコマンド <Leader>,y <Leader>,tと対応しています。
+
+QuicFixウィンドウを表示せずにQuicFixリスト取得も可能です。
+>
+  " 検索してQuicFixリスト取得 (qflistはgetqflist()、timeはlocaltime()を参照)
+  let [qflist, time] = QFixHowmScheduleQFList('schedule', 'c:/temp', 'utf-8')
+  " キャッシュされたQuicFixリスト取得 (参照)
+  let [qflist, time] = QFixHowmScheduleCachedQFList('schedule')
 
 ------------------------------------------------------------------------------
 3.1 キーマップ						*howm-schedule-keymap*

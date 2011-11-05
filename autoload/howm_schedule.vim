@@ -2,24 +2,36 @@
 "    Description: howm style scheduler
 "         Author: fuenor <fuenor@gmail.com>
 "                 http://sites.google.com/site/fudist/Home/qfixhowm
-"  Last Modified: 2011-10-18 19:09
+"  Last Modified: 2011-11-01 18:13
 "=============================================================================
-let s:Version = 2.53
+let s:Version = 2.54
 scriptencoding utf-8
 
 "=============================================================================
-"    Description: howmスタイルの予定・TODOを表示
-"                 (必要 mygrep.vim, openuri.vim)
-"                 (推奨 myqfix.vim, /syntax/howm_schedule.vim)
+"    howmスタイルの予定・TODOを表示
+"    (必要 mygrep.vim, openuri.vim)
+"    (推奨 myqfix.vim, /syntax/howm_schedule.vim)
 "
-"                 詳しい使い方は以下のサイトを参照してください。
-"                 http://sites.google.com/site/fudist/Home/qfixhowm/howm-reminder
+"    詳しい使い方は以下のサイトを参照してください。
+"    http://sites.google.com/site/fudist/Home/qfixhowm/howm-reminder
 "
-"                 QFixHowm以外でhowmスタイルの予定・TODOを使用したい場合は
-"                 /doc/howm_schedule.jaxを参照してください。
+"    QFixHowm以外でhowmスタイルの予定・TODOを使用したい場合は
+"    /doc/howm_schedule.jaxを参照してください。
 "
-"                 Ver.2 : let loaded_HowmSchedule = 1 までコピー
+"     autoloadで読み込んでいる場合は howm_schedule#init()が必要です。
+"        :call howm_schedule#init()
+"
+"     予定・TODO表示 (type : 'schedule' or 'todo')
+"        :call QFixHowmSchedule('schedule', 'c:/temp', 'utf-8')
+"
+"     QuicFixウィンドウを表示せずにQuicFixリスト取得も可能です。
+"        " 検索してQuicFixリスト取得 (qflistは getqflist() 参照)
+"        let [qflist, time] = QFixHowmScheduleQFList('schedule', 'c:/temp', 'utf-8')
+"        " キャッシュされたQuicFixリスト取得 (timeは localtime() 参照)
+"        let [qflist, time] = QFixHowmScheduleCachedQFList('schedule')
+"
 "=============================================================================
+" Ver.2 : let loaded_HowmSchedule = 1 までコピー
 
 if exists('disable_MyGrep') && disable_MyGrep == 1
   finish
@@ -43,22 +55,30 @@ if exists('g:fudist') && g:fudist
   let s:debug = 1
 endif
 
+""""""""""""""""""""""""""""""
 " Do you like spagehtti?
 " OK, go ahead. You have been warned!
 
-""""""""""""""""""""""""""""""
-" howmスタイル予定・TODO表示コマンド
-" call QFixHowmSchedule('schedule', 'c:/temp', 'utf-8')
-" type : 'schedule' or 'todo'
-""""""""""""""""""""""""""""""
-function! QFixHowmSchedule(type, dir, fenc, ...)
+function! QFixHowmSchedule(type, dir, fenc)
   let l:howm_dir          = g:howm_dir
   let l:howm_fileencoding = g:howm_fileencoding
   let g:howm_dir          = a:dir
   let g:howm_fileencoding = a:fenc
-  call s:QFixHowmListReminder_(a:type)
+  let mode = a:0 ? a:1 : ''
+  let sq = s:QFixHowmListReminder_(a:type, mode)
   let g:howm_dir          = l:howm_dir
   let g:howm_fileencoding = l:howm_fileencoding
+  return sq
+endfunction
+
+function! QFixHowmScheduleQFList(type, dir, fenc)
+  return QFixHowmSchedule(a:type, a:dir, a:fenc, 'qflist')
+endfunction
+
+function! QFixHowmScheduleCachedQFList(mode)
+  exe 'let time = s:LT_'.a:mode
+  exe 'let sq = s:sq_'.a:mode
+  return [sq, time]
 endfunction
 
 """"""""""""""""""""""""""""""
@@ -393,7 +413,7 @@ function! QFixHowmListReminder(mode)
     endif
   endif
   if exists('*QFixHowmInit') && QFixHowmInit()
-    return
+    return []
   endif
   if a:mode =~ 'menu'
     let saved_sq = getloclist(0)
@@ -405,9 +425,9 @@ function! QFixHowmListReminder(mode)
   return sq
 endfunction
 
-function! s:QFixHowmListReminder_(mode)
+function! s:QFixHowmListReminder_(mode,...)
   if exists('*QFixHowmInit') && QFixHowmInit()
-    return
+    return []
   endif
   let addflag = 0
   let l:howm_dir = g:howm_dir
@@ -486,7 +506,7 @@ function! s:QFixHowmListReminder_(mode)
   let sq = s:QFixHowmSortReminder(sq, a:mode)
   let sq = s:AddTodayLine(sq)
   let sq = s:CnvDayOfWeek(sq)
-  if a:mode == 'menu'
+  if a:mode == 'menu' || (a:0 && a:1 == 'qflist')
     let s:reminder_cache = 0
     return sq
   endif
@@ -498,6 +518,7 @@ function! s:QFixHowmListReminder_(mode)
     redraw | echo ''
     let g:QFix_SearchPath = l:howm_dir
     QFixCopen
+    call cursor(1, 1)
     if g:QFixHowm_SchedulePreview == 0 && g:QFix_PreviewEnable == 1
       let g:QFix_PreviewEnable = -1
     endif
@@ -2320,6 +2341,7 @@ function! QFixHowmCmd_ScheduleList(...) range
     call QFixHowmExportSchedule(schlist)
   else
     QFixCopen
+    call cursor(1, 1)
   endif
   return schlist
 endfunction

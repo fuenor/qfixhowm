@@ -258,6 +258,13 @@ exec 'silent! vnoremap <unique> <silent> '.s:MyGrep_Key.'V  :call VGrep("", -1, 
 exec 'silent! nnoremap <unique> <silent> '.s:MyGrep_Key.'k :MyGrepReadResult<CR>\|:QFixCopen<CR>'
 exec 'silent! nnoremap <unique> <silent> '.s:MyGrep_Key.'H :call QFixGrepHelp()<CR>'
 
+exec 'silent! nnoremap <unique> <silent> '.s:MyGrep_Key.'. :<C-u>call QFixGrepLocationMode()<CR>'
+exec 'silent! nnoremap <unique> <silent> '.s:MyGrep_Key.'0 :<C-u>call QFixGrepLocationMode(0)<CR>'
+exec 'silent! nnoremap <unique> <silent> '.s:MyGrep_Key.'1 :<C-u>call QFixGrepLocationMode(1)<CR>'
+exec 'silent! nnoremap <unique> <silent> '.s:MyGrep_Key.'2 :<C-u>call QFixGrepLocationMode(2)<CR>'
+exec 'silent! nnoremap <unique> <silent> '.s:MyGrep_Key.'3 :<C-u>call QFixGrepLocationMode(3)<CR>'
+exec 'silent! nnoremap <unique> <silent> '.s:MyGrep_Key.'4 :<C-u>call QFixGrepLocationMode(4)<CR>'
+
 autocmd BufWinEnter quickfix exec 'silent! nnoremap <unique> <buffer> <silent> '.s:MyGrep_Key.'w :MyGrepWriteResult<CR>'
 
 """"""""""""""""""""""""""""""
@@ -1080,6 +1087,28 @@ silent! function QFixGetqflist()
   else
     return getqflist()
   endif
+endfunction
+
+"ロケーションリスト設定
+function! QFixGrepLocationMode(...)
+  let mode = a:0 ? a:1 : count
+  if mode == 0
+    let g:QFix_UseLocationList   = 0
+    let g:MyGrep_UseLocationList = 0
+  elseif mode == 1
+    let g:QFix_UseLocationList   = 1
+    let g:MyGrep_UseLocationList = 0
+  elseif mode == 2
+    let g:QFix_UseLocationList   = 1
+    let g:MyGrep_UseLocationList = 1
+  elseif mode == 3
+    let g:QFix_UseLocationList   = 0
+    let g:MyGrep_UseLocationList = 1
+  endif
+  if a:0 > 1
+    return
+  endif
+  echo printf('QFixWin (%s) : QFixGrep (%s)', (g:QFix_UseLocationList ? 'L' : 'Q'), (g:MyGrep_UseLocationList ? 'L' : 'Q'))
 endfunction
 
 "copen代替

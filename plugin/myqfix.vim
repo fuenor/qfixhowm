@@ -163,6 +163,7 @@ endif
 """"""""""""""""""""""""""""""
 silent! nnoremap <unique> <silent> <C-w>, :ToggleQFixWin<CR>
 silent! nnoremap <unique> <silent> <C-w>. :MoveToQFixWin<CR>
+" silent! nnoremap <unique> <silent> <C-w>/ :<C-u>call QFixLocationMode()<CR>
 
 """"""""""""""""""""""""""""""
 " コマンド
@@ -854,6 +855,26 @@ function! QFixToggleHighlight()
   let g:QFix_PreviewFtypeHighlight = !g:QFix_PreviewFtypeHighlight
   let s:QFixPreviewfile = ''
   echo 'FileType syntax : ' . (g:QFix_PreviewFtypeHighlight? 'ON' : 'OFF')
+endfunction
+
+""""""""""""""""""""""""""""""
+" Quickfix/ロケーションリスト切替
+""""""""""""""""""""""""""""""
+function! QFixLocationMode(...)
+  let mode = a:0 ? a:1 : count
+  if mode == 0
+    let g:QFix_UseLocationList   = 0
+    let g:MyGrep_UseLocationList = 0
+  elseif mode == 1
+    let g:QFix_UseLocationList   = 1
+    let g:MyGrep_UseLocationList = 0
+  elseif mode == 2
+    let g:QFix_UseLocationList   = 1
+    let g:MyGrep_UseLocationList = 1
+  elseif mode == 3
+    let g:QFix_UseLocationList   = 0
+    let g:MyGrep_UseLocationList = 1
+  endif
 endfunction
 
 """"""""""""""""""""""""""""""

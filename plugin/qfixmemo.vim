@@ -2686,19 +2686,7 @@ endif
 function! qfixmemo#LocationMode(...)
   let mode = a:0 ? a:1 : count
   let g:qfixmemo_use_location_list = mode
-  if mode == 0
-    let g:QFix_UseLocationList   = 0
-    let g:MyGrep_UseLocationList = 0
-  elseif mode == 1
-    let g:QFix_UseLocationList   = 1
-    let g:MyGrep_UseLocationList = 0
-  elseif mode == 2
-    let g:QFix_UseLocationList   = 1
-    let g:MyGrep_UseLocationList = 1
-  elseif mode == 3
-    let g:QFix_UseLocationList   = 0
-    let g:MyGrep_UseLocationList = 1
-  endif
+  call QFixLocationMode(mode)
   if a:0 > 1
     return
   endif

@@ -874,6 +874,9 @@ function! QFixLocationMode(...)
   elseif mode == 3
     let g:QFix_UseLocationList   = 0
     let g:MyGrep_UseLocationList = 1
+  elseif mode == 4
+    let g:QFix_UseLocationList   = 0
+    let g:MyGrep_UseLocationList = 0
   endif
 endfunction
 

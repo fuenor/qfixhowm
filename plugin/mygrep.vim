@@ -1091,7 +1091,8 @@ endfunction
 
 "ロケーションリスト設定
 function! QFixGrepLocationMode(...)
-  let mode = a:0 ? a:1 : count
+  let mode = a:0 ? a:1 : 0
+  let mode = count ? count : mode
   if mode == 0
     let g:QFix_UseLocationList   = 0
     let g:MyGrep_UseLocationList = 0

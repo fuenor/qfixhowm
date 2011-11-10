@@ -146,9 +146,7 @@ function! QFixMRU(...)
     call QFixMRUWrite(0)
   endif
   if len(s:MruDic) == 0
-    echohl ErrorMsg
-    redraw|echo 'QFixMRU: MRU is empty!'
-    echohl None
+    redraw|echo 'QFixMRU: No mru list'
     return
   endif
   let dirmode = g:QFixMRU_DirMode
@@ -178,6 +176,9 @@ function! QFixMRU(...)
   let sq = QFixMRUPrecheck(s:MruDic, entries, dir)
   call QFixMRUOpen(sq, basedir)
   redraw | echo ''
+  if len(sq) == 0
+    redraw|echo 'QFixMRU: No mru list'
+  endif
 endfunction
 
 function! QFixMRUPrecheck(sq, entries, dir)

@@ -218,10 +218,10 @@ let g:QFix_Resize = 1
 let g:QFix_PreviewEnableLock = 0
 let g:QFix_PreviousPath = getcwd()
 
-let s:tempdir = fnamemodify(tempname(), ':p:h')
 if !exists('g:qfixtempname')
   let g:qfixtempname = tempname()
 endif
+let s:tempdir = fnamemodify(g:qfixtempname, ':p:h')
 silent! function FudistPerf(title)
 endfunction
 function! FudistEnv()

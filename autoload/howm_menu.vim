@@ -40,17 +40,22 @@ endif
 if !exists('g:QFixHowm_MenuKey')
   let g:QFixHowm_MenuKey = 1
 endif
+if !exists('g:QFixHowm_MenuCalendar')
+  let g:QFixHowm_MenuCalendar = 1
+endif
 if !exists('g:HowmFiles_Preview')
   let g:HowmFiles_Preview = 1
 endif
 
 let s:howmsuffix = 'howm'
 let s:filehead = '\(howm\|sche\)://'
+let s:calender_exists = 0
 
 """"""""""""""""""""""""""""""
 augroup HowmFiles
   au!
   au BufWinEnter __HOWM_MENU__ call <SID>BufWinEnterMenu(g:HowmFiles_Preview, s:filehead)
+  au BufWinLeave __HOWM_MENU__ call <SID>BufWinLeaveMenu()
   au BufLeave    __HOWM_MENU__ call <SID>BufLeaveMenu()
   au CursorHold  __HOWM_MENU__ call <SID>PreviewMenu(s:filehead)
   exe 'au BufNewFile,BufRead '.g:QFixHowm_Menufile.' let b:qfixmemo_bufwrite_pre = 0'
@@ -69,6 +74,7 @@ function! s:TogglePreview(...)
 endfunction
 
 function! s:Close()
+  call QFixPclose()
   if winnr('$') == 1 || (winnr('$') == 2 && b:PreviewEnable == 1)
     if tabpagenr('$') > 1
       tabclose
@@ -406,9 +412,20 @@ function! QFixHowmOpenMenu(...)
     call QFixHowmOpenMenuPost()
   endif
   setlocal nomodifiable
+  let g:QFixHowm_MenuKey = search('%".*"\[', 'ncw') ? g:QFixHowm_MenuKey : 0
+  if g:QFixHowm_MenuKey
+    call HowmMenuCmd_()
+  endif
+  silent! call HowmMenuCmd()
   if firstwin
     enew
     b #
+  endif
+  let s:calender_exists = 0
+  if g:QFixHowm_MenuCalendar && bufwinnr('__Calendar__') == -1
+    call qfixmemo#Calendar()
+    let s:calender_exists = bufnr('__Calendar__')
+    wincmd p
   endif
   let g:QFix_Disable = 0
 endfunction
@@ -495,11 +512,16 @@ function! QFixHowmCmd(cmd)
   if g:qfixmemo_grep_cword
     let g:qfixmemo_grep_cword = -1
   endif
-  if a:cmd =~ '^[sg]$'
+  if a:cmd == ' '
+    call qfixmemo#Edit(g:qfixmemo_diary)
+  elseif a:cmd == 'c'
+    call qfixmemo#EditNew()
+  elseif a:cmd == 'u'
+    call qfixmemo#Quickmemo()
+  else
+    let cmd = g:qfixmemo_mapleader.a:cmd
+    call feedkeys(cmd, 'm')
   endif
-  let cmd = g:qfixmemo_mapleader.a:cmd
-  echo 'QFixHowm : exec '.cmd
-  call feedkeys(cmd, 't')
 endfunction
 
 function! s:HowmMenuCR() range
@@ -550,7 +572,7 @@ function! s:MenuCmd_J()
 endfunction
 
 function! HowmMenuClose()
-  QFixPclose
+  call QFixPclose()
   if winnr('$') == 1
     exec 'silent! b#'
     return
@@ -598,12 +620,18 @@ function! s:BufWinEnterMenu(preview, head)
   call QFixAltWincmdMap()
   nnoremap <buffer> <silent> <CR> :<C-u>call <SID>HowmMenuCR()<CR>
   nnoremap <buffer> <silent> <2-LeftMouse> <ESC>:<C-u>call <SID>HowmMenuCR()<CR>
-  if g:QFixHowm_MenuKey
-    call HowmMenuCmd_()
-  endif
-  silent! call HowmMenuCmd()
-
   silent! exec 'lchdir ' . escape(g:qfixmemo_dir, ' ')
+endfunction
+
+function! s:BufWinLeaveMenu()
+  if g:QFixHowm_MenuCalendar && s:calender_exists
+    let winnr = bufwinnr(s:calender_exists)
+    if winnr != -1
+      exe winnr.'wincmd w'
+      exe 'wincmd c'
+    endif
+    let s:calender_exists = 0
+  endif
 endfunction
 
 let g:HowmMenuLnum = [0, 1, 1, 0]

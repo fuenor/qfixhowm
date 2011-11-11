@@ -4,6 +4,7 @@
 "                 http://sites.google.com/site/fudist/Home/qfixhowm
 "  Last Modified: 2011-11-01 18:13
 "=============================================================================
+" Ver.2 : let loaded_HowmSchedule = 1 までコピー
 let s:Version = 2.54
 scriptencoding utf-8
 
@@ -31,7 +32,6 @@ scriptencoding utf-8
 "        let [qflist, time] = QFixHowmScheduleCachedQFList('schedule')
 "
 "=============================================================================
-" Ver.2 : let loaded_HowmSchedule = 1 までコピー
 
 if exists('disable_MyGrep') && disable_MyGrep == 1
   finish
@@ -254,10 +254,6 @@ endif
 "strftime()の基準年
 if !exists('g:YearStrftime')
   let g:YearStrftime = 1970
-endif
-"strftime()の基準日数
-if !exists('g:DateStrftime')
-  let g:DateStrftime = 719162
 endif
 "GMTとの時差
 if !exists('g:QFixHowm_ST')
@@ -589,7 +585,7 @@ function! s:Overday(year, month, day)
   endif
   let day = a:day
   let monthdays = [31,28,31,30,31,30,31,31,30,31,30,31]
-  if year%4 == 0 && year%100 != 0 || year%400 == 0
+  if (year%4 == 0 && year%100 != 0) || year%400 == 0
     let monthdays[1] = 29
   endif
   if monthdays[month-1] < day
@@ -799,7 +795,6 @@ function! s:QFixHowmSortReminderPre(sq)
   endfor
   return qflist
 endfunction
-
 
 " リマインダーに今日の日付と時刻表示を追加
 function! s:AddTodayLine(qflist)
@@ -1722,7 +1717,9 @@ function! QFixHowmScheduleActionStr()
   endif
   let save_cursor = getpos('.')
   let uriopen = g:QFixHowm_UserURIopen
-  silent! exec 'let uriopen = g:QFixHowm_UserURIopen_'.g:QFixHowm_UserFileExt
+  if exists('g:QFixHowm_UserURIopen_'.g:QFixHowm_UserFileExt)
+    exe 'let uriopen = g:QFixHowm_UserURIopen_'.g:QFixHowm_UserFileExt
+  endif
   if uriopen == 1
     call setpos('.', save_cursor)
     let ret = QFixHowmOpenCursorline()
@@ -1741,19 +1738,25 @@ function! QFixHowmScheduleActionStr()
     return ret
   endif
   call setpos('.', save_cursor)
-  if exists('g:QFixHowm_UserSwActionLock')
-    let ret = QFixHowmSwitchActionLock(g:QFixHowm_UserSwActionLock)
+  let swaction = 'g:QFixHowm_UserSwActionLock'
+  let swaction = exists('g:qfixmemo_switch_action') ? 'g:qfixmemo_switch_action' : swaction
+  if exists(swaction)
+    exe 'let ret = QFixHowmSwitchActionLock('.swaction.')'
     if ret != "\<CR>"
       return ret
     endif
   endif
   call setpos('.', save_cursor)
-  for i in range(1, g:QFixHowm_UserSwActionLockMax)
-    if !exists('g:QFixHowm_UserSwActionLock'.i)
+  let range = g:QFixHowm_UserSwActionLockMax
+  if exists(swaction.'Max')
+    exe 'let range = '.swaction.'Max'
+  endif
+  for i in range(1, range)
+    if !exists(swaction.i)
       continue
     endif
     call setpos('.', save_cursor)
-    exec 'let action = '.'g:QFixHowm_UserSwActionLock'.i
+    exec 'let action = '.swaction.i
     if action != []
       let ret = QFixHowmSwitchActionLock(action)
       if ret != "\<CR>"
@@ -1769,7 +1772,9 @@ function! QFixHowmScheduleActionStr()
     endif
   endif
   call setpos('.', save_cursor)
-  let ret = QFixHowmSwitchActionLock(g:QFixHowm_SwitchListActionLock)
+  let swaction = 'g:QFixHowm_SwitchListActionLock'
+  let swaction = exists('g:qfixmemo_swlist_action') ? 'g:qfixmemo_swlist_action' : swaction
+  exe 'let ret = QFixHowmSwitchActionLock('.swaction.')'
   if ret != "\<CR>"
     return ret
   endif
@@ -2425,6 +2430,12 @@ function! HowmSchedueCachedTime(mode)
   exe 'let time = s:LT_'.a:mode
   return time
 endfunction
+
+"strftime()の基準日数(1970-01-01)
+if !exists('g:DateStrftime')
+  " let g:DateStrftime = 719162
+  let g:DateStrftime = QFixHowmDate2Int(printf('%4.4d%2.2d%2.2d', g:YearStrftime, 1, 1))
+endif
 
 let loaded_HowmSchedule = 1
 

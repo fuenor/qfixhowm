@@ -85,6 +85,16 @@ endif
 if !exists('g:qfixmemo_diary')
   let g:qfixmemo_diary         = 'diary/%Y-%m-%d'
 endif
+if exists('*QFixMemoCalendarDiary')
+  let calendar_action = "QFixMemoCalendarDiary"
+elseif exists('*QFixHowmCalendarDiary')
+  let calendar_action = "QFixHowmCalendarDiary"
+endif
+if exists('*QFixMemoCalendarSign')
+  let calendar_sign   = "QFixMemoCalendarSign"
+elseif exists('*QFixHowmCalendarSign')
+  let calendar_sign   = "QFixHowmCalendarSign"
+endif
 " クイックメモファイル名
 if !exists('g:qfixmemo_quickmemo')
   let g:qfixmemo_quickmemo     = 'Qmem-00-0000-00-00-000000'
@@ -218,7 +228,7 @@ if !exists('g:qfixmemo_rename_length')
   let g:qfixmemo_rename_length = len(strftime(g:qfixmemo_filename))
 endif
 
-" 新規ファイル作成時のオプション
+" QFixMemoファイル作成時のコマンド
 if !exists('g:qfixmemo_editcmd')
   let g:qfixmemo_editcmd = ''
 endif
@@ -234,6 +244,11 @@ endif
 " 自動生成ファイル名(,W ,X)
 if !exists('g:qfixmemo_auto_generate_filename')
   let g:qfixmemo_auto_generate_filename = '%Y-%m-%d-%H%M%S'
+endif
+
+" リストスイッチアクション
+if !exists('g:qfixmemo_swlist_action')
+  let qfixmemo_swlist_action = ['{ }', '{-}', '{*}']
 endif
 
 let s:howm_ext = 'howm'
@@ -348,6 +363,8 @@ silent! function QFixMemoKeymap()
   silent! nnoremap <silent> <unique> <Leader>s       :<C-u>call qfixmemo#FGrep()<CR>
   silent! nnoremap <silent> <unique> <Leader>g       :<C-u>call qfixmemo#Grep()<CR>
 
+  silent! nnoremap <silent> <unique> <Leader>q       :<C-u>call qfixmemo#Calendar()<CR>
+  silent! nnoremap <silent> <unique> <Leader>Q       :<C-u>call qfixmemo#Calendar('LR')<CR>
   silent! nnoremap <silent> <unique> <Leader>o       :<C-u>call QFixMemoOutline()<CR>
 
   if g:qfixmemo_use_howm_schedule
@@ -482,8 +499,10 @@ silent! function QFixMemoMenubar(menu, leader)
   exe printf(sepcmd, 2)
   call s:addMenu(menucmd, 'FGrep(&S)', 's')
   call s:addMenu(menucmd, 'Grep(&G)' , 'g')
+  exe printf(sepcmd, 3)
+  call s:addMenu(menucmd, 'Calendar(&Q)' , 'q')
   if g:qfixmemo_use_howm_schedule
-    exe printf(sepcmd, 3)
+    exe printf(sepcmd, 4)
     call s:addMenu(menucmd, 'Schedule(&Y)'        , 'y')
     call s:addMenu(menucmd, 'Todo(&T)'            , 't')
     call s:addMenu(menucmd, 'Menu(&,)'            , ',')
@@ -500,10 +519,10 @@ silent! function QFixMemoMenubar(menu, leader)
   " call s:addMenu(menucmd, 'Rename(&Z)'      , 'rn')
   call s:addMenu(menucmd, 'Rename-files(&Z)', 'rN')
   if g:qfixmemo_use_howm_schedule
-    exe printf(sepcmd, 7)
+    exe printf(sepcmd, 8)
     call s:addMenu(menucmd, 'Help(&H)', 'H')
   endif
-  exe printf(sepcmd, 8)
+  exe printf(sepcmd, 9)
   let submenu = '.Buffer[Local]\ (&B)'
   let sepcmd  = 'amenu <silent> 41.335 '.a:menu.submenu.'.-sep%d-			<Nop>'
   let menucmd = 'amenu <silent> 41.335 '.a:menu.submenu.'.%s<Tab>'.a:leader.'%s :call feedkeys("'.a:leader.'%s","t")<CR>'
@@ -1049,7 +1068,8 @@ function! s:edit(file, ...)
   if isdirectory(dir) == 0
     call mkdir(dir, 'p')
   endif
-  exe g:qfixmemo_editcmd.' edit ' . opt . escape(file, ' #%')
+  let editcmd = g:qfixmemo_editcmd != '' ? g:qfixmemo_editcmd : 'edit '
+  exe editcmd . ' ' . opt .' ' . escape(file, ' #%')
   if !filereadable(file)
     call qfixmemo#Template('New')
   endif
@@ -1597,6 +1617,26 @@ function! qfixmemo#RenameAll()
 endfunction
 
 """"""""""""""""""""""""""""""
+" カレンダー表示
+function! qfixmemo#Calendar(...)
+  call qfixmemo#Init()
+  if a:0 && g:qfixmemo_calendar_wincmd =~ 'botright'
+    let g:qfixmemo_calendar_wincmd = 'vertical topleft'
+  elseif a:0
+    let g:qfixmemo_calendar_wincmd = 'vertical botright'
+  endif
+  let winnr = bufwinnr('__Calendar__')
+  if a:0 && winnr != -1
+    exe winnr.'wincmd w'
+    exe 'wincmd c'
+  elseif fnamemodify(bufname(winbufnr(0)), ':t') == '__Calendar__'
+    close
+    return
+  endif
+  call QFixMemoCalendar(g:qfixmemo_calendar_wincmd, '__Calendar__', g:qfixmemo_calendar_count)
+endfunction
+
+""""""""""""""""""""""""""""""
 let s:rwalk = []
 let s:randomfile = ''
 " ランダム表示
@@ -1861,8 +1901,13 @@ function! s:GetOptionWithID(opt, id)
 endfunction
 
 """"""""""""""""""""""""""""""
+" メニュータイトル
+if !exists('g:qfixmemo_menu_title')
+  let g:qfixmemo_menu_title = '__menu__'
+endif
+
+""""""""""""""""""""""""""""""
 " sub menu
-"
 " サブメニューのタイトル
 if !exists('g:qfixmemo_submenu_title')
   let g:qfixmemo_submenu_title = '__submenu__'
@@ -1878,6 +1923,13 @@ endif
 " サブメニューを出す方向
 if !exists('g:qfixmemo_submenu_direction')
   let g:qfixmemo_submenu_direction = 'topleft vertical'
+endif
+" サブメニューカレンダーのウィンドウ位置
+" ''             非表示
+" 'rightbelow'   右か下
+" 'leftabove'    左か上
+if !exists('g:qfixmemo_submenu_calendar_wincmd')
+  let g:qfixmemo_submenu_calendar_wincmd = 'leftabove'
 endif
 " サブメニューのシングルウィンドウモード
 if !exists('g:qfixmemo_submenu_single_mode')
@@ -1974,6 +2026,7 @@ function! s:OpenQFixSubWin(file, id)
   setlocal bufhidden=hide
   setlocal noswapfile
   setlocal foldcolumn=0
+  setlocal nobuflisted
   setlocal nolist
   setlocal winfixwidth
   exe 'let &wrap='.s:GetOptionWithID('g:qfixmemo_submenu_wrap', swid)
@@ -1991,9 +2044,17 @@ function! s:OpenQFixSubWin(file, id)
     call qfixmemo_msg#submenu()
   endif
   call QFixMemoSubMenuOutline(swid)
+  let wincmd = s:GetOptionWithID('g:qfixmemo_submenu_calendar_wincmd', swid)
+  if wincmd != ''
+    let wincmd = wincmd . (windir =~ 'vert' ? '' : ' vertical')
+    if exists('*QFixMemoCalendar')
+      call QFixMemoCalendar(wincmd, '__Cal__', 1, 'parent')
+    endif
+  endif
   if exists('*QFixMemoSubMenuBufWinEnter')
     call QFixMemoSubMenuBufWinEnter()
   endif
+  exe 'normal! zz'
 endfunction
 
 let s:qfixmemo_fileencoding = g:qfixmemo_fileencoding
@@ -2098,6 +2159,7 @@ function! QFixFtype(file)
     call s:syntaxHighlight()
   endif
   return 1
+  let g:qfixmemo_keyword_file = '~/.qfixmemo-keys'
 endfunction
 
 " for qfixwin
@@ -2290,7 +2352,7 @@ function! qfixmemo#LoadKeyword(...)
   endfor
   silent! syn clear qfixmemoKeyword
   let s:KeywordHighlight = substitute(s:KeywordHighlight, '\\|\s*$', '', '')
-  if s:KeywordHighlight != ''
+  if s:KeywordHighlight != '' && s:isQFixMemo(expand('%'))
     exe 'syn match qfixmemoKeyword display "\V'.escape(s:KeywordHighlight, '"').'"'
   endif
 endfunction
@@ -2531,15 +2593,20 @@ function! qfixmemo#SwitchAction()
       return 1
     endif
   endif
+  call setpos('.', save_cursor)
   for i in range(1, g:qfixmemo_switch_action_max)
     if !exists('g:qfixmemo_switch_action'.i)
       continue
     endif
-    exe 'let action = '.'g:qfixmemo_switch_action'.i
+    exe 'let action = g:qfixmemo_switch_action'.i
     if QFixMemoSwitchAction(action)
       return 1
     endif
   endfor
+  call setpos('.', save_cursor)
+  if QFixMemoSwitchAction(g:qfixmemo_swlist_action)
+    return 1
+  endif
   call setpos('.', save_cursor)
   return 0
 endfunction

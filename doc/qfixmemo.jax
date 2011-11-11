@@ -17,7 +17,8 @@ CONTENTS                                                *qfixmemo-contents*
   3.1 クイックメモ                                      |qfixmemo-quickmemo|
   3.2 ペアファイル                                      |qfixmemo-pairfile|
   3.3 シンタックスハイライト                            |qfixmemo-syntax|
-  3.4 メモファイル削除                                  |qfixmemo-delete|
+  3.4 スイッチアクション                                |qfixmemo-action|
+  3.5 メモファイル削除                                  |qfixmemo-delete|
 4. エントリ一覧                                         |qfixmemo-entry-list|
   4.1 エントリ一覧のオプション                          |qfixmemo-entry-list-option|
   4.2 MRUリスト                                         |qfixmemo-entry-list-mru|
@@ -27,9 +28,10 @@ CONTENTS                                                *qfixmemo-contents*
 6. ランダム表示                                         |qfixmemo-random|
 7. フォールディング                                     |qfixmemo-folding|
 8. サブメニュー                                         |qfixmemo-submenu|
-8.1 サブメニュー用アウトライン                          |qfixmemo-submenu-outline|
-8.2 アウトラインオプション                              |qfixmemo-submenu-outline-option|
-8.3 複数のサブメニュー                                  |qfixmemo-submenu-multi|
+8.1 カレンダー                                          |qfixmemo-submenu-calendar|
+8.2 サブメニュー用アウトライン                          |qfixmemo-submenu-outline|
+8.3 アウトラインオプション                              |qfixmemo-submenu-outline-option|
+8.4 複数のサブメニュー                                  |qfixmemo-submenu-multi|
 9. ローカルバッファコマンド                             |qfixmemo-local-commands|
 10. 予定・TODO                                          |qfixmemo-schedule|
 11. ファイルリネーム                                    |qfixmemo-rename|
@@ -39,13 +41,11 @@ CONTENTS                                                *qfixmemo-contents*
     12.1.3 タイトル検索の正規表現                       |qfixmemo-title-regxp|
   12.2 キーマップ                                       |qfixmemo-user-keymap|
   12.3 保存前処理                                       |qfixmemo-pre-save|
-  12.4 ファイルタイプの指定                             |qfixmemo-filetype|
+  12.4 ファイルタイプ指定                               |qfixmemo-filetype|
   12.5 デフォルトシンタックス                           |qfixmemo-default-syntax|
   12.6 複数のQFixMemoディレクトリ                       |qfixmemo-chenv|
-  12.7 calendar.vim                                     |qfixmemo-calendar|
-  12.8 URIを開く                                        |qfixmemo-uri|
-    12.8.1 ファイルリンク                               |qfixmemo-link|
-  12.9 ロケーションリスト                               |qfixmemo-window|
+  12.7 URIを開く                                        |qfixmemo-uri|
+  12.8 ロケーションリスト                               |qfixmemo-window|
 
 ==============================================================================
 1. Intro																								*qfixmemo-intro*
@@ -79,21 +79,16 @@ QFixMemoはQFixHowmをよりシンプルにリファクタリングしたプラ�
 このファイルがQFixHowmとして配布されている場合はオプションの互換性を維持するた
 めに、plugin/env-cnv.vimでQFixHowmのオプションをQFixMemoのオプションにコンバー
 トしています。このためQFixMemoのオプションは毎回のコマンド実行時にQFixHowmのオ
-プションで置き換えられることになります。
+プションで一部置き換えられることになります。 >
+  qfixmemo_dir, qfixmemo_filename, qfixmemo_ext, qfixmemo_filetype
+  (*) それ以外のオプションはコンバート時でもほぼすべて有効です。
+
 不要な場合は.vimrcで無効化してください。 >
   " QFixHowmとのオプションコンバートを行わない
   let QFixHowm_Convert = 0
 
 逆にこのファイルがQFixMemoとして配布されていてQFixHowmとオプション互換にしたい
 場合はmisc/env-cnv.vimをpluginディレクトリへコピーしてください。
-
-基本的な使用方法はQFixHowm(howm)と同じですが、QFixHowmはhowm-mode.vimへのパッ
-チから開発を始めた関係で構造が煩雑になっています。
-またQFixHowmには実験的なオプションやコマンドも多いため、わかりにくいところがあ
-ります。
-このためQFixMemoではシンプルな機能だけに絞って、またhowm形式べったりではなく自
-由な書式を扱えるように、できるだけユーザが自由にカスタマイズできるプラグインを
-目指して開発しています。
 
 QFixHowmとして使用する場合の大きな違いはメモファイルの拡張子の扱いにあります。
 Ver.3ではhowm_filename等で指定したファイル名の拡張子は"無視"され、常に
@@ -123,8 +118,13 @@ http://sites.google.com/site/fudist/Home/qfixhowm/option/outline-mode#user-synta
 または|qfixmemo-syntax|を参照してください。
 
 ファイルタイプに qfix_memoを指定する例 >
+  " QFixHowmとして使用する場合
   let QFixHowm_FileType = 'qfix_memo'
 
+  " QFixMemoとして使用する場合
+  let qfixmemo_filetype = 'qfix_memo'
+
+NOTE:
 予定・TODO等のシンタックスハイライトはビルトインになったため、howm_memo.vimは
 qfixapp内のsyntaxディレクトリにコピーすることも出来ます
 
@@ -304,8 +304,33 @@ NOTE:
 ------------------------------------------------------------
 ============================================================
 
+------------------------------------------------------------
+3.4 スイッチアクション																	*qfixmemo-action*
+
+特殊なキーワード上で<CR>を押すと定義したスイッチアクションキーワードに変化しま
+す。
+次のようにカテゴリタグをスイッチアクション化してQFixMemoのメモファイル上で<CR>
+を押すと [ ] → [:mail] → [:pc] というようにループして変化します。
+>
+  let qfixmemo_switch_action = ['[ ]', '[:mail]', '[:pc]', '[:vim]']
+スイッチアクションは8個まで定義可能です。
+>
+  let qfixmemo_switch_action1 = ['[.]', '[:movie]', '[:music]', '[:game]']
+  let qfixmemo_switch_action2 = ['[*]', '[:Windows]', '[:Linux]', '[:Mac]']
+  ...
+
+その他にデフォルトではリスト用のスイッチアクションが用意されています。
+>
+  let qfixmemo_swlist_action = ['{ }', '{-}', '{*}']
+
+また {_} は 「日付 + .」に変更されシンタックスハイライトも変化します。
+TODOリストの終了として扱えるので次のようにスイッチアクションを定義しても良いか
+もしれません。
+ >
+  let qfixmemo_swlist_action = ['{ }', '{-}', '{*}', {_}]
+
 ------------------------------------------------------------------------------
-3.4 メモファイル削除																		*qfixmemo-delete*
+3.5 メモファイル削除																		*qfixmemo-delete*
 
 メモファイルはバッファの内容を削除して保存すると削除されます。
 またQuickfixウィンドウ上で D コマンドを実行してもファイル削除可能ですが、一ファ
@@ -430,7 +455,6 @@ qfixmemo_random_dirを設定します。
   2 : qfixmemo_root_dir
   3 : qfixmemo_dir
   デフォルトでは1,2が設定されていないので qfixmemo_dirが使用されます
-
  >
   " ランダム表示検索対象ディレクトリ
   let qfixmemo_random_dir = '~/qfixmemo/random'
@@ -509,7 +533,58 @@ qfixmemo_root_dirが優先されます。
 NOTE:
 ウィンドウ表示方向については|vertical|を参照してください。
 
-8.1 サブメニュー用アウトライン													*qfixmemo-submenu-outline*
+------------------------------------------------------------
+8.1 カレンダー																			*qfixmemo-submenu-calendar*
+ >
+サブメニューにはデフォルトでカレンダーが表示されています。
+またカレンダー単体のサブメニューを開くことも出来ます。
+
+<Leader>q           カレンダー
+<Leader>Q           カレンダー表示方向を変更
+
+カレンダー上でのキーマップ
+|  i < <Left>   | 前の月へ               |
+|  o > <Right>  | 次の月へ               |
+|  t .          | 今日の日付へ           |
+|               |                        |
+|     <CR>      | 日記を開く / コマンド  |
+|  (数値)<CR>   | 指定数値日の日記を開く |
+
+オプション >
+  " 単体カレンダーの分割指定(vertical topleft, vertical botright)
+  let qfixmemo_calendar_wincmd = 'vertical topleft'
+  " 単体カレンダーに表示する月数
+  let qfixmemo_calendar_count  = 3
+
+  " サブメニュー内で表示するカレンダーの分割指定(leftabove, rightbelow)
+  let qfixmemo_submenu_calendar_wincmd = 'leftabove'
+
+------------------------------------------------------------
+8.1.2 カレンダーの休日表示													*qfixmemo-submenu-holiday*
+
+カレンダーに表示する休日を定義するファイルにはQFixHowmの休日定義ファイルを使用
+します。
+
+https://sites.google.com/site/fudist/Home/qfixhowm#downloads
+
+定義ファイルはqfixmemo_fileencodingと同じ物を使用します。
+定義ファイルを適当なディレクトリにコピーした後calendar_holidayfileに休日定義ファ
+イルのパスを指定してください。
+>
+  " 休日定義ファイル(パス等は環境に合わせてください)
+  let calendar_holidayfile = '~/howm/Sche-Hd-0000-00-00-000000.howm'
+
+NOTE:
+実際には予定・TODO(|qfixmemo-schedule|)で休日定義ファイル設定を行なっていると
+calendar_holidayfileは自動設定されるので必要ありません。
+
+サインは次の表のように表示されます。
+|     |  普通日               |
+|  +  |  日記が存在する       |
+|  @  |  休日                 |
+|  #  |  休日で日記が存在する |
+
+8.2 サブメニュー用アウトライン													*qfixmemo-submenu-outline*
 
 以下に表示されているのはアウトライン機能のヘルプと同じ表示例です。
 
@@ -556,7 +631,8 @@ NOTE:
 	# コメント行は
 	# 折り畳まれません。
 
-8.2 アウトラインオプション											*qfixmemo-submenu-outline-option*
+------------------------------------------------------------
+8.3 アウトラインオプション											*qfixmemo-submenu-outline-option*
 
 アウトラインといってもfoldmethodとsyntaxを設定しているだけなので、好みに応じて
 変更してみてください。
@@ -577,7 +653,8 @@ NOTE:
   " アウトライン(syntax)
   let g:qfixmemo_outline_syntax = 'ezotl'
 
-8.3 複数のサブメニュー																	*qfixmemo-submenu-multi*
+------------------------------------------------------------
+8.4 複数のサブメニュー																	*qfixmemo-submenu-multi*
 
 3<Leader>iのようにカウント指定して実行し、複数のサブメニューを切り替えて表示す
 ることも出来ます。サブメニューのオプションは個別に設定可能です。
@@ -811,7 +888,7 @@ qfixmemo#UpdateTime()を有効にすると、保存の度にカーソル位置�
 タンプが更新されます。
 
 ------------------------------------------------------------------------------
-12.4 ファイルタイプの指定																*qfixmemo-filetype*
+12.4 ファイルタイプ指定																	*qfixmemo-filetype*
 
 メモファイルに使用するシンタックスハイライトはファイルタイプ指定で変更可能です。
 
@@ -879,7 +956,6 @@ qfixmemo_filetypeを変更してください。
 QFixHowmの環境変更用スクリプト互換の qfixmemo-chenv.vimもあります。
 qfixmemo/misc/qfixmemo-chenv.vim をpluginディレクトリにコピーして、.vimrcにオ
 プション設定を追加してください。
-
  >
   " qfixmemo-chenv.vimの基準ディレクトリ設定
   let qfixmemo_chdir = qfixmemo_dir
@@ -908,27 +984,14 @@ qfixmemo/misc/qfixmemo-chenv.vim をpluginディレクトリにコピーして�
 を行いたい場合は qfixmemo-chenv.vimを改変してください。
 
 ------------------------------------------------------------------------------
-12.7 calendar.vim																				*qfixmemo-calendar*
-
-calendar.vimでQFixMemoの日記を使用することが出来ます。
-qfixmemo/misc/qfixmemo-calendar.vim をpluginディレクトリにコピーして、.vimrcに
-オプション設定を追加してください。
- >
-  let calendar_action = "QFixMemoCalendarDiary"
-  let calendar_sign   = "QFixMemoCalendarSign"
-
-またQFixMemo/QFixHowmの予定・TODO形式を利用した休日の強調表示も可能です。
-詳しくはqfixmemo-calendar.vim内のドキュメントを参照してください。
-
-------------------------------------------------------------------------------
-12.8 URIを開く																					*qfixmemo-uri*
+12.7 URIを開く																					*qfixmemo-uri*
 
 QFixMemoではURLや画像ファイル等のリンクを記述すると自動でリンク化され<CR>を押
 すと外部ブラウザで開くことができます。
 詳しいことは doc/openuri.jaxを参照してください。
 
 ------------------------------------------------------------------------------
-12.9 ロケーションリスト																	*qfixmemo-window*
+12.8 ロケーションリスト																	*qfixmemo-window*
 
 Vimで作業中にmakeなどでQuickFixウィンドウを使用していると、QFixMemo/QFixGrepで
 はQuickFixウィンドウを使用したくない場面もあるかもしれません。

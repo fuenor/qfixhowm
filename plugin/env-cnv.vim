@@ -164,6 +164,10 @@ endif
 if !exists('g:qfixmemo_filetype')
   let g:qfixmemo_filetype = 'howm_memo'
 endif
+" for howm-chenv.vim
+if !exists('g:QFixHowm_FileType')
+  let g:QFixHowm_FileType = g:qfixmemo_filetype
+endif
 if !exists('g:qfixmemo_diary')
   let g:qfixmemo_diary = '%Y/%m/%Y-%m-%d-000000'
 endif

@@ -43,10 +43,6 @@ endif
 """"""""""""""""""""""""""""""
 " イベント処理
 """"""""""""""""""""""""""""""
-" howm_schedule.vimをautoloadで読み込む
-if !exists('g:QFixHowm_Autoload')
-  let g:QFixHowm_Autoload = 1
-endif
 " howmファイルの自動整形を使用する
 if !exists('g:QFixHowm_Autoformat')
   let g:QFixHowm_Autoformat = 1
@@ -93,21 +89,9 @@ silent! function QFixMemoQFBufWinEnterPost()
   endif
 endfunction
 
-" VimEnter
-function! QFixMemoVimEnter()
-  call QFixHowmSetup()
-  if g:QFixHowm_Autoload == 0
-    call howm_schedule#Init()
-  endif
-endfunction
-
 " 初期化
 function! QFixMemoInit(init)
   call QFixHowmSetup()
-  call howm_schedule#Init()
-  if a:init
-    return
-  endif
 endfunction
 
 """"""""""""""""""""""""""""""
@@ -131,42 +115,18 @@ if exists('g:QFixHowm_Key') || exists('g:QFixHowm_KeyB')
   let g:qfixmemo_mapleader = g:QFixHowm_Key . g:QFixHowm_KeyB
 endif
 
-" 最低限必要なオプション
-if !exists('g:howm_dir')
-  let g:howm_dir          = '~/howm'
-endif
-if !exists('g:howm_filename')
-  let g:howm_filename     = '%Y/%m/%Y-%m-%d-%H%M%S.'.s:howmsuffix
-endif
-if !exists('g:QFixHowm_FileExt')
-  let g:QFixHowm_FileExt  = fnamemodify(g:howm_filename,':e')
-endif
-" howm_filenameから生成されるオプション
-if exists('g:howm_filename')
-  if !exists('g:QFixHowm_DiaryFile') && !exists('g:qfixmemo_diary')
-    let g:QFixHowm_DiaryFile = fnamemodify(g:howm_filename, ':h').'/%Y-%m-%d-000000.'.g:QFixHowm_FileExt
-  endif
-  if !exists('g:QFixHowm_QuickMemoFile') && !exists('g:qfixmemo_quickmemo')
-    let g:QFixHowm_QuickMemoFile = 'Qmem-00-0000-00-00-000000.'.g:QFixHowm_FileExt
-  endif
-  if !exists('g:QFixHowm_FilenameLen') && !exists('g:qfixmemo_rename_length')
-    let g:QFixHowm_FilenameLen = len(fnamemodify(strftime(g:howm_filename), ':t:r'))
-  endif
-endif
-
 " QFixMemo/QFixHowmでデフォルトが異なるオプション
 if !exists('g:qfixmemo_dir')
   let g:qfixmemo_dir = '~/howm'
 endif
+if !exists('g:qfixmemo_filename')
+  let g:qfixmemo_filename = '%Y/%m/%Y-%m-%d-%H%M%S.'.s:howmsuffix
+endif
 if !exists('g:qfixmemo_ext')
-  let g:qfixmemo_ext = s:howmsuffix
+  let g:qfixmemo_ext = fnamemodify(g:qfixmemo_filename,':e')
 endif
 if !exists('g:qfixmemo_filetype')
   let g:qfixmemo_filetype = 'howm_memo'
-endif
-" for howm-chenv.vim
-if !exists('g:QFixHowm_FileType')
-  let g:QFixHowm_FileType = g:qfixmemo_filetype
 endif
 if !exists('g:qfixmemo_diary')
   let g:qfixmemo_diary = '%Y/%m/%Y-%m-%d-000000'
@@ -188,6 +148,36 @@ if !exists('g:qfixmemo_keyword_file')
 endif
 if !exists('g:qfixmemo_random_file')
   let g:qfixmemo_random_file = '~/.howm-random'
+endif
+
+" 最低限必要なオプション
+if !exists('g:howm_dir')
+  let g:howm_dir = g:qfixmemo_dir
+endif
+if !exists('g:howm_filename')
+  let g:howm_filename = g:qfixmemo_filename
+endif
+if !exists('g:QFixHowm_FileExt')
+  let g:QFixHowm_FileExt  = fnamemodify(g:howm_filename, ':e')
+endif
+if !exists('g:QFixHowm_FileType')
+  let g:QFixHowm_FileType = g:qfixmemo_filetype
+endif
+let g:qfixmemo_dir      = g:howm_dir
+let g:qfixmemo_filename = g:howm_filename
+let g:qfixmemo_ext      = g:QFixHowm_FileExt
+let g:qfixmemo_filetype = g:QFixHowm_FileType
+" howm_filenameから生成されるオプション
+if exists('g:howm_filename')
+  if !exists('g:QFixHowm_DiaryFile') && !exists('g:qfixmemo_diary')
+    let g:QFixHowm_DiaryFile = fnamemodify(g:howm_filename, ':h').'/%Y-%m-%d-000000.'.g:QFixHowm_FileExt
+  endif
+  if !exists('g:QFixHowm_QuickMemoFile') && !exists('g:qfixmemo_quickmemo')
+    let g:QFixHowm_QuickMemoFile = 'Qmem-00-0000-00-00-000000.'.g:QFixHowm_FileExt
+  endif
+  if !exists('g:QFixHowm_FilenameLen') && !exists('g:qfixmemo_rename_length')
+    let g:QFixHowm_FilenameLen = len(fnamemodify(strftime(g:howm_filename), ':t:r'))
+  endif
 endif
 
 " howmテンプレート
@@ -226,9 +216,13 @@ if !exists('g:QFixHowm_RelPath')
   let g:QFixHowm_RelPath = g:howm_dir
 endif
 " メニュー
-if exists('g:qfixmemo_menu_title') && !exists('g:QFixHowm_MenuDir') && !exists('g:QFixHowm_Menufile')
-  let g:QFixHowm_MenuDir  = fnamemodify(g:qfixmemo_menu_title, ':p:h')
-  let g:QFixHowm_Menufile = fnamemodify(g:qfixmemo_menu_title, ':t')
+if exists('g:qfixmemo_menu_title')
+  if !exists('g:QFixHowm_MenuDir')
+    let g:QFixHowm_MenuDir  = fnamemodify(g:qfixmemo_menu_title, ':p:h')
+  endif
+  if !exists('g:QFixHowm_Menufile')
+    let g:QFixHowm_Menufile = fnamemodify(g:qfixmemo_menu_title, ':t')
+  endif
 endif
 
 " 一度だけ初期化するオプション
@@ -401,7 +395,7 @@ if !exists('g:QFixHowm_MenuDir')
   let g:QFixHowm_MenuDir = ''
 endif
 " メニューファイル名
-if !exists('g:QFixHowm_Menufile')
+if !exists('g:QFixHowm_Menufile') || g:QFixHowm_Menufile == ''
   let g:QFixHowm_Menufile = 'Menu-00-00-000000.'.s:howmsuffix
 endif
 " come-fromリンク

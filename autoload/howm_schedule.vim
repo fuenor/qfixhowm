@@ -280,8 +280,6 @@ if g:QFixHowm_Default_Key > 0
   exec 'silent! nnoremap <unique> <silent> '.s:QFixHowm_Key.'rd    :<C-u>call QFixHowmGenerateRepeatDate()<CR>'
   exec "silent! nnoremap <unique> <silent> ".s:QFixHowm_Key."d :call QFixHowmInsertDate('Date')<CR>"
   exec "silent! nnoremap <unique> <silent> ".s:QFixHowm_Key."T :call QFixHowmInsertDate('Time')<CR>"
-  exec 'silent! nnoremap <unique> <silent> '.s:QFixHowm_Key.',  :<C-u>call QFixHowmOpenMenu("cache")<CR>'
-  exec 'silent! nnoremap <unique> <silent> '.s:QFixHowm_Key.'r, :<C-u>call QFixHowmOpenMenu()<CR>'
 endif
 
 """"""""""""""""""""""""""""""

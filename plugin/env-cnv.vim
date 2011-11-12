@@ -258,37 +258,38 @@ endif
 let s:cnvopt = [
   \ ['let g:howm_dir = substitute(%s, "[/\\]$", "", "")', 'g:howm_dir'],
   \ ['let g:qfixmemo_dir          = %s', 'g:howm_dir'],
-  \ ["let g:qfixmemo_filename = fnamemodify(%s, ':r')", 'g:howm_filename'],
-  \ ['let g:qfixmemo_ext          = %s', 'g:QFixHowm_FileExt'],
+  \ ['let g:qfixmemo_filename     = %s', 'g:howm_filename'],
   \ ['let g:qfixmemo_fileencoding = %s', 'g:howm_fileencoding'],
   \ ['let g:qfixmemo_fileformat   = %s', 'g:howm_fileformat'],
+  \ ['let g:qfixmemo_ext          = %s', 'g:QFixHowm_FileExt'],
   \ ['let g:qfixmemo_filetype     = %s', 'g:QFixHowm_FileType'],
   \ ['let g:qfixmemo_quickmemo    = %s', 'g:QFixHowm_QuickMemoFile'],
   \ ['let g:qfixmemo_diary        = %s', 'g:QFixHowm_DiaryFile'],
   \ ['let g:qfixmemo_pairfile_dir = %s', 'g:QFixHowm_PairLinkDir'],
-  \ ['let g:qfixmemo_title         = %s', 'g:QFixHowm_Title'],
-  \ ['let g:qfixmemo_title_length  = %s', 'g:QFixHowm_Replace_Title_Len'],
-  \ ['let g:qfixmemo_forceencoding = %s', 'g:QFixHowm_ForceEncoding'],
-  \ ['let g:qfixmemo_folding       = %s', 'g:QFixHowm_Folding'],
-  \ ['let g:qfixmemo_grep_cword    = %s', 'g:QFixHowm_DefaultSearchWord'],
-  \ ['let g:qfixmemo_splitmode     = %s', 'g:QFixHowm_SplitMode'],
-  \ ['let g:qfixmemo_rename_length = %s', 'g:QFixHowm_FilenameLen'],
-  \ ['let g:qfixmemo_swlist_action = %s', 'g:QFixHowm_SwitchListActionLock'],
-  \ ['let g:qfixmemo_switch_action = %s', 'g:QFixHowm_UserSwActionLock'],
+  \ ['let g:qfixmemo_title          = %s', 'g:QFixHowm_Title'],
+  \ ['let g:qfixmemo_title_length   = %s', 'g:QFixHowm_Replace_Title_Len'],
+  \ ['let g:qfixmemo_forceencoding  = %s', 'g:QFixHowm_ForceEncoding'],
+  \ ['let g:qfixmemo_folding        = %s', 'g:QFixHowm_Folding'],
+  \ ['let g:qfixmemo_grep_cword     = %s', 'g:QFixHowm_DefaultSearchWord'],
+  \ ['let g:qfixmemo_splitmode      = %s', 'g:QFixHowm_SplitMode'],
+  \ ['let g:qfixmemo_rename_length  = %s', 'g:QFixHowm_FilenameLen'],
   \ ['let g:qfixmemo_use_list_cache = %s', 'g:QFixHowm_TitleListCache'],
+  \ ['let g:qfixmemo_swlist_action  = %s', 'g:QFixHowm_SwitchListActionLock'],
+  \ ['let g:qfixmemo_switch_action  = %s', 'g:QFixHowm_UserSwActionLock'],
   \ ['let g:qfixmemo_template        = %s', 'g:QFixHowm_Template'],
   \ ['let g:qfixmemo_template_keycmd = %s', 'g:QFixHowm_Cmd_NewEntry'],
   \ ['let g:qfixmemo_template_tag    = %s', 'g:QFixHowm_DefaultTag'],
   \ ['let g:qfixmemo_submenu_title           = %s', 'g:SubWindow_Title'],
   \ ['let g:qfixmemo_submenu_direction       = %s', 'g:SubWindow_Direction'],
   \ ['let g:qfixmemo_submenu_size            = %s', 'g:SubWindow_Size'],
+  \ ['let g:qfixmemo_submenu_keepsize        = %s', 'g:SubWindow_KeepSize'],
   \ ['let g:qfixmemo_submenu_wrap            = %s', 'g:SubWindow_Wrap'],
   \ ['let g:qfixmemo_submenu_calendar_wincmd = %s', 'g:SubWindow_CalendarWinCmd'],
   \ ['let g:qfixmemo_submenu_single_mode     = %s', 'g:SubWindow_SingleMode'],
-  \ ['let g:qfixmemo_calendar_count = %s', 'g:QFixHowm_CalendarCount'],
-  \ ['let g:qfixmemo_random_columns = %s', 'g:QFixHowm_RandomWalkColumns'],
-  \ ['let g:qfixmemo_random_exclude = %s', 'g:QFixHowm_RandomWalkExclude'],
-  \ ['let g:qfixmemo_random_file    = %s', 'g:QFixHowm_RandomWalkFile',],
+  \ ['let g:qfixmemo_calendar_count = %s',          'g:QFixHowm_CalendarCount'],
+  \ ['let g:qfixmemo_random_columns = %s',          'g:QFixHowm_RandomWalkColumns'],
+  \ ['let g:qfixmemo_random_exclude = %s',          'g:QFixHowm_RandomWalkExclude'],
+  \ ['let g:qfixmemo_random_file    = %s',          'g:QFixHowm_RandomWalkFile',],
   \ ['let g:qfixmemo_random_time    = %s*24*60*60', 'g:QFixHowm_RandomWalkUpdate'],
   \ ['let g:qfixmemo_keyword_mode = %s', 'g:QFixHowm_Wiki'],
   \ ['let g:qfixmemo_keyword_dir  = %s', 'g:QFixHowm_WikiDir'],
@@ -337,6 +338,9 @@ function! QFixHowmSetup()
     endif
     if exists('g:SubWindow_Size'.i)
       exe printf('let g:qfixmemo_submenu_size%d=g:SubWindow_Size%d', i, i)
+    endif
+    if exists('g:SubWindow_KeepSize'.i)
+      exe printf('let g:qfixmemo_submenu_keepsize%d=g:SubWindow_KeepSize%d', i, i)
     endif
     if exists('g:SubWindow_Wrap'.i)
       exe printf('let g:qfixmemo_submenu_wrap%d=g:SubWindow_Wrap%d', i, i)

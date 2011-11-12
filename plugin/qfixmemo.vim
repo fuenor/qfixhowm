@@ -948,8 +948,8 @@ function! qfixmemo#Edit(...)
   else
     let file = strftime(a:1)
   endif
-  if tolower(fnamemodify(file, ':e')) != g:qfixmemo_ext
-    let file = file . '.' . g:qfixmemo_ext
+  if fnamemodify(file, ':e') !~ '\c'.g:qfixmemo_ext
+    let file = file.'.'.g:qfixmemo_ext
   endif
   call qfixmemo#EditFile(file)
 endfunction
@@ -996,7 +996,7 @@ function! qfixmemo#Quickmemo(...)
     let s:qfixmemo_quickmemo = file
   endif
   if fnamemodify(file, ':e') == ''
-    let file = file . '.' . g:qfixmemo_ext
+    let file = file.'.'.g:qfixmemo_ext
   endif
   call qfixmemo#EditFile(file)
 endfunction
@@ -1018,7 +1018,7 @@ function! qfixmemo#PairFile(file)
   let pfile = g:qfixmemo_pairfile_dir . '/' . file
 
   let glist = []
-  if !filereadable(fnamemodify(g:qfixmemo_dir . '/' . pfile . '.' . g:qfixmemo_ext, ':p'))
+  if !filereadable(fnamemodify(g:qfixmemo_dir . '/' . pfile . '.'.g:qfixmemo_ext, ':p'))
     let str = g:qfixmemo_title . ' ' . substitute(fnamemodify(file, ':p'), '\\', '/', 'g')
     call add(glist, str)
     let type = g:qfixmemo_filetype . (g:qfixmemo_filetype != '' ? '.' : '') . &filetype
@@ -1436,7 +1436,10 @@ function! qfixmemo#ListFile(file)
   call qfixmemo#Init()
   let title = '^'.escape(g:qfixmemo_title, g:qfixmemo_escape)
   let qflist = qfixlist#search(title, g:qfixmemo_dir, 'reverse', 0, g:qfixmemo_fileencoding, '**/*')
-  let pattern = a:file.'.'.g:qfixmemo_ext
+  let pattern = a:file
+  if fnamemodify(pattern, ':e') !~ '\c'.g:qfixmemo_ext
+    let pattern = pattern.'.'.g:qfixmemo_ext
+  endif
   let pattern = s:strftimeRegxp(pattern)
   call filter(qflist, "v:val['filename'] =~ '" . pattern . "'")
   call qfixlist#open(qflist, g:qfixmemo_dir)
@@ -1497,16 +1500,25 @@ let s:RenameQFList = []
 function! qfixmemo#ListRenameFile(file)
   call qfixmemo#Init()
   let qflist = qfixmemo#Glob(g:qfixmemo_dir, '**/*.'.g:qfixmemo_ext, 'list')
-  let pattern = a:file.'.'.g:qfixmemo_ext
+  for d in qflist
+    let d['filename'] = substitute(d['filename'], '\\', '/', 'g')
+  endfor
+  let pattern = a:file
+  if fnamemodify(pattern, ':e') !~ '\c'.g:qfixmemo_ext
+    let pattern = pattern.'.'.g:qfixmemo_ext
+  endif
   let pattern = s:strftimeRegxp(pattern)
   call filter(qflist, "v:val['filename'] =~ '" . pattern . "'")
-  let pattern = g:qfixmemo_diary.'.'.g:qfixmemo_ext
+  let pattern = g:qfixmemo_diary
+  if fnamemodify(pattern, ':e') !~ '\c'.g:qfixmemo_ext
+    let pattern = pattern.'.'.g:qfixmemo_ext
+  endif
   let pattern = s:strftimeRegxp(pattern)
   call filter(qflist, "v:val['filename'] !~ '" . pattern . "'")
   call filter(qflist, "v:val['filename'] !~ '/" . g:qfixmemo_pairfile_dir . "/'")
   for d in qflist
     let file = s:formatFileName(d['text'], g:qfixmemo_rename_length)
-    let d['text'] = file . '.' .  g:qfixmemo_ext
+    let d['text'] = file . '.' . g:qfixmemo_ext
   endfor
 
   call qfixlist#open(qflist, g:qfixmemo_dir)
@@ -1916,6 +1928,10 @@ endif
 if !exists('g:qfixmemo_submenu_size')
   let g:qfixmemo_submenu_size = 30
 endif
+" サブメニューを常に一定のサイズにする
+if !exists('g:qfixmemo_submenu_keepsize')
+  let g:qfixmemo_submenu_keepsize = 0
+endif
 " サブメニューのwrap
 if !exists('g:qfixmemo_submenu_wrap')
   let g:qfixmemo_submenu_wrap = 1
@@ -2003,12 +2019,13 @@ function! s:OpenQFixSubWin(file, id)
   endif
   let windir  = s:GetOptionWithID('g:qfixmemo_submenu_direction', swid)
   let winsize = s:GetOptionWithID('g:qfixmemo_submenu_size', swid)
+  let keepsize = s:GetOptionWithID('g:qfixmemo_submenu_keepsize', swid)
 
   let bufnum = bufnr(file)
   if bufnum == -1
     let wcmd = expand(file)
       augroup QFixMemoSubMenu
-        if winsize > 0
+        if keepsize && winsize > 0
           if windir =~ 'vert'
             exe 'au BufEnter '.fnamemodify(file, ':t').' normal! '.winsize ."\<C-W>|"
           else
@@ -2048,7 +2065,7 @@ function! s:OpenQFixSubWin(file, id)
   if wincmd != ''
     let wincmd = wincmd . (windir =~ 'vert' ? '' : ' vertical')
     if exists('*QFixMemoCalendar')
-      call QFixMemoCalendar(wincmd, '__Cal__', 1, 'parent')
+      call QFixMemoCalendar(wincmd, '__Cal__', 1, 'parent'. (keepsize ? 'resize' : ''))
     endif
   endif
   if exists('*QFixMemoSubMenuBufWinEnter')

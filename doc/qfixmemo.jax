@@ -371,7 +371,6 @@ l ra A は外部grepを使用するのでMRUリストより速度的には遅く
 ができます。
 同様に<Leader>lでは更新日数の指定が可能です。
 初期値は.vimrcでも設定できます。
-
  >
   " MRUの表示数
   let QFixMRU_Entries   = 20
@@ -520,6 +519,9 @@ qfixmemo_root_dirが優先されます。
 
   " サブメニューのウィンドウサイズ
   let qfixmemo_submenu_size = 30
+
+  " サブメニューのウィンドウサイズを維持する
+  let qfixmemo_submenu_size = 0
 
   " サブメニューのウィンドウ表示方向
   let qfixmemo_submenu_direction = 'topleft vertical'

@@ -437,7 +437,9 @@ function! QFixMemoCalendar(dircmd, file, cnt, ...)
   let winwidth = 1 + strlen(g:submenu_calendar_lmargin) + 3*7 + 1
   let b:calendar_width = winwidth
   let cbufnr = bufnr('%')
+  let b:calendar_resize = 0
   if a:0
+    let b:calendar_resize = a:1 =~ 'resize' ? 1 :0
     call s:winfixheight(winheight)
     exe 'normal! '.winwidth ."\<C-W>|"
     " サブメニューと同時にウィンドウクローズするためのフック
@@ -446,8 +448,10 @@ function! QFixMemoCalendar(dircmd, file, cnt, ...)
       exe 'au BufWinLeave * call <SID>SCBufWinLeave('.pbufnr.','.cbufnr.')'
     augroup END
   elseif win
+    let b:calendar_resize = 1
     exe 'normal! '.winwidth ."\<C-W>|"
   else
+    let b:calendar_resize = 1
     call s:winfixheight(winheight)
   endif
   " オートリサイズ
@@ -470,8 +474,8 @@ function! QFixMemoCalendar(dircmd, file, cnt, ...)
   nnoremap <silent> <buffer> <CR> :<C-u>call <SID>CR()<CR>
   " nnoremap <silent> <buffer> <Up>    :<C-u>call <SID>CR('up')<CR>
   " nnoremap <silent> <buffer> <Down>  :<C-u>call <SID>CR('down')<CR>
-  " nnoremap <silent> <buffer> <Right> :<C-u>call <SID>CR('>')<CR>
-  " nnoremap <silent> <buffer> <Left>  :<C-u>call <SID>CR('<')<CR>
+  nnoremap <silent> <buffer> <Right> :<C-u>call <SID>CR('>')<CR>
+  nnoremap <silent> <buffer> <Left>  :<C-u>call <SID>CR('<')<CR>
   if a:0
     wincmd p
   endif
@@ -648,8 +652,10 @@ endfunction
 
 function! s:SCBufEnter(pbuf, cbuf)
   if expand('<abuf>') == a:cbuf
-    exe 'normal! '.b:calendar_width  ."\<C-W>|"
-    call s:winfixheight(b:calendar_height)
+    if b:calendar_resize
+      exe 'normal! '.b:calendar_width  ."\<C-W>|"
+      call s:winfixheight(b:calendar_height)
+    endif
     let save_cursor = getpos('.')
     call cursor(1, 1)
     exe 'normal! z-'
@@ -686,7 +692,8 @@ function! s:syntax()
   syn match Type '<\+\s*\.\s*>\+'
   let s:vwruler = "Su Mo Tu We Th Fr Sa"
   exe 'syn match CalRuler "'.s:vwruler.'"'
-  exe 'syn match CalSunday  display "'.'^'.g:submenu_calendar_lmargin.'. \?\d\+"'
+
+  exe 'syn match CalSunday  display "'.'^'.g:submenu_calendar_lmargin.'. \?\d\+" contains=CalToday'
 
   hi def link CalNavi     Search
   hi def link CalSaturday Statement

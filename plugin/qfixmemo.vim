@@ -1356,7 +1356,7 @@ function! qfixmemo#ListRecentTimeStamp(...)
     let saved_grepprg = &grepprg
     set grepprg=findstr
     let tregxp = substitute(tregxp, '\^', '', 'g')
-    let tregxp = substitute(tregxp.'|', ' [^| ]*|', ' ', 'g')
+    let tregxp = substitute(tregxp, '|', ' ', 'g')
     let prevPath = escape(getcwd(), ' ')
     let qf = getqflist()
     exe 'lchdir ' . expand(g:qfixmemo_dir)

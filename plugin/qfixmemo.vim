@@ -338,7 +338,7 @@ silent! function QFixMemoKeymap()
   silent! nnoremap <silent> <unique> <Leader>c       :<C-u>call qfixmemo#EditNew()<CR>
   silent! nnoremap <silent> <unique> <Leader>u       :<C-u>call qfixmemo#Quickmemo()<CR>
   silent! nnoremap <silent> <unique> <Leader>U       :<C-u>call qfixmemo#Quickmemo(0)<CR>
-  silent! nnoremap <silent> <unique> <Leader><Space> :<C-u>call qfixmemo#Edit(g:qfixmemo_diary)<CR>
+  silent! nnoremap <silent> <unique> <Leader><Space> :<C-u>call qfixmemo#EditDiary(g:qfixmemo_diary)<CR>
   silent! nnoremap <silent> <unique> <Leader>j       :<C-u>call qfixmemo#PairFile('%')<CR>
   silent! nnoremap <silent> <unique> <Leader>i       :<C-u>call qfixmemo#SubMenu()<CR>
   silent! nnoremap <silent> <unique> <Leader>I       :<C-u>call qfixmemo#SubMenu(0)<CR>
@@ -1002,9 +1002,13 @@ function! qfixmemo#Quickmemo(...)
 endfunction
 
 " 日記を開く
-function! qfixmemo#EditDiary()
+function! qfixmemo#EditDiary(file)
   call qfixmemo#Init()
-  call qfixmemo#Edit(g:qfixmemo_diary)
+  let file = a:file
+  if fnamemodify(file, ':e') == ''
+    let file = file.'.'.g:qfixmemo_ext
+  endif
+  call qfixmemo#EditFile(file)
 endfunction
 
 " ペアファイルを開く
@@ -1314,7 +1318,6 @@ function! qfixmemo#ListRecentTimeStamp(...)
 
   " findstrは特別扱い
   let findstr = (g:mygrepprg == '') + (g:mygrepprg == 'findstr') + (a:0)
-
   let fmt = g:qfixmemo_timeformat
   if findstr
     let fmt = substitute(fmt, ' .*$', '', '')
@@ -1348,21 +1351,22 @@ function! qfixmemo#ListRecentTimeStamp(...)
   let fmt = substitute(fmt, '\C%d', '[0-3][0-9]', 'g')
   let fmt = fmt . '\([^'.g:qfixmemo_scheduleext.']\|$\)'
 
+  redraw | echo 'QFixMemo : Searching...'
   if findstr
     let saved_grepprg = &grepprg
-    let tregxp = '"'.substitute(tregxp, '|', ' ', 'g').'"'
-    redraw | echo 'QFixMemo : (findstr) Searching...'
+    set grepprg=findstr
+    let tregxp = substitute(tregxp, '\^', '', 'g')
+    let tregxp = substitute(tregxp.'|', ' [^| ]*|', ' ', 'g')
     let prevPath = escape(getcwd(), ' ')
+    let qf = getqflist()
     exe 'lchdir ' . expand(g:qfixmemo_dir)
-    let cmd = 'grep! /n /p /r /s ' . tregxp . ' *.*'
+    let cmd = 'grep! /n /p /r /i /s /b "' . tregxp . '" *.*'
     silent! exe cmd
     silent! exe 'lchdir ' . prevPath
+    let qflist = getqflist()
+    call setqflist(qf)
     let &grepprg = saved_grepprg
-    let qflist = QFixGetqflist()
     let qflist = qfixlist#Sort('rtext', qflist)
-    " redraw | echo 'QFixMemo : Sorting...'
-    call QFixSetqflist([])
-    let qflist = reverse(qflist)
     " FIXME: findstrで内部エンコーディングが utf-8 だと日本語ファイル名が処理できない
     for idx in range(len(qflist))
       let file = bufname(qflist[idx]['bufnr'])
@@ -1435,24 +1439,24 @@ endfunction
 function! qfixmemo#ListFile(file)
   call qfixmemo#Init()
   let title = '^'.escape(g:qfixmemo_title, g:qfixmemo_escape)
-  let qflist = qfixlist#search(title, g:qfixmemo_dir, 'reverse', 0, g:qfixmemo_fileencoding, '**/*')
   let pattern = a:file
   if fnamemodify(pattern, ':e') !~ '\c'.g:qfixmemo_ext
     let pattern = pattern.'.'.g:qfixmemo_ext
   endif
+  let pattern = '**/'.substitute(pattern, '[\\/]', '\[\\\\/\]', 'g')
   let pattern = s:strftimeRegxp(pattern)
-  call filter(qflist, "v:val['filename'] =~ '" . pattern . "'")
+  let qflist = qfixlist#search(title, g:qfixmemo_dir, 'reverse', 0, g:qfixmemo_fileencoding, pattern)
   call qfixlist#open(qflist, g:qfixmemo_dir)
 endfunction
 
 function! s:strftimeRegxp(regxp)
   let regxp = a:regxp
-  let regxp = substitute(regxp, '%Y', '\\d\\{4}', 'g')
-  let regxp = substitute(regxp, '%m', '\\d\\{2}', 'g')
-  let regxp = substitute(regxp, '%d', '\\d\\{2}', 'g')
-  let regxp = substitute(regxp, '%H', '\\d\\{2}', 'g')
-  let regxp = substitute(regxp, '%M', '\\d\\{2}', 'g')
-  let regxp = substitute(regxp, '%S', '\\d\\{2}', 'g')
+  let regxp = substitute(regxp, '%Y', '[0-9][0-9][0-9][0-9]', 'g')
+  let regxp = substitute(regxp, '%m', '[0-9][0-9]', 'g')
+  let regxp = substitute(regxp, '%d', '[0-9][0-9]', 'g')
+  let regxp = substitute(regxp, '%H', '[0-9][0-9]', 'g')
+  let regxp = substitute(regxp, '%M', '[0-9][0-9]', 'g')
+  let regxp = substitute(regxp, '%S', '[0-9][0-9]', 'g')
   return regxp
 endfunction
 

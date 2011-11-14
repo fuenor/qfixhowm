@@ -43,8 +43,8 @@ endif
 if !exists('g:QFixHowm_MenuCalendar')
   let g:QFixHowm_MenuCalendar = 1
 endif
-if !exists('g:HowmFiles_Preview')
-  let g:HowmFiles_Preview = 1
+if !exists('g:QFixHowm_MenuPreviewEnable')
+  let g:QFixHowm_MenuPreviewEnable = 1
 endif
 
 let s:howmsuffix = 'howm'
@@ -54,7 +54,7 @@ let s:calender_exists = 0
 """"""""""""""""""""""""""""""
 augroup HowmFiles
   au!
-  au BufWinEnter __HOWM_MENU__ call <SID>BufWinEnterMenu(g:HowmFiles_Preview, s:filehead)
+  au BufWinEnter __HOWM_MENU__ call <SID>BufWinEnterMenu(g:QFixHowm_MenuPreviewEnable, s:filehead)
   au BufWinLeave __HOWM_MENU__ call <SID>BufWinLeaveMenu()
   au BufLeave    __HOWM_MENU__ call <SID>BufLeaveMenu()
   au CursorHold  __HOWM_MENU__ call <SID>PreviewMenu(s:filehead)
@@ -66,21 +66,21 @@ function! s:TogglePreview(...)
   if a:0
     " let g:QFixHowm_MenuPreview = b:PreviewEnable
   else
-    let g:HowmFiles_Preview = b:PreviewEnable
+    let g:QFixHowm_MenuPreviewEnable = b:PreviewEnable
   endif
   if !b:PreviewEnable
     call QFixPclose()
   endif
 endfunction
 
-function! s:Close()
+function! s:BufWinLeaveMenu()
   call QFixPclose()
-  if winnr('$') == 1 || (winnr('$') == 2 && b:PreviewEnable == 1)
+  call s:BufHiddenMenu()
+  if winnr('$') == 1
     if tabpagenr('$') > 1
       tabclose
     else
       silent! b #
-      " silent! close
     endif
   else
     close
@@ -502,9 +502,6 @@ endfunction
 function! HowmMenuCmdMap(cmd, ...)
   let cmd = a:0 ? a:1 : a:cmd
   let cmd = ':call QFixHowmCmd("'.cmd.'")<CR>'
-  if g:QFixHowm_MenuCloseOnJump && cmd =~ '"[cu ]"'
-    let cmd = cmd.':<C-u>call HowmMenuClose()<CR>'
-  endif
   exec 'silent! nnoremap <buffer> <silent> '.a:cmd.' '.cmd
 endfunction
 
@@ -512,6 +509,7 @@ function! QFixHowmCmd(cmd)
   if g:qfixmemo_grep_cword
     let g:qfixmemo_grep_cword = -1
   endif
+  let bufnr = bufnr('%')
   if a:cmd == ' '
     call qfixmemo#Edit(g:qfixmemo_diary)
   elseif a:cmd == 'c'
@@ -521,6 +519,9 @@ function! QFixHowmCmd(cmd)
   else
     let cmd = g:qfixmemo_mapleader.a:cmd
     call feedkeys(cmd, 'm')
+  endif
+  if g:QFixHowm_MenuCloseOnJump && a:cmd =~ '^[ cu]$'
+    call HowmMenuClose(bufnr)
   endif
 endfunction
 
@@ -546,7 +547,7 @@ function! s:HowmMenuCR() range
     if cmd =~ '^<.*>$'
       exec 'let cmd = '.'"\'.cmd.'"'
     endif
-    call feedkeys(cmd, 't')
+    call feedkeys(cmd, 'm')
     call setpos('.', save_cursor)
     return ''
   endif
@@ -571,19 +572,17 @@ function! s:MenuCmd_J()
   echo 'Close on jump : ' . (g:QFixHowm_MenuCloseOnJump? 'ON' : 'OFF')
 endfunction
 
-function! HowmMenuClose()
+function! HowmMenuClose(mbuf)
+  let buf = bufnr('%')
   call QFixPclose()
-  if winnr('$') == 1
-    exec 'silent! b#'
-    return
+  call s:BufHiddenMenu()
+  let winnr = bufwinnr(a:mbuf)
+  if winnr != -1
+    exe winnr.'wincmd w'
+    exe 'wincmd c'
   endif
-  let mfilename = '__HOWM_MENU__'
-  for i in range(1, winnr('$'))
-    if fnamemodify(bufname(winbufnr(i)), ':t') == mfilename
-      exec i . 'wincmd w'
-      exec 'silent! close'
-    endif
-  endfor
+  let winnr = bufwinnr(buf)
+  exe winnr.'wincmd w'
 endfunction
 
 function! s:BufWinEnterMenu(preview, head)
@@ -596,8 +595,8 @@ function! s:BufWinEnterMenu(preview, head)
     let b:PreviewEnable = a:preview
   endif
 
-  hi link QFMenuButton	Special
-  hi link QFMenuSButton	Identifier
+  hi link QFMenuButton Special
+  hi link QFMenuSButton Identifier
   exe 'set ft='.g:qfixmemo_filetype
   call qfixmemo#Syntax()
   runtime! syntax/howm_schedule.vim
@@ -615,7 +614,7 @@ function! s:BufWinEnterMenu(preview, head)
   call QFixHowmQFsyntax()
 
   nnoremap <buffer> <silent> J :<C-u>call <SID>MenuCmd_J()<CR>
-  nnoremap <buffer> <silent> q :<C-u>call <SID>Close()<CR>
+  nnoremap <buffer> <silent> q :close<CR>
   nnoremap <buffer> <silent> i :<C-u>call <SID>TogglePreview('menu')<CR>
   call QFixAltWincmdMap()
   nnoremap <buffer> <silent> <CR> :<C-u>call <SID>HowmMenuCR()<CR>
@@ -623,7 +622,7 @@ function! s:BufWinEnterMenu(preview, head)
   silent! exec 'lchdir ' . escape(g:qfixmemo_dir, ' ')
 endfunction
 
-function! s:BufWinLeaveMenu()
+function! s:BufHiddenMenu()
   if g:QFixHowm_MenuCalendar && s:calender_exists
     let winnr = bufwinnr(s:calender_exists)
     if winnr != -1

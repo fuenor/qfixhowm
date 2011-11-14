@@ -83,7 +83,7 @@ if !exists('g:qfixmemo_filename')
 endif
 " 日記ファイル名
 if !exists('g:qfixmemo_diary')
-  let g:qfixmemo_diary         = 'diary/%Y-%m-%d'
+  let g:qfixmemo_diary         = 'diary/%Y/%m/%Y-%m-%d'
 endif
 if exists('*QFixMemoCalendarDiary')
   let calendar_action = "QFixMemoCalendarDiary"
@@ -423,8 +423,11 @@ if g:qfixmemo_use_howm_schedule
       call QFixHowmOpenMenu()
     endif
     call <SID>howmScheduleEnv('restore')
-    let lt = localtime() - HowmSchedueCachedTime('menu')
-    echo 'QFixMemo : Cached menu ('.lt/60.' minutes ago)'
+    let lt = HowmSchedueCachedTime('menu')
+    if lt > 0
+      let lt = localtime() - lt
+      echo 'QFixMemo : Cached menu ('.lt/60.' minutes ago)'
+    endif
   endfunction
 
   function! s:howmScheduleEnv(mode)
@@ -869,6 +872,7 @@ endfunction
 
 function! s:syntaxHighlight()
   if g:qfixmemo_syntax_flag =~ '^...1'
+    silent! syn clear qfixmemoTitle
     let l:qfixmemo_title = escape(g:qfixmemo_title, g:qfixmemo_escape)
     exe 'syn region qfixmemoTitle start="^'.l:qfixmemo_title.'[^'.g:qfixmemo_title.']'.'" end="$" contains=qfixmemoTitleDesc,qfixmemoCategory'
     exe 'syn match qfixmemoTitleDesc "^'.l:qfixmemo_title.'$"'
@@ -1921,6 +1925,10 @@ endfunction
 if !exists('g:qfixmemo_menu_title')
   let g:qfixmemo_menu_title = '__menu__'
 endif
+" メニューキーを使用する
+if !exists('g:qfixmemo_menu_hotkey')
+  let g:qfixmemo_menu_hotkey = 1
+endif
 
 """"""""""""""""""""""""""""""
 " sub menu
@@ -2734,7 +2742,6 @@ function! s:qfixmemoSortHowmClink(v1, v2)
 endfunction
 
 """"""""""""""""""""""""""""""
-" help
 function! qfixmemo#Syntax()
   if g:qfixmemo_filetype != ''
     exe 'setlocal filetype=' . g:qfixmemo_filetype

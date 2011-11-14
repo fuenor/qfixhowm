@@ -1215,9 +1215,7 @@ function! QFixPreviewOpen(file, line, ...)
   silent! wincmd P
   let s:QFix_PreviewWin = bufnr('%')
   " set options
-  if g:QFix_PreviewWrap == 0
-    let &wrap = g:QFix_PreviewWrap
-  endif
+  let &wrap = g:QFix_PreviewWrap
   setlocal nofoldenable
   setlocal nobuflisted
   setlocal noswapfile

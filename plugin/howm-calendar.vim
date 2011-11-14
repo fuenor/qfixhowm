@@ -193,10 +193,6 @@ endfunction
 """"""""""""""""""""""""""""""
 " localtime()基準の経過日
 """"""""""""""""""""""""""""""
-" strftime()の基準年
-if !exists('g:YearStrftime')
-  let g:YearStrftime = 1970
-endif
 function! Date2Int(year, month, day)
   let year = a:year
   let month = a:month
@@ -218,6 +214,10 @@ function! Date2Int(year, month, day)
   let today = dy + dl + dm + day - 1
   return today
 endfunction
+" strftime()の基準年
+if !exists('g:YearStrftime')
+  let g:YearStrftime = 1970
+endif
 " strftime()の基準日数(1970-01-01)
 if !exists('g:DateStrftime')
   let g:DateStrftime = Date2Int(g:YearStrftime, 1, 1)
@@ -645,8 +645,9 @@ function! s:SCBufWinLeave(pbuf, cbuf)
     exe 'augroup SubmenuCalendar'.a:cbuf
       au!
     augroup END
-    " FIXME: エラーメッセージが出る場合
-    silent! call feedkeys("\<C-w>c", 'n')
+    if bufname('%') == bufname(expand('<abuf>')+0)
+      silent! close
+    endif
   endif
 endfunction
 
@@ -698,7 +699,7 @@ function! s:syntax()
   hi def link CalNavi     Search
   hi def link CalSaturday Statement
   hi def link CalSunday   Type
-  hi def link CalRuler    StatusLine
+  hi def link CalRuler    StatusLineNC
   hi def link CalWeeknm   Comment
   hi def link CalToday    Directory
   hi def link CalHeader   Special

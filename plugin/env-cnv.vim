@@ -99,13 +99,6 @@ endfunction
 """"""""""""""""""""""""""""""
 let s:howmsuffix = 'howm'
 
-" デフォルト変更
-if g:QFixHowm_Convert < 2
-  if !exists('g:qfixmemo_keyword_mode')
-    let g:qfixmemo_keyword_mode = 0
-  endif
-endif
-
 " キーマップリーダー
 if !exists('g:qfixmemo_mapleader')
   let g:qfixmemo_mapleader = 'g,'
@@ -150,23 +143,18 @@ endif
 " for howm-chenv.vim
 if !exists('g:QFixHowm_DiaryFile') && !exists('g:qfixmemo_diary')
   let g:QFixHowm_DiaryFile = fnamemodify(g:howm_filename, ':h').'/%Y-%m-%d-000000.'.g:QFixHowm_FileExt
+  " let g:QFixHowm_DiaryFile = 'diary/%Y/%m/%Y-%m-%d.'.g:QFixHowm_FileExt
 endif
 if !exists('g:QFixHowm_QuickMemoFile') && !exists('g:qfixmemo_quickmemo')
   let g:QFixHowm_QuickMemoFile = 'Qmem-00-0000-00-00-000000.'.g:QFixHowm_FileExt
 endif
 
 " QFixMemo/QFixHowmでデフォルトが異なるオプション
-if !exists('g:qfixmemo_diary')
-  let g:qfixmemo_diary = 'diary/%Y/%m/%Y-%m-%d'
-endif
 if !exists('g:qfixmemo_pairfile_dir')
   let g:qfixmemo_pairfile_dir = 'pairlink'
 endif
 if !exists('g:qfixmemo_keyword_mode')
   let g:qfixmemo_keyword_mode = 1
-endif
-if !exists('g:qfixmemo_keyword_dir')
-  let g:qfixmemo_keyword_dir = 'wiki'
 endif
 if !exists('g:qfixmemo_keyword_file')
   let g:qfixmemo_keyword_file = '~/.howm-keys'
@@ -441,7 +429,9 @@ function! QFixHowmHelp()
   call myhowm_msg#HelpInit()
   call setline(1, g:QFixHowmHelpList)
   call cursor(1, 1)
+  syn clear
   call qfixmemo#Syntax()
+  syn match Special '<.\{-}>'
   setlocal nomodifiable
   nnoremap <silent> <buffer> <CR> :call QFixMemoUserModeCR()<CR>
 endfunction

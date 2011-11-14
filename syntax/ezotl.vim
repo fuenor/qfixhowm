@@ -13,8 +13,8 @@ hi link ezotlWarningMsg WarningMsg
 hi link ezotlTitle      Identifier
 
 hi link ezotlTab0   Normal
-hi link ezotlTab1   Statement
-hi link ezotlTab2   Special
+hi link ezotlTab1   Special
+hi link ezotlTab2   Statement
 hi link ezotlTab3   Type
 hi link ezotlTab4   PreProc
 

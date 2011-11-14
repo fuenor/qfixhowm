@@ -302,10 +302,6 @@ function! QFixHowmSetup()
       exe printf(opt[0], opt[1])
     endif
   endfor
-
-  " タイトル検索の正規表現作成
-  call QFixMemoTitleRegxp()
-
   " ファイルタイプに QFixHowm_FileType以外を使用する
   if exists('g:QFixHowm_HowmMode') && g:QFixHowm_HowmMode == 0
     if exists('g:QFixHowm_UserFileExt')
@@ -315,6 +311,8 @@ function! QFixHowmSetup()
       let g:qfixmemo_filetype = g:QFixHowm_UserFileType
     endif
   endif
+  " タイトル検索の正規表現作成
+  call QFixMemoTitleRegxp()
 
   " テンプレート
   if exists('g:QFixHowm_Template_'.g:qfixmemo_ext)

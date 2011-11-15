@@ -3,9 +3,9 @@
 "                 see doc/openuri.jax
 "         Author: fuenor <fuenor@gmail.com>
 "                 http://sites.google.com/site/fudist/Home  (Japanese)
-"  Last Modified: 2011-11-01 12:42
+"  Last Modified: 2011-11-14 22:31
 "=============================================================================
-let s:Version = 1.00
+let s:Version = 1.01
 scriptencoding utf-8
 if exists('g:disable_openuri') && g:disable_openuri == 1
   finish
@@ -80,11 +80,11 @@ function! openuri#init()
     let g:openuri_schemereg = g:openuri_schemereg.'\|'.key
   endfor
 
-  if exists('g:QFixHowm_OpenURIcmd')
-    let g:openuri_cmd = g:QFixHowm_OpenURIcmd
-  endif
   if exists('g:QFixHowm_OpenVimExtReg')
     let g:openuri_vimextreg = g:QFixHowm_OpenVimExtReg
+  endif
+  if exists('g:QFixHowm_OpenURIcmd')
+    let g:openuri_cmd = g:QFixHowm_OpenURIcmd
   endif
   if exists('g:QFixHowm_Edit')
     let g:openuri_edit = g:QFixHowm_Edit
@@ -94,20 +94,26 @@ endfunction
 """"""""""""""""""""""""""""""
 " カーソル位置のファイルを開く
 """"""""""""""""""""""""""""""
-" カーソル位置のファイルを開くコマンド
-if !exists('g:openuri_cmd')
-  if has('unix')
-    let g:openuri_cmd = "call system('firefox %s &')"
-  else
-    " Internet Explorer
-    " let g:openuri_cmd = '!start "C:/Program Files/Internet Explorer/iexplore.exe" %s'
-    let g:openuri_cmd = '!start "rundll32.exe" url.dll,FileProtocolHandler %s'
-  endif
-endif
-
 " Vimで開くファイル指定
 if !exists('g:openuri_vimextreg')
   let g:openuri_vimextreg = '\.\(txt\|mkd\|wiki\|rd\|vim\|js\|java\|py\|rb\|h\|c\|cpp\|ini\|conf\)$'
+endif
+
+" カーソル位置のファイルを開くコマンド
+if !exists('g:openuri_cmd')
+  " netrw を使用する場合(:help gx)
+  let g:openuri_cmd = 'netrw'
+  " if has('unix')
+  "   " let g:openuri_cmd = "call system('firefox %s &')"
+  " else
+  "   " Internet Explorer
+  "   " let g:openuri_cmd = '!start "C:/Program Files/Internet Explorer/iexplore.exe" %s'
+  "   let g:openuri_cmd = '!start "rundll32.exe" url.dll,FileProtocolHandler %s'
+  " endif
+endif
+" netrw でリモートを使用
+if !exists('g:openuri_netrw_remote')
+  let g:openuri_netrw_remote = 0
 endif
 
 " scheme:// convert dictionary
@@ -240,6 +246,7 @@ function! s:openstr(str)
   if str =~ '^\(\(https\|http\|file\|ftp\)://\|'.pathhead.'\)$'
     return "\<CR>"
   endif
+
   " Vimか指定のプログラムで開く
   if str =~ '^'.pathhead
     if str !~ '^\\\\'
@@ -249,6 +256,15 @@ function! s:openstr(str)
       silent! exe 'lchdir ' . prevPath
     endif
     if str !~ l:vimextreg
+      if g:openuri_cmd =~ '\c^'.'netrw'
+        if has("win32") || has("win95") || has("win64") || has("win16")
+          if &enc != 'cp932' && str =~ '[^[:print:]]'
+            let str = iconv(str, &enc, 'cp932')
+          endif
+        endif
+        call netrw#NetrwBrowseX(str, g:openuri_netrw_remote)
+        return 1
+      endif
       let ext = tolower(fnamemodify(str, ':e'))
       if !exists('g:openuri_'.ext) && exists('g:QFixHowm_Opencmd_'.ext)
         exe 'let g:openuri_'.ext.' = g:QFixHowm_Opencmd_'.ext
@@ -319,13 +335,20 @@ function! s:openuri(uri)
     let urichr  = "[-0-9a-zA-Z;/?@&=+$,_.!~*'()%:#]"
     let uri = matchstr(uri, urichr.'\+')
   endif
-  if has('win32') || has('win64')
+  if has("win32") || has("win95") || has("win64") || has("win16")
     if &enc != 'cp932' && uri =~ '^file://' && uri =~ '[^[:print:]]'
       let bat = 1
     endif
   endif
+  if g:openuri_cmd =~ '\c^'.'netrw$'
+    if bat
+      let str = iconv(uri, &enc, 'cp932')
+    endif
+    call netrw#NetrwBrowseX(uri, g:openuri_netrw_remote)
+    return 1
+  endif
   if g:openuri_cmd != ''
-    let cmd = g:openuri_cmd
+    let cmd = substitute(g:openuri_cmd, '^netrw|', '', '')
     if g:openuri_cmd =~ '\(rundll32\|iexplore\(\.exe\)\?\)' && uri =~ '^file://'
     else
       let uri = s:EncodeURL(uri, &enc)

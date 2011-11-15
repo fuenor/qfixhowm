@@ -190,7 +190,9 @@ http://sites.google.com/site/fudist/Home/grep/install
 
 <Leader>c           let qfixmemo_filename  = '%Y/%m/%Y-%m-%d-%H%M%S'
 <Leader>u           let qfixmemo_quickmemo = 'Qmem-00-0000-00-00-000000'
-<Leader><Space>     let qfixmemo_diary     = 'diary/%Y-%m-%d'
+<Leader><Space>     let qfixmemo_diary     = 'diary/%Y/%m/%Y-%m-%d'
+
+ファイル拡張子      let qfixmemo_ext       = 'txt'
 
 ファイル名には |strftime()|で使用可能な文字列が設定できます。
 
@@ -243,8 +245,10 @@ NOTE:
 
 NOTE:
 クイックメモで開くファイル
-- 指定ファイル名に拡張子が存在しない場合はqfixmemo_extを拡張子として付加します
 - フルパスで指定すると qfixmemo_dir外のファイルを開くことができます
+- 指定ファイル名に拡張子が存在しない場合はqfixmemo_extを拡張子として付加します
+  パスや拡張子まで含めて指定されている場合は、指定のファイルを開きます。
+  したがってクイックメモに限りQFixMemo以外のファイルでも開くことが可能です
 
 ------------------------------------------------------------------------------
 3.2 ペアファイル																				*qfixmemo-pairfile*
@@ -295,8 +299,8 @@ NOTE:
 + リスト3 : (空白文字)+':'以降はノーマル表示
 
 表 (行頭が'|'で始まる表。セル内が' *'で始まると項目名)
-| *名前  | *アドレス |
-| Google | http://www.google.co.jp |
+| *名前   | *アドレス          |
+| example | http://example.com |
 
 :定義リスト : 行頭の':'と(空白文字)+':'で始める
 
@@ -523,17 +527,23 @@ qfixmemo_root_dirが優先されます。
   " サブメニューのウィンドウサイズを維持する
   let qfixmemo_submenu_size = 0
 
-  " サブメニューのウィンドウ表示方向
+  " サブメニューのウィンドウ表示コマンド
   let qfixmemo_submenu_direction = 'topleft vertical'
 
   " サブメニューのwrap
   let qfixmemo_submenu_wrap = 1
 
+  " サブメニューウィンドウサイズを維持する
+  let g:qfixmemo_submenu_keepsize = 0
+
+  " サブメニューのカレンダー表示用コマンド(空文字列 '' なら非表示)
+  let g:qfixmemo_submenu_calendar_wincmd = 'leftabove'
+
   " サブメニューでアウトラインを使用する
   let g:qfixmemo_submenu_outline = 1
 
 NOTE:
-ウィンドウ表示方向については|vertical|を参照してください。
+ウィンドウ表示コマンドについては|vertical|を参照してください。
 
 ------------------------------------------------------------
 8.1 カレンダー																			*qfixmemo-submenu-calendar*
@@ -557,9 +567,6 @@ NOTE:
   let qfixmemo_calendar_wincmd = 'vertical topleft'
   " 単体カレンダーに表示する月数
   let qfixmemo_calendar_count  = 3
-
-  " サブメニュー内で表示するカレンダーの分割指定(leftabove, rightbelow)
-  let qfixmemo_submenu_calendar_wincmd = 'leftabove'
 
 ------------------------------------------------------------
 8.1.2 カレンダーの休日表示													*qfixmemo-submenu-holiday*

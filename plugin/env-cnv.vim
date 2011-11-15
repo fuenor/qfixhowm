@@ -136,9 +136,10 @@ endif
 if !exists('g:howm_filename')
   let g:howm_filename = g:qfixmemo_filename
 endif
-let g:QFixHowm_FileExt = fnamemodify(g:howm_filename, ':e')
-let g:QFixHowm_FileExt = g:QFixHowm_FileExt == '' ? s:defsuffix : g:QFixHowm_FileExt
-
+if !exists('g:QFixHowm_FileExt')
+  let g:QFixHowm_FileExt = fnamemodify(g:howm_filename, ':e')
+  let g:QFixHowm_FileExt = g:QFixHowm_FileExt != '' ? g:QFixHowm_FileExt : s:defsuffix
+endif
 if !exists('g:QFixHowm_FileType')
   let g:QFixHowm_FileType = g:qfixmemo_filetype
 endif

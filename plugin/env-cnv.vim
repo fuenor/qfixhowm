@@ -98,6 +98,7 @@ endfunction
 " オプションコンバート
 """"""""""""""""""""""""""""""
 let s:howmsuffix = 'howm'
+let s:defsuffix  = 'txt'
 
 " キーマップリーダー
 if !exists('g:qfixmemo_mapleader')
@@ -118,11 +119,11 @@ if !exists('g:qfixmemo_dir')
   let g:qfixmemo_dir = '~/howm'
 endif
 if !exists('g:qfixmemo_filename')
-  let g:qfixmemo_filename = '%Y/%m/%Y-%m-%d-%H%M%S.txt'
+  let g:qfixmemo_filename = '%Y/%m/%Y-%m-%d-%H%M%S.'.s:defsuffix
 endif
 if !exists('g:qfixmemo_ext')
   let g:qfixmemo_ext = fnamemodify(g:qfixmemo_filename, ':e')
-  let g:qfixmemo_ext = g:qfixmemo_ext != '' ? g:qfixmemo_ext : 'txt'
+  let g:qfixmemo_ext = g:qfixmemo_ext != '' ? g:qfixmemo_ext : s:defsuffix
 endif
 if !exists('g:qfixmemo_filetype')
   let g:qfixmemo_filetype = 'howm_memo'
@@ -135,9 +136,9 @@ endif
 if !exists('g:howm_filename')
   let g:howm_filename = g:qfixmemo_filename
 endif
-if !exists('g:QFixHowm_FileExt')
-  let g:QFixHowm_FileExt  = fnamemodify(g:howm_filename, ':e')
-endif
+let g:QFixHowm_FileExt = fnamemodify(g:howm_filename, ':e')
+let g:QFixHowm_FileExt = g:QFixHowm_FileExt == '' ? s:defsuffix : g:QFixHowm_FileExt
+
 if !exists('g:QFixHowm_FileType')
   let g:QFixHowm_FileType = g:qfixmemo_filetype
 endif

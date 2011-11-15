@@ -178,7 +178,7 @@ if !exists('g:QFixHowm_ShowScheduleMenu')
 endif
 ",y で表示する予定・TODO
 if !exists('g:QFixHowm_ListReminder_ScheExt')
-  let g:QFixHowm_ListReminder_ScheExt = '[-@!.]'
+  let g:QFixHowm_ListReminder_ScheExt = '[@!.]'
 endif
 ",t で表示する予定・TODO
 if !exists('g:QFixHowm_ListReminder_TodoExt')

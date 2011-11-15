@@ -73,20 +73,6 @@ function! s:TogglePreview(...)
   endif
 endfunction
 
-function! s:BufWinLeaveMenu()
-  call QFixPclose()
-  call s:BufHiddenMenu()
-  if winnr('$') == 1
-    if tabpagenr('$') > 1
-      tabclose
-    else
-      silent! b #
-    endif
-  else
-    close
-  endif
-endfunction
-
 function! s:Getfile(lnum, ...)
   let l = a:lnum
   let str = getline(l)
@@ -521,8 +507,21 @@ function! QFixHowmCmd(cmd)
     call feedkeys(cmd, 'm')
   endif
   if g:QFixHowm_MenuCloseOnJump && a:cmd =~ '^[ cu]$'
-    call HowmMenuClose(bufnr)
+    call <SID>HowmMenuClose(bufnr)
   endif
+endfunction
+
+function! s:HowmMenuClose(mbuf)
+  let buf = bufnr('%')
+  call s:CloseMenuPre()
+  exe 'bd '.a:mbuf
+  let winnr = bufwinnr(buf)
+  exe winnr.'wincmd w'
+endfunction
+
+function! s:CloseMenuPre()
+  call QFixPclose()
+  call s:CloseCalendar()
 endfunction
 
 function! s:HowmMenuCR() range
@@ -572,22 +571,7 @@ function! s:MenuCmd_J()
   echo 'Close on jump : ' . (g:QFixHowm_MenuCloseOnJump? 'ON' : 'OFF')
 endfunction
 
-function! HowmMenuClose(mbuf)
-  let buf = bufnr('%')
-  call QFixPclose()
-  call s:BufHiddenMenu()
-  let winnr = bufwinnr(a:mbuf)
-  if winnr != -1
-    exe winnr.'wincmd w'
-    exe 'wincmd c'
-  endif
-  let winnr = bufwinnr(buf)
-  exe winnr.'wincmd w'
-endfunction
-
 function! s:BufWinEnterMenu(preview, head)
-  " set nowinfixheight
-  " set winfixwidth
   let &wrap=g:QFixHowm_MenuWrap
   let b:updatetime = g:QFix_PreviewUpdatetime
   exec 'setlocal updatetime='.b:updatetime
@@ -614,7 +598,7 @@ function! s:BufWinEnterMenu(preview, head)
   call QFixHowmQFsyntax()
 
   nnoremap <buffer> <silent> J :<C-u>call <SID>MenuCmd_J()<CR>
-  nnoremap <buffer> <silent> q :close<CR>
+  nnoremap <buffer> <silent> q :call <SID>Close()<CR>
   nnoremap <buffer> <silent> i :<C-u>call <SID>TogglePreview('menu')<CR>
   call QFixAltWincmdMap()
   nnoremap <buffer> <silent> <CR> :<C-u>call <SID>HowmMenuCR()<CR>
@@ -622,20 +606,38 @@ function! s:BufWinEnterMenu(preview, head)
   silent! exec 'lchdir ' . escape(g:qfixmemo_dir, ' ')
 endfunction
 
-function! s:BufHiddenMenu()
-  if g:QFixHowm_MenuCalendar && s:calender_exists
-    let winnr = bufwinnr(s:calender_exists)
-    if winnr != -1
-      exe winnr.'wincmd w'
-      exe 'wincmd c'
+function! s:BufWinLeaveMenu()
+  call QFixPclose()
+  let winnum = 1+(g:QFixHowm_MenuCalendar && (bufwinnr(s:calender_exists) != -1))
+  if tabpagenr('$') > 1 && winnum > 1 && winnr('$') == winnum
+    tabclose
+  elseif tabpagenr('$') == 1 && winnr('$') == winnum
+    call s:CloseCalendar()
+    if bufname('%') == '__HOWM_MENU__'
+      silent! b#
     endif
+  endif
+endfunction
+
+function! s:CloseCalendar()
+  if g:QFixHowm_MenuCalendar && s:calender_exists > 0
+    silent! exe 'bd '.s:calender_exists
     let s:calender_exists = 0
+  endif
+endfunction
+
+function! s:Close()
+  call QFixPclose()
+  let winnum = 1+(g:QFixHowm_MenuCalendar && (bufwinnr(s:calender_exists) != -1))
+  if tabpagenr('$') == 1 && winnr('$') == winnum
+    silent! b #
+  else
+    close
   endif
 endfunction
 
 let g:HowmMenuLnum = [0, 1, 1, 0]
 function! s:BufLeaveMenu()
-  " set nowinfixheight
   let g:HowmMenuLnum = getpos('.')
   if b:PreviewEnable
     call QFixPclose()

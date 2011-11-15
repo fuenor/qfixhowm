@@ -412,7 +412,7 @@ function! Grep(word, mode, title, addflag)
     let filepattern = g:MyGrep_FilePattern
   endif
   if extpattern == ''
-    let filepattern = input("filepattern : ", filepattern)
+    let filepattern = input("filepattern (rcsv: **/*) : ", filepattern)
   else
     let filepattern = extpattern
   endif

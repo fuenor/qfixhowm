@@ -27,6 +27,11 @@ if exists('g:fudist') && g:fudist
   let s:debug = 1
 endif
 
+" キーマップリーダー
+if !exists('g:qfixmemo_mapleader')
+  let g:qfixmemo_mapleader     = 'g,'
+endif
+
 if !exists('g:qfixmemo_dir')
   let g:qfixmemo_dir           = '~/qfixmemo'
 endif
@@ -35,14 +40,6 @@ if !exists('g:qfixmemo_fileencoding')
 endif
 if !exists('g:qfixmemo_fileformat')
   let g:qfixmemo_fileformat    = &ff
-endif
-if !exists('g:qfixmemo_ext')
-  let g:qfixmemo_ext           = 'txt'
-endif
-
-" キーマップリーダー
-if !exists('g:qfixmemo_mapleader')
-  let g:qfixmemo_mapleader     = 'g,'
 endif
 
 " タイトルマーカー
@@ -59,7 +56,7 @@ if !exists('g:qfixmemo_forceencoding')
 endif
 " BOMを自動変換
 if !exists('g:qfixmemo_nobomb')
-  let g:qfixmemo_nobomb = 1
+  let g:qfixmemo_nobomb        = 1
 endif
 
 " QFixMemoのシンタックスハイライト設定
@@ -81,10 +78,20 @@ endif
 if !exists('g:qfixmemo_filename')
   let g:qfixmemo_filename      = '%Y/%m/%Y-%m-%d-%H%M%S'
 endif
+" メモファイルの拡張子(qfixmemo_filenameから設定)
+if !exists('g:qfixmemo_ext')
+  let g:qfixmemo_ext = fnamemodify(g:qfixmemo_filename, ':e')
+  let g:qfixmemo_ext = g:qfixmemo_ext != '' ? g:qfixmemo_ext : 'txt'
+endif
+" クイックメモファイル名
+if !exists('g:qfixmemo_quickmemo')
+  let g:qfixmemo_quickmemo     = 'Qmem-00-0000-00-00-000000'
+endif
 " 日記ファイル名
 if !exists('g:qfixmemo_diary')
   let g:qfixmemo_diary         = 'diary/%Y/%m/%Y-%m-%d'
 endif
+" howm-calendar.vim
 if exists('*QFixMemoCalendarDiary')
   let calendar_action = "QFixMemoCalendarDiary"
 elseif exists('*QFixHowmCalendarDiary')
@@ -94,10 +101,6 @@ if exists('*QFixMemoCalendarSign')
   let calendar_sign   = "QFixMemoCalendarSign"
 elseif exists('*QFixHowmCalendarSign')
   let calendar_sign   = "QFixHowmCalendarSign"
-endif
-" クイックメモファイル名
-if !exists('g:qfixmemo_quickmemo')
-  let g:qfixmemo_quickmemo     = 'Qmem-00-0000-00-00-000000'
 endif
 " ペアファイルの作成先ディレクトリ
 if !exists('g:qfixmemo_pairfile_dir')
@@ -1656,6 +1659,11 @@ function! qfixmemo#Calendar(...)
   call QFixMemoCalendar(g:qfixmemo_calendar_wincmd, '__Calendar__', g:qfixmemo_calendar_count)
 endfunction
 
+if !exists('*QFixMemoCalendar')
+function QFixMemoCalendar(...)
+endfunction
+endif
+
 """"""""""""""""""""""""""""""
 let s:rwalk = []
 let s:randomfile = ''
@@ -1931,6 +1939,15 @@ if !exists('g:qfixmemo_menu_hotkey')
 endif
 
 """"""""""""""""""""""""""""""
+" カレンダー
+if !exists('g:qfixmemo_calendar_wincmd')
+  let g:qfixmemo_calendar_wincmd = 'vertical topleft'
+endif
+if !exists('g:qfixmemo_calendar_count')
+  let g:qfixmemo_calendar_count = 3
+endif
+
+""""""""""""""""""""""""""""""
 " sub menu
 " サブメニューのタイトル
 if !exists('g:qfixmemo_submenu_title')
@@ -2076,9 +2093,7 @@ function! s:OpenQFixSubWin(file, id)
   let wincmd = s:GetOptionWithID('g:qfixmemo_submenu_calendar_wincmd', swid)
   if wincmd != ''
     let wincmd = wincmd . (windir =~ 'vert' ? '' : ' vertical')
-    if exists('*QFixMemoCalendar')
-      call QFixMemoCalendar(wincmd, '__Cal__', 1, 'parent'. (keepsize ? 'resize' : ''))
-    endif
+    call QFixMemoCalendar(wincmd, '__Cal__', 1, 'parent'. (keepsize ? 'resize' : ''))
   endif
   if exists('*QFixMemoSubMenuBufWinEnter')
     call QFixMemoSubMenuBufWinEnter()

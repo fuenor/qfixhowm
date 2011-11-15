@@ -121,7 +121,8 @@ if !exists('g:qfixmemo_filename')
   let g:qfixmemo_filename = '%Y/%m/%Y-%m-%d-%H%M%S.txt'
 endif
 if !exists('g:qfixmemo_ext')
-  let g:qfixmemo_ext = fnamemodify(g:qfixmemo_filename,':e')
+  let g:qfixmemo_ext = fnamemodify(g:qfixmemo_filename, ':e')
+  let g:qfixmemo_ext = g:qfixmemo_ext != '' ? g:qfixmemo_ext : 'txt'
 endif
 if !exists('g:qfixmemo_filetype')
   let g:qfixmemo_filetype = 'howm_memo'

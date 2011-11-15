@@ -136,9 +136,15 @@ function! CalendarSign_(day, month, year)
   return g:calendar_flag[id]
 endfunction
 
+if !exists('g:howm_calendar_wincmd')
+  let g:howm_calendar_wincmd = 'vertical topleft'
+endif
+if !exists('g:howm_calendar_count')
+  let g:howm_calendar_count = 3
+endif
 if !exists('*Calendar')
   function Calendar(...)
-    call QFixMemoCalendar(g:qfixmemo_calendar_wincmd, '__Calendar__', g:qfixmemo_calendar_count)
+    call QFixMemoCalendar(g:howm_calendar_wincmd, '__Calendar__', g:howm_calendar_count)
     if exists('g:fudist')
       call s:CalendarPost(a:0)
     endif
@@ -540,12 +546,6 @@ function! s:CR(...)
   endif
 endfunction
 
-if !exists('g:qfixmemo_calendar_wincmd')
-  let g:qfixmemo_calendar_wincmd = 'vertical topleft'
-endif
-if !exists('g:qfixmemo_calendar_count')
-  let g:qfixmemo_calendar_count = 3
-endif
 function! s:build(...)
   let num = exists('b:calendar_count') ? b:calendar_count : 3
   let num = a:0 ? a:1 : num
@@ -692,14 +692,15 @@ function! s:syntax()
   " ruler
   syn match Type '<\+\s*\.\s*>\+'
   let s:vwruler = "Su Mo Tu We Th Fr Sa"
-  exe 'syn match CalRuler "'.s:vwruler.'"'
+  exe 'syn match CalRulerNC "'.s:vwruler.'"'
 
   exe 'syn match CalSunday  display "'.'^'.g:submenu_calendar_lmargin.'. \?\d\+" contains=CalToday'
 
   hi def link CalNavi     Search
   hi def link CalSaturday Statement
   hi def link CalSunday   Type
-  hi def link CalRuler    StatusLineNC
+  hi def link CalRuler    StatusLine
+  hi def link CalRulerNC  StatusLineNC
   hi def link CalWeeknm   Comment
   hi def link CalToday    Directory
   hi def link CalHeader   Special

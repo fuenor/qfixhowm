@@ -1689,8 +1689,8 @@ function! qfixmemo#RandomWalk(file, ...)
   let ftime = ftime < 0 ? 0 : ftime
   let ltime = localtime() - ftime
   let dir   = g:qfixmemo_dir
-  if exists('g:qfixmemo_root_dir')
-    let dir = g:qfixmemo_root_dir
+  if exists('g:qfixmemo_root')
+    let dir = g:qfixmemo_root
   endif
   if exists('g:qfixmemo_random_dir')
     let dir = g:qfixmemo_random_dir
@@ -1726,8 +1726,8 @@ endfunction
 function! qfixmemo#RebuildRandomCache(file)
   call qfixmemo#Init()
   let dir   = g:qfixmemo_dir
-  if exists('g:qfixmemo_root_dir')
-    let dir = g:qfixmemo_root_dir
+  if exists('g:qfixmemo_root')
+    let dir = g:qfixmemo_root
   endif
   if exists('g:qfixmemo_random_dir')
     let dir = g:qfixmemo_random_dir
@@ -1997,8 +1997,8 @@ endif
 
 let s:qfixmemo_submenu_title = g:qfixmemo_submenu_title
 let s:submenu_basedir = g:qfixmemo_dir
-if exists('g:qfixmemo_root_dir')
-  let s:submenu_basedir = g:qfixmemo_root_dir
+if exists('g:qfixmemo_root')
+  let s:submenu_basedir = g:qfixmemo_root
 endif
 let s:sb_id = 0
 function! qfixmemo#SubMenu(...)

@@ -354,8 +354,8 @@ function! s:setholidayfile()
   endif
   if exists('g:QFixHowm_ScheduleSearchDir') && g:QFixHowm_ScheduleSearchDir != ''
     let l:howm_dir = g:QFixHowm_ScheduleSearchDir
-  elseif exists('g:qfixmemo_root_dir')
-    let l:howm_dir = g:qfixmemo_root_dir
+  elseif exists('g:qfixmemo_root')
+    let l:howm_dir = g:qfixmemo_root
   elseif exists('g:QFixHowm_RootDir')
     let l:howm_dir = g:QFixHowm_RootDir
   elseif exists('g:qfixmemo_dir')

@@ -455,7 +455,7 @@ U                   絞り込み全てをアンドゥ
 qfixmemo_random_dirを設定します。
 ランダム表示検索対象ディレクトリは以下のオプションの順番で設定されます。
   1 : qfixmemo_random_dir
-  2 : qfixmemo_root_dir
+  2 : qfixmemo_root
   3 : qfixmemo_dir
   デフォルトでは1,2が設定されていないので qfixmemo_dirが使用されます
  >
@@ -508,10 +508,10 @@ QFixMemoではサブメニューを開くことができます。
   " サブメニューのタイトル指定
   let qfixmemo_submenu_title = '__submenu__'
 
-基準ディレクトリは qfixmemo_dirですが、qfixmemo_root_dirがあれば、
-qfixmemo_root_dirが優先されます。
+基準ディレクトリは qfixmemo_dirですが、qfixmemo_rootがあれば、
+qfixmemo_rootが優先されます。
 
-  1 : qfixmemo_root_dir
+  1 : qfixmemo_root
   2 : qfixmemo_dir
 
 またタイトルではなくパス付きでファイル名指定も可能です。

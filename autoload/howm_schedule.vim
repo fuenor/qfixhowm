@@ -661,7 +661,7 @@ function! s:QFixHowmSortReminder(sq, mode)
 
   let idx = 0
   for d in qflist
-    let d.text = substitute(d.text, '\s*', '','')
+    let d.text = substitute(d.text, '^\s*', '','')
     let str = matchstr(d.text, '^\['.s:sch_date)
     let str = substitute(str, '^\[', '', '')
     let searchWord = ']'.s:sch_cmd
@@ -679,7 +679,8 @@ function! s:QFixHowmSortReminder(sq, mode)
     if cmd =~ '@' && opt > 1 && opt >= 2
       let dow = opt . dow
     endif
-    let d.text = substitute(d.text, ']'.escape(cmd, '~*'),  ']'. desc . dow, '')
+    let d.text = substitute(d.text, ']'.escape(cmd, '~*'),  ']'. desc . dow . '', '')
+    let d.text = substitute(d.text, dow.'\s*', dow.' ', '')
     let cmd = cmd[0]
     if opt == ''
       if cmd =~ '^-'
@@ -718,6 +719,9 @@ function! s:QFixHowmSortReminder(sq, mode)
           continue
         endif
       endif
+    elseif cmd =~ '^@'
+      call remove(qflist, idx)
+      continue
     endif
     if exists('g:QFixHowmToday')
       let d.text = d.text . "\t\t(" . priority . ")"

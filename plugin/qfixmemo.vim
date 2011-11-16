@@ -488,87 +488,81 @@ endfunction
 
 silent! function QFixMemoMenubar(menu, leader)
   let sepcmd  = 'amenu <silent> 41.333 '.a:menu.'.-sep%d-			<Nop>'
-  let menucmd = 'amenu <silent> 41.333 '.a:menu.'.%s<Tab>'.a:leader.'%s :call feedkeys("'.a:leader.'%s","t")<CR>'
-  call s:addMenu(menucmd, 'CreateNew(&C)'      , 'c', '<C-u>call qfixmemo#EditNew()')
-  call s:addMenu(menucmd, 'CreateNew(Name)(&N)', 'C', '<C-u>call qfixmemo#Edit()')
-  call s:addMenu(menucmd, 'QuickMemo(&U)'      , 'u', '<C-u>call qfixmemo#Quickmemo()')
-  call s:addMenu(menucmd, 'Diary(&D)'    , '<Space>', '<C-u>call qfixmemo#EditDiary(g:qfixmemo_diary)')
-  call s:addMenu(menucmd, 'PairFile(&J)'       , 'j', '<C-u>call qfixmemo#PairFile("%")')
-  call s:addMenu(menucmd, 'SubMenu(&I)'        , 'i', '<C-u>call qfixmemo#SubMenu()')
+  let menucmd = 'amenu <silent> 41.333 '.a:menu.'.%s<Tab>'.a:leader.'%s %s'
+  call s:addMenu(menucmd, 'CreateNew(&C)'      , 'c', ':<C-u>call qfixmemo#EditNew()<CR>')
+  call s:addMenu(menucmd, 'CreateNew(Name)(&N)', 'C', ':<C-u>call qfixmemo#Edit()<CR>')
+  call s:addMenu(menucmd, 'QuickMemo(&U)'      , 'u', ':<C-u>call qfixmemo#Quickmemo()<CR>')
+  call s:addMenu(menucmd, 'Diary(&D)'    , '<Space>', ':<C-u>call qfixmemo#EditDiary(g:qfixmemo_diary)<CR>')
+  call s:addMenu(menucmd, 'PairFile(&J)'       , 'j', ':<C-u>call qfixmemo#PairFile("%")<CR>')
+  call s:addMenu(menucmd, 'SubMenu(&I)'        , 'i', ':<C-u>call qfixmemo#SubMenu()<CR>')
   exe printf(sepcmd, 1)
   let sepcmd  = 'amenu <silent> 41.334 '.a:menu.'.-sep%d-			<Nop>'
-  let menucmd = 'amenu <silent> 41.334 '.a:menu.'.%s<Tab>'.a:leader.'%s :call feedkeys("'.a:leader.'%s","t")<CR>'
-  call s:addMenu(menucmd, 'MRU(&M)'              , 'm', '<C-u>call qfixmemo#ListMru()')
-  call s:addMenu(menucmd, 'ListRecent(&L)'       , 'l', '<C-u>call qfixmemo#ListRecent()')
-  call s:addMenu(menucmd, 'ListRecent(Stamp)(&2)', 'L', '<C-u>call qfixmemo#ListRecentTimeStamp()')
+  let menucmd = 'amenu <silent> 41.334 '.a:menu.'.%s<Tab>'.a:leader.'%s %s'
+  call s:addMenu(menucmd, 'MRU(&M)'              , 'm', ':<C-u>call qfixmemo#ListMru()<CR>')
+  call s:addMenu(menucmd, 'ListRecent(&L)'       , 'l', ':<C-u>call qfixmemo#ListRecent()<CR>')
+  call s:addMenu(menucmd, 'ListRecent(Stamp)(&2)', 'L', ':<C-u>call qfixmemo#ListRecentTimeStamp()<CR>')
 
   if g:qfixmemo_use_list_cache
-    call s:addMenu(menucmd, 'List(cache)(&E)', 'a',  '<C-u>call qfixmemo#ListCache("open")')
-    call s:addMenu(menucmd, 'ListAll(&A)'    , 'ra', '<C-u>call qfixmemo#List("open")')
+    call s:addMenu(menucmd, 'List(cache)(&E)', 'a',  ':<C-u>call qfixmemo#ListCache("open")<CR>')
+    call s:addMenu(menucmd, 'ListAll(&A)'    , 'ra', ':<C-u>call qfixmemo#List("open")<CR>')
   else
-    call s:addMenu(menucmd, 'ListAll(&A)',     'a',  '<C-u>call qfixmemo#List("open")')
+    call s:addMenu(menucmd, 'ListAll(&A)',     'a',  ':<C-u>call qfixmemo#List("open")<CR>')
   endif
-  call s:addMenu(menucmd, 'DiaryList(&O)',     'A',  '<C-u>call qfixmemo#ListFile(g:qfixmemo_diary)')
-  call s:addMenu(menucmd, 'FileList(&F)',      'rA', '<C-u>call qfixmemo#Glob(g:qfixmemo_dir, "**/*", "open")')
+  call s:addMenu(menucmd, 'DiaryList(&O)',     'A',  ':<C-u>call qfixmemo#ListFile(g:qfixmemo_diary)<CR>')
+  call s:addMenu(menucmd, 'FileList(&F)',      'rA', ':<C-u>call qfixmemo#Glob(g:qfixmemo_dir, "**/*", "open")<CR>')
   exe printf(sepcmd, 2)
-  call s:addMenu(menucmd, 'Calendar(&Q)', 'q', '<C-u>call qfixmemo#Calendar()')
+  call s:addMenu(menucmd, 'Calendar(&Q)', 'q', ':<C-u>call qfixmemo#Calendar()<CR>')
   exe printf(sepcmd, 3)
-  call s:addMenu(menucmd, 'FGrep(&S)', 's', '<C-u>call qfixmemo#FGrep()')
-  call s:addMenu(menucmd, 'Grep(&G)' , 'g', '<C-u>call qfixmemo#Grep()')
+  call s:addMenu(menucmd, 'FGrep(&S)', 's', ':<C-u>call qfixmemo#FGrep()<CR>')
+  call s:addMenu(menucmd, 'Grep(&G)' , 'g', ':<C-u>call qfixmemo#Grep()<CR>')
   if g:qfixmemo_use_howm_schedule
     exe printf(sepcmd, 4)
-    call s:addMenu(menucmd, 'Menu(&,)'            , ',',  '<C-u>call qfixmemo#OpenMenu()')
-    call s:addMenu(menucmd, 'Schedule(&Y)'        , 'y',  '<C-u>call qfixmemo#ListReminder("schedule")')
-    call s:addMenu(menucmd, 'Todo(&T)'            , 't',  '<C-u>call qfixmemo#ListReminder("todo")')
-    call s:addMenu(menucmd, 'Rebuild-Menu(&\.)'   , 'r,', '<C-u>call qfixmemo#OpenMenu("cache")')
-    call s:addMenu(menucmd, 'Rebuild-Schedule(&V)', 'ry', '<C-u>call qfixmemo#ListReminderCache("schedule")')
-    call s:addMenu(menucmd, 'Rebuild-Todo(&W)'    , 'rt', '<C-u>call qfixmemo#ListReminderCache("todo")')
+    call s:addMenu(menucmd, 'Menu(&,)'            , ',',  ':<C-u>call qfixmemo#OpenMenu()<CR>')
+    call s:addMenu(menucmd, 'Schedule(&Y)'        , 'y',  ':<C-u>call qfixmemo#ListReminder("schedule")<CR>')
+    call s:addMenu(menucmd, 'Todo(&T)'            , 't',  ':<C-u>call qfixmemo#ListReminder("todo")<CR>')
+    call s:addMenu(menucmd, 'Rebuild-Menu(&\.)'   , 'r,', ':<C-u>call qfixmemo#OpenMenu("cache")<CR>')
+    call s:addMenu(menucmd, 'Rebuild-Schedule(&V)', 'ry', ':<C-u>call qfixmemo#ListReminderCache("schedule")<CR>')
+    call s:addMenu(menucmd, 'Rebuild-Todo(&W)'    , 'rt', ':<C-u>call qfixmemo#ListReminderCache("todo")<CR>')
   endif
   exe printf(sepcmd, 5)
-  call s:addMenu(menucmd, 'RandomWalk(&R)'        , 'rr', '<C-u>call qfixmemo#RandomWalk(g:qfixmemo_random_file)')
-  call s:addMenu(menucmd, 'Rebuild-RandomWalk(&X)', 'rR', '<C-u>call qfixmemo#RebuildRandomCache(g:qfixmemo_random_file)')
+  call s:addMenu(menucmd, 'RandomWalk(&R)'        , 'rr', ':<C-u>call qfixmemo#RandomWalk(g:qfixmemo_random_file)<CR>')
+  call s:addMenu(menucmd, 'Rebuild-RandomWalk(&X)', 'rR', ':<C-u>call qfixmemo#RebuildRandomCache(g:qfixmemo_random_file)<CR>')
   exe printf(sepcmd, 6)
-  call s:addMenu(menucmd, 'Rebuild-Keyword(&K)', 'rk', '<C-u>call qfixmemo#RebuildKeyword()')
+  call s:addMenu(menucmd, 'Rebuild-Keyword(&K)', 'rk', ':<C-u>call qfixmemo#RebuildKeyword()<CR>')
   exe printf(sepcmd, 7)
-  call s:addMenu(menucmd, 'Rename(&Z)',       'rn', '<C-u>call qfixmemo#Rename()')
-  call s:addMenu(menucmd, 'Rename-files(&Z)', 'rN', '<C-u>call qfixmemo#ListRenameFile(g:qfixmemo_filename)')
+  call s:addMenu(menucmd, 'Rename(&Z)',       'rn', ':<C-u>call qfixmemo#Rename()<CR>')
+  call s:addMenu(menucmd, 'Rename-files(&Z)', 'rN', ':<C-u>call qfixmemo#ListRenameFile(g:qfixmemo_filename)<CR>')
   if g:qfixmemo_use_howm_schedule
     exe printf(sepcmd, 8)
-    call s:addMenu(menucmd, 'Help(&H)', 'H')
+    call s:addMenu(menucmd, 'Help(&H)', 'H', ':call feedkeys("'.a:leader.'H")<CR>')
   endif
   exe printf(sepcmd, 9)
   let submenu = '.Buffer[Local]\ (&B)'
   let sepcmd  = 'amenu <silent> 41.335 '.a:menu.submenu.'.-sep%d-			<Nop>'
-  let menucmd = 'amenu <silent> 41.335 '.a:menu.submenu.'.%s<Tab>'.a:leader.'%s :call feedkeys("'.a:leader.'%s","t")<CR>'
+  let menucmd = 'amenu <silent> 41.335 '.a:menu.submenu.'.%s<Tab>'.a:leader.'%s %s'
   exe printf(sepcmd, 1)
-  call s:addMenu(menucmd, 'Outline(&O)', 'o',  '<C-u>call QFixMemoOutline()')
+  call s:addMenu(menucmd, 'Outline(&O)', 'o',  ':<C-u>call QFixMemoOutline()<CR>')
   exe printf(sepcmd, 2)
-  call s:addMenu(menucmd, 'NewEntry(&1)', 'P', '<C-u>call qfixmemo#Template("top")')
-  call s:addMenu(menucmd, 'NewEntry(&P)', 'p', '<C-u>call qfixmemo#Template("prev")')
-  call s:addMenu(menucmd, 'NewEntry(&N)', 'n', '<C-u>call qfixmemo#Template("next")')
-  call s:addMenu(menucmd, 'NewEntry(&B)', 'N', '<C-u>call qfixmemo#Template("bottom")')
+  call s:addMenu(menucmd, 'NewEntry(&1)', 'P', ':<C-u>call qfixmemo#Template("top")<CR>')
+  call s:addMenu(menucmd, 'NewEntry(&P)', 'p', ':<C-u>call qfixmemo#Template("prev")<CR>')
+  call s:addMenu(menucmd, 'NewEntry(&N)', 'n', ':<C-u>call qfixmemo#Template("next")<CR>')
+  call s:addMenu(menucmd, 'NewEntry(&B)', 'N', ':<C-u>call qfixmemo#Template("bottom")<CR>')
   exe printf(sepcmd, 3)
-  call s:addMenu(menucmd, 'UpdateTime(&S)'    , 'S',  '<C-u>call qfixmemo#UpdateTime()')
-  call s:addMenu(menucmd, 'SortEntry(&S)'     , 'rs', '<C-u>call qfixmemo#SortEntry("Normal")')
-  call s:addMenu(menucmd, 'SortEntry(rev)(&S)', 'rS', '<C-u>call qfixmemo#SortEntry("Reverse")')
+  call s:addMenu(menucmd, 'UpdateTime(&S)'    , 'S',  ':<C-u>call qfixmemo#UpdateTime()<CR>')
+  call s:addMenu(menucmd, 'SortEntry(&S)'     , 'rs', ':<C-u>call qfixmemo#SortEntry("Normal")<CR>')
+  call s:addMenu(menucmd, 'SortEntry(rev)(&S)', 'rS', ':<C-u>call qfixmemo#SortEntry("Reverse")<CR>')
 
   exe printf(sepcmd, 4)
-  call s:addMenu(menucmd, 'DeleteEntry(&X)', 'x' ,'<C-u>call qfixmemo#DeleteEntry()')
-  call s:addMenu(menucmd, 'MoveEntry(&M)'  , 'X' ,'<C-u>call qfixmemo#DeleteEntry("Move")')
-  call s:addMenu(menucmd, 'DivideEntry(&W)', 'W' ,'<C-u>call qfixmemo#DivideEntry()')
+  call s:addMenu(menucmd, 'DeleteEntry(&X)', 'x' ,':<C-u>call qfixmemo#DeleteEntry()<CR>')
+  call s:addMenu(menucmd, 'MoveEntry(&M)'  , 'X' ,':<C-u>call qfixmemo#DeleteEntry("Move")<CR>')
+  call s:addMenu(menucmd, 'DivideEntry(&W)', 'W' ,':<C-u>call qfixmemo#DivideEntry()<CR>')
   if exists('*QFixMemoMenubarPost')
     call QFixMemoMenubarPost(a:menu, a:leader)
   endif
 endfunction
 
-function! s:addMenu(menu, acc, key,...)
-  if a:0 == 0
-    let cmd = printf(a:menu, a:acc, a:key, a:key)
-  else
-    let cmd = substitute(a:menu, 'call\s*feedkeys.*\ze<CR>', '%s', '')
-    let cmd = printf(cmd, a:acc, a:key, a:1)
-  endif
-  exe cmd
+function! s:addMenu(menu, acc, key, cmd)
+  exe printf(a:menu, a:acc, a:key, a:cmd)
 endfunction
 
 " VimEnter

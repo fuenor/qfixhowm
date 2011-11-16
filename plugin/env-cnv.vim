@@ -315,7 +315,7 @@ function! QFixHowmSetup()
       exe printf(opt[0], opt[1])
     endif
   endfor
-  " ファイルタイプに QFixHowm_FileType以外を使用する
+  " ファイルタイプに QFixHowm_FileType以外を使用する(Ver.2)
   if exists('g:QFixHowm_HowmMode') && g:QFixHowm_HowmMode == 0
     if exists('g:QFixHowm_UserFileExt')
       let g:qfixmemo_ext = g:QFixHowm_UserFileExt
@@ -381,12 +381,12 @@ if g:QFixHowm_RecentMode == 2
   function! QFixMemoMenubarPost(menu, leader)
     silent! exe 'aunmenu Memo(&M).ListRecent(&L)'
     silent! exe 'aunmenu Memo(&M).ListRecent(Stamp)(&2)'
-    let menucmd = 'amenu <silent> 41.333 '.a:menu.'.%s<Tab>'.a:leader.'%s :call feedkeys("'.a:leader.'%s","t")<CR>'
-    call s:addMenu(menucmd, 'ListRecent(Stamp)(&l)', 'l')
-    call s:addMenu(menucmd, 'ListRecent(&2)'       , 'L')
+    let menucmd = 'amenu <silent> 41.333 '.a:menu.'.%s<Tab>'.a:leader.'%s %s'
+    call s:addMenu(menucmd, 'ListRecent(&L)'       , 'L', ':<C-u>call qfixmemo#ListRecent()<CR>')
+    call s:addMenu(menucmd, 'ListRecent(Stamp)(&2)', 'l', ':<C-u>call qfixmemo#ListRecentTimeStamp()<CR>')
   endfunction
-  function! s:addMenu(menu, acc, cmd)
-    exe printf(a:menu, a:acc, a:cmd, a:cmd)
+  function! s:addMenu(menu, acc, key, cmd)
+    exe printf(a:menu, a:acc, a:key, a:cmd)
   endfunction
 endif
 

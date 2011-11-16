@@ -29,12 +29,35 @@ if !exists('g:qfixmemo_chenv_file')
   let g:qfixmemo_chenv_file = '~/.qfixmemoenv.vim'
 endif
 " 基準ディレクトリ
-if !exists('g:qfixmemo_chdir')
-  let g:qfixmemo_chdir = '~/qfixmemo'
-  if exists('g:QFixMemo_RootDir')
-    let g:qfixmemo_chdir = g:QFixMemo_RootDir
+if !exists('g:qfixmemo_chenv_dir')
+  let g:qfixmemo_chenv_dir = '~/qfixmemo'
+  if exists('g:qfixmemo_root')
+    let g:qfixmemo_chenv_dir = g:qfixmemo_root
   elseif exists('g:qfixmemo_dir')
-    let g:qfixmemo_chdir = g:qfixmemo_dir
+    let g:qfixmemo_chenv_dir = g:qfixmemo_dir
+  endif
+endif
+" デフォルト拡張子設定(qfixmemo-chenv.vimのみ有効)
+if !exists('g:qfixmemo_chenv_ext')
+  let g:qfixmemo_chenv_ext = ''
+  if exists('g:qfixmemo_filename')
+    let g:qfixmemo_chenv_ext = fnamemodify(g:qfixmemo_filename, ':e')
+  endif
+  if exists('g:qfixmemo_ext')
+    let g:qfixmemo_chenv_ext = g:qfixmemo_ext
+  endif
+  if g:qfixmemo_chenv_ext == ''
+    let g:qfixmemo_chenv_ext = 'txt'
+  endif
+endif
+" デフォルトファイルタイプ(howm-chenv.vimのみ有効)
+if !exists('g:qfixmemo_chenv_filetype')
+  let g:qfixmemo_chenv_filetype = ''
+  if exists('g:qfixmemo_filetype')
+    let g:qfixmemo_chenv_filetype = g:qfixmemo_filetype
+  endif
+  if g:qfixmemo_chenv_filetype == ''
+    let g:qfixmemo_chenv_filetype = 'qfix_memo'
   endif
 endif
 
@@ -44,23 +67,23 @@ if !exists('g:qfixmemo_random_file')
 endif
 let s:qfixmemo_random_file = g:qfixmemo_random_file
 
-command! -nargs=1 QFixMemoChdir let qfixmemo_dir = qfixmemo_chdir.<q-args> |echo "qfixmemo_dir = ".qfixmemo_dir
+command! -nargs=1 QFixMemoChdir let qfixmemo_dir = qfixmemo_chenv_dir.<q-args> |echo "qfixmemo_dir = ".qfixmemo_dir
 function! QFixMemoChEnv(dir, fname, title)
-  let g:qfixmemo_dir = g:qfixmemo_chdir . '/' . a:dir
+  let g:qfixmemo_dir = g:qfixmemo_chenv_dir . '/' . a:dir
   let g:qfixmemo_dir = substitute(g:qfixmemo_dir, '[/\\]$', '', '')
 
   if a:dir =~ '-mkd$'
-    " let g:qfixmemo_ext        = 'mkd'
-    let g:qfixmemo_filetype    = 'markdown'
-  if a:dir =~ '-org$'
-    " let g:qfixmemo_ext        = 'org'
-    let g:qfixmemo_filetype    = 'org'
+    let g:qfixmemo_ext       = 'mkd'
+    let g:qfixmemo_filetype  = 'markdown'
+  elseif a:dir =~ '-org$'
+    let g:qfixmemo_ext       = 'org'
+    let g:qfixmemo_filetype  = 'org'
   elseif a:dir =~ 'vimwiki$'
-    " let g:qfixmemo_ext        = 'wiki'
-    let g:qfixmemo_filetype    = 'vimwiki'
+    let g:qfixmemo_ext       = 'wiki'
+    let g:qfixmemo_filetype  = 'vimwiki'
   else
-    " let g:qfixmemo_ext        = 'txt'
-    let g:qfixmemo_filetype    = 'qfix_memo'
+    let g:qfixmemo_ext       = g:qfixmemo_chenv_ext
+    let g:qfixmemo_filetype  = g:qfixmemo_chenv_filetype
   endif
   let g:qfixmemo_random_dir  = g:qfixmemo_dir
   let g:qfixmemo_random_file = s:qfixmemo_random_file . '-' . a:dir
@@ -87,7 +110,7 @@ function! QFixMemoChEnv(dir, fname, title)
   let file = expand(g:qfixmemo_chenv_file)
   let str = []
   let cmd = 'silent call QFixMemoChEnv('."'".a:dir."', '".a:fname."', '".a:title."')"
-  cal add(str, cmd)
+  call add(str, cmd)
   let ostr = readfile(file)
   if str != ostr
     call writefile(str, file)

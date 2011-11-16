@@ -1090,7 +1090,19 @@ silent! function QFixGetqflist()
 endfunction
 
 "ロケーションリスト設定
-function! QFixGrepLocationMode(...)
+if !exists('*QFixGrepLocationMode')
+  function QFixGrepLocationMode(...)
+    let mode = a:0 ? a:1 : 0
+    let mode = count ? count : mode
+    call QFixLocationMode(mode)
+    if a:0 > 1
+      return
+    endif
+    echo printf('QFixWin (%s) : QFixGrep (%s)', (g:QFix_UseLocationList ? 'L' : 'Q'), (g:MyGrep_UseLocationList ? 'L' : 'Q'))
+  endfunction
+endif
+
+function! QFixLocationMode(...)
   let mode = a:0 ? a:1 : 0
   let mode = count ? count : mode
   if mode == 0
@@ -1108,13 +1120,7 @@ function! QFixGrepLocationMode(...)
   elseif mode == 4
     let g:QFix_UseLocationList   = 0
     let g:MyGrep_UseLocationList = 0
-  else
-    return
   endif
-  if a:0 > 1
-    return
-  endif
-  echo printf('QFixWin (%s) : QFixGrep (%s)', (g:QFix_UseLocationList ? 'L' : 'Q'), (g:MyGrep_UseLocationList ? 'L' : 'Q'))
 endfunction
 
 "copen代替

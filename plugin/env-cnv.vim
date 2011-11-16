@@ -8,11 +8,12 @@ let s:Version = 1.00
 scriptencoding utf-8
 
 if !exists('g:QFixHowm_Convert')
-  let QFixHowm_Convert = 1
+  let g:QFixHowm_Convert = 1
 endif
-if exists('g:QFixHowm_Convert') && g:QFixHowm_Convert == 0
+if g:QFixHowm_Convert == 0
   finish
 endif
+
 "-----------------------------------------------------------------------------
 " このファイルでオプションコンバートを行っているため、QFixMemoはQFixHowmとオプ
 " ション互換のプラグインとして動作しています。
@@ -25,19 +26,26 @@ endif
 "
 " コンバートを切っても基本的なコマンドや動作はQFixMemoとしてほぼ同一に扱えます。
 " QFixMemoのドキュメントについては以下を参照してください。
-" doc/qfixmemo.jax
-" http://github.com/fuenor/qfixmemo/blob/master/doc/qfixmemo.jax
+"   doc/qfixmemo.jax
+"   http://github.com/fuenor/qfixmemo/blob/master/doc/qfixmemo.jax
 "
 " 予定・TODOについてはコンバートを切ってもQFixHowmのオプションがそのまま適用さ
 " れます。
-" http://sites.google.com/site/fudist/Home/qfixhowm/howm-reminder
-" doc/howm_schedule.jax
+"   http://sites.google.com/site/fudist/Home/qfixhowm/howm-reminder
+"   doc/howm_schedule.jax
 "
 " QFixHowm Ver.3の実装概要については以下を参照して下さい
-" https://sites.google.com/site/fudist/Home/qfixdev/ver3
+"   https://sites.google.com/site/fudist/Home/qfixdev/ver3
 "
-" CAUTION: ファイルの読み込み順がファイル名順である事に依存しています。
-"          (env-cnv.vimの初期化がqfixmemo.vimより先に行われると仮定)
+" CAUTION:
+"   howm-chenv.vim, howm2html.vimを使用していてうまく動作しない場合は .vimrcで
+"   howm_dirを明示的に設定してください。
+"
+" NOTE:
+"   ファイルの読み込み順がファイル名順である事に依存しています。
+"   (env-cnv.vimの初期化がqfixmemo.vimより先に行われると仮定)
+"   明示的に先読みを行うにはqfixmemo_prescriptを使用します。
+"     let g:qfixmemo_prescript = '~/qfixapp/plugin/env-cnv.vim'
 "-----------------------------------------------------------------------------
 
 """"""""""""""""""""""""""""""
@@ -60,6 +68,7 @@ if g:QFixHowm_RecentMode == 2
 endif
 
 " BufWritePre
+if !exists('*QFixMemoBufWritePre')
 function! QFixMemoBufWritePre()
   if g:QFixHowm_Autoformat > 0
     " タイトル行付加
@@ -80,9 +89,10 @@ function! QFixMemoBufWritePre()
     call qfixmemo#DeleteNullLines()
   endif
 endfunction
+endif
 
 " BufWinEnter quickfix
-silent! function QFixMemoQFBufWinEnterPost()
+function! QFixMemoQFBufWinEnterPost()
   if exists("*QFixHowmExportSchedule")
     nnoremap <buffer> <silent> !  :call QFixHowmCmd_ScheduleList()<CR>
     vnoremap <buffer> <silent> !  :call QFixHowmCmd_ScheduleList('visual')<CR>
@@ -315,7 +325,9 @@ function! QFixHowmSetup()
     endif
   endif
   " タイトル検索の正規表現作成
-  call QFixMemoTitleRegxp()
+  if exists('*QFixMemoTitleRegxp')
+    call QFixMemoTitleRegxp()
+  endif
 
   " テンプレート
   if exists('g:QFixHowm_Template_'.g:qfixmemo_ext)
@@ -468,4 +480,7 @@ function! QFixMemoSetFolding()
     setlocal foldexpr=getline(v:lnum)=~g:QFixHowm_FoldingPattern?'>1':'1'
   endif
 endfunction
+
+"=============================================================================
+let g:QFixHowm_Convert = 0
 

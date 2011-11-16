@@ -1273,9 +1273,11 @@ function! QFixPreviewOpen(file, line, ...)
 endfunction
 
 " プレビューのエンコーディング強制オプション
-silent! function QFixPreviewReadOpt(file)
+if !exists('*QFixPreviewReadOpt')
+function QFixPreviewReadOpt(file)
   return ''
 endfunction
+endif
 
 """"""""""""""""""""""""""""""
 " filetypeを返す

@@ -303,9 +303,11 @@ function! s:read(mfile)
 endfunction
 
 " プレビューのエンコーディング強制オプション
+if !exists('*QFixPreviewReadOpt')
 silent! function QFixPreviewReadOpt(file)
   return ''
 endfunction
+endif
 
 " MRU表示前処理
 silent! function QFixMRUOpenPre(sq, entries, dir)
@@ -751,7 +753,9 @@ silent! function QFixMRURegisterCheck(mru)
 endfunction
 
 function! s:VimEnter()
-  silent! call QFixMRUAddEntryRegxp()
+  if exists('*QFixMRUAddEntryRegxp')
+    call QFixMRUAddEntryRegxp()
+  endif
 endfunction
 
 function! s:BufEnter()

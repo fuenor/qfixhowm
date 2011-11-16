@@ -51,6 +51,19 @@ let s:howmsuffix = 'howm'
 let s:filehead = '\(howm\|sche\)://'
 let s:calender_exists = 0
 
+"メニューファイルディレクトリ
+if !exists('g:QFixHowm_MenuDir')
+  let g:QFixHowm_MenuDir = ''
+endif
+"メニューファイル名
+if !exists('g:QFixHowm_Menufile')
+  let g:QFixHowm_Menufile = 'Menu-00-00-000000.'.s:howmsuffix
+endif
+" メニュー画面に表示する MRUリストのエントリ数
+if !exists('g:QFixHowm_MenuRecent')
+  let g:QFixHowm_MenuRecent = 5
+endif
+
 """"""""""""""""""""""""""""""
 augroup HowmFiles
   au!
@@ -262,19 +275,6 @@ endfunction
 """"""""""""""""""""""""""""""
 "メニュー画面
 """"""""""""""""""""""""""""""
-"メニューファイルディレクトリ
-if !exists('g:QFixHowm_MenuDir')
-  let g:QFixHowm_MenuDir = ''
-endif
-"メニューファイル名
-if !exists('g:QFixHowm_Menufile')
-  let g:QFixHowm_Menufile = 'Menu-00-00-000000.'.s:howmsuffix
-endif
-" メニュー画面に表示する MRUリストのエントリ数
-if !exists('g:QFixHowm_MenuRecent')
-  let g:QFixHowm_MenuRecent = 5
-endif
-
 command! -count -nargs=* QFixHowmOpenMenuCache         call QFixHowmOpenMenu('cache')
 command! -count -nargs=* QFixHowmOpenMenu              call QFixHowmOpenMenu()
 

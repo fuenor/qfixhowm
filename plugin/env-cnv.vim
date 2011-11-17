@@ -139,6 +139,12 @@ if !exists('g:qfixmemo_ext')
   let g:qfixmemo_ext = fnamemodify(g:qfixmemo_filename, ':e')
   let g:qfixmemo_ext = g:qfixmemo_ext != '' ? g:qfixmemo_ext : s:defsuffix
 endif
+if !exists('g:qfixmemo_fileencoding')
+  let g:qfixmemo_fileencoding = &enc
+endif
+if !exists('g:qfixmemo_fileformat')
+  let g:qfixmemo_fileformat = &ff
+endif
 if !exists('g:qfixmemo_filetype')
   let g:qfixmemo_filetype = 'howm_memo'
 endif
@@ -153,6 +159,12 @@ endif
 if !exists('g:QFixHowm_FileExt')
   let g:QFixHowm_FileExt = fnamemodify(g:howm_filename, ':e')
   let g:QFixHowm_FileExt = g:QFixHowm_FileExt != '' ? g:QFixHowm_FileExt : s:defsuffix
+endif
+if !exists('g:howm_fileencoding')
+  let g:howm_fileencoding = g:qfixmemo_fileencoding
+endif
+if !exists('g:howm_fileformat')
+  let g:howm_fileformat = g:qfixmemo_fileformat
 endif
 if !exists('g:QFixHowm_FileType')
   let g:QFixHowm_FileType = g:qfixmemo_filetype

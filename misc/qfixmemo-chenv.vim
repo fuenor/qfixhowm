@@ -24,6 +24,54 @@ if v:version < 700 || &cp
   finish
 endif
 
+" (設定例)
+" 以下を .vimrcへ追加
+"
+" " 現メモディレクトリ表示
+" nnoremap <silent> g,hh :echo qfixmemo_dir<CR>
+" " 環境変更コマンド
+" nnoremap <silent> g,ha :call QFixMemoChEnv('',         'time', '=')<CR>
+" nnoremap <silent> g,hm :call QFixMemoChEnv('main',     'time', '=')<CR>
+" nnoremap <silent> g,hw :call QFixMemoChEnv('work',     'day',  '=')<CR>
+" nnoremap <silent> g,hc :call QFixMemoChEnv('pc',       'time', '= [:pc]')<CR>
+" nnoremap <silent> g,hd :call QFixMemoChEnv('howm-mkd', 'time', '#')<CR>
+" nnoremap <silent> g,hd :call QFixMemoChEnv('howm-org', 'time', '.')<CR>
+" nnoremap <silent> g,hv :call QFixMemoChEnv('vimwiki',  'time', '=')<CR>
+"
+" (オプション解説)
+" :call QFixMemoChEnv(dir, fileformat, title)
+"
+" dir
+" 使用するディレクトリ指定
+" qfixmemo_chenv_dir を基準ディレクトリとして dir が付加される
+" 基準ディレクトリは以下の順番で決定される
+"   1. qfixmemo_chenv_dir
+"   2. qfixmemo_root
+"   3. qfixmemo_dir
+"
+" なおdirの最後に -mkd がつくとファイルタイプが markdown、-org ならorg、
+" vimwikiなら vimwikiに設定される。
+"
+" format
+" 生成するファイル名指定
+" | month  | 月単位   |
+" | day    | 日単位   |
+" | time   | 時刻単位 |
+"
+" title
+" 最初の空白までをタイトル記号として qfixmemo_title へ設定。
+" 空白以降はタグとして qfixmemo_template_tag へ登録される
+"
+" NOTE:
+" キーマップ定義にQFixMemoKeymapPost() を使用するとキーマップリーダーが自動変更される
+" function! QFixMemoKeymapPost()
+"   nnoremap <silent> <Leader>ha :call QFixMemoChEnv('',         'time', '=')<CR>
+"   nnoremap <silent> <Leader>hm :call QFixMemoChEnv('main',     'time', '=')<CR>
+"   nnoremap <silent> <Leader>hw :call QFixMemoChEnv('work',     'day',  '=')<CR>
+"   nnoremap <silent> <Leader>hc :call QFixMemoChEnv('pc',       'time', '= [:pc]')<CR>
+" endfunction
+
+""""""""""""""""""""""""""""""
 " スクリプトファイル名
 if !exists('g:qfixmemo_chenv_file')
   let g:qfixmemo_chenv_file = '~/.qfixmemoenv.vim'

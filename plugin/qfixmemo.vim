@@ -218,9 +218,9 @@ endif
 if !exists('g:qfixmemo_random_file')
   let g:qfixmemo_random_file = '~/.qfixmemo-random'
 endif
-" ランダム表示ファイル更新時間(秒)
+" ランダム表示ファイル更新時間(日数)
 if !exists('g:qfixmemo_random_time')
-  let g:qfixmemo_random_time = 10*24*60*60
+  let g:qfixmemo_random_time = 10
 endif
 " ランダム表示数
 if !exists('g:qfixmemo_random_columns')
@@ -1689,7 +1689,7 @@ function! qfixmemo#RandomWalk(file, ...)
   if exists('g:qfixmemo_random_dir')
     let dir = g:qfixmemo_random_dir
   endif
-  if ftime == 0 || ltime > g:qfixmemo_random_time
+  if ftime == 0 || ltime > (g:qfixmemo_random_time*24*60*60)
     let s:rwalk = s:randomWriteFile(file, dir)
   elseif file != s:randomfile
     let s:rwalk = s:randomReadFile(file, dir)

@@ -318,6 +318,7 @@ function! s:QFBufWinEnter(...)
   call QFixAltWincmdMap()
 
   nnoremap <buffer> <silent> <CR>   :call <SID>BeforeJump()<CR><CR>:call <SID>AfterJump()<CR>
+  vnoremap <buffer> <silent> <CR>   :call <SID>VisCR()<CR>
   nnoremap <buffer> <silent> <S-CR> :call <SID>BeforeJump()<CR>:call <SID>QFixSplit()<CR>:call <SID>AfterJump()<CR>
   if g:QFix_Edit == 'tab'
     nnoremap <buffer> <silent> <S-CR> :call <SID>BeforeJump()<CR>:call <SID>QFixEdit()<CR>:call <SID>AfterJump()<CR>
@@ -568,6 +569,28 @@ function! s:AfterJump(...)
   if winheight(0) < g:QFix_WindowHeightMin
     exec 'resize '. g:QFix_WindowHeightMin
   endif
+  call QFixCR('after')
+  if g:QFix_CloseOnJump
+    QFixCclose
+  endif
+endfunction
+
+""""""""""""""""""""""""""""""
+" Visual mode <CR>
+""""""""""""""""""""""""""""""
+function! s:VisCR() range
+  let fline = a:firstline
+  let lline = a:lastline
+  call s:BeforeJump()
+  let qf = QFixGetqflist()
+  for l in range(fline, lline)
+    let bufnr = qf[l-1]['bufnr']
+    let lnum  = qf[l-1]['lnum']
+    let col   = qf[l-1]['col']
+    let file = fnamemodify(bufname(bufnr), ':p')
+    call QFixEditFile(file)
+    call cursor(lnum, col)
+  endfor
   call QFixCR('after')
   if g:QFix_CloseOnJump
     QFixCclose

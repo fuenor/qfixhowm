@@ -10,9 +10,13 @@ scriptencoding utf-8
 if !exists('g:QFixHowm_Convert')
   let g:QFixHowm_Convert = 1
 endif
+if exists('g:loaded_envcnv') && !exists('fudist')
+  finish
+endif
 if g:QFixHowm_Convert == 0
   finish
 endif
+let g:loaded_envcnv = 1
 
 "-----------------------------------------------------------------------------
 " このファイルでオプションコンバートを行っているため、QFixMemoはQFixHowmとオプ
@@ -302,7 +306,7 @@ let s:cnvopt = [
   \ ['let g:qfixmemo_random_columns          = %s', 'g:QFixHowm_RandomWalkColumns'],
   \ ['let g:qfixmemo_random_exclude          = %s', 'g:QFixHowm_RandomWalkExclude'],
   \ ['let g:qfixmemo_random_file             = %s', 'g:QFixHowm_RandomWalkFile',],
-  \ ['let g:qfixmemo_random_time  = (24*60*60)*%s', 'g:QFixHowm_RandomWalkUpdate'],
+  \ ['let g:qfixmemo_random_time             = %s', 'g:QFixHowm_RandomWalkUpdate'],
   \ ['let g:qfixmemo_keyword_mode            = %s', 'g:QFixHowm_Wiki'],
   \ ['let g:qfixmemo_keyword_dir             = %s', 'g:QFixHowm_WikiDir'],
   \ ['let g:qfixmemo_keyword_file            = %s', 'g:QFixHowm_keywordfile'],
@@ -480,7 +484,4 @@ function! QFixMemoSetFolding()
     setlocal foldexpr=getline(v:lnum)=~g:QFixHowm_FoldingPattern?'>1':'1'
   endif
 endfunction
-
-"=============================================================================
-let g:QFixHowm_Convert = 0
 

@@ -446,8 +446,8 @@ U                   絞り込み全てをアンドゥ
   let qfixmemo_random_columns = 10
   " ランダム表示のキャッシュファイル名
   let qfixmemo_random_file = '~/.qfixmemo-random'
-  " 指定秒数が経過していたらキャッシュファイル再作成
-  let qfixmemo_random_time = 10*24*60*60
+  " 指定日数が経過していたらキャッシュファイル再作成
+  let qfixmemo_random_time = 10
   " ランダム表示から除きたいエントリの正規表現
   let qfixmemo_random_exclude = ''
 

@@ -10,8 +10,9 @@ scriptencoding utf-8
 
 "=============================================================================
 "    howmスタイルの予定・TODOを表示
-"    (必要 mygrep.vim, openuri.vim)
+"    (必要 mygrep.vim)
 "    (推奨 myqfix.vim, /syntax/howm_schedule.vim)
+"    (アクションロックを使用する場合は要openuri.vim)
 "
 "    詳しい使い方は以下のサイトを参照してください。
 "    http://sites.google.com/site/fudist/Home/qfixhowm/howm-reminder
@@ -25,10 +26,12 @@ scriptencoding utf-8
 "     予定・TODO表示 (type : 'schedule' or 'todo')
 "        :call QFixHowmSchedule('schedule', 'c:/temp', 'utf-8')
 "
-"     QuicFixウィンドウを表示せずにQuicFixリスト取得も可能です。
-"        " 検索してQuicFixリスト取得 (qflistは getqflist() 参照)
+"     QuickFixウィンドウを表示せずにQuickFixリスト取得も可能です。
+"        " c:/temp以下を検索して予定・TODOのQuickFixリストを取得
 "        let [qflist, time] = QFixHowmScheduleQFList('schedule', 'c:/temp', 'utf-8')
-"        " キャッシュされたQuicFixリスト取得 (timeは localtime() 参照)
+"        (qflistは getqflist()、timeは localtime() 参照)
+"
+"        " キャッシュされたQuickFixリスト取得
 "        let [qflist, time] = QFixHowmScheduleCachedQFList('schedule')
 "
 "=============================================================================
@@ -84,19 +87,28 @@ endfunction
 """"""""""""""""""""""""""""""
 let s:howmsuffix = 'howm'
 if !exists('howm_dir')
-  let howm_dir          = '~/howm'
-endif
-if !exists('howm_filename')
-  let howm_filename     = '%Y/%m/%Y-%m-%d-%H%M%S.'.s:howmsuffix
+  let howm_dir = '~/howm'
+  if exists('g:qfixmemo_dir')
+    let howm_dir = g:qfixmemo_dir
+  endif
 endif
 if !exists('QFixHowm_FileExt')
-  let QFixHowm_FileExt  = fnamemodify(g:howm_filename,':e')
+  let QFixHowm_FileExt = ''
+  if exists('g:qfixmemo_filename')
+    let QFixHowm_FileExt = fnamemodify(g:qfixmemo_filename,':e')
+  endif
+  if g:QFixHowm_FileExt == '' && exists('howm_filename')
+    let g:QFixHowm_FileExt  = fnamemodify(g:howm_filename,':e')
+  endif
+  if g:QFixHowm_FileExt == ''
+    let g:QFixHowm_FileExt == 'txt'
+  endif
 endif
 if !exists('howm_fileencoding')
   let howm_fileencoding = &enc
-endif
-if !exists('howm_fileformat')
-  let howm_fileformat   = &ff
+  if exists('g:qfixmemo_fileencoding')
+    let howm_fileencoding = g:qfixmemo_fileencoding
+  endif
 endif
 
 "キーマップリーダー

@@ -207,9 +207,9 @@ if MyGrep_MenuBar
   exec 'amenu <silent> 41.331 '.s:menu.'.GrepBufferadd(&B)<TAB>'.s:MyGrep_Key.'B  :BGrepadd<CR>'
   exec 'amenu <silent> 41.331 '.s:menu.'.Vimgrepadd(&V)<Tab>'.s:MyGrep_Key.'V  :QFVGrepadd!<CR>'
   exec 'amenu <silent> 41.331 '.s:menu.'.-sep2-			<Nop>'
-  exec 'amenu <silent> 41.331 '.s:menu.'.CurrentDirMode(&M)<Tab>'.s:MyGrep_Key.'rM  :ToggleGrepCurrentDirMode<CR>'
-  exec 'amenu <silent> 41.331 '.s:menu.'.RecursiveMode(&D)<Tab>'.s:MyGrep_Key.'rD  :ToggleGrepRecursiveMode<CR>'
-  exec 'amenu <silent> 41.331 '.s:menu.'.SetFileEncoding(&S)<Tab>'.s:MyGrep_Key.'rS  :call s:SetFileEncoding()<CR>'
+  exec 'amenu <silent> 41.331 '.s:menu.'.CurrentDirMode(&D)<Tab>'.s:MyGrep_Key.'rD  :ToggleGrepCurrentDirMode<CR>'
+  exec 'amenu <silent> 41.331 '.s:menu.'.SetFileEncoding(&G)<Tab>'.s:MyGrep_Key.'rG  :call s:SetFileEncoding()<CR>'
+  exec 'amenu <silent> 41.331 '.s:menu.'.RecursiveMode(&M)<Tab>'.s:MyGrep_Key.'rM  :ToggleGrepRecursiveMode<CR>'
   exec 'amenu <silent> 41.331 '.s:menu.'.-sep3-			<Nop>'
   exec 'amenu <silent> 41.331 '.s:menu.'.Load\ Quickfix(&L)<Tab>'.s:MyGrep_Key.'k  :MyGrepReadResult<CR>\|:QFixCopen<CR>'
   exec 'amenu <silent> 41.331 '.s:menu.'.Load\ Quickfix[Local]\ (&O)<Tab>O :MyGrepReadResult<CR>'
@@ -236,9 +236,9 @@ exec 'silent! vnoremap <unique> <silent> '.s:MyGrep_Key.'rf  :call RFGrep("", -1
 exec 'silent! nnoremap <unique> <silent> '.s:MyGrep_Key.'v  :QFVGrep!<CR>'
 exec 'silent! vnoremap <unique> <silent> '.s:MyGrep_Key.'v  :call VGrep("", -1, 0)<CR>'
 
-exec 'silent! nnoremap <unique> <silent> '.s:MyGrep_Key.'rM  :ToggleGrepCurrentDirMode<CR>'
-exec 'silent! nnoremap <unique> <silent> '.s:MyGrep_Key.'rD  :ToggleGrepRecursiveMode<CR>'
-exec 'silent! nnoremap <unique> <silent> '.s:MyGrep_Key.'rS  :call <SID>SetFileEncoding()<CR>'
+exec 'silent! nnoremap <unique> <silent> '.s:MyGrep_Key.'rD  :ToggleGrepCurrentDirMode<CR>'
+exec 'silent! nnoremap <unique> <silent> '.s:MyGrep_Key.'rG  :call <SID>SetFileEncoding()<CR>'
+exec 'silent! nnoremap <unique> <silent> '.s:MyGrep_Key.'rM  :ToggleGrepRecursiveMode<CR>'
 
 exec 'silent! nnoremap <unique> <silent> '.s:MyGrep_Key.'B  :BGrepadd<CR>'
 exec 'silent! nnoremap <unique> <silent> '.s:MyGrep_Key.'E  :QFGrepadd!<CR>'
@@ -711,7 +711,7 @@ function! MyGrep(pattern, searchPath, filepattern, fenc, addflag, ...)
     redraw|echom '"'.l:mygrepprg.'"'." is not executable!"
     echohl None
     let mes = '"'.l:mygrepprg.'" is not executable!'
-    let choice = confirm(mes, "&OK")
+    let choice = confirm(mes, "&OK", 1, "W")
     let g:MyGrep_Regexp = 1
     let g:MyGrep_Ignorecase = 1
     let g:MyGrep_Recursive  = 0
@@ -864,8 +864,8 @@ endfunction
 """"""""""""""""""""""""""""""
 function! s:ExecGrep(cmd, prg, searchPath, searchWord, from_encoding, to_encoding, filepattern)
   if !isdirectory(expand(a:searchPath))
-    let mes = printf('QFixGrep : %s is not directory!', a:searchPath)
-    let choice = confirm(mes, "&OK")
+    let mes = printf('"%s" is not directory!', a:searchPath)
+    let choice = confirm(mes, "&OK", 1, "W")
     let g:MyGrep_retval = ''
     return g:MyGrep_retval
   endif

@@ -377,7 +377,7 @@ function! QFixHowmOpenMenu(...)
   silent! %delete _
   silent! exec 'silent! -1put=glist'
   silent! $delete _
-  exec 'lchdir ' . escape(g:qfixmemo_dir, ' ')
+  silent! exec 'lchdir ' . escape(g:qfixmemo_dir, ' ')
   call cursor(1, 1)
   if search('%menu%', 'cW') > 0
     let str = substitute(getline('.'), '%menu%', mfile, '')

@@ -54,14 +54,23 @@ let s:calender_exists = 0
 "メニューファイルディレクトリ
 if !exists('g:QFixHowm_MenuDir')
   let g:QFixHowm_MenuDir = ''
+  if exists('g:qfixmemo_menu_title')
+    let g:QFixHowm_MenuDir  = fnamemodify(g:qfixmemo_menu_title, ':h')
+  endif
 endif
 "メニューファイル名
 if !exists('g:QFixHowm_Menufile')
   let g:QFixHowm_Menufile = 'Menu-00-00-000000.'.s:howmsuffix
+  if exists('g:qfixmemo_menu_title')
+    let g:QFixHowm_Menufile = fnamemodify(g:qfixmemo_menu_title, ':t')
+  endif
 endif
 " メニュー画面に表示する MRUリストのエントリ数
 if !exists('g:QFixHowm_MenuRecent')
   let g:QFixHowm_MenuRecent = 5
+  if exists('g:qfixmemo_recentdays')
+    let g:QFixHowm_MenuRecent = g:qfixmemo_recentdays
+  endif
 endif
 
 """"""""""""""""""""""""""""""
@@ -101,7 +110,7 @@ function! s:Getfile(lnum, ...)
     let str = substitute(str, '^'.head, '', '')
   endif
   let file = substitute(str, '|.*$', '', '')
-  silent! exec 'lchdir ' . escape(dir, ' ')
+  silent! exe 'lchdir ' . escape(dir, ' ')
   let file = fnamemodify(file, ':p')
   if !filereadable(file)
     return ['', 0]
@@ -176,7 +185,7 @@ function! s:SortExec(...)
   elseif g:QFix_Sort == 'reverse'
     let sq = reverse(sq)
   endif
-  silent! exec 'lchdir ' . escape(g:qfixmemo_dir, ' ')
+  silent! exe 'lchdir ' . escape(g:qfixmemo_dir, ' ')
   let s:glist = []
   for d in sq
     let filename = fnamemodify(d['filename'], ':.')
@@ -268,8 +277,8 @@ function! s:Exec(cmd, ...) range
   endif
   let mod = &modifiable ? '' : 'no'
   setlocal modifiable
-  exec cmd
-  exec 'setlocal '.mod.'modifiable'
+  exe cmd
+  exe 'setlocal '.mod.'modifiable'
 endfunction
 
 """"""""""""""""""""""""""""""
@@ -289,18 +298,21 @@ function! QFixHowmOpenMenu(...)
   endif
   redraw | echo 'QFixHowm : Open menu...'
   let winnr = QFixWinnr()
-  exec winnr.'wincmd w'
+  exe winnr.'wincmd w'
   if &buftype == 'quickfix'
     silent! wincmd w
   endif
   let g:QFix_Disable = 1
   silent! let firstwin = s:GetBufferInfo()
-  if g:QFixHowm_MenuDir== ''
+  if g:QFixHowm_MenuDir == ''
     let mfile = g:qfixmemo_dir. '/'.g:QFixHowm_Menufile
   else
     let mfile = g:QFixHowm_MenuDir  . '/' . g:QFixHowm_Menufile
   endif
+  let prevPath = escape(getcwd(), ' ')
+  silent! exe 'lchdir ' . escape(g:qfixmemo_dir, ' ')
   let mfile = fnamemodify(mfile, ':p')
+  silent! exe 'lchdir ' . prevPath
   let mfile = substitute(mfile, '\\', '/', 'g')
   let mfile = substitute(mfile, '/\+', '/', 'g')
   let mfilename = '__HOWM_MENU__'
@@ -346,19 +358,19 @@ function! QFixHowmOpenMenu(...)
   let menubuf = 0
   for i in range(1, winnr('$'))
     if fnamemodify(bufname(winbufnr(i)), ':t') == mfilename
-      exec i . 'wincmd w'
+      exe i . 'wincmd w'
       let menubuf = i
       let g:HowmMenuLnum = getpos('.')
       break
     endif
   endfor
   if s:menubufnr
-    exec 'b '.s:menubufnr
+    exe 'b '.s:menubufnr
   else
     if g:QFixHowm_MenuCmd != ''
-      exec g:QFixHowm_MenuCmd
+      exe g:QFixHowm_MenuCmd
     endif
-    silent! exec 'silent! edit '.mfilename
+    silent! exe 'silent! edit '.mfilename
     let s:menubufnr = bufnr('%')
   endif
   setlocal buftype=nofile
@@ -366,18 +378,18 @@ function! QFixHowmOpenMenu(...)
   setlocal noswapfile
   setlocal nobuflisted
   setlocal modifiable
-  exec 'setlocal fenc='.g:qfixmemo_fileencoding
-  exec 'setlocal ff='.g:qfixmemo_fileformat
+  exe 'setlocal fenc='.g:qfixmemo_fileencoding
+  exe 'setlocal ff='.g:qfixmemo_fileformat
   if g:QFix_Width > 0
-    exec "normal! ".g:QFixHowm_MenuWidth."\<C-W>|"
+    exe "normal! ".g:QFixHowm_MenuWidth."\<C-W>|"
   endif
   if g:QFixHowm_MenuHeight > 0
-    exec 'resize '. g:QFixHowm_MenuHeight
+    exe 'resize '. g:QFixHowm_MenuHeight
   endif
   silent! %delete _
-  silent! exec 'silent! -1put=glist'
+  silent! exe 'silent! -1put=glist'
   silent! $delete _
-  silent! exec 'lchdir ' . escape(g:qfixmemo_dir, ' ')
+  silent! exe 'lchdir ' . escape(g:qfixmemo_dir, ' ')
   call cursor(1, 1)
   if search('%menu%', 'cW') > 0
     let str = substitute(getline('.'), '%menu%', mfile, '')
@@ -448,12 +460,11 @@ function! s:HowmMenuReplace(sq, rep, head)
     let lnum = d['lnum'] < 1 ? 0 : d['lnum']
     call add(glist, printf("%s|%d| %s", file, lnum, d['text']))
   endfor
-  silent! exec 'lchdir ' . prevPath
   let save_cursor = getpos('.')
   call cursor(1, 1)
   if search(a:rep, 'cW') > 0
     silent! delete _
-    silent! exec 'silent! -1put=glist'
+    silent! exe 'silent! -1put=glist'
   endif
   call setpos('.', save_cursor)
 endfunction
@@ -488,7 +499,7 @@ endfunction
 function! HowmMenuCmdMap(cmd, ...)
   let cmd = a:0 ? a:1 : a:cmd
   let cmd = ':call QFixHowmCmd("'.cmd.'")<CR>'
-  exec 'silent! nnoremap <buffer> <silent> '.a:cmd.' '.cmd
+  exe 'silent! nnoremap <buffer> <silent> '.a:cmd.' '.cmd
 endfunction
 
 function! QFixHowmCmd(cmd)
@@ -544,7 +555,7 @@ function! s:HowmMenuCR() range
   if cmd != ''
     let cmd = substitute(matchstr(cmd, '".\+"'), '^"\|"$', '', 'g')
     if cmd =~ '^<.*>$'
-      exec 'let cmd = '.'"\'.cmd.'"'
+      exe 'let cmd = '.'"\'.cmd.'"'
     endif
     call feedkeys(cmd, 'm')
     call setpos('.', save_cursor)
@@ -557,12 +568,12 @@ function! s:HowmMenuCR() range
   endif
   call QFixPclose()
   if g:QFixHowm_MenuCloseOnJump
-    exec 'edit '.escape(file, ' %#')
+    exe 'edit '.escape(file, ' %#')
   else
     call QFixEditFile(file)
   endif
   call cursor(lnum, 1)
-  exec 'normal! zz'
+  exe 'normal! zz'
   return ''
 endfunction
 
@@ -574,7 +585,7 @@ endfunction
 function! s:BufWinEnterMenu(preview, head)
   let &wrap=g:QFixHowm_MenuWrap
   let b:updatetime = g:QFix_PreviewUpdatetime
-  exec 'setlocal updatetime='.b:updatetime
+  exe 'setlocal updatetime='.b:updatetime
   if !exists('b:PreviewEnable')
     let b:PreviewEnable = a:preview
   endif
@@ -603,7 +614,7 @@ function! s:BufWinEnterMenu(preview, head)
   call QFixAltWincmdMap()
   nnoremap <buffer> <silent> <CR> :<C-u>call <SID>HowmMenuCR()<CR>
   nnoremap <buffer> <silent> <2-LeftMouse> <ESC>:<C-u>call <SID>HowmMenuCR()<CR>
-  silent! exec 'lchdir ' . escape(g:qfixmemo_dir, ' ')
+  silent! exe 'lchdir ' . escape(g:qfixmemo_dir, ' ')
 endfunction
 
 function! s:BufWinLeaveMenu()

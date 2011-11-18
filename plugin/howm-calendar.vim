@@ -14,11 +14,6 @@ if !exists('g:calendar_holidayfile')
   " let g:calendar_holidayfile = '~/qfixmemo/Sche-Hd-0000-00-00-000000.howm'
   let g:calendar_holidayfile = ''
 endif
-" 休日サインの設定
-if !exists('g:calendar_flag')
-  " サインには + ! # $ % & @ ? が使えます
-  let g:calendar_flag=['', '+', '@', '#']
-endif
 " CalHolidayのハイライト指定
 if !exists('g:calendar_CalHoliday')
   " let g:calendar_CalHoliday = 'CalMemo'
@@ -28,12 +23,23 @@ endif
 if !exists('g:calendar_howm_syntax')
   let g:calendar_howm_syntax = 1
 endif
+" サインの表示位置 left-fit, left, right
+if !exists("g:calendar_mark")
+ \|| (g:calendar_mark != 'left'
+ \&& g:calendar_mark != 'left-fit'
+ \&& g:calendar_mark != 'right')
+  let g:calendar_mark = 'left-fit'
+endif
 
 " コマンド乗っ取り
 " ハイライトを変更されたくない場合は calendar_howm_syntax = 0 を設定
 if g:calendar_howm_syntax
   au VimEnter * command! -nargs=* Calendar  call Calendar(0,<f-args>) | call CalendarPost()
   au VimEnter * command! -nargs=* CalendarH call Calendar(1,<f-args>) | call CalendarPost()
+endif
+
+if !exists('g:calendar_flag')
+  let g:calendar_flag=['', '+', '@', '#']
 endif
 
 if !exists('g:calendar_action')
@@ -49,12 +55,13 @@ function! CalendarPost()
   if g:calendar_howm_syntax == 0
     return
   endif
+  syn match CalConceal /[@]/ contained
   if g:calendar_mark =~ 'left-fit'
-    syn match CalHoliday display "\s*[@#]\d*"
+    syn match CalHoliday display "\s*[@#]\d*" contains=CalConceal
   elseif g:calendar_mark =~ 'right'
-    syn match CalHoliday display "\d*[@#]\s*"
+    syn match CalHoliday display "\d*[@#]\s*" contains=CalConceal
   else
-    syn match CalHoliday display "[@#]\s*\d*"
+    syn match CalHoliday display "[@#]\s*\d*" contains=CalConceal
   endif
   if s:holiday == 1 " 今日が休日
     hi link CalToday CalHoliday
@@ -62,6 +69,7 @@ function! CalendarPost()
   hi link CalMemo    PreProc
   hi link CalSunday  WarningMsg
   exe 'hi def link CalHoliday '.g:calendar_CalHoliday
+  hi CalConceal guifg=bg guibg=bg ctermfg=bg ctermbg=bg
 endfunction
 
 function! s:CalendarPost(win)
@@ -109,14 +117,7 @@ function! QFixMemoCalendarDiary(day, month, year, week, dir)
 endfunction
 
 "=============================================================================
-if !exists("g:calendar_mark")
- \|| (g:calendar_mark != 'left'
- \&& g:calendar_mark != 'left-fit'
- \&& g:calendar_mark != 'right')
-  let g:calendar_mark = 'left'
-endif
-
-""""""""""""""""""""""""""""""
+" スタブ
 function! HolidayCheck(year, month, day)
   return 0
 endfunction
@@ -163,20 +164,35 @@ if v:version < 700 || &cp
   finish
 endif
 
-if exists('g:QFixCalendar_version') && g:QFixCalendar_version < s:Version
-  unlet loaded_QFixCalendar_vim
+if exists('g:QFixMemoCalendar_version') && g:QFixMemoCalendar_version < s:Version
+  unlet loaded_QFixMemoCalendar_vim
 endif
-if exists("loaded_QFixCalendar_vim") && !exists('fudist')
+if exists("loaded_QFixMemoCalendar_vim") && !exists('fudist')
   finish
 endif
-let g:QFixCalendar_version = s:Version
-let loaded_QFixCalendar_vim = 1
+let g:QFixMemoCalendar_version = s:Version
+let loaded_QFixMemoCalendar_vim = 1
 
 " 休日定義ファイル
 " https://sites.google.com/site/fudist/Home/qfixhowm#downloads
 if !exists('g:calendar_holidayfile')
   " let g:calendar_holidayfile = '~/qfixmemo/Sche-Hd-0000-00-00-000000.howm'
   let g:calendar_holidayfile = ''
+endif
+" カレンダーボード
+if !exists('g:calendar_footer')
+  let g:calendar_footer = [
+    \ '   Prev  |  Next',
+    \ '  -----------------',
+    \ '     <   |   >',
+    \ '     i   |   o',
+    \ '  -----------------',
+    \ '    t .  : Today',
+    \ '    r    : Reload',
+    \ '  -----------------',
+    \ '  {num}<CR> : diary',
+    \ '  ex. <CR> or 16<CR>',
+    \]
 endif
 
 """"""""""""""""""""""""""""""
@@ -413,8 +429,6 @@ if !exists('g:qfixtempname')
   let g:qfixtempname = tempname()
 endif
 function! QFixMemoCalendar(dircmd, file, cnt, ...)
-  " HAHAHA!
-  let g:calendar_mark = 'left'
   let file = fnamemodify(g:qfixtempname, ':p:h') .'/'. a:file
   let winnr = bufwinnr(file)
   if winnr != -1
@@ -553,18 +567,7 @@ function! s:build(...)
   setlocal modifiable
   let glist = s:CalendarStr(num)
   if num > 1
-    call extend(glist, [
-                  \ '  Prev  |  Next',
-                  \ ' -----------------',
-                  \ '    <   |   >',
-                  \ '    i   |   o',
-                  \ ' -----------------',
-                  \ '   t .  : Today',
-                  \ '   r    : Reload',
-                  \ ' -----------------',
-                  \ ' {num}<CR> : diary',
-                  \ ' ex. 16<CR>',
-                  \])
+    call extend(glist, CalendarBoard())
   endif
   let b:calendar_height = len(glist)
   silent! %delete _
@@ -573,6 +576,23 @@ function! s:build(...)
   exe 'normal! z-'
   setlocal nomodifiable
 endfunction
+
+if !exists('*CalendarBoard')
+function CalendarBoard()
+  let month = strftime('%m')
+  let day   = strftime('%d')
+  if day == 24 && month == 12
+    return extend(['    Merry Xmas!', ''], g:calendar_footer)
+  elseif day == 31 && month == 10
+    return extend(['   Trick or Treat?', ''], g:calendar_footer)
+  elseif day == 1 && month == 1
+    return extend(['   Happy New Year!', ''], g:calendar_footer)
+  elseif s:holiday
+    " 休日
+  endif
+  return g:calendar_footer
+endfunction
+endif
 
 let s:cal = '  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31'
 let s:mruler = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
@@ -614,7 +634,13 @@ function! s:CalendarStr(...)
       let hday = HolidayCheck(year, month, n)
       exe 'let id = '.g:calendar_sign.'(n, month, year)'
       if id != ''
-        let str = substitute(str, printf(' \(%2d\)', n), id.'\1', '')
+        if g:calendar_mark =~ 'left-fit'
+          let str = substitute(str, printf('%3d', n), printf('%3s', id.string(n)), '')
+        elseif g:calendar_mark =~ 'right'
+          let str = substitute(str, printf('%2d ', n), printf('%2d%s', n, id), '')
+        else
+          let str = substitute(str, printf('%3d', n), printf('%s%2d', id, n), '')
+        endif
       endif
     endfor
     if month == str2nr(strftime('%m')) && year == strftime('%Y')
@@ -672,18 +698,18 @@ endfunction
 
 function! s:syntax()
   syn clear
-  exe 'syn match CalSaturday display /.\%>'.(3*7+g:submenu_calendar_lmargin-2).'v/'
+  exe 'syn match CalSaturday display /.\%>'.(3*7+strlen(g:submenu_calendar_lmargin)-2).'v[+!$%&?]\? *\d\+$/'
 
   " today
   if g:calendar_mark =~ 'left-fit'
-    syn match CalToday display "\s*\*\d*"
-    syn match CalMemo display "\s*[+!$%&?]\d*"
+    syn match CalToday display "\s*\*\d\+"
+    syn match CalMemo display "\s*[+!$%&?]\d\+"
   elseif g:calendar_mark =~ 'right'
-    syn match CalToday display "\d*\*\s*"
-    syn match CalMemo display "\d*[+!$%&?]\s*"
+    syn match CalToday display "\d\+\*\s*"
+    syn match CalMemo display "\d\+[+!$%&?]\s*"
   else
-    syn match CalToday display "\*\s*\d*"
-    syn match CalMemo display "[+!$%&?]\s*\d*"
+    syn match CalToday display "\*\s*\d\+"
+    syn match CalMemo display "[+!$%&?]\s*\d\+"
   endif
 
   " header
@@ -694,7 +720,7 @@ function! s:syntax()
   let s:vwruler = "Su Mo Tu We Th Fr Sa"
   exe 'syn match CalRulerNC "'.s:vwruler.'"'
 
-  exe 'syn match CalSunday  display "'.'^'.g:submenu_calendar_lmargin.'. \?\d\+" contains=CalToday'
+  exe 'syn match CalSunday  display "'.'^'.g:submenu_calendar_lmargin.'[+!$%&?]\? \{,2}\d\+" contains=CalToday'
 
   hi def link CalNavi     Search
   hi def link CalSaturday Statement

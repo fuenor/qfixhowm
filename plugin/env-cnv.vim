@@ -253,7 +253,7 @@ endif
 " メニュー
 if exists('g:qfixmemo_menu_title')
   if !exists('g:QFixHowm_MenuDir')
-    let g:QFixHowm_MenuDir  = fnamemodify(g:qfixmemo_menu_title, ':p:h')
+    let g:QFixHowm_MenuDir  = fnamemodify(g:qfixmemo_menu_title, ':h')
   endif
   if !exists('g:QFixHowm_Menufile')
     let g:QFixHowm_Menufile = fnamemodify(g:qfixmemo_menu_title, ':t')
@@ -446,7 +446,10 @@ function! QFixMemoRebuildKeyword(dir, fenc)
   let file = g:howm_dir
   let file = g:QFixHowm_MenuDir == '' ? g:howm_dir : g:QFixHowm_MenuDir
   let file = expand(file) . '/' . g:QFixHowm_Menufile
-  silent! exe 'lvimgrep /\('.g:howm_clink_pattern.'\|'.'\[\[[^\]]\+\]\]'.'\)/j '. escape(file, ' ')
+  let pre  = g:qfixmemo_keyword_pre
+  let post = g:qfixmemo_keyword_post
+  let kpattern = pre.'.\{-}'.post
+  silent! exe 'lvimgrep /\('.g:howm_clink_pattern.'\|'.kpattern.'\)/j '. escape(file, ' ')
   let qflist = getloclist(0)
   call setloclist(0, saved_sq)
   return qflist

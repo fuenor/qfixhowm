@@ -220,10 +220,6 @@ endif
 if !exists('g:qfixmemo_use_deletenulllines')
   let g:qfixmemo_use_deletenulllines = 1
 endif
-" キーワードを使用する
-if !exists('g:qfixmemo_use_keyword')
-  let g:qfixmemo_use_keyword = 1
-endif
 
 " スイッチアクションの最大数
 if !exists('g:qfixmemo_switch_action_max')
@@ -1622,7 +1618,7 @@ function! s:formatFileName(fname, len)
   let fname = a:fname
 
   let fname = substitute(fname, title . '\s*\|\.\+$', '', 'g')
-  let fname = substitute(fname, '^\(\[[^\]]\+\]\s*\)\+', '', 'g')
+  let fname = substitute(fname, '^\(\[.\{-}\]\s*\)\+', '', 'g')
   let chars = a:len
   let fn =  chars != 0 ? '' : fname
   while chars
@@ -2456,24 +2452,36 @@ function! qfixmemo#Cmd_X(...) range
 endfunction
 
 """"""""""""""""""""""""""""""
+" キーワードを使用する
+if !exists('g:qfixmemo_use_keyword')
+  let g:qfixmemo_use_keyword = 1
+endif
 " キーワードファイル
 if !exists('g:qfixmemo_keyword_file')
   let g:qfixmemo_keyword_file = '~/.qfixmemo-keys'
 endif
-" オートリンク用tagsを作成するディレクトリ
-if !exists('g:qfixmemo_keyword_dir')
-  let g:qfixmemo_keyword_dir = 'wiki'
-endif
 " オートリンク用キーワードの処理
 " 0 : 検索
-" 1 : qfixmemo_keyword_dirを使用
+" 1 : qfixmemo_keyword_dir内の対応するファイルを開く
 " 2 : vimwikiを使用
 if !exists('g:qfixmemo_keyword_mode')
   let g:qfixmemo_keyword_mode = 1
 endif
+" keyword対応ファイル作成ディレクトリ
+if !exists('g:qfixmemo_keyword_dir')
+  let g:qfixmemo_keyword_dir = 'keyword'
+endif
 " キーワードに登録しない正規表現
 if !exists('g:qfixmemo_keyword_exclude')
   let g:qfixmemo_keyword_exclude = ''
+endif
+" キーワード開始正規表現
+if !exists('g:qfixmemo_keyword_pre')
+  let g:qfixmemo_keyword_pre = '\[\['
+endif
+" キーワード終了正規表現
+if !exists('g:qfixmemo_keyword_post')
+  let g:qfixmemo_keyword_post = '\]\]'
 endif
 
 " オートリンク読込
@@ -2516,22 +2524,25 @@ function! qfixmemo#AddKeyword(...)
   if g:qfixmemo_use_keyword == 0 && (!a:0 || !a:1)
     return
   endif
+  let pre  = g:qfixmemo_keyword_pre
+  let post = g:qfixmemo_keyword_post
+  let kpattern = pre.'.\{-}'.post
 
   let addkey = 0
   if a:0
     let list = a:1
-    call filter(list, "v:val =~ '\[\[.*\]\]'")
+    call filter(list, "v:val =~ '".kpattern."'")
   else
-    let list = s:GetKeywordStr('\[\[.*\]\]')
+    let list = s:GetKeywordStr(kpattern)
   endif
   for text in list
     while 1
-      let stridx = match(text, '\[\[')
-      let pairpos = matchend(text, '\]\]')
+      let stridx = match(text, pre)
+      let pairpos = matchend(text, post)
       if stridx == -1 || pairpos == -1
         break
       endif
-      let keyword = strpart(text, stridx+2, pairpos-stridx-strlen('[[]]'))
+      let keyword = matchstr(text, pre.'\zs'.'.\{-}'.'\ze'.post)
       let keyword = substitute(keyword, '^\s*', '', '')
       let keyword = substitute(keyword, '\s*$', '', '')
       let text = strpart(text, pairpos)
@@ -2598,7 +2609,7 @@ function! qfixmemo#RebuildKeyword()
   endif
   redraw | echo 'QFixMemo : Rebuild Keyword...'
 
-  let pattern = '\[\[.*\]\]'
+  let pattern = g:qfixmemo_keyword_pre . '.*' .g:qfixmemo_keyword_post
   let kfile = '*.'.s:howm_ext.' *.'.g:qfixmemo_ext
   let qflist = qfixlist#search(pattern, g:qfixmemo_dir, '', 0, g:qfixmemo_fileencoding, '**/'.kfile)
   if exists('g:howm_clink_pattern')
@@ -2608,7 +2619,8 @@ function! qfixmemo#RebuildKeyword()
   endif
 
   let extlist = QFixMemoRebuildKeyword(g:qfixmemo_dir, g:qfixmemo_fileencoding)
-  let pattern = '\[\[[^\]]\+\]\]'
+  let pattern = g:qfixmemo_keyword_pre.'.*'.g:qfixmemo_keyword_post
+
   if exists('g:howm_clink_pattern')
     let pattern = '\('.g:howm_clink_pattern.'\|'.pattern.'\)'
   endif

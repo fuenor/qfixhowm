@@ -104,9 +104,8 @@ QFixHowm_FileExtが使用されます。
   let QFixHowm_FileType = 'markdown'
 
 ファイルタイプは明示的に指定することも可能ですが、拡張子から自動設定させること
-も出来ます。
-
-拡張子からファイルタイプを指定する設定 >
+も出来ます。 >
+  "拡張子からファイルタイプを指定する設定
   " 拡張子が'mkd'ならファイルタイプは'markdown'になります
   let QFixHowm_FileType = ''
 
@@ -876,25 +875,21 @@ QFixMemoはキーマップが .vimrcや他のプラグインで定義されて�
 12.3 保存前処理																					*qfixmemo-pre-save*
 
 保存前にタイトル行とタイムスタンプの付加とファイル末の空行削除等が行われます。
-保存前処理は .vimrc等に QFixMemoBufWritePre() を作成する事で変更可能です。
-
+保存前処理は .vimrc等でオプション設定する事で変更可能です。
  >
-  " BufWritePre
-  function! QFixMemoBufWritePre()
-    " タイトル行付加
-    call qfixmemo#AddTitle()
-    " タイムスタンプ付加
-    call qfixmemo#AddTime()
-    " タイムスタンプアップデート
-    " call qfixmemo#UpdateTime()
-    " Wikiスタイルのキーワードリンク作成
-    call qfixmemo#AddKeyword()
-    " ファイル末の空行を削除
-    call qfixmemo#DeleteNullLines()
-  endfunction
+  " タイトル行付加
+  let qfixmemo_use_addtitle        = 1
+  " タイムスタンプ付加
+  let qfixmemo_use_addtime         = 1
+  " タイムスタンプアップデート
+  let qfixmemo_use_updatetime      = 0
+  " ファイル末の空行を削除
+  let qfixmemo_use_deletenulllines = 1
+  " キーワードリンク作成
+  let qfixmemo_use_keyword         = 1
 <
-qfixmemo#UpdateTime()を有効にすると、保存の度にカーソル位置のエントリのタイムス
-タンプが更新されます。
+qfixmemo_use_updatetime を1にすると、保存の度にカーソル位置のエントリのタイム
+スタンプが更新されます。
 
 ------------------------------------------------------------------------------
 12.4 ファイルタイプ指定																	*qfixmemo-filetype*

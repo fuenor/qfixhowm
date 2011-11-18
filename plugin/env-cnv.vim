@@ -76,22 +76,20 @@ if !exists('*QFixMemoBufWritePre')
 function! QFixMemoBufWritePre()
   if g:QFixHowm_Autoformat > 0
     " タイトル行付加
-    call qfixmemo#AddTitle()
+    call qfixmemo#AddTitle(1)
     if g:QFixHowm_SaveTime > -1
       " タイムスタンプ付加
-      call qfixmemo#AddTime()
+      call qfixmemo#AddTime(1)
     endif
     if g:QFixHowm_SaveTime == 2
       " タイムスタンプアップデート
-      call qfixmemo#UpdateTime()
+      call qfixmemo#UpdateTime(1)
     endif
+    " ファイル末の空行を削除
+    call qfixmemo#DeleteNullLines(1)
   endif
   " キーワード作成
   call qfixmemo#AddKeyword()
-  " ファイル末の空行を削除
-  if g:QFixHowm_Autoformat > 0
-    call qfixmemo#DeleteNullLines()
-  endif
 endfunction
 endif
 
@@ -104,7 +102,7 @@ function! QFixMemoQFBufWinEnterPost()
 endfunction
 
 " 初期化
-function! QFixMemoInit(init)
+function! QFixMemoInit()
   call QFixHowmSetup()
 endfunction
 
@@ -112,7 +110,20 @@ endfunction
 " オプションコンバート
 """"""""""""""""""""""""""""""
 let s:howmsuffix = 'howm'
-let s:defsuffix  = 'txt'
+let s:defsuffix  = 'howm'
+" デフォルト変更予定オプション
+if QFixHowm_Convert > 1
+  " デフォルト拡張子
+  let s:defsuffix  = 'txt'
+  ",y で表示する予定・TODO
+  if !exists('g:QFixHowm_ListReminder_ScheExt')
+    let g:QFixHowm_ListReminder_ScheExt = '[-@!.]'
+  endif
+  "予定・TODOのソート優先順
+  if !exists('g:QFixHowm_ReminderPriority')
+    let g:QFixHowm_ReminderPriority = {'@' : 1, '!' : 1, '+' : 3, '-' : 4, '~' : 5, '.' : 6}
+  endif
+endif
 
 " キーマップリーダー
 if !exists('g:qfixmemo_mapleader')
@@ -339,10 +350,6 @@ function! QFixHowmSetup()
     if exists('g:QFixHowm_UserFileType')
       let g:qfixmemo_filetype = g:QFixHowm_UserFileType
     endif
-  endif
-  " タイトル検索の正規表現作成
-  if exists('*QFixMemoTitleRegxp')
-    call QFixMemoTitleRegxp()
   endif
 
   " テンプレート

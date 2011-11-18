@@ -55,13 +55,15 @@ function! CalendarPost()
   if g:calendar_howm_syntax == 0
     return
   endif
-  syn match CalConceal /[@]/ contained
+  let ch = g:calendar_flag[2]
+  exe 'syn match CalHolidaySign /['.ch.']/ contained'
+  let ch = g:calendar_flag[2] . g:calendar_flag[3]
   if g:calendar_mark =~ 'left-fit'
-    syn match CalHoliday display "\s*[@#]\d*" contains=CalConceal
+    exe 'syn match CalHoliday display "\s*['.ch.']\d*" contains=CalHolidaySign'
   elseif g:calendar_mark =~ 'right'
-    syn match CalHoliday display "\d*[@#]\s*" contains=CalConceal
+    exe 'syn match CalHoliday display "\d*['.ch.']\s*" contains=CalHolidaySign'
   else
-    syn match CalHoliday display "[@#]\s*\d*" contains=CalConceal
+    exe 'syn match CalHoliday display "['.ch.']\s*\d*" contains=CalHolidaySign'
   endif
   if s:holiday == 1 " 今日が休日
     hi link CalToday CalHoliday
@@ -69,6 +71,7 @@ function! CalendarPost()
   hi link CalMemo    PreProc
   hi link CalSunday  WarningMsg
   exe 'hi def link CalHoliday '.g:calendar_CalHoliday
+  hi def link CalHolidaySign CalConceal
   hi CalConceal guifg=bg guibg=bg ctermfg=bg ctermbg=bg
 endfunction
 

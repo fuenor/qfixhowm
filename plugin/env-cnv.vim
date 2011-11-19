@@ -115,6 +115,11 @@ let s:defsuffix  = 'howm'
 if QFixHowm_Convert > 1
   " デフォルト拡張子
   let s:defsuffix  = 'txt'
+  " デフォルトファイルタイプ(markdownとどちらにするか検討中)
+  if !exists('g:qfixmemo_filetype')
+    " let g:qfixmemo_filetype = 'markdown'
+    let g:qfixmemo_filetype = 'qfix_memo'
+  endif
   ",y で表示する予定・TODO
   if !exists('g:QFixHowm_ListReminder_ScheExt')
     let g:QFixHowm_ListReminder_ScheExt = '[-@!.]'
@@ -213,6 +218,34 @@ if exists('g:QFixHowm_DiaryFile')
 endif
 if exists('g:QFixHowm_QuickMemoFile')
   let g:qfixmemo_quickmemo = g:QFixHowm_QuickMemoFile
+endif
+
+" タイムスタンプ(strftime)
+if !exists('g:qfixmemo_timeformat')
+  let g:qfixmemo_timeformat = '[%Y-%m-%d %H:%M]'
+  if exists('g:QFixHowm_DatePattern')
+    let g:qfixmemo_timeformat = '['.g:QFixHowm_DatePattern.' %H:%M]'
+  endif
+endif
+" qfixmemo#UpdateTime()でタイムスタンプの置換に使用する正規表現(Vim)
+if !exists('g:qfixmemo_timeformat_regxp')
+  let g:qfixmemo_timeformat_regxp = g:qfixmemo_timeformat
+  let g:qfixmemo_timeformat_regxp = '^'.escape(g:qfixmemo_timeformat_regxp, '[]~*.#')
+  let g:qfixmemo_timeformat_regxp = substitute(g:qfixmemo_timeformat_regxp, '\C%Y', '\\d\\{4}', 'g')
+  let g:qfixmemo_timeformat_regxp = substitute(g:qfixmemo_timeformat_regxp, '\C%m', '[0-1]\\d', 'g')
+  let g:qfixmemo_timeformat_regxp = substitute(g:qfixmemo_timeformat_regxp, '\C%d', '[0-3]\\d', 'g')
+  let g:qfixmemo_timeformat_regxp = substitute(g:qfixmemo_timeformat_regxp, '\C%H', '[0-2]\\d', 'g')
+  let g:qfixmemo_timeformat_regxp = substitute(g:qfixmemo_timeformat_regxp, '\C%M', '[0-5]\\d', 'g')
+  let g:qfixmemo_timeformat_regxp = substitute(g:qfixmemo_timeformat_regxp, '\C%a', '\\(Sun\\|Mon\\|Tue\\|Wed\\|Thu\\|Fri\\|Sat\\|日\\|月\\|火\\|水\\|木\\|金\\|土\\)', 'g')
+endif
+" タイムスタンプ行とみなす正規表現(Vim)
+if !exists('g:qfixmemo_timestamp_regxp')
+  let g:qfixmemo_timestamp_regxp = g:qfixmemo_timeformat_regxp.'\([^-@!+~.]\|$\)'
+endif
+" qfixmemo#AddTitle()で擬似タイトル行とみなす正規表現(Vim)
+if !exists('g:qfixmemo_alt_title_regxp')
+  let g:qfixmemo_alt_title_regxp = g:qfixmemo_timeformat_regxp.'[-@!+~.]'
+  let g:qfixmemo_alt_title_regxp = substitute(g:qfixmemo_alt_title_regxp, '^^', '^\\s*', 'g')
 endif
 
 " howmテンプレート

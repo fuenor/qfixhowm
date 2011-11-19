@@ -112,35 +112,33 @@ if !exists('g:qfixmemo_pairfile_dir')
   let g:qfixmemo_pairfile_dir  = 'pairfile'
 endif
 
-" タイムスタンプフォーマット
-if !exists('g:qfixmemo_timeformat')
-  let g:qfixmemo_timeformat = '[%Y-%m-%d %H:%M]'
-  if exists('g:QFixHowm_DatePattern')
-    let g:qfixmemo_timeformat = '['. g:QFixHowm_DatePattern . ' %H:%M]'
-  endif
-endif
-
-" 予定・TODO識別子
-if !exists('g:qfixmemo_scheduleext')
-  let g:qfixmemo_scheduleext = '-@!+~.'
-endif
 function! qfixmemo#SetTimeFormatRegxp(fmt)
   let regxp = a:fmt
   let regxp = '^'.escape(regxp, '[]~*.#')
-  let regxp = substitute(regxp, '\C%Y', '[0-9][0-9][0-9][0-9]', 'g')
-  let regxp = substitute(regxp, '\C%m', '[0-1][0-9]', 'g')
-  let regxp = substitute(regxp, '\C%d', '[0-3][0-9]', 'g')
-  let regxp = substitute(regxp, '\C%H', '[0-2][0-9]', 'g')
-  let regxp = substitute(regxp, '\C%M', '[0-5][0-9]', 'g')
-  let regxp = substitute(regxp, '\C%S', '[0-5][0-9]', 'g')
+  let regxp = substitute(regxp, '\C%Y', '\\d\\{4}', 'g')
+  let regxp = substitute(regxp, '\C%m', '[0-1]\\d', 'g')
+  let regxp = substitute(regxp, '\C%d', '[0-3]\\d', 'g')
+  let regxp = substitute(regxp, '\C%H', '[0-2]\\d', 'g')
+  let regxp = substitute(regxp, '\C%M', '[0-5]\\d', 'g')
+  let regxp = substitute(regxp, '\C%S', '[0-5]\\d', 'g')
+  let regxp = substitute(regxp, '\C%a', '\\(Sun\\|Mon\\|Tue\\|Wed\\|Thu\\|Fri\\|Sat\\|日\\|月\\|火\\|水\\|木\\|金\\|土\\)', 'g')
   return regxp
 endfunction
-let s:qfixmemo_timeformat = qfixmemo#SetTimeFormatRegxp(g:qfixmemo_timeformat)
-
-if exists('g:qfixmemo_scheduleformat')
-  let s:qfixmemo_scheduleformat = g:qfixmemo_scheduleformat
-else
-  let s:qfixmemo_scheduleformat = '^\s*\[\d\{4}[-/]\d\{2}[-/]\d\{2}\( \d\{2}\(:\d\{2}\)\{1,2}\)\?\]['.g:qfixmemo_scheduleext.']'
+" タイムスタンプ(strftime)
+if !exists('g:qfixmemo_timeformat')
+  let g:qfixmemo_timeformat = '[%Y-%m-%d %H:%M]'
+endif
+" qfixmemo#UpdateTime()でタイムスタンプの置換に使用する正規表現(Vim)
+if !exists('g:qfixmemo_timeformat_regxp')
+  let g:qfixmemo_timeformat_regxp = qfixmemo#SetTimeFormatRegxp(g:qfixmemo_timeformat)
+endif
+" タイムスタンプ行とみなす正規表現(Vim)
+if !exists('g:qfixmemo_timestamp_regxp')
+  let g:qfixmemo_timestamp_regxp = g:qfixmemo_timeformat_regxp
+endif
+" qfixmemo#AddTitle()で擬似タイトル行とみなす正規表現(Vim)
+if !exists('g:qfixmemo_alt_title_regxp')
+  let g:qfixmemo_alt_title_regxp = ''
 endif
 
 " 新規エントリテンプレート
@@ -482,7 +480,7 @@ function! s:QFixMemoLocalKeymap()
   nnoremap <silent> <buffer> <LocalLeader>W :<C-u>call qfixmemo#DivideEntry()<CR>
   vnoremap <silent> <buffer> <LocalLeader>W :<C-u>call qfixmemo#DivideEntry()<CR>
 
-  nnoremap <silent> <buffer> <LocalLeader>S  :<C-u>call qfixmemo#UpdateTime('force')<CR>
+  nnoremap <silent> <buffer> <LocalLeader>S  :<C-u>call qfixmemo#UpdateTime(1)<CR>
   nnoremap <silent> <buffer> <LocalLeader>rs :<C-u>call qfixmemo#SortEntry('Normal')<CR>
   nnoremap <silent> <buffer> <LocalLeader>rS :<C-u>call qfixmemo#SortEntry('Reverse')<CR>
 
@@ -563,7 +561,7 @@ silent! function QFixMemoMenubar(menu, leader)
   call s:addMenu(menucmd, 'NewEntry(&N)', 'n', ':<C-u>call qfixmemo#Template("next")<CR>')
   call s:addMenu(menucmd, 'NewEntry(&B)', 'N', ':<C-u>call qfixmemo#Template("bottom")<CR>')
   exe printf(sepcmd, 3)
-  call s:addMenu(menucmd, 'UpdateTime(&S)'    , 'S',  ':<C-u>call qfixmemo#UpdateTime()<CR>')
+  call s:addMenu(menucmd, 'UpdateTime(&S)'    , 'S',  ':<C-u>call qfixmemo#UpdateTime(1)<CR>')
   call s:addMenu(menucmd, 'SortEntry(&S)'     , 'rs', ':<C-u>call qfixmemo#SortEntry("Normal")<CR>')
   call s:addMenu(menucmd, 'SortEntry(rev)(&S)', 'rS', ':<C-u>call qfixmemo#SortEntry("Reverse")<CR>')
 
@@ -736,7 +734,7 @@ function! s:syntaxHighlight()
     hi link qfixmemoKeyword Underlined
   endif
   if g:qfixmemo_syntax_flag =~ '^.1..'
-    exe 'syn match qfixmemoDateTime "'.s:qfixmemo_timeformat . '" contains=qfixmemoDate,qfixmemoTime'
+    exe 'syn match qfixmemoDateTime "'.g:qfixmemo_timestamp_regxp . '" contains=qfixmemoDate,qfixmemoTime'
     syn match qfixmemoDate contained '\d\{4}-\d\{2}-\d\{2}'
     syn match qfixmemoDate contained '\d\{4}/\d\{2}/\d\{2}'
     syn match qfixmemoTime contained '\d\{2}\(:\d\{2}\)\+'
@@ -788,16 +786,16 @@ function! qfixmemo#AddTitle(...)
   endif
   let l:qfixmemo_title = escape(g:qfixmemo_title, g:qfixmemo_escape)
   let rpattern = '^'.l:qfixmemo_title .'\s*\(\[.\{-}]*\]\s*\)*\s*$'
+  let tpattern = qfixmemo#TitleRegxp()
 
   let save_cursor = getpos('.')
-
-  let tpattern = qfixmemo#TitleRegxp()
   " 一行目は必ずタイトル
   let fline = 1
   call cursor(1, 1)
   let str = getline(fline)
+  let altreg = g:qfixmemo_alt_title_regxp
   " 一行目が予定・TODOなら次エントリへ
-  if str =~ s:qfixmemo_scheduleformat
+  if (altreg != '' && str =~ altreg)
     let [entry, fline, lline] = QFixMRUGet('entry', '%', fline, tpattern)
     let fline = lline + 1
     if fline >= line('$')
@@ -816,7 +814,7 @@ function! qfixmemo#AddTitle(...)
     if title =~ rpattern
       call remove(entry, 0)
       for str in entry
-        if str != '' && str !~ s:qfixmemo_scheduleformat && str !~ s:qfixmemo_timeformat && str !~ '^\[.\{-}]$'
+        if str != '' && (altreg != '' && str !~ altreg) && str !~ g:qfixmemo_timestamp_regxp
           let len = strlen(str)
           let str = substitute(str, '\%>' . g:qfixmemo_title_length .'v.*','','')
           if strlen(str) != len
@@ -852,7 +850,7 @@ function! qfixmemo#AddTime(...)
       break
     endif
     let [entry, fline, lline] = QFixMRUGet('entry', '%', fline, tpattern)
-    if len(filter(entry, "v:val =~ '" . s:qfixmemo_timeformat . '\(\s\|$\)'. "'")) == 0
+    if len(filter(entry, "v:val =~ '" . g:qfixmemo_timestamp_regxp. "'")) == 0
       let str = strftime(g:qfixmemo_timeformat)
       exe fline . 'put=str'
       let lline += 1
@@ -874,13 +872,13 @@ function! qfixmemo#UpdateTime(...)
   let tpattern = qfixmemo#TitleRegxp()
   let [title, fline, lline] = QFixMRUGet('title', '%', fline, tpattern)
   call cursor(fline, 1)
-  let fline = search(s:qfixmemo_timeformat, 'cW')
+  let fline = search(g:qfixmemo_timestamp_regxp, 'cW')
   let str = strftime(g:qfixmemo_timeformat)
   if fline == 0 || fline > lline
     let fline = fline == 0 ? 1 : fline
     exe fline . 'put=str'
   elseif s:qfixmemoWriteUpdateTime
-    let str = substitute(getline(fline), s:qfixmemo_timeformat, str, '')
+    let str = substitute(getline(fline), g:qfixmemo_timeformat_regxp, str, '')
     call setline(fline, str)
   endif
   call setpos('.', save_cursor)
@@ -1275,6 +1273,7 @@ function! qfixmemo#DeleteEntry(...)
     stopinsert
     let s:qfixmemoWriteUpdateTime = 0
     write!
+    let s:qfixmemoWriteUpdateTime = 1
   endif
 endfunction
 
@@ -1389,10 +1388,11 @@ function! qfixmemo#ListRecentTimeStamp(...)
       let fmt = g:qfixmemo_timeformat_findstr
     endif
   endif
-  let fmt = '^' . escape(fmt, '[]~*.#')
+  let fmt = '^' . escape(fmt, '()[]~*.#')
   let fmt = substitute(fmt, '\C%H', '[0-2][0-9]', 'g')
   let fmt = substitute(fmt, '\C%M', '[0-5][0-9]', 'g')
   let fmt = substitute(fmt, '\C%S', '[0-5][0-9]', 'g')
+  let fmt = substitute(fmt, '\C%a', iconv('(Sun|Mon|Tue|Wed|Thu|Fri|Sat|日|月|火|水|木|金|土)', &enc, g:qfixmemo_fileencoding), 'g')
 
   let tregxp = ''
   let ltime = localtime()
@@ -1410,10 +1410,6 @@ function! qfixmemo#ListRecentTimeStamp(...)
     let ltime -= 24*60*60
   endfor
   let tregxp = substitute(tregxp, '^|', '', '')
-  let fmt = substitute(fmt, '\C%Y', '[0-2][0-9][0-9][0-9]', 'g')
-  let fmt = substitute(fmt, '\C%m', '[0-1][0-9]', 'g')
-  let fmt = substitute(fmt, '\C%d', '[0-3][0-9]', 'g')
-  let fmt = fmt . '\([^'.g:qfixmemo_scheduleext.']\|$\)'
 
   redraw | echo 'QFixMemo : Searching...'
   if findstr
@@ -1439,6 +1435,7 @@ function! qfixmemo#ListRecentTimeStamp(...)
     endfor
   else
     let qflist = qfixlist#search(tregxp, g:qfixmemo_dir, 'rtext', 0, g:qfixmemo_fileencoding, '**/*')
+    let fmt = g:qfixmemo_timestamp_regxp
     call filter(qflist, "v:val['text'] =~ '" . fmt . "'")
   endif
 
@@ -2442,6 +2439,7 @@ function! qfixmemo#Cmd_X(...) range
     endif
     let s:qfixmemoWriteUpdateTime = 0
     write!
+    let s:qfixmemoWriteUpdateTime = 1
     wincmd p
     let qf = QFixGetqflist()
     call remove(qf, l)
@@ -2796,7 +2794,7 @@ function! QFixMemoSwitchAction(list, ...)
       continue
     endif
     if pattern == '{_}'
-      " let cpattern = strftime('['.s:qfixmemo_timeformat.'].')
+      " let cpattern = strftime('['.g:qfixmemo_timeformat.'].')
     endif
     let prevcol = (a:0 == 0 ? start : col('.'))
     call cursor(prevline, start)
@@ -2842,6 +2840,7 @@ function! qfixmemo#SortEntry(mode)
   call cursor(1, 1)
   let s:qfixmemoWriteUpdateTime = 0
   write
+  let s:qfixmemoWriteUpdateTime = 1
   unlet! elist
 endfunction
 
@@ -2851,7 +2850,8 @@ function! s:qfixmemoGetEntryList()
 
   let elist = []
   let titlepattern = qfixmemo#TitleRegxp()
-  let timepattern = s:qfixmemo_timeformat . '\([^'.g:qfixmemo_scheduleext.']\+\|$\)'
+  let timepattern = g:qfixmemo_timestamp_regxp
+
   let fline = 1
   while 1
     let [entry, fline, lline] = QFixMRUGet('entry', '%', fline, titlepattern)

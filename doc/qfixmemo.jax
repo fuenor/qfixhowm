@@ -812,6 +812,38 @@ qfixmemo/misc/user-func.vim にまとめてあります。
   let g:qfixmemo_template_keycmd = "2j$a"
 
 ------------------------------------------------------------------------------
+NOTE:
+デフォルトのタイムスタンプフォーマットは以下のように定義されています。
+>
+  " タイムスタンプ(strftime)
+  let qfixmemo_timeformat       = '[%Y-%m-%d %H:%M]'
+
+  " qfixmemo#UpdateTime()でタイムスタンプの置換に使用する正規表現(Vim)
+  let qfixmemo_timeformat_regxp = '^\[\d\{4}-\d\{2}\d\{2} \d\{2}:\d\{2}\]'
+
+  " タイムスタンプ行とみなす正規表現(Vim)
+  let qfixmemo_timestamp_regxp  = qfixmemo_timeformat_regxp
+
+  " qfixmemo#AddTitle()で擬似タイトル行とみなす正規表現(Vim)
+  let qfixmemo_alt_title_regxp  = ''
+<
+qfixmemo_timeformat_regxpは設定しなければ自動で %Y 等を置換した正規表現として
+作成されます。
+したがって (2011-12-24 土 23:59) というタイムスタンプフォーマットは以下のよう
+にだけ設定すれば良いことになります。
+>
+  let qfixmemo_timeformat = '(%Y-%m-%d %a %H:%M)'
+
+なお「QFixMemoのタイムスタンプ」と「howmスタイルの予定・TODOのタイムスタンプ」
+は完全に独立して扱われています。
+
+NOTE:
+findstrを使用している場合は<Leader>Lで最初の空白までしか認識しなかったり曜日部
+分の検索ができないのでタイムスタンプフォーマットを変更する場合は気をつけてくだ
+さい。
+grepを使用している場合は問題ありません。
+
+------------------------------------------------------------------------------
 12.1.2 タイトルマーカーとタイトル検索の正規表現					*qfixmemo-title*
 
 タイトルマーカーを変更することも可能です。 >

@@ -161,7 +161,7 @@ endif
 "                 http://sites.google.com/site/fudist/Home/qfixhowm
 "  Last Modified: 2011-11-05 20:41
 "=============================================================================
-let s:Version = 1.00
+let s:Version = 1.01
 scriptencoding utf-8
 if v:version < 700 || &cp
   finish
@@ -181,6 +181,13 @@ let loaded_QFixMemoCalendar_vim = 1
 if !exists('g:calendar_holidayfile')
   " let g:calendar_holidayfile = '~/qfixmemo/Sche-Hd-0000-00-00-000000.howm'
   let g:calendar_holidayfile = ''
+endif
+" 曜日表示
+" 0 : 英語
+" 1 : 日本語
+" 2 : 日本語+陰暦
+if !exists('g:calendar_jp')
+  let g:calendar_jp = 2 * ($LANG =~ 'ja')
 endif
 " カレンダーボード
 if !exists('g:calendar_footer')
@@ -441,6 +448,9 @@ function! QFixMemoCalendar(dircmd, file, cnt, ...)
   let windir = a:dircmd
   let win = windir =~ 'vert'
   let winsize = 0 "winwidth(0)
+  if a:0 && a:1 =~ 'parent'
+    let winsize = winwidth(0)
+  endif
   let pbufnr = bufnr('%')
   exe 'silent! ' . windir . ' ' . (winsize == 0 ? '' : string(winsize)) . 'split '
   silent! exe 'edit '.escape(file, ' ')
@@ -453,16 +463,23 @@ function! QFixMemoCalendar(dircmd, file, cnt, ...)
   setlocal nomodifiable
   setlocal winfixwidth
   setlocal winfixheight
-  let b:dircmd = windir
-  let b:calendar_winfixheight = a:0
+  setlocal foldcolumn=0
+  let cbufnr = bufnr('%')
+  let b:submenu_calendar_lmargin = g:submenu_calendar_lmargin
+  let winwidth  = strlen(b:submenu_calendar_lmargin) + 3*7 + 1
+  if a:0 && a:1 =~ 'parent'
+    " parentに合わせてマージン設定
+  endif
   call s:build(a:cnt)
   let winheight = line('$')
-  let winwidth = 1 + strlen(g:submenu_calendar_lmargin) + 3*7 + 1
   let b:calendar_width = winwidth
-  let cbufnr = bufnr('%')
+  let b:dircmd = windir
+  let b:calendar_winfixheight = a:0
   let b:calendar_resize = 0
   if a:0
     let b:calendar_resize = a:1 =~ 'resize' ? 1 :0
+    let winwidth = winsize
+    let b:calendar_width = winwidth
     call s:winfixheight(winheight)
     exe 'normal! '.winwidth ."\<C-W>|"
     " サブメニューと同時にウィンドウクローズするためのフック
@@ -598,7 +615,18 @@ endfunction
 endif
 
 let s:cal = '  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31'
-let s:mruler = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+if !exists('g:calendar_dow')
+  let g:calendar_dow   = ' Su Mo Tu We Th Fr Sa'
+  if g:calendar_jp
+    let g:calendar_dow = ' 日 月 火 水 木 金 土'
+  endif
+endif
+if !exists('g:calendar_month')
+  let g:calendar_month = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+  if g:calendar_jp == 2
+    let g:calendar_month = ['睦月', '如月', '弥生', '卯月', '皐月', '水無月', '文月', '葉月', '長月', '神無月', '霜月', '師走']
+  endif
+endif
 function! s:CalendarStr(...)
   let loop = a:0 ? a:1 : 1
   let glist = []
@@ -651,10 +679,10 @@ function! s:CalendarStr(...)
     endif
     let str = substitute(str, '\(.\{21}\)', '\1|', 'g')
     let list = split(str, '|')
-    call insert(list, ' Su Mo Tu We Th Fr Sa')
-    let mruler = printf('  < . > %4.4d/%2.2d %s', year, month, s:mruler[month-1])
+    call insert(list, g:calendar_dow)
+    let mruler = printf(' < . > %4.4d/%2.2d %s', year, month, g:calendar_month[month-1])
     call insert(list, mruler)
-    call map(list, 'substitute(v:val, "^", g:submenu_calendar_lmargin, "")')
+    call map(list, 'substitute(v:val, "^", b:submenu_calendar_lmargin, "")')
     let month += 1
     if loop > 1
       call extend(list, [''])
@@ -701,7 +729,7 @@ endfunction
 
 function! s:syntax()
   syn clear
-  exe 'syn match CalSaturday display /.\%>'.(3*7+strlen(g:submenu_calendar_lmargin)-2).'v[+!$%&?]\? *\d\+$/'
+  exe 'syn match CalSaturday display /.\%>'.(3*7+strlen(b:submenu_calendar_lmargin)-2).'v[+!$%&?]\? *\d\+$/'
 
   " today
   if g:calendar_mark =~ 'left-fit'
@@ -716,15 +744,15 @@ function! s:syntax()
   endif
 
   " header
-  syn match CalHeader display "[^ ]*\d\+\/\d\+ [A-Z].."
+  syn match CalHeader display '< \. > \d\{4}/\d\{2} [^ ]\+' contains=CalCmd
+  syn match CalCmd '< \. >' contained
 
   " ruler
-  syn match Type '<\+\s*\.\s*>\+'
-  let s:vwruler = "Su Mo Tu We Th Fr Sa"
-  exe 'syn match CalRulerNC "'.s:vwruler.'"'
+  exe 'syn match CalRulerNC "'.substitute(g:calendar_dow, '^\s*\|\s*$', '', '').'"'
 
-  exe 'syn match CalSunday  display "'.'^'.g:submenu_calendar_lmargin.'[+!$%&?]\? \{,2}\d\+" contains=CalToday'
+  exe 'syn match CalSunday  display "'.'^'.b:submenu_calendar_lmargin.'[+!$%&?]\? \{,2}\d\+" contains=CalToday'
 
+  hi def link CalCmd      Type
   hi def link CalNavi     Search
   hi def link CalSaturday Statement
   hi def link CalSunday   Type

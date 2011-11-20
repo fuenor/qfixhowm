@@ -83,6 +83,10 @@ endif
 if !exists('g:qfixmemo_filename')
   let g:qfixmemo_filename      = '%Y/%m/%Y-%m-%d-%H%M%S'
 endif
+" ファイル名指定で任意ファイルを作成する際のファイル名/ディレクトリ
+if !exists('g:qfixmemo_misc_file')
+  let g:qfixmemo_misc_file     = '%Y/%m/'
+endif
 " メモファイルの拡張子(qfixmemo_filenameから設定)
 if !exists('g:qfixmemo_ext')
   let g:qfixmemo_ext = fnamemodify(g:qfixmemo_filename, ':e')
@@ -363,7 +367,7 @@ function s:QFixMemoKeymap()
     call QFixMemoKeymap()
     return
   endif
-  silent! nnoremap <silent> <unique> <Leader>C       :<C-u>call qfixmemo#Edit()<CR>
+  silent! nnoremap <silent> <unique> <Leader>C       :<C-u>call qfixmemo#EditInput()<CR>
   silent! nnoremap <silent> <unique> <Leader>c       :<C-u>call qfixmemo#EditNew()<CR>
   silent! nnoremap <silent> <unique> <Leader>u       :<C-u>call qfixmemo#Quickmemo()<CR>
   silent! nnoremap <silent> <unique> <Leader>U       :<C-u>call qfixmemo#Quickmemo(0)<CR>
@@ -508,7 +512,7 @@ silent! function QFixMemoMenubar(menu, leader)
   let sepcmd  = 'amenu <silent> 41.333 '.a:menu.'.-sep%d-			<Nop>'
   let menucmd = 'amenu <silent> 41.333 '.a:menu.'.%s<Tab>'.a:leader.'%s %s'
   call s:addMenu(menucmd, 'CreateNew(&C)'      , 'c', ':<C-u>call qfixmemo#EditNew()<CR>')
-  call s:addMenu(menucmd, 'CreateNew(Name)(&N)', 'C', ':<C-u>call qfixmemo#Edit()<CR>')
+  call s:addMenu(menucmd, 'CreateNew(Name)(&N)', 'C', ':<C-u>call qfixmemo#EditInput()<CR>')
   call s:addMenu(menucmd, 'QuickMemo(&U)'      , 'u', ':<C-u>call qfixmemo#Quickmemo()<CR>')
   call s:addMenu(menucmd, 'Diary(&D)'    , '<Space>', ':<C-u>call qfixmemo#EditDiary(g:qfixmemo_diary)<CR>')
   call s:addMenu(menucmd, 'PairFile(&J)'       , 'j', ':<C-u>call qfixmemo#PairFile("%")<CR>')
@@ -1029,6 +1033,37 @@ function! qfixmemo#EditNew()
     exe 'let file = g:qfixmemo_filename'.count
   endif
   call qfixmemo#Edit(file)
+endfunction
+
+" 新規メモをファイル名指定で作成
+" 拡張子指定がないときのみ、qfixmemo_extを付加する。
+function! qfixmemo#EditInput()
+  if qfixmemo#Init('mkdir')
+    return
+  endif
+  let fname = g:qfixmemo_misc_file
+  if count
+    exe 'let fname = g:qfixmemo_misc_file'.count
+  endif
+  let fname = substitute(fname, '[/\\]\+', '/', 'g')
+  while 1
+    let file = input('File: ', fname, 'file')
+    if file == ''
+      return
+    endif
+    if fnamemodify(file, ':t') == ''
+      echohl ErrorMsg
+      redraw|echom 'QFixMemo : Please input filename.'
+      echohl None
+      continue
+    endif
+    break
+  endwhile
+  let file = substitute(file, '[/\\]\+', '/', 'g')
+  if fnamemodify(file, ':e') == ''
+    let file = file.'.'.g:qfixmemo_ext
+  endif
+  call qfixmemo#EditFile(file)
 endfunction
 
 " クイックメモを開く

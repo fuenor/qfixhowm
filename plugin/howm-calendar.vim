@@ -72,7 +72,11 @@ function! CalendarPost()
   hi link CalSunday  WarningMsg
   exe 'hi def link CalHoliday '.g:calendar_CalHoliday
   hi def link CalHolidaySign CalConceal
-  hi CalConceal guifg=bg guibg=bg
+  if has('gui_running')
+    hi CalConceal guifg=bg guibg=bg
+  else
+    hi link CalConceal CalHoliday
+  endif
 endfunction
 
 function! s:CalendarPost(win)

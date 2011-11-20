@@ -73,8 +73,8 @@ http://sites.google.com/site/fudist/Home/grep
 
 QFixMemoはQFixHowmをよりシンプルにリファクタリングしたプラグインです。
 
-予定・TODO部分にはQFixHowmのソースを流用しているため、オプション設定がほぼその
-まま使えますが、メモファイル名等のオプションは若干異なります。 >
+予定・TODO部分にはhowm_schedule.vimとして独立動作するプラグインを使用している
+ているため、QFixHowmのオプション設定がそのまま使えます。
 
 このファイルがQFixHowmとして配布されている場合はオプションの互換性を維持するた
 めに、plugin/env-cnv.vimでQFixHowmのオプションをQFixMemoのオプションにコンバー
@@ -83,31 +83,9 @@ QFixMemoはQFixHowmをよりシンプルにリファクタリングしたプラ�
   qfixmemo_dir, qfixmemo_filename, qfixmemo_ext, qfixmemo_filetype
   (*) それ以外のオプションはコンバート時でもほぼすべて有効です。
 
-不要な場合は.vimrcで無効化してください。 >
+QFixMemoとしてのネイティブな状態で使用したい場合は.vimrcで無効化してください。 >
   " QFixHowmとのオプションコンバートを行わない
   let QFixHowm_Convert = 0
-
-逆にこのファイルがQFixMemoとして配布されていてQFixHowmとオプション互換にしたい
-場合はmisc/env-cnv.vimをpluginディレクトリへコピーしてください。
-
-QFixHowmとして使用する場合の大きな違いはメモファイルの拡張子の扱いにあります。
-Ver.3ではhowm_filename等で指定したファイル名の拡張子は"無視"され、常に
-QFixHowm_FileExtが使用されます。
-(QFixHowm_FileExtがない場合は howm_filenameから生成されます)
-
-拡張子をmkdにする例 >
-  " ファイル拡張子をmkdにする
-  let QFixHowm_FileExt = 'mkd'
-
-同様にVer.3でのファイルタイプ切替はQFixHowm_FileTypeのみで変更可能です。 >
-  " ファイルタイプをmarkdownにする
-  let QFixHowm_FileType = 'markdown'
-
-ファイルタイプは明示的に指定することも可能ですが、拡張子から自動設定させること
-も出来ます。 >
-  "拡張子からファイルタイプを指定する設定
-  " 拡張子が'mkd'ならファイルタイプは'markdown'になります
-  let QFixHowm_FileType = ''
 
 1.3 qfix_memoファイルタイプ															*qfixmemo-qfix_memo*
 
@@ -143,34 +121,38 @@ qfixapp内のsyntaxディレクトリにコピーすることも出来ます
   let qfixmemo_dir           = '~/qfixmemo'
 
 Windows: >
+  " メモファイルのファイル名
+  let qfixmemo_filename      = '%Y/%m/%Y-%m-%d-%H%M%S.txt'
   " メモファイルのファイルエンコーディング
   let qfixmemo_fileencoding  = 'cp932'
   " メモファイルのファイルフォーマット(改行コード)
   let qfixmemo_fileformat    = 'dos'
 Unix: >
+  " メモファイルのファイル名
+  let qfixmemo_filename      = '%Y/%m/%Y-%m-%d-%H%M%S.txt'
   " メモファイルのファイルエンコーディング
   let qfixmemo_fileencoding  = 'utf-8'
   " メモファイルのファイルフォーマット(改行コード)
   let qfixmemo_fileformat    = 'unix'
 <
 NOTE:
-Windowsでファイルエンコーディングを 'utf-8' に設定したい場合は別途grepを用意し
-て設定を行う必要があります。
+Windowsでファイルエンコーディングを utf-8 に設定したい場合は別途grepを用意して
+設定を行う必要があります。
 http://sites.google.com/site/fudist/Home/grep/install
 ファイルフォーマット(改行コード)についてはWindowsでも 'unix' に設定可能です。
 
-予定・TODOにはQFixHowmのソースがそのまま使用されていますので、タイムスタンプ
-フォーマットはなるべくデフォルトのままか - を / に変える程度で使用して下さい。
-またWindowsのデフォルトで使用されるfindstrは正規表現の関係で制限があり、タイム
-スタンプフォーマットを変更すると検索できなくなる事があります。
+------------------------------------------------------------------------------
+ファイルタイプはqfixmemo_filetypeで指定します
 
-タイムスタンプ: >
-  let g:qfixmemo_timeformat = '[%Y-%m-%d %H:%M]'
+Markdownを使用する例 >
+  " ファイルタイプにmarkdownを仕様
+  let qfixmemo_filetype  = 'markdown'
 
-  " タイムスタンプフォーマットの日付部分を変更する場合 QFixHowm_DatePatternも
-  " 変更する必要があります。
-  let g:qfixmemo_timeformat  = '[%Y/%m/%d %H:%M]'
-  let g:QFixHowm_DatePattern = '%Y/%m/%d'
+拡張子にtxt以外を使用する場合は、拡張子から自動判別させることも可能です。 >
+  " ファイルタイプは拡張子から自動判別
+  let qfixmemo_filetype  = ''
+
+詳しくは|qfixmemo-filetype|を参照してください。
 
 ==============================================================================
 3. メモファイルを開く																		*qfixmemo-file*
@@ -186,15 +168,21 @@ http://sites.google.com/site/fudist/Home/grep/install
 <Leader>C           ファイル名を指定して新規ファイル作成
 
 メモファイルのファイル名は変更可能です。
+ファイル名には |strftime()|で使用可能な文字列が設定できます。
 
 <Leader>c           let qfixmemo_filename  = '%Y/%m/%Y-%m-%d-%H%M%S'
 <Leader>u           let qfixmemo_quickmemo = 'Qmem-00-0000-00-00-000000'
 <Leader><Space>     let qfixmemo_diary     = 'diary/%Y/%m/%Y-%m-%d'
 
 ファイル拡張子      let qfixmemo_ext       = 'txt'
+(明示的に設定しない場合は起動時に qfixmemo_filenameで指定されている拡張子が使
+用されます。デフォルトはtxtです)
 
-ファイル名には |strftime()|で使用可能な文字列が設定できます。
+NOTE:
+新規ファイル名、クイックメモ、日記の拡張子はファイル作成時には指定しても無視さ
+れ、常にqfixmemo_extが付加されます。
 
+------------------------------------------------------------------------------
 新規ファイルを開くと = で始まる行がテンプレートとして挿入されます。
 この行がタイトル行ですので、適当なタイトルを入力してメモを書いてください。
 タイトルを付けるのが面倒なら<CR>を押して本文から書きます。
@@ -205,8 +193,10 @@ http://sites.google.com/site/fudist/Home/grep/install
 
 NOTE:
 <Leader>cではカウント指定で qfixmemo_filename, qfixmemo_filename1, ...を使用さ
-れます。特定のファイルだけ特定のディレクトリにメモを取りたい場合に使用します。
+れます。特定のファイルだけ特定のファイル名フォーマットでメモを取りたい場合に使
+用します。
 
+------------------------------------------------------------------------------
 NOTE:
 メモファイル中に [[キーワード]] のように [[ と ]] でWikiスタイルのキーワードを
 作成するとオートリンク化され、キーワード上で<CR>を押すと対応するファイルを開く
@@ -243,16 +233,16 @@ NOTE:
 
 クイックメモではカウント指定が可能です。
 
-2<Leader>u などとして実行時にカウント指定すると qfixmemo_quickmemo2 のように対応する
-ファイル名のクイックメモが開かれ、以降は <Leader>u を使用すると一番最後に指定された
-クイックメモが開かれます。
+2<Leader>u などとして実行時にカウント指定すると qfixmemo_quickmemo2 のように対
+応するファイル名のクイックメモが開かれ、以降は <Leader>u を使用すると一番最後
+に指定されたクイックメモが開かれます。
 クイックメモは <Leader>U でデフォルト(qfixmemo_quickmemo)に戻すことが出来ます。
 
 NOTE:
 クイックメモで開くファイル
 - フルパスで指定すると qfixmemo_dir外のファイルを開くことができます
-- 指定ファイル名に拡張子が存在しない場合はqfixmemo_extを拡張子として付加します
-  パスや拡張子まで含めて指定されている場合は、指定のファイルを開きます。
+- 指定ファイル名に拡張子が存在しない場合はqfixmemo_extを拡張子として付加します。
+  ただしパスや拡張子まで含めて指定されている場合は、指定のファイルを開きます。
   したがってクイックメモに限りQFixMemo以外のファイルでも開くことが可能です
 
 ------------------------------------------------------------------------------
@@ -367,8 +357,12 @@ l ra A は外部grepを使用するのでMRUリストより速度的には遅く
 す。
 最新の状態を取得したい場合は <Leader>ra等で再検索します。
 
-なおキャッシュの存在しない <Leader>aの初回実行時には <Leader>raが実行されます。
+本来はQuickFixウィンドウに表示すれば良いのですが、QuickFixは大量のエントリを登
+録するのに向いていないため独自ウィンドウに表示しています。
+なお<Leader>aのエントリ一覧はQuickFixと違い、編集してずれた行番号を追尾するこ
+とはできません。そのような場合は<Leader>raで再検索する必要があります。
 
+なおキャッシュの存在しない <Leader>aの初回実行時には <Leader>raが実行されます。
 <Leader>a でキャッシュ表示を使用したくない場合は次のように設定してください。
  >
   " <Leader>a に「全エントリ一覧」を割り当て
@@ -396,6 +390,22 @@ l ra A は外部grepを使用するのでMRUリストより速度的には遅く
   " MRUの基準ディレクトリ
   let QFixMRU_RootDir   = qfixmemo_dir
 <
+たとえばWindowsでは c:/howm Linuxでは ~/howm 以下にメモファイルが存在していて、
+何らかの形でファイル共有しているとします。この場合は次のように設定を行います。
+>
+  " MRUの基準ディレクトリ(Windows)
+  let QFixMRU_RootDir = 'c:/howm'
+  " MRU保存ファイル名
+  let QFixMRU_Filename  = 'c:/howm/.qfixmru'
+
+  " MRUの基準ディレクトリ(Linux)
+  let QFixMRU_RootDir = '~/hnowm'
+  " MRU保存ファイル名
+  let QFixMRU_Filename  = '~/howm/.qfixmru'
+こうすると同じ内容の .qfixmruを共有するとこが出来、どちらの環境でも同じMRUリス
+トが表示されることになります。
+なおqfixmemo_fileencodingは合わせておく必要があります。
+
 ==============================================================================
 5. 検索																									*qfixmemo-grep*
 
@@ -415,7 +425,10 @@ http://sites.google.com/site/fudist/Home/grep
 s                   指定文字列で絞り込み
 r                   指定文字列を'含まない'絞り込み
 S                   名前順などのソート切替
-dd,d(ビジュアル)    登録行の削除
+dd                  登録行の削除
+d(ビジュアル)       登録行の削除
+p                   削除した行の貼付け
+P                   削除した行の貼付け
 u                   ソートや絞り込みのアンドゥ
 U                   絞り込み全てをアンドゥ
 

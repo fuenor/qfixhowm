@@ -6,7 +6,7 @@
 "  Last Modified: 2011-11-02 23:57
 "=============================================================================
 scriptencoding utf-8
-let s:Version = 2.87
+let s:Version = 2.88
 
 " What Is This:
 "   This plugin adds preview, sortings and advanced search to your quickfix window.
@@ -100,6 +100,10 @@ endif
 " 'tab'に設定すると<S-CR>はファイルをタブで開く
 if !exists('g:QFix_Edit')
   let g:QFix_Edit = ''
+endif
+" QFixWin独自の<CR>コマンドを使用する
+if !exists('g:QFix_UseAltCR')
+  " let g:QFix_UseAltCR = 1
 endif
 " ファイルを開くとQuickfixウィンドウを閉じる
 if !exists('g:QFix_CloseOnJump')
@@ -317,8 +321,15 @@ function! s:QFBufWinEnter(...)
   nnoremap <buffer> <silent> q :close<CR>
   call QFixAltWincmdMap()
 
-  nnoremap <buffer> <silent> <CR>   :call <SID>BeforeJump()<CR><CR>:call <SID>AfterJump()<CR>
-  vnoremap <buffer> <silent> <CR>   :call <SID>VisCR()<CR>
+  if !exists('g:QFix_UseAltCR')
+    let g:QFix_UseAltCR = 1
+  endif
+  if g:QFix_UseAltCR == 1
+    nnoremap <buffer> <silent> <CR>   :call <SID>BeforeJump()<CR><CR>:call <SID>AfterJump()<CR>
+  elseif g:QFix_UseAltCR == 2
+    nnoremap <buffer> <silent> <CR>   :call <SID>VisCR()<CR>
+    vnoremap <buffer> <silent> <CR>   :call <SID>VisCR()<CR>
+  endif
   nnoremap <buffer> <silent> <S-CR> :call <SID>BeforeJump()<CR>:call <SID>QFixSplit()<CR>:call <SID>AfterJump()<CR>
   if g:QFix_Edit == 'tab'
     nnoremap <buffer> <silent> <S-CR> :call <SID>BeforeJump()<CR>:call <SID>QFixEdit()<CR>:call <SID>AfterJump()<CR>
@@ -1142,14 +1153,21 @@ function! QFixPclose()
   else
     let saved_winfixheight = &winfixheight
     let saved_winfixwidth  = &winfixwidth
-    setlocal nowinfixheight
-    setlocal nowinfixwidth
+    let wh = winheight(0)
+    let ww = winwidth(0)
+    setlocal winfixheight
+    setlocal winfixwidth
     silent! pclose!
     let &winfixheight = saved_winfixheight
     let &winfixwidth  = saved_winfixwidth
+    let w = &lines - winheight(0) - &cmdheight - (&laststatus > 0 ? 1 : 0)
+    if w > 0
+      exe 'normal! '. wh ."\<C-W>_"
+      exe 'normal! '. ww ."\<C-W>|"
+    endif
   endif
   if &buftype == 'quickfix'
-    call QFixResize(h)
+    " call QFixResize(h)
     let g:QFix_Height = h
   endif
   let s:UseQFixPreviewOpen = 1

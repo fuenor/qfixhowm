@@ -46,6 +46,12 @@ if v:version < 700 || &cp
   finish
 endif
 
+if !exists('g:qfixlist_wincmd')
+  let g:qfixlist_wincmd = 'rightbelow split'
+endif
+if !exists('g:qfixlist_after_wincmd')
+  let g:qfixlist_after_wincmd = 'wincmd J'
+endif
 if !exists('g:qfixlist_close_on_jump')
   let g:qfixlist_close_on_jump = 0
 endif
@@ -65,7 +71,7 @@ endfunction
 
 function! qfixlist#search(pattern, dir, cmd, days, fenc, file)
   let cmd = a:cmd
-  redraw | echo 'QFixList : exec grep...'
+  redraw | echo 'QFixList : execute grep...'
   if a:days
     let g:MyGrep_FileListWipeTime = localtime() - a:days*24*60*60
   endif
@@ -228,9 +234,27 @@ function! qfixlist#open(...)
   call QFixPclose()
   let path = s:QFixList_dir
   let file = fnamemodify(tempname(), ':p:h').'/__QFix_List__'
-  let mode = 'split'
-  call QFixEditFile(file, mode)
-  wincmd J
+  let winnr = bufwinnr(file)
+  if winnr != -1
+    exe winnr . 'wincmd w'
+  else
+    let aftercmd = ''
+    let prevbuf = bufnr('%')
+    if &buftype != ''
+      for i in range(1, winnr('$'))
+        exe i . 'wincmd w'
+        if &buftype == ''
+          break
+        endif
+      endfor
+      if &buftype != ''
+        exe bufwinnr(prevbuf) . 'wincmd w'
+        let aftercmd = g:qfixlist_after_wincmd
+      endif
+    endif
+    silent! exe 'silent! '.g:qfixlist_wincmd.' '.file
+    exe aftercmd
+  endif
   if loaded
     silent! exec 'lchdir ' . escape(s:QFixList_dir, ' ')
     return
@@ -364,10 +388,15 @@ endfunction
 
 function! s:TogglePreview(...)
   let b:PreviewEnable = !b:PreviewEnable
-  call QFixPclose()
+  if !b:PreviewEnable
+    call QFixPclose()
+  endif
 endfunction
 
 function! s:CR()
+  if b:PreviewEnable
+    call QFixPclose()
+  endif
   let [file, lnum] = s:Getfile('.')
   if g:qfixlist_close_on_jump
     silent! close

@@ -37,6 +37,9 @@ endif
 if !exists('g:QFixHowm_MenuCmd')
   let g:QFixHowm_MenuCmd = ''
 endif
+if !exists('g:QFixHowm_MenuWinCmd')
+  let g:QFixHowm_MenuWinCmd = 'edit'
+endif
 if !exists('g:QFixHowm_MenuKey')
   let g:QFixHowm_MenuKey = 1
 endif
@@ -370,7 +373,7 @@ function! QFixHowmOpenMenu(...)
     if g:QFixHowm_MenuCmd != ''
       exe g:QFixHowm_MenuCmd
     endif
-    silent! exe 'silent! edit '.mfilename
+    silent! exe 'silent! '.g:QFixHowm_MenuWinCmd.' '.mfilename
     let s:menubufnr = bufnr('%')
   endif
   setlocal buftype=nofile
@@ -419,10 +422,19 @@ function! QFixHowmOpenMenu(...)
     enew
     b #
   endif
-  let s:calender_exists = 0
-  if g:QFixHowm_MenuCalendar && bufwinnr('__Calendar__') == -1
-    call qfixmemo#Calendar()
-    let s:calender_exists = bufnr('__Calendar__')
+  if bufwinnr(bufnr('__Calendar__')) == -1 && s:calender_exists == 0
+    call QFixMemoCalendar(g:qfixmemo_calendar_wincmd, '__Calendar__', g:qfixmemo_calendar_count)
+    if g:QFixHowm_MenuCalendar
+      let s:calender_exists = bufnr('__Calendar__')
+      wincmd p
+    endif
+  elseif bufwinnr(bufnr('__Calendar__')) != -1
+    " FIXME: s:HolidayVimgrep()中でlvimgrepを実行するとカレンダーが乱れる対策
+    exe bufwinnr(bufnr('__Calendar__')) .'wincmd w'
+    let save_cursor = getpos('.')
+    call cursor(1, 1)
+    exe 'normal! z-'
+    call setpos('.', save_cursor)
     wincmd p
   endif
   let g:QFix_Disable = 0
@@ -627,13 +639,16 @@ function! s:BufWinLeaveMenu()
     if bufname('%') == '__HOWM_MENU__'
       silent! b#
     endif
+  else
+    call s:CloseCalendar()
   endif
+  let s:calender_exists = 0
 endfunction
 
 function! s:CloseCalendar()
   if g:QFixHowm_MenuCalendar && s:calender_exists > 0
     silent! exe 'bd '.s:calender_exists
-    let s:calender_exists = 0
+    let s:calender_exists = -1
   endif
 endfunction
 
@@ -641,7 +656,7 @@ function! s:Close()
   call QFixPclose()
   let winnum = 1+(g:QFixHowm_MenuCalendar && (bufwinnr(s:calender_exists) != -1))
   if tabpagenr('$') == 1 && winnr('$') == winnum
-    silent! b #
+    silent! bprev
   else
     close
   endif

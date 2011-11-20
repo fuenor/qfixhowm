@@ -199,6 +199,7 @@ if !exists('g:calendar_footer')
     \ '  -----------------',
     \ '    t .  : Today',
     \ '    r    : Reload',
+    \ '    q    : close',
     \ '  -----------------',
     \ '  {num}<CR> : diary',
     \ '  ex. <CR> or 16<CR>',
@@ -454,7 +455,7 @@ function! QFixMemoCalendar(dircmd, file, cnt, ...)
   let pbufnr = bufnr('%')
   exe 'silent! ' . windir . ' ' . (winsize == 0 ? '' : string(winsize)) . 'split '
   silent! exe 'edit '.escape(file, ' ')
-  setlocal buftype=nowrite
+  setlocal buftype=nofile
   setlocal bufhidden=hide
   setlocal nobuflisted
   setlocal noswapfile
@@ -548,14 +549,16 @@ function! s:CR(...)
     let str = getline(lnum)
     let y = matchstr(str, '\d\{4}')
     let m = matchstr(str, '/\zs\d\{2}')
-    " TODO:特殊バッファしかない場合はとなりへ
+    " 特殊バッファしかない
     if QFixWinnr() == -1
       let vert = b:dircmd =~ 'vert'
       let hjkl = b:dircmd =~ '\(^\|\s*\)\(rightb\|bel\|bo\)'
       if vert
-        exe 'wincmd '. (hjkl ? 'h' : 'l')
+        exe (hjkl ? 'leftabove vsplit' : 'rightbelow vsplit ')
+        bprev
       else
-        exe 'wincmd '. (hjkl ? 'k' : 'j')
+        exe (hjkl ? 'leftabove split' : 'rightbelow split')
+        bprev
       endif
     endif
     exe 'call '.g:calendar_action.'(key, m, y, "", "")'
@@ -709,6 +712,9 @@ function! s:SCBufWinLeave(pbuf, cbuf)
 endfunction
 
 function! s:SCBufEnter(pbuf, cbuf)
+  if !exists('b:calendar_resize')
+    return
+  endif
   if expand('<abuf>') == a:cbuf
     if b:calendar_resize
       exe 'normal! '.b:calendar_width  ."\<C-W>|"

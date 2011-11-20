@@ -275,6 +275,11 @@ if !exists('g:qfixmemo_isqfixmemo_regxp')
   let g:qfixmemo_isqfixmemo_regxp = '\c\.'.s:howm_ext.'$'
 endif
 
+" QFixWinでの<CR>を独自処理する
+if !exists('g:QFix_UseAltCR')
+  let g:QFix_UseAltCR = 2
+endif
+
 """"""""""""""""""""""""""""""
 " User function
 """"""""""""""""""""""""""""""

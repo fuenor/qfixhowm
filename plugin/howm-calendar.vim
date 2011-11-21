@@ -303,9 +303,17 @@ function! s:MakeHolidayTbl(year)
         endif
         let s:holidaytbl[date] = d['text']
       elseif d['cmd'] == '@@'
+        if d['cnvdow'] =~ 'Sun'
+          continue
+        endif
         for month in range(1, 12)
-          let day = s:EndOfMonth(a:year, month, d['day'])
-          let date = printf('%4.4d%2.2d%2.2d', a:year, month, day)
+          if d['cnvdow'] != ''
+            let time = s:GetCnvDoWTime(a:year, month, d['cnvdow'], d['sft'])
+            let date = strftime('%Y%m%d', time)
+          else
+            let day = s:EndOfMonth(a:year, month, d['day'])
+            let date = printf('%4.4d%2.2d%2.2d', a:year, month, day)
+          endif
           let s:holidaytbl[date] = d['text']
         endfor
       else

@@ -56,14 +56,14 @@ function! CalendarPost()
     return
   endif
   let ch = g:calendar_flag[2]
-  exe 'syn match CalHolidaySign /['.ch.']/ contained'
+  exe 'syn match CalConceal /['.ch.']/ contained'
   let ch = g:calendar_flag[2] . g:calendar_flag[3]
   if g:calendar_mark =~ 'left-fit'
-    exe 'syn match CalHoliday display "\s*['.ch.']\d*" contains=CalHolidaySign'
+    exe 'syn match CalHoliday display "\s*['.ch.']\d*" contains=CalConceal'
   elseif g:calendar_mark =~ 'right'
-    exe 'syn match CalHoliday display "\d*['.ch.']\s*" contains=CalHolidaySign'
+    exe 'syn match CalHoliday display "\d*['.ch.']\s*" contains=CalConceal'
   else
-    exe 'syn match CalHoliday display "['.ch.']\s*\d*" contains=CalHolidaySign'
+    exe 'syn match CalHoliday display "['.ch.']\s*\d*" contains=CalConceal'
   endif
   if s:holiday == 1 " 今日が休日
     hi link CalToday CalHoliday
@@ -71,12 +71,7 @@ function! CalendarPost()
   hi link CalMemo    PreProc
   hi link CalSunday  WarningMsg
   exe 'hi def link CalHoliday '.g:calendar_CalHoliday
-  hi def link CalHolidaySign CalConceal
-  if has('gui_running')
-    hi CalConceal guifg=bg guibg=bg
-  else
-    hi link CalConceal CalHoliday
-  endif
+  hi def link CalConceal Ignore
 endfunction
 
 function! s:CalendarPost(win)
@@ -201,12 +196,12 @@ if !exists('g:calendar_footer')
     \ '  -----------------',
     \ '  <S-Left>|<S-Right>',
     \ '  -----------------',
-    \ '  <   > : Prev/Next',
-    \ '  i   o : Prev/Next',
+    \ '   <  > : Prev/Next',
+    \ '   i  o : Prev/Next',
     \ '    .   : Command',
     \ '    t   : Today',
-    \ '    r   : Reload',
     \ '    q   : Close',
+    \ '    r   : Reload',
     \]
 endif
 
@@ -282,14 +277,17 @@ function! s:EndOfMonth(year, month, day)
   return day
 endfunction
 
-" 今年の予定を作成
+" 指定年の予定を作成
 let s:holidaytbl = {}
 function! s:MakeHolidayTbl(year)
+  if exists('s:holidaytbl[a:year]')
+    return
+  endif
+  let s:holidaytbl[a:year] = '|exists|'
   if len(s:holidaydict) == 0
     call s:readholidayfile()
   endif
-  if !exists('s:holidaytbl[a:year]') && len(s:holidaydict)
-    let s:holidaytbl[a:year] = '|exists|'
+  if len(s:holidaydict)
     if exists('*MakeUserHoliday')
       call MakeUserHoliday(s:holidaytbl, a:year)
     endif
@@ -320,55 +318,52 @@ endfunction
 " 休日定義ファイルを読み込み
 let s:holidaydict= []
 function! s:readholidayfile()
-  call s:setholidayfile()
-  let file = expand(g:calendar_holidayfile)
-  if file ==''
-    return 1
-  elseif !filereadable(file)
-    let mes = printf("%s does not exist.", file)
-    echo mes
-    return 1
-  endif
-  let glist = readfile(file)
-  let today = strftime('%Y%m%d')
-  let sch_ext  = '-@!+~.'
-  let sch_date = '^.\d\{4}.\d\{2}.\d\{2}.'
-  let sch_dow  = '\c\(Sun\|Mon\|Tue\|Wed\|Thu\|Fri\|Sat\|Hdy\)'
-  let sch_cmd  = '['.sch_ext.']\{1,3}\(([0-9]*[-+*]\?'.sch_dow.'\?\([-+]\d\+\)\?)\)\?[0-9]*'
-  for str in glist
-    let date = matchstr(str, sch_date)
-    let date = substitute(date, '[^0-9]', '', 'g')
-    let year  = strpart(date, 0,  4)+0
-    let month = strpart(date, 4,  2)+0
-    let day   = strpart(date, 6,  2)+0
-    let str = substitute(str, sch_date, '', '')
-    let cmdstr = matchstr(str, '^'.sch_cmd)
-    if cmdstr == ''
+  let files = s:setholidayfile()
+  for file in files
+    if !filereadable(file)
       continue
     endif
-    let cmd = matchstr(cmdstr, '['.sch_ext.']\+')
-    let opt = matchstr(cmdstr, '\d*$')
-    let cnvdow = matchstr(cmdstr, '(\(\d\*\)\?'.sch_dow)
-    let cnvdow = substitute(cnvdow, '(', '', '')
-    let sft = matchstr(cmdstr, '[-+]\(\d\+\|'.sch_dow.'\))')
-    let sft = substitute(sft, ')', '', '')
-    let repeat = matchstr(cmdstr, '(\d\+')
-    let repeat = substitute(repeat, '(', '', '')
-    let text = substitute(str, '^'.sch_cmd, '', '')
-    if cmd == '@'
-      if day == '00'
-        let day = s:EndOfMonth(year, month, day)
+    let glist = readfile(file)
+    let today = strftime('%Y%m%d')
+    let sch_ext  = '-@!+~.'
+    let sch_date = '^.\d\{4}.\d\{2}.\d\{2}.'
+    let sch_dow  = '\c\(Sun\|Mon\|Tue\|Wed\|Thu\|Fri\|Sat\|Hdy\)'
+    let sch_cmd  = '['.sch_ext.']\{1,3}\(([0-9]*[-+*]\?'.sch_dow.'\?\([-+]\d\+\)\?)\)\?[0-9]*'
+    for str in glist
+      let date = matchstr(str, sch_date)
+      let date = substitute(date, '[^0-9]', '', 'g')
+      let year  = strpart(date, 0,  4)+0
+      let month = strpart(date, 4,  2)+0
+      let day   = strpart(date, 6,  2)+0
+      let str = substitute(str, sch_date, '', '')
+      let cmdstr = matchstr(str, '^'.sch_cmd)
+      if cmdstr == ''
+        continue
       endif
-      let date = printf('%4.4d%2.2d%2.2d', year, month, day)
-      let s:holidaytbl[date] = text
-      continue
-    elseif cmd == '@@'
-    elseif cmd == '@@@'
-    else
-      continue
-    endif
-    let hday = {'cmd':cmd, 'year':year, 'month':month, 'day':day, 'repeat':repeat, 'cnvdow':cnvdow, 'sft':sft, 'opt':opt, 'text':text}
-    call add(s:holidaydict, hday)
+      let cmd = matchstr(cmdstr, '['.sch_ext.']\+')
+      let opt = matchstr(cmdstr, '\d*$')
+      let cnvdow = matchstr(cmdstr, '(\(\d\*\)\?'.sch_dow)
+      let cnvdow = substitute(cnvdow, '(', '', '')
+      let sft = matchstr(cmdstr, '[-+]\(\d\+\|'.sch_dow.'\))')
+      let sft = substitute(sft, ')', '', '')
+      let repeat = matchstr(cmdstr, '(\d\+')
+      let repeat = substitute(repeat, '(', '', '')
+      let text = substitute(str, '^'.sch_cmd, '', '')
+      if cmd == '@'
+        if day == '00'
+          let day = s:EndOfMonth(year, month, day)
+        endif
+        let date = printf('%4.4d%2.2d%2.2d', year, month, day)
+        let s:holidaytbl[date] = text
+        continue
+      elseif cmd == '@@'
+      elseif cmd == '@@@'
+      else
+        continue
+      endif
+      let hday = {'cmd':cmd, 'year':year, 'month':month, 'day':day, 'repeat':repeat, 'cnvdow':cnvdow, 'sft':sft, 'opt':opt, 'text':text}
+      call add(s:holidaydict, hday)
+    endfor
   endfor
   if HolidayCheck(strftime('%Y'), strftime('%m'), strftime('%d'))
     let s:holiday = 1
@@ -378,9 +373,10 @@ endfunction
 
 function! s:setholidayfile()
   if g:calendar_holidayfile != ''
-    return g:calendar_holidayfile
-  endif
-  if !exists('g:QFixHowm_HolidayFile')
+    let file = g:calendar_holidayfile
+  elseif exists('g:QFixHowm_HolidayFile')
+    let file = g:QFixHowm_HolidayFile
+  else
     return ''
   endif
   if exists('g:QFixHowm_ScheduleSearchDir') && g:QFixHowm_ScheduleSearchDir != ''
@@ -398,10 +394,11 @@ function! s:setholidayfile()
   endif
   let prevPath = escape(getcwd(), ' ')
   silent! exe 'lchdir ' . escape(l:howm_dir, ' ')
-  let file = fnamemodify(g:QFixHowm_HolidayFile, ':p')
-  let file = substitute(file, '\\', '/', 'g')
+  let file = fnamemodify(file, ':p')
   exe 'lchdir ' . prevPath
-  let g:calendar_holidayfile = file
+  let file = substitute(expand(file), "\<NL>.*", '', '')
+  let file = substitute(file, '\\', '/', 'g')
+  return split(file, "\<NL>")
   return file
 endfunction
 

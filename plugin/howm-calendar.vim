@@ -72,7 +72,11 @@ function! CalendarPost()
   hi link CalSunday  WarningMsg
   exe 'hi def link CalHoliday '.g:calendar_CalHoliday
   hi def link CalHolidaySign CalConceal
-  hi CalConceal guifg=bg guibg=bg
+  if has('gui_running')
+    hi CalConceal guifg=bg guibg=bg
+  else
+    hi link CalConceal CalHoliday
+  endif
 endfunction
 
 function! s:CalendarPost(win)
@@ -192,17 +196,17 @@ endif
 " カレンダーボード
 if !exists('g:calendar_footer')
   let g:calendar_footer = [
-    \ '   Prev  |  Next',
-    \ '  -----------------',
-    \ '     <   |   >',
-    \ '     i   |   o',
-    \ '  -----------------',
-    \ '    t .  : Today',
-    \ '    r    : Reload',
-    \ '    q    : close',
-    \ '  -----------------',
-    \ '  {num}<CR> : diary',
+    \ '  {num}<CR> : Diary',
     \ '  ex. <CR> or 16<CR>',
+    \ '  -----------------',
+    \ '  <S-Left>|<S-Right>',
+    \ '  -----------------',
+    \ '  <   > : Prev/Next',
+    \ '  i   o : Prev/Next',
+    \ '    .   : Command',
+    \ '    t   : Today',
+    \ '    r   : Reload',
+    \ '    q   : Close',
     \]
 endif
 
@@ -459,6 +463,7 @@ function! QFixMemoCalendar(dircmd, file, cnt, ...)
   setlocal bufhidden=hide
   setlocal nobuflisted
   setlocal noswapfile
+  setlocal nolist
   setlocal nowrap
   setlocal nonumber
   setlocal nomodifiable
@@ -510,13 +515,15 @@ function! QFixMemoCalendar(dircmd, file, cnt, ...)
   nnoremap <silent> <buffer> i    :<C-u>call <SID>CR('<')<CR>
   nnoremap <silent> <buffer> o    :<C-u>call <SID>CR('>')<CR>
   nnoremap <silent> <buffer> r    :<C-u>call <SID>CR('r')<CR>
-  nnoremap <silent> <buffer> t    :<C-u>call <SID>CR('.')<CR>
+  nnoremap <silent> <buffer> t    :<C-u>call <SID>CR('today')<CR>
   nnoremap <silent> <buffer> .    :<C-u>call <SID>CR('.')<CR>
   nnoremap <silent> <buffer> <CR> :<C-u>call <SID>CR()<CR>
   " nnoremap <silent> <buffer> <Up>    :<C-u>call <SID>CR('up')<CR>
   " nnoremap <silent> <buffer> <Down>  :<C-u>call <SID>CR('down')<CR>
-  nnoremap <silent> <buffer> <Right> :<C-u>call <SID>CR('>')<CR>
-  nnoremap <silent> <buffer> <Left>  :<C-u>call <SID>CR('<')<CR>
+  nnoremap <silent> <buffer> <S-Up>    :<C-u>call <SID>CR('<')<CR>
+  nnoremap <silent> <buffer> <S-Down>  :<C-u>call <SID>CR('>')<CR>
+  nnoremap <silent> <buffer> <S-Right> :<C-u>call <SID>CR('>')<CR>
+  nnoremap <silent> <buffer> <S-Left>  :<C-u>call <SID>CR('<')<CR>
   if a:0
     wincmd p
   endif
@@ -567,7 +574,14 @@ function! s:CR(...)
     call s:build()
     call s:winfixheight(b:calendar_height)
     call search('\.', 'c')
-  elseif key =~ '[./]\|\(^[A-Z][a-z]\{2}$\)\|\ctoday'
+  elseif key == '.'
+    if expand('<cWORD>') =~ '\.'
+      call s:CR('today')
+    else
+      call cursor(1, 1)
+      call search('\.', 'c')
+    endif
+  elseif key =~ '[/]\|\(^[A-Z][a-z]\{2}$\)\|\ctoday'
     let str = expand('<cWORD>') =~ '\*' ? '\.' : '\*'
     let b:year  = strftime('%Y')
     let b:month = strftime('%m')

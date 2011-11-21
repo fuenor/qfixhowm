@@ -1008,7 +1008,7 @@ function! qfixmemo#EditFile(file)
     return
   endif
   let prevPath = escape(getcwd(), ' ')
-  silent! exe 'lchdir ' . expand(g:qfixmemo_dir)
+  exe 'lchdir ' . escape(expand(g:qfixmemo_dir), ' ')
   let file = fnamemodify(strftime(a:file), ':p')
   exe 'lchdir ' . prevPath
   if s:isQFixMemo(file)
@@ -1459,10 +1459,10 @@ function! qfixmemo#ListRecentTimeStamp(...)
     let tregxp = substitute(tregxp, '|', ' ', 'g')
     let prevPath = escape(getcwd(), ' ')
     let qf = getqflist()
-    exe 'lchdir ' . expand(g:qfixmemo_dir)
+    exe 'lchdir ' . escape(expand(g:qfixmemo_dir), ' ')
     let cmd = 'grep! /n /p /r /i /s /b "' . tregxp . '" *.*'
     silent! exe cmd
-    silent! exe 'lchdir ' . prevPath
+    exe 'lchdir ' . prevPath
     let qflist = getqflist()
     call setqflist(qf)
     let &grepprg = saved_grepprg
@@ -1603,7 +1603,7 @@ function! qfixmemo#Glob(path, file, mode)
       call insert(qflist, usefile)
     endif
   endfor
-  silent! exe 'lchdir ' . prevPath
+  exe 'lchdir ' . prevPath
   redraw | echo ''
   if mode =~ 'list'
     return qflist
@@ -1913,7 +1913,7 @@ function! s:randomReadFile(file, dir)
     let res = {'filename' : file, 'lnum' : lnum, 'text' : text}
     call add(result, res)
   endfor
-  silent! exe 'lchdir ' . prevPath
+  exe 'lchdir ' . prevPath
   return result
 endfunction
 
@@ -1943,7 +1943,7 @@ function! s:randomWriteFile(file, dir)
     call filter(sq, "v:val['text']     !~ '".rexclude."'")
     call filter(sq, "v:val['filename'] !~ '".rexclude."'")
   endif
-  silent! exe 'lchdir ' . escape(expand(dir), ' ')
+  exe 'lchdir ' . escape(expand(dir), ' ')
   let result = []
   call add(result, dir)
   let head = QFixNormalizePath(expand(dir)) . '/'
@@ -1956,7 +1956,7 @@ function! s:randomWriteFile(file, dir)
     call add(result, res)
   endfor
   call writefile(result, rfile)
-  silent! exe 'lchdir ' . prevPath
+  exe 'lchdir ' . prevPath
   return sq
 endfunction
 
@@ -2121,9 +2121,9 @@ function! qfixmemo#SubMenu(...)
   let basedir = s:submenu_basedir
   let l:count = a:0 && a:1 ? a:1 : count
   let prevPath = escape(getcwd(), ' ')
-  silent! exe 'lchdir ' . escape(expand(basedir), ' ')
+  exe 'lchdir ' . escape(expand(basedir), ' ')
   let file = fnamemodify(s:qfixmemo_submenu_title, ':p')
-  silent! exe 'lchdir ' . prevPath
+  exe 'lchdir ' . prevPath
   let dir = fnamemodify(file, ':h')
   let bufnum = bufnr(file)
   let winnum = bufwinnr(file)
@@ -2160,9 +2160,9 @@ function! qfixmemo#SubMenu(...)
     exe 'let s:qfixmemo_submenu_title = g:qfixmemo_submenu_title'.l:count
     let s:sb_id = l:count
   endif
-  silent! exe 'lchdir ' . escape(expand(basedir), ' ')
+  exe 'lchdir ' . escape(expand(basedir), ' ')
   let file = fnamemodify(s:qfixmemo_submenu_title, ':p')
-  silent! exe 'lchdir ' . prevPath
+  exe 'lchdir ' . prevPath
   call s:OpenQFixSubWin(file, s:sb_id)
 endfunction
 
@@ -2410,7 +2410,7 @@ function! qfixmemo#Cmd_Replace(mode)
     call add(nsq, sqdat)
   endfor
   call QFixSetqflist(nsq)
-  silent! exe 'lchdir ' . prevPath
+  exe 'lchdir ' . prevPath
   QFixCopen
   call cursor(1, 1)
   return
@@ -2664,13 +2664,13 @@ function! qfixmemo#RebuildKeyword()
   endif
 
   let prevPath = escape(getcwd(), ' ')
-  silent! exe 'lchdir ' . escape(expand(s:submenu_basedir), ' ')
+  exe 'lchdir ' . escape(expand(s:submenu_basedir), ' ')
   let file = fnamemodify(g:qfixmemo_submenu_title, ':p')
   let saved_sq = getloclist(0)
   silent! exe 'lvimgrep /'.pattern.'/j '. escape(file, ' ')
   call extend(extlist, getloclist(0))
   call setloclist(0, saved_sq)
-  silent! exe 'lchdir ' . prevPath
+  exe 'lchdir ' . prevPath
 
   for n in range(len(extlist))
     if !exists('extlist[n]["filename"]')

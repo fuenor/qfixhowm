@@ -236,6 +236,7 @@ if !exists('g:qfixmemo_timeformat_regxp')
   let g:qfixmemo_timeformat_regxp = substitute(g:qfixmemo_timeformat_regxp, '\C%d', '[0-3]\\d', 'g')
   let g:qfixmemo_timeformat_regxp = substitute(g:qfixmemo_timeformat_regxp, '\C%H', '[0-2]\\d', 'g')
   let g:qfixmemo_timeformat_regxp = substitute(g:qfixmemo_timeformat_regxp, '\C%M', '[0-5]\\d', 'g')
+  let g:qfixmemo_timeformat_regxp = substitute(g:qfixmemo_timeformat_regxp, '\C%S', '[0-5]\\d', 'g')
   let g:qfixmemo_timeformat_regxp = substitute(g:qfixmemo_timeformat_regxp, '\C%a', '\\(Sun\\|Mon\\|Tue\\|Wed\\|Thu\\|Fri\\|Sat\\|日\\|月\\|火\\|水\\|木\\|金\\|土\\)', 'g')
 endif
 " タイムスタンプ行とみなす正規表現(Vim)
@@ -244,8 +245,7 @@ if !exists('g:qfixmemo_timestamp_regxp')
 endif
 " qfixmemo#AddTitle()で擬似タイトル行とみなす正規表現(Vim)
 if !exists('g:qfixmemo_alt_title_regxp')
-  let g:qfixmemo_alt_title_regxp = g:qfixmemo_timeformat_regxp.'[-@!+~.]'
-  let g:qfixmemo_alt_title_regxp = substitute(g:qfixmemo_alt_title_regxp, '^^', '^\\s*', 'g')
+  let g:qfixmemo_alt_title_regxp = '^\s*\[\d\{4}[-/]\d\{2}[-/]\d\{2}\( \d\{2}:\d\{2}\)\?\][-@!+~.]'
 endif
 
 " howmテンプレート

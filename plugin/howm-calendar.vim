@@ -377,7 +377,7 @@ function! s:setholidayfile()
   elseif exists('g:QFixHowm_HolidayFile')
     let file = g:QFixHowm_HolidayFile
   else
-    return ''
+    let file = 'Sche-Hd-0000-00-00-000000.*'
   endif
   if exists('g:QFixHowm_ScheduleSearchDir') && g:QFixHowm_ScheduleSearchDir != ''
     let l:howm_dir = g:QFixHowm_ScheduleSearchDir

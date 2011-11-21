@@ -463,6 +463,7 @@ function! QFixMemoCalendar(dircmd, file, cnt, ...)
   setlocal bufhidden=hide
   setlocal nobuflisted
   setlocal noswapfile
+  setlocal nolist
   setlocal nowrap
   setlocal nonumber
   setlocal nomodifiable

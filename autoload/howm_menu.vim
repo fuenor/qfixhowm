@@ -1,7 +1,6 @@
 "=============================================================================
 "    Description: howm menu for qfixmemo
 "         Author: fuenor <fuenor@gmail.com>
-"  Last Modified: 0000-00-00 00:00
 "        Version: 1.00
 "=============================================================================
 scriptencoding utf-8
@@ -422,13 +421,13 @@ function! QFixHowmOpenMenu(...)
     enew
     b #
   endif
-  if bufwinnr(bufnr('__Calendar__')) == -1 && s:calender_exists == 0
+  if bufwinnr('__Calendar__') == -1 && s:calender_exists == 0
     call QFixMemoCalendar(g:qfixmemo_calendar_wincmd, '__Calendar__', g:qfixmemo_calendar_count)
     if g:QFixHowm_MenuCalendar
       let s:calender_exists = bufnr('__Calendar__')
       wincmd p
     endif
-  elseif bufwinnr(bufnr('__Calendar__')) != -1
+  elseif bufwinnr('__Calendar__') != -1
     " FIXME: s:HolidayVimgrep()中でlvimgrepを実行するとカレンダーが乱れる対策
     exe bufwinnr(bufnr('__Calendar__')) .'wincmd w'
     let save_cursor = getpos('.')

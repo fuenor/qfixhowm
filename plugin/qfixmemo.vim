@@ -948,6 +948,12 @@ endfunction
 
 let s:init = 0
 function! qfixmemo#Init(...)
+  " for qfixwin
+  if &buftype == 'quickfix'
+    let b:qfixwin_height = winheight(0)
+    let b:qfixwin_width  = winwidth(0)
+    let g:QFix_Height = b:qfixwin_height
+  endif
   call QFixMemoInit()
   call QFixMemoTitleRegxp()
   if a:0 && a:1 !~ 'silent'
@@ -1394,6 +1400,7 @@ function! qfixmemo#ListMru()
   endif
   redraw | echo 'QFixMemo : Read MRU...'
   call QFixMRU(g:qfixmemo_dir, '/:dir')
+  redraw|echo ''
 endfunction
 
 " 最近編集されたファイル内のエントリ一覧
@@ -1527,17 +1534,15 @@ function! qfixmemo#List(mode, ...)
 endfunction
 
 " キャッシュ表示
-let s:lcinit = 0
 function! qfixmemo#ListCache(mode, ...)
   if qfixmemo#Init()
     return
   endif
   let mode = a:mode
-  if qfixlist#GetList() != [] && s:lcinit
+  if qfixlist#GetList() != []
     let mode = substitute(mode, 'open', 'cache', '')
   endif
   call qfixmemo#List(mode)
-  let s:lcinit = 1
 endfunction
 
 " ファイルリスト
@@ -1612,7 +1617,6 @@ function! qfixmemo#Glob(path, file, mode)
   else
     call qfixlist#open(qflist, path)
   endif
-  let s:lcinit = 1
 endfunction
 
 let s:RenameQFList = []
@@ -2186,17 +2190,17 @@ function! s:OpenQFixSubWin(file, id)
       augroup QFixMemoSubMenu
         if keepsize && winsize > 0
           if windir =~ 'vert'
-            exe 'au BufEnter '.fnamemodify(file, ':t').' normal! '.winsize ."\<C-W>|"
+            exe 'au BufEnter '.fnamemodify(file, ':t').' call <SID>QFixMemoSubMenuResize('.winsize.', "vertical")'
           else
-            exe 'au BufEnter '.fnamemodify(file, ':t').' normal! '.winsize ."\<C-W>_"
+            exe 'au BufEnter '.fnamemodify(file, ':t').' call <SID>QFixMemoSubMenuResize('.winsize.')'
           endif
         endif
+        exe 'au BufLeave '.fnamemodify(file, ':t').' call <SID>QFixMemoSubMenuBufLeave()'
         exe 'au BufWinLeave,VimLeave '.fnamemodify(file, ':t').' call <SID>SubMenuBufAutoWrite()'
       augroup END
   else
     let wcmd = '+buffer' . bufnum
   endif
-
   exe 'silent! ' . windir . ' ' . (winsize == 0 ? '' : string(winsize)) . 'split ' . wcmd
   setlocal buftype=nowrite
   setlocal bufhidden=hide
@@ -2220,15 +2224,45 @@ function! s:OpenQFixSubWin(file, id)
     call qfixmemo_msg#submenu()
   endif
   call QFixMemoSubMenuOutline(swid)
+  if exists('b:submenu_width')
+    exe 'normal! '.b:submenu_width ."\<C-W>|"
+  elseif windir =~ 'vert'
+    let b:submenu_width = winsize
+    exe 'normal! '.b:submenu_width ."\<C-W>|"
+  endif
   let wincmd = s:GetOptionWithID('g:qfixmemo_submenu_calendar_wincmd', swid)
   if wincmd != ''
     let wincmd = wincmd . (windir =~ 'vert' ? '' : ' vertical')
+    let saved_ei = &eventignore
+    set eventignore=BufLeave
     call QFixMemoCalendar(wincmd, '__Cal__', 1, 'parent'. (keepsize ? 'resize' : ''))
+    let &eventignore = saved_ei
   endif
   if exists('*QFixMemoSubMenuBufWinEnter')
     call QFixMemoSubMenuBufWinEnter()
   endif
   exe 'normal! zz'
+endfunction
+
+function s:QFixMemoSubMenuBufLeave()
+  let b:submenu_height = winheight(0)
+  let b:submenu_width  = winwidth(0)
+endfunction
+
+function s:QFixMemoSubMenuResize(winsize, ...)
+  if a:0
+    let b:submenu_width = b:submenu_width < a:winsize ? a:winsize : b:submenu_width
+    if winwidth(0) < b:submenu_width || &winwidth > b:submenu_width
+      exe 'normal! '.b:submenu_width ."\<C-W>|"
+    endif
+  else
+    let w = &lines - winheight(0) - &cmdheight - (&laststatus > 0 ? 1 : 0)
+    if w > 0
+      if winheight(0) < a:winsize
+        exe 'normal! '.a:winsize ."\<C-W>_"
+      endif
+    endif
+  endif
 endfunction
 
 let s:qfixmemo_fileencoding = g:qfixmemo_fileencoding
@@ -2277,6 +2311,7 @@ function! s:qfBufWinEnter()
   nnoremap <buffer> <silent> @    :call qfixmemo#Cmd_AT('normal')<CR><ESC>
   vnoremap <buffer> <silent> @    :call qfixmemo#Cmd_AT('visual')<CR><ESC>
   nnoremap <buffer> <silent> #    :call qfixmemo#Cmd_Replace('remove')<CR>
+
   nnoremap <buffer> <silent> R    :call qfixmemo#Cmd_RD('Remove')<CR>
   vnoremap <buffer> <silent> R    :call qfixmemo#Cmd_RD('Remove')<CR>
   nnoremap <buffer> <silent> D    :call qfixmemo#Cmd_RD('Delete')<CR>

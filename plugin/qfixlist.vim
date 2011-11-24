@@ -1,7 +1,6 @@
 "=============================================================================
 "    Description: Title list (with QFixPreview)
 "         Author: fuenor <fuenor@gmail.com>
-"  Last Modified: 0000-00-00 00:00
 "=============================================================================
 let s:Version = 1.00
 scriptencoding utf-8
@@ -31,6 +30,7 @@ scriptencoding utf-8
 "    | FGrep        | :let MyGrep_Regexp     = 0 |
 "    | Ignorecase   | :let MyGrep_Ignorecase = 1 |
 "    | Recursive    | :let MyGrep_Recursive  = 1 |
+"    (*) these options reset to default when qfixlist#grep() finished
 
 "=============================================================================
 if exists('disable_QFixList') && disable_QFixList == 1
@@ -57,6 +57,12 @@ if !exists('g:qfixlist_close_on_jump')
 endif
 if !exists('g:qfixlist_use_fnamemodify')
   let g:qfixlist_use_fnamemodify = 0
+endif
+if !exists('g:qfixlist_autoclose')
+  let g:qfixlist_autoclose = 0
+endif
+if !exists('g:qfixlist_preview_enable')
+  let g:qfixlist_preview_enable = 1
 endif
 
 let loaded_QFixList = 1
@@ -159,16 +165,57 @@ endfunction
 """"""""""""""""""""""""""""""
 augroup QFixFiles
   au!
-  autocmd BufWinEnter __QFix_List__ call <SID>BufWinEnter(g:QFix_PreviewEnable)
+  autocmd BufWinEnter __QFix_List__ call <SID>BufWinEnter(g:qfixlist_preview_enable)
   autocmd BufEnter    __QFix_List__ call <SID>BufEnter()
   autocmd BufLeave    __QFix_List__ call <SID>BufLeave()
   autocmd CursorHold  __QFix_List__ call <SID>Preview()
+  autocmd BufWinEnter      quickfix call <SID>QFBufWinEnter('__QFix_List__')
 augroup END
 
 let s:lnum = line('.')
 let s:QFixListCache = []
 let s:QFixList_dir = ''
 let g:MyGrep_ErrorMes = ''
+
+function! s:QFBufWinEnter(name)
+  nnoremap <buffer> <silent> <C-g> :call <SID>Cmd_QFixListQFcopy('normal')<CR>
+  vnoremap <buffer> <silent> <C-g> :call <SID>Cmd_QFixListQFcopy('visual')<CR>
+  if !g:qfixlist_autoclose
+    return
+  endif
+  let winnr = bufwinnr(a:name)
+  if winnr != -1
+    exe winnr.'wincmd w'
+    close
+    wincmd p
+  endif
+endfunction
+
+function! s:Cmd_QFixListQFcopy(mode) range
+  let lastline = line('$')
+  let firstline = a:firstline
+  if a:firstline != a:lastline || a:mode =~ 'visual'
+    let lastline = a:lastline
+  else
+    let firstline = 1
+  endif
+
+  if exists('b:qfixwin_buftype')
+    let qf = b:qfixwin_buftype ? getloclist(0) : getqflist()
+  else
+    let qf = QFixGetqflist()
+  endif
+  let path = substitute(fnamemodify(bufname(qf[0]['bufnr']), ':p'), '[\\/]', '/', 'g')
+  let file = substitute(line(1), '|.*$', '', '')
+  let path = fnamemodify(strpart(0, strlen(file)), ':p:h')
+  if lastline != line('$')
+    call remove(qf, lastline, -1)
+  endif
+  if firstline > 1
+    call remove(qf, 0, firstline - 2)
+  endif
+  call qfixlist#open(qf, path)
+endfunction
 
 function! qfixlist#GetList()
   return s:QFixListCache
@@ -195,7 +242,7 @@ function! qfixlist#copen(...)
   let g:QFix_SearchPath = s:QFixList_dir
   redraw | echo 'QFixList : Set quickfix list...'
   call QFixSetqflist(s:QFixListCache)
-  call QFixPclose()
+  call QFixPclose(1)
   redraw | echo ''
   QFixCopen
   if a:0
@@ -212,6 +259,9 @@ function! qfixlist#copen(...)
 endfunction
 
 function! qfixlist#open(...)
+  if g:qfixlist_autoclose
+    QFixCclose
+  endif
   let loaded = 1
   if a:0 > 0
     let s:QFixListCache = deepcopy(a:1)
@@ -231,7 +281,7 @@ function! qfixlist#open(...)
     echohl None
     return
   endif
-  call QFixPclose()
+  call QFixPclose(1)
   let path = s:QFixList_dir
   let file = fnamemodify(tempname(), ':p:h').'/__QFix_List__'
   let winnr = bufwinnr(file)
@@ -275,9 +325,14 @@ function! qfixlist#open(...)
     let head = fnamemodify(expand(s:QFixList_dir), ':p')
     let head = QFixNormalizePath(head)
     for n in s:QFixListCache
-      let file = n['filename'][len(head):]
-      " let file = substitute(file, '^'.head, '', '')
-      " let file = fnamemodify(n['filename'], ':.')
+      if !exists("n['filename']")
+        let n['filename'] = fnamemodify(bufname(n['bufnr']), ':p')
+        let file = QFixNormalizePath(fnamemodify(n['filename'], ':.'))
+      else
+        let file = n['filename'][len(head):]
+        " let file = substitute(file, '^'.head, '', '')
+        " let file = fnamemodify(n['filename'], ':.')
+      endif
       let lnum = n['lnum']
       let text = n['text']
       let res = file.'|'.lnum.'| '.text
@@ -313,9 +368,14 @@ function! qfixlist#open(...)
 endfunction
 
 function! s:BufWinEnter(preview)
+  if s:def_height == 0
+    let s:def_height = winheight(0)
+  endif
   setlocal winfixheight
-  let b:updatetime = g:QFix_PreviewUpdatetime
-  exec 'setlocal updatetime='.b:updatetime
+  if exists('g:QFix_PreviewUpdatetime')
+    let b:updatetime = g:QFix_PreviewUpdatetime
+    exec 'setlocal updatetime='.b:updatetime
+  endif
   let b:PreviewEnable = a:preview
 
   call QFixAltWincmdMap()
@@ -367,13 +427,28 @@ function! s:reopen()
   call qfixlist#open()
 endfunction
 
+let s:def_height = 0
+let s:height = 0
+let s:width = 0
 function! s:BufEnter()
+  let w = &lines - winheight(0) - &cmdheight - (&laststatus > 0 ? 1 : 0)
+  if w > 0
+    " let s:height = s:height < s:def_height ? s:def_height : s:height
+    if s:height
+      exe 'normal! '. s:height ."\<C-W>_"
+    endif
+  endif
+  if s:width
+    " exe 'normal! '. s:width ."\<C-W>|"
+  endif
 endfunction
 
 function! s:BufLeave()
+  let s:height = winheight(0)
+  let s:width = winwidth(0)
   let s:lnum = line('.')
   if b:PreviewEnable
-    call QFixPclose()
+    call QFixPclose(1)
   endif
 endfunction
 
@@ -388,14 +463,15 @@ endfunction
 
 function! s:TogglePreview(...)
   let b:PreviewEnable = !b:PreviewEnable
+  let g:qfixlist_preview_enable = b:PreviewEnable
   if !b:PreviewEnable
-    call QFixPclose()
+    call QFixPclose(1)
   endif
 endfunction
 
 function! s:CR()
   if b:PreviewEnable
-    call QFixPclose()
+    call QFixPclose(1)
   endif
   let [file, lnum] = s:Getfile('.')
   if g:qfixlist_close_on_jump

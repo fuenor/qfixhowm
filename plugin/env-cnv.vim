@@ -2,7 +2,6 @@
 "    Description: QFixHowm option convert function
 "         Author: fuenor <fuenor@gmail.com>
 "                 http://sites.google.com/site/fudist/Home  (Japanese)
-"  Last Modified: 0000-00-00 00:00
 "=============================================================================
 let s:Version = 1.00
 scriptencoding utf-8
@@ -110,11 +109,9 @@ endfunction
 " オプションコンバート
 """"""""""""""""""""""""""""""
 let s:howmsuffix = 'howm'
-let s:defsuffix  = 'howm'
+let s:defsuffix  = 'txt'
 " デフォルト変更予定オプション
 if QFixHowm_Convert > 1
-  " デフォルト拡張子
-  let s:defsuffix  = 'txt'
   " デフォルトファイルタイプ(markdownとどちらにするか検討中)
   if !exists('g:qfixmemo_filetype')
     " let g:qfixmemo_filetype = 'markdown'
@@ -346,6 +343,8 @@ let s:cnvopt = [
   \ ['let g:qfixmemo_splitmode               = %s', 'g:QFixHowm_SplitMode'],
   \ ['let g:qfixmemo_rename_length           = %s', 'g:QFixHowm_FilenameLen'],
   \ ['let g:qfixmemo_use_list_cache          = %s', 'g:QFixHowm_TitleListCache'],
+  \ ['let g:qfixlist_autoclose               = %s', 'g:QFixHowm_ListAutoClose'],
+  \ ['let g:qfixlist_wincmd                  = %s', 'g:QFixHowm_ListWinCmd'],
   \ ['let g:qfixmemo_swlist_action           = %s', 'g:QFixHowm_SwitchListActionLock'],
   \ ['let g:qfixmemo_switch_action           = %s', 'g:QFixHowm_UserSwActionLock'],
   \ ['let g:qfixmemo_template                = %s', 'g:QFixHowm_Template'],

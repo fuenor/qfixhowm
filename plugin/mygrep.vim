@@ -2,9 +2,8 @@
 "    Description: 日本語Grepヘルパー
 "         Author: fuenor <fuenor@gmail.com>
 "                 http://sites.google.com/site/fudist/Home/grep
-"  Last Modified: 2011-10-16 21:29
 "================================================================================
-let s:Version = 2.83
+let s:Version = 2.84
 scriptencoding utf-8
 
 if exists('enable_MyGrep')
@@ -338,7 +337,6 @@ function! UGrep(cmd, args, mode, addflag)
     exec ccmd
   endif
   call QFixPclose()
-  call QFixCclose()
   if g:QFix_SearchPath != ''
   " silent! exec 'lchdir ' . escape(g:QFix_SearchPath, ' ')
   endif
@@ -450,7 +448,6 @@ function! Grep(word, mode, title, addflag)
     call QFixSaveHeight(0)
   endif
   call QFixPclose()
-  call QFixCclose()
   call MyGrep(pattern, searchPath, filepattern, fenc, addflag)
   if g:QFix_SearchPath != ''
   " silent! exec 'lchdir ' . escape(g:QFix_SearchPath, ' ')
@@ -541,7 +538,6 @@ function! BGrep(word, mode, addflag)
     silent! exec ccmd
   endif
   call QFixPclose()
-  call QFixCclose()
   let vopt = g:QFix_UseLocationList ? 'l' : ''
   silent! exec ':bufdo | try | '.vopt.'vimgrepadd /' . pattern . '/j % | catch | endtry'
   silent! exec 'b'.bufnr
@@ -1145,9 +1141,11 @@ endfunction
 
 "pclose代替
 silent! command QFixPclose call QFixPclose()
-silent! function! QFixPclose()
+if !exists('*QFixPclose')
+function QFixPclose(...)
   silent! pclose!
 endfunction
+endif
 
 " MyGrepReadResult stab
 if !exists('*MyGrepReadResult')

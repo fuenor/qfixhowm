@@ -2,10 +2,8 @@
 "    Description: howm style scheduler
 "         Author: fuenor <fuenor@gmail.com>
 "                 http://sites.google.com/site/fudist/Home/qfixhowm
-"  Last Modified: 2011-11-01 18:13
 "=============================================================================
-" Ver.2 : let loaded_HowmSchedule = 1 までコピー
-let s:Version = 2.54
+let s:Version = 2.55
 scriptencoding utf-8
 
 "=============================================================================
@@ -267,6 +265,10 @@ endif
 if !exists('g:YearStrftime')
   let g:YearStrftime = 1970
 endif
+" strftime()の初週曜日
+if !exists('g:DoWStrftime')
+  let g:DoWStrftime = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+endif
 "GMTとの時差
 if !exists('g:QFixHowm_ST')
   let g:QFixHowm_ST = -9
@@ -449,7 +451,7 @@ function! s:QFixHowmListReminder_(mode,...)
   if s:reminder_cache == 0
     let holiday_sq = s:HolidayVimgrep(l:howm_dir, g:QFixHowm_HolidayFile)
   endif
-  QFixCclose
+  call QFixPclose(1)
   let prevPath = escape(getcwd(), ' ')
   silent! exec 'lchdir ' . escape(l:howm_dir, ' ')
   let ext = s:sch_Ext
@@ -686,7 +688,7 @@ function! s:QFixHowmSortReminder(sq, mode)
     let desc  = escape(cmd[0], '~')
     let dow = ''
     if g:QFixHowm_ShowScheduleDayOfWeek
-      let dow = ' '.s:DoW[QFixHowmDate2Int(str)%7]
+      let dow = ' '.g:DoWStrftime[QFixHowmDate2Int(str)%7]
     endif
     if cmd =~ '@' && opt > 1 && opt >= 2
       let dow = opt . dow
@@ -864,7 +866,7 @@ function! s:AddTodayLine(qflist)
   let str = strftime('['.s:hts_date.']')
   let dow = ' '
   if g:QFixHowm_ShowScheduleDayOfWeek
-    let dow = ' '.s:DoW[QFixHowmDate2Int(str)%7] . ' '
+    let dow = ' '.g:DoWStrftime[QFixHowmDate2Int(str)%7] . ' '
   endif
   if g:QFixHowm_ShowTodayLine >= 2
     let str = strftime('['.s:hts_date.']')
@@ -1376,7 +1378,7 @@ function! s:CnvDoW(year, month, sft, dow, ofs)
   let fday = QFixHowmDate2Int(sstr)
   let fdow = fday%7
   let day = fday - fday%7
-  let tday = day + (sft-1) * 7 + index(s:DoW, dow)
+  let tday = day + (sft-1) * 7 + index(g:DoWStrftime, dow)
 
   let day = tday - g:DateStrftime - (sft-1) * 7
   let ttime = day * 24 * 60 * 60 + g:QFixHowm_ST * (60 * 60) "JST = -9
@@ -1389,7 +1391,6 @@ function! s:CnvDoW(year, month, sft, dow, ofs)
 endfunction
 
 "曜日シフト
-let s:DoW = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun', 'Hdy']
 function! s:DayOfWeekShift(cmd, str)
   let cmd = a:cmd
   let str = a:str
@@ -1405,7 +1406,7 @@ function! s:DayOfWeekShift(cmd, str)
   "休日シフト
   if dow == 'Hdy' && exists('s:HolidayList') && s:HolidayList != []
     while 1
-      if count(s:HolidayList, actday) == 0  && '\c'.s:DoW[actday%7] !~ 'Sun'
+      if count(s:HolidayList, actday) == 0  && '\c'.g:DoWStrftime[actday%7] !~ 'Sun'
         break
       endif
       let sec = QFixHowmDate2Int(str.' 00:00')
@@ -1416,7 +1417,7 @@ function! s:DayOfWeekShift(cmd, str)
     return str
   endif
 
-  if '\c'.s:DoW[actday%7] =~ dow && dow != ''
+  if '\c'.g:DoWStrftime[actday%7] =~ dow && dow != ''
     let sec = QFixHowmDate2Int(str.' 00:00')
     let sec = sec + (sft == '-' ? -1: 1) * 24 *60 *60
     let str = strftime(s:hts_date, sec)
@@ -2349,7 +2350,7 @@ function! QFixHowmCmd_ScheduleList(...) range
   endfor
   call setpos('.', save_cursor)
 
-  QFixCclose
+  call QFixPclose(1)
   let h = g:QFix_Height
   for d in schlist
     call s:QFixHowmMakeScheduleList(d)

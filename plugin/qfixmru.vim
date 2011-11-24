@@ -2,9 +2,8 @@
 "    Description: MRU entry list (with QFixPreview)
 "         Author: fuenor <fuenor@gmail.com>
 "                 http://sites.google.com/site/fudist/Home  (Japanese)
-"  Last Modified: 2011-10-16 19:27
 "=============================================================================
-let s:Version = 1.08
+let s:Version = 1.09
 scriptencoding utf-8
 
 "What Is This:
@@ -206,8 +205,8 @@ function! QFixMRUPrecheck(sq, entries, dir)
   endif
 
   " 高速化のためtempバッファ使用
-  silent! exec 'split '
-  silent! exec 'silent! edit '.s:tempfile
+  let wh = winheight(0)
+  silent! exec 'silent! split '.s:tempfile
   setlocal buftype=nofile
   setlocal bufhidden=hide
   setlocal noswapfile
@@ -245,6 +244,11 @@ function! QFixMRUPrecheck(sq, entries, dir)
   endfor
   silent! bd
 
+  wincmd p
+  let w = &lines - winheight(0) - &cmdheight - (&laststatus > 0 ? 1 : 0)
+  if w > 0
+    exe 'normal! '. wh ."\<C-W>_"
+  endif
   return mru
 endfunction
 
@@ -311,9 +315,6 @@ endif
 
 " MRU表示前処理
 silent! function QFixMRUOpenPre(sq, entries, dir)
-  if exists('g:loaded_QFixWin')
-    call QFixPclose()
-  endif
 endfunction
 
 " MRU表示処理(Quickfixウィンドウを開く)
@@ -487,8 +488,7 @@ function! QFixMRUGet(mode, mfile, lnum, ...)
   endif
 
   if mfile != '%'
-    silent! exec 'split '
-    silent! exec 'silent! edit '.s:tempfile
+    silent! exec 'silent! split '.s:tempfile
     setlocal buftype=nofile
     setlocal bufhidden=hide
     setlocal noswapfile

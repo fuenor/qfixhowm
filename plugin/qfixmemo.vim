@@ -1015,7 +1015,8 @@ function! qfixmemo#EditFile(file)
   endif
   let prevPath = escape(getcwd(), ' ')
   exe 'lchdir ' . escape(expand(g:qfixmemo_dir), ' ')
-  let file = fnamemodify(strftime(a:file), ':p')
+  let file = strftime(a:file)
+  let file = fnamemodify(file, ':p')
   exe 'lchdir ' . prevPath
   if s:isQFixMemo(file)
     let file = substitute(fnamemodify(file, ':p'), '\\', '/', 'g')

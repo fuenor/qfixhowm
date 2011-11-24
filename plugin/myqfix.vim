@@ -1102,23 +1102,28 @@ function! QFixCopen(cmd, mode)
   call s:QFixSetBuftype()
 
   if spath != '' && a:mode == 0 && g:QFix_UseLocationList == 0
+    let none = 0
+    let cpath = g:QFix_SearchPath
+    let cpath = expand(cpath)
+    let ppath = '|'
     " 登録されている半分のファイルが QFix_SearchPath以下になかったらクリア
     let none = idx / 2
     for n in qf
       let file = bufname(n['bufnr'])
-      if file =~ '^\([a-zA-Z]:\|[\\/~]\)'
+      let path = fnamemodify(file, ':h')
+      if path == ppath
         let none -= 1
+      else
+        let file = printf("%s/%s", cpath, file)
+        if filereadable(file)
+          let none -= 1
+          let ppath = path
+        endif
       endif
       if none < 1
         break
       endif
     endfor
-    if none > 0
-      silent! exe 'lchdir ' . escape(opath, ' ')
-      silent! exe cmd .'open ' . g:QFix_Height
-      let g:QFix_SearchPath = ''
-      exe 'let g:QFix_SelectedLine'.b:qfixwin_buftype. '=1'
-    endif
   endif
   let g:QFix_Win = bufnr('%')
   if g:QFix_Width > 0

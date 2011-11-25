@@ -3,7 +3,7 @@
 "         Author: fuenor <fuenor@gmail.com>
 "                 http://sites.google.com/site/fudist/Home  (Japanese)
 "=============================================================================
-let s:Version = 1.09
+let s:Version = 1.10
 scriptencoding utf-8
 
 "What Is This:
@@ -318,16 +318,18 @@ silent! function QFixMRUOpenPre(sq, entries, dir)
 endfunction
 
 " MRU表示処理(Quickfixウィンドウを開く)
-silent! function QFixMRUOpen(sq, basedir)
-  let sq = a:sq
-
+let s:prevqf = []
+silent! function QFixMRUOpen(qf, basedir)
   if exists('g:loaded_QFixWin')
     let g:QFix_SearchPath = a:basedir
-    call QFixSetqflist(sq)
-    call QFixCopen('', 1)
-    call cursor(1, 1)
+    call QFixSetqflist(a:qf)
+    QFixCopen
+    if QFixGetqflist() != s:prevqf
+      let s:prevqf = QFixGetqflist()
+      call cursor(1, 1)
+    endif
   else
-    silent! call setqflist(sq)
+    silent! call setqflist(a:qf)
     silent! copen
   endif
 endfunction

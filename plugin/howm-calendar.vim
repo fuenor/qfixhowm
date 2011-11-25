@@ -592,20 +592,20 @@ function! QFixMemoCalendar(dircmd, file, cnt, ...)
   endif
 
   nnoremap <silent> <buffer> q    :close<CR>
-  nnoremap <silent> <buffer> >    :<C-u>call <SID>CR('>')<CR>
-  nnoremap <silent> <buffer> <    :<C-u>call <SID>CR('<')<CR>
-  nnoremap <silent> <buffer> i    :<C-u>call <SID>CR('<')<CR>
-  nnoremap <silent> <buffer> o    :<C-u>call <SID>CR('>')<CR>
+  nnoremap <silent> <buffer> >    :<C-u>call <SID>CR('>>')<CR>
+  nnoremap <silent> <buffer> <    :<C-u>call <SID>CR('<<')<CR>
+  nnoremap <silent> <buffer> i    :<C-u>call <SID>CR('<<')<CR>
+  nnoremap <silent> <buffer> o    :<C-u>call <SID>CR('>>')<CR>
   nnoremap <silent> <buffer> r    :<C-u>call <SID>CR('r')<CR>
   nnoremap <silent> <buffer> t    :<C-u>call <SID>CR('today')<CR>
   nnoremap <silent> <buffer> .    :<C-u>call <SID>CR('.')<CR>
   nnoremap <silent> <buffer> <CR> :<C-u>call <SID>CR()<CR>
   " nnoremap <silent> <buffer> <Up>    :<C-u>call <SID>CR('up')<CR>
   " nnoremap <silent> <buffer> <Down>  :<C-u>call <SID>CR('down')<CR>
-  nnoremap <silent> <buffer> <S-Up>    :<C-u>call <SID>CR('<')<CR>
-  nnoremap <silent> <buffer> <S-Down>  :<C-u>call <SID>CR('>')<CR>
-  nnoremap <silent> <buffer> <S-Right> :<C-u>call <SID>CR('>')<CR>
-  nnoremap <silent> <buffer> <S-Left>  :<C-u>call <SID>CR('<')<CR>
+  nnoremap <silent> <buffer> <S-Up>    :<C-u>call <SID>CR('<<')<CR>
+  nnoremap <silent> <buffer> <S-Down>  :<C-u>call <SID>CR('>>')<CR>
+  nnoremap <silent> <buffer> <S-Right> :<C-u>call <SID>CR('>>')<CR>
+  nnoremap <silent> <buffer> <S-Left>  :<C-u>call <SID>CR('<<')<CR>
   if a:0
     wincmd p
   endif
@@ -632,11 +632,14 @@ function! s:CR(...)
   let str = getline(lnum)
   let year  = matchstr(str, '\d\{4}')
   let month = matchstr(str, '/\zs\d\{2}')
-  if key =~ '<\|>'
+  if key =~ '<\+\|>\+'
     let b:month += key =~ '>' ? 1 : -1
     call s:build()
     call s:winfixheight(b:calendar_height)
     call search(key, 'c')
+    if key =~ '<<\|>>'
+      call setpos('.', save_cursor)
+    endif
   elseif key =~ '^\d\+$'
     " 特殊バッファしかない
     if QFixWinnr() == -1

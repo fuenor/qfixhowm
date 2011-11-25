@@ -1019,7 +1019,6 @@ function! qfixmemo#EditFile(file)
   let file = fnamemodify(file, ':p')
   exe 'lchdir ' . prevPath
   if s:isQFixMemo(file)
-    let file = substitute(fnamemodify(file, ':p'), '\\', '/', 'g')
     let opt = '++enc=' . g:qfixmemo_fileencoding . ' ++ff=' . g:qfixmemo_fileformat . ' '
     let mode = g:qfixmemo_splitmode ? 'split' : ''
     call s:edit(file, mode, opt)

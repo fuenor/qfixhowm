@@ -59,6 +59,7 @@ let g:QFixGrepHelpList = [
  \ '   i       : プレビュー表示ON/OFF',
  \ '   I       : ファイルタイプのハイライト表示ON/OFF',
  \ '  <C-h>    : ハイスピードプレビューON/OFF',
+ \ '  <C-l>    : QuickFix上でのパスを最短表示にする',
  \ '',
  \ '   &       : Quickfixウィンドウをロケーションリストにコピーして開く',
  \ '   A       : Quickfixウィンドウを保存',

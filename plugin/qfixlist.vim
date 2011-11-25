@@ -214,7 +214,9 @@ function! s:Cmd_QFixListQFcopy(mode) range
   if firstline > 1
     call remove(qf, 0, firstline - 2)
   endif
+  redraw | echo 'QFixList : Copying...'
   call qfixlist#open(qf, path)
+  redraw | echo ''
 endfunction
 
 function! qfixlist#GetList()
@@ -318,7 +320,7 @@ function! qfixlist#open(...)
   setlocal cursorline
 
   silent! exec 'lchdir ' . escape(s:QFixList_dir, ' ')
-  let g:QFix_SearchPath = s:QFixList_dir
+  " let g:QFix_SearchPath = s:QFixList_dir
 
   let glist = []
   if g:qfixlist_use_fnamemodify == 0

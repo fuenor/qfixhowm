@@ -5,7 +5,7 @@
 "                 http://sites.google.com/site/fudist/Home  (Japanese)
 "=============================================================================
 scriptencoding utf-8
-let s:Version = 2.89
+let s:Version = 2.90
 
 " What Is This:
 "   This plugin adds preview, sortings and advanced search to your quickfix window.
@@ -36,6 +36,7 @@ let s:Version = 2.89
 "
 "   | A | Save
 "   | O | Restore
+"   | & | Copy to Location list
 "=============================================================================
 if exists('disable_QFixWin') && disable_QFixWin == 1
   finish
@@ -121,10 +122,11 @@ if !exists('g:QFix_PreviewExclude')
 endif
 
 " プレビューする間隔
-" (この値で判定しているのでユニークな奇数を推奨)
+" (この値でプレビューが有効か判定しているのでユニーク値を推奨)
 if !exists('g:QFix_PreviewUpdatetime')
   let g:QFix_PreviewUpdatetime = 17
 endif
+let g:QFix_DefaultUpdatetime = &updatetime
 " ファイル名取得の高速化
 if !exists('g:QFix_HighSpeedPreview')
   let g:QFix_HighSpeedPreview = 0
@@ -157,6 +159,9 @@ if !exists('g:QFix_Preview_winfixwidth')
 endif
 if !exists('g:QFix_TabEditMode')
   let g:QFix_TabEditMode = 1
+endif
+if !exists('g:QFix_SearchPathMode')
+  let g:QFix_SearchPathMode = 1
 endif
 
 """"""""""""""""""""""""""""""
@@ -202,7 +207,6 @@ if !exists('g:QFixWin_QuickFixTitleReg')
 endif
 
 let g:QFix_Win = -1
-let g:QFix_DefaultUpdatetime = &updatetime
 
 let s:QFix_PreviewWin = -1
 let s:QFixPreviewfile = ''
@@ -336,6 +340,7 @@ function! s:QFBufWinEnter(...)
   nnoremap <buffer> <silent> J      :<C-u>call <SID>QFixCmd_J()<CR>
   nnoremap <buffer> <silent> A      :MyGrepWriteResult<CR>
   nnoremap <buffer> <silent> O      :MyGrepReadResult<CR>
+  nnoremap <buffer> <silent> <C-l>  :<C-u>call <SID>ShortPath()<CR>:exe 'normal! <C-l>'<CR>
   silent! nnoremap <buffer> <unique> <silent> o :MyGrepWriteResult<CR>
 
   if b:qfixwin_buftype == g:QFix_UseLocationList
@@ -452,7 +457,6 @@ function! s:QFixBufEnter(...)
         let cmd = g:QFix_UseLocationList ? 'lopen' : 'copen'
         exe cmd
       endif
-      exe 'let lnum = g:QFix_SelectedLine'.b:qfixwin_buftype
     endif
   endif
 endfunction
@@ -786,6 +790,12 @@ endfunction
 """"""""""""""""""""""""""""""
 " quickfix比較
 """"""""""""""""""""""""""""""
+function! QFixCompareBufnr(v1, v2)
+  if a:v1.bufnr == a:v2.bufnr
+    return (a:v1.lnum > a:v2.lnum?1:-1)
+  endif
+  return a:v1.bufnr>a:v2.bufnr?1:-1
+endfunction
 function! QFixCompareName(v1, v2)
   if a:v1.bufnr == a:v2.bufnr
     return (a:v1.lnum > a:v2.lnum?1:-1)
@@ -1051,6 +1061,7 @@ endfunction
 
 """"""""""""""""""""""""""""""
 " copen代替
+" CAUTION: cclose/copenでバッファ番号が変わるので b: は実質的に保存されない
 """"""""""""""""""""""""""""""
 function! QFixCopen(cmd, mode)
   if g:QFix_Disable
@@ -1061,6 +1072,18 @@ function! QFixCopen(cmd, mode)
     let b:qfixwin_width  = winwidth(0)
     let g:QFix_Height = b:qfixwin_height
   endif
+  let qf = QFixGetqflist()
+  let idx = len(qf)
+  if idx == 0
+    echohl ErrorMsg
+    if g:QFix_UseLocationList
+      redraw|echom 'QFixWin : no location list'
+    else
+      redraw|echom 'QFixWin : no list'
+    endif
+    echohl None
+    return
+  endif
   if a:cmd == ''
     let cmd = g:QFix_CopenCmd
     if exists('g:QFix_CopenCmd'.g:QFix_UseLocationList)
@@ -1069,61 +1092,41 @@ function! QFixCopen(cmd, mode)
   else
     let cmd = a:cmd
   endif
-  exe 'let g:QFix_SearchPath'.g:QFix_UseLocationList.'=g:QFix_SearchPath'
-
-  let spath = g:QFix_SearchPath
-  let spath = expand(spath)
-  let opath = getcwd()
-
-  let qf = QFixGetqflist()
-  let idx = len(qf)-1
-  if idx < 0
-    if g:QFix_UseLocationList
-      echohl ErrorMsg
-      redraw|echom 'QFixWin : no location list'
-      echohl None
-      return
-    endif
-    let g:QFix_SearchPath = ''
-    echohl ErrorMsg
-    redraw|echom 'QFixWin : Nothing in list!'
-    echohl None
-    return
-  endif
-  call QFixPclose()
-  let saved_pe = g:QFix_PreviewEnable
   let cmd = cmd . (g:QFix_UseLocationList ? ' l' : ' c')
+  let saved_pe = g:QFix_PreviewEnable
   let g:QFix_PreviewEnable = 0
+  call QFixPclose()
   silent! exe cmd . 'open ' . g:QFix_Height
-  if spath != ''
-    silent! exe 'lchdir ' . escape(spath, ' ')
-    silent! exe cmd .'open ' . g:QFix_Height
-  endif
   call s:QFixSetBuftype()
+  if !exists('b:QFix_SearchPath')
+    if exists('g:QFix_SearchPath'.b:qfixwin_buftype)
+      exe 'let b:QFix_SearchPath=g:QFix_SearchPath'.b:qfixwin_buftype
+    else
+      exe 'let b:QFix_SearchPath=g:QFix_SearchPath'
+    endif
+    let b:QFix_SearchPath = QFixNormalizePath(fnamemodify(b:QFix_SearchPath, ':p:h'))
+    " let b:QFix_SearchPath = ''
+  endif
 
-  if spath != '' && a:mode == 0 && g:QFix_UseLocationList == 0
-    let none = 0
-    let cpath = g:QFix_SearchPath
-    let cpath = expand(cpath)
-    let ppath = '|'
-    " 登録されている半分のファイルが QFix_SearchPath以下になかったらクリア
-    let none = idx / 2+1
-    for n in qf
-      let file = bufname(n['bufnr'])
-      if file =~ '^\([\\/~:]\|[A-Za-z]:\)'
-        let none -= 1
-      endif
-      if none < 1
-        break
-      endif
-    endfor
-    if none <= 0
-      silent! exe 'lchdir ' . escape(opath, ' ')
-      silent! exe cmd .'open ' . g:QFix_Height
-      let g:QFix_SearchPath = ''
-      exe 'let g:QFix_SelectedLine'.b:qfixwin_buftype. '=1'
+  let spath = ''
+  if g:QFix_SearchPathMode == 1
+    if !s:SetSearchPath(qf, g:QFix_SearchPath, cmd.'open '.g:QFix_Height)
+      let spath = QFixNormalizePath(fnamemodify(g:QFix_SearchPath, ':p:h'))
+    endif
+  elseif g:QFix_SearchPathMode == 2
+    let spath = QFixGetqfRootPath(qf)
+    if spath != ''
+      silent! exe 'lchdir ' . escape(spath, ' ')
+      silent! exe cmd . 'open ' . g:QFix_Height
     endif
   endif
+  if b:QFix_SearchPath != spath
+    exe 'let g:QFix_SelectedLine'.b:qfixwin_buftype. '=1'
+  endif
+  exe 'let lnum=g:QFix_SelectedLine'.b:qfixwin_buftype
+  call cursor(lnum, 1)
+  let b:QFix_SearchPath = spath
+  exe 'let g:QFix_SearchPath'.b:qfixwin_buftype.'=b:QFix_SearchPath'
   let g:QFix_Win = bufnr('%')
   if g:QFix_Width > 0
     exe "normal! ".g:QFix_Width."\<C-W>|"
@@ -1131,8 +1134,117 @@ function! QFixCopen(cmd, mode)
   let g:QFix_PreviewEnable = saved_pe
   let &winfixheight = g:QFix_Copen_winfixheight
   let &winfixwidth  = g:QFix_Copen_winfixwidth
-  exe 'let lnum=g:QFix_SelectedLine'.b:qfixwin_buftype
-  silent! exe 'normal! '.lnum.'G'
+endfunction
+
+" Windowsパス正規化
+let s:MSWindows = has('win95') + has('win16') + has('win32') + has('win64')
+function! QFixNormalizePath(path, ...)
+  let path = a:path
+  " let path = expand(a:path)
+  if s:MSWindows
+    if a:0 " 比較しかしないならキャピタライズ
+      let path = toupper(path)
+    else
+      " expand('~') で展開されるとドライブレターは大文字、
+      " expand('c:/')ではそのままなので統一
+      let path = substitute(path, '^\([a-z]\):', '\u\1:', '')
+    endif
+    let path = substitute(path, '\\', '/', 'g')
+  endif
+  return path
+endfunction
+
+" パス表示を短くする
+function! s:ShortPath()
+  let qf = b:qfixwin_buftype ? getloclist(0) : getqflist()
+  let wh = winheight(0)
+  let spath = QFixGetqfRootPath(qf)
+  let cmd = b:qfixwin_buftype ? 'l' : 'c'
+  if spath != ''
+    silent! exe 'lchdir ' . escape(spath, ' ')
+    silent! exe cmd . 'open '
+    let w = &lines - winheight(0) - &cmdheight - (&laststatus > 0 ? 1 : 0)
+    if w > 0 && &buftype == 'quickfix'
+      exe 'normal! '. wh ."\<C-W>_"
+      " exe 'normal! '. ww ."\<C-W>|"
+    endif
+  endif
+endfunction
+
+" パス表示を最も短くするディレクトリを探す
+function! QFixGetqfRootPath(qf)
+  if len(a:qf) == 0
+    return ''
+  endif
+  if exists('+shellslash')
+    let saved_ssl = &shellslash
+    set shellslash
+  endif
+  let qf = deepcopy(a:qf)
+  let pbuf = -1
+  for n in qf
+    if bufexists(n['bufnr'])
+      let pbuf = n['bufnr']
+      break
+    endif
+  endfor
+  if pbuf == -1
+    return ''
+  endif
+  let qf = sort(qf, "QFixCompareBufnr")
+  let spath = fnamemodify(bufname(qf[0]['bufnr']), ':p:h')
+  for n in qf
+    if n['bufnr'] == pbuf
+      continue
+    endif
+    let pbuf = n['bufnr']
+    let path = fnamemodify(bufname(pbuf), ':p:h')
+    let head = spath
+    let slen = strlen(head)
+    while 1
+      if path =~ '^\V'.head
+        let spath = head
+        break
+      endif
+      let head = fnamemodify(head, ':h')
+      let hlen = strlen(head)
+      if hlen == slen
+        break
+      endif
+      let slen = hlen
+    endwhile
+  endfor
+  if exists('+shellslash')
+    let &shellslash = saved_ssl
+  endif
+  return spath
+endfunction
+
+function! s:SetSearchPath(qf, path, ...)
+  let prevPath = escape(getcwd(), ' ')
+  silent! exe 'lchdir ' . escape(expand(a:path), ' ')
+  if a:0
+    let cmd = a:1
+  else
+    let cmd = 'copen'
+  endif
+  silent! exe cmd
+  " 登録されている半分のファイルが path以下になかったらクリア
+  let none = len(a:qf) / 2 +1
+  for n in a:qf
+    let file = bufname(n['bufnr'])
+    if file =~ '^\([\\/~:]\|[A-Za-z]:\)'
+      let none -= 1
+    endif
+    if none < 1
+      break
+    endif
+  endfor
+  if none <= 0
+    silent! exe 'lchdir ' . prevPath
+    silent! exe cmd
+  endif
+  return none <= 0
 endfunction
 
 """"""""""""""""""""""""""""""

@@ -225,7 +225,7 @@ if !exists('g:qfixtempname')
   let g:qfixtempname = tempname()
 endif
 let s:tempdir = fnamemodify(g:qfixtempname, ':p:h')
-silent! function FudistPerf(title)
+silent! function FudistPerf(...)
 endfunction
 function! FudistEnv()
   if has('unix')
@@ -322,7 +322,7 @@ function! s:QFBufWinEnter(...)
   if g:QFix_UseAltCR == 1
     nnoremap <buffer> <silent> <CR>   :call <SID>BeforeJump()<CR><CR>:call <SID>AfterJump()<CR>
   elseif g:QFix_UseAltCR == 2
-    nnoremap <buffer> <silent> <CR>   :call <SID>VisCR()<CR>
+    nnoremap <buffer> <silent> <CR>   :call <SID>BeforeJump()<CR><CR>:call <SID>AfterJump()<CR>
     vnoremap <buffer> <silent> <CR>   :call <SID>VisCR()<CR>
   endif
   nnoremap <buffer> <silent> <S-CR> :call <SID>BeforeJump()<CR>:call <SID>QFixSplit()<CR>:call <SID>AfterJump()<CR>
@@ -593,7 +593,7 @@ endfunction
 " After <CR>
 """"""""""""""""""""""""""""""
 function! s:AfterJump(...)
-  exe "normal! zz"
+  " exe "normal! zz"
   call QFixCR('after')
   if g:QFix_CloseOnJump
     QFixCclose
@@ -1124,6 +1124,7 @@ function! QFixCopen(cmd, mode)
   endif
   exe 'let lnum=g:QFix_SelectedLine'.b:qfixwin_buftype
   call cursor(lnum, 1)
+  silent! exe 'normal! zz'
   let b:QFix_SearchPath = spath
   exe 'let g:QFix_SearchPath'.b:qfixwin_buftype.'=b:QFix_SearchPath'
   let g:QFix_Win = bufnr('%')
@@ -1861,29 +1862,5 @@ function! s:QFdoexec(cmd, fline, lline)
   endfor
   exe 'cr '.fline
   let g:QFixHowm_UseMRU = mru
-endfunction
-
-""""""""""""""""""""""""""""""
-" mru.vim対策
-" nnoremap <silent> gkm :let QFix_Resize = 0<CR>:MRU<CR>
-" MRU起動前にQFix_Resizeを0にして下さい
-""""""""""""""""""""""""""""""
-augroup QFixResize
-  au!
-  au BufWinEnter __MRU_Files__ let g:QFix_Resize = 0
-  au BufWinLeave __MRU_Files__ let g:QFix_Resize = -1
-  au BufEnter * call QFixResizeBufEnter()
-augroup END
-
-function! QFixResizeBufEnter()
-  if g:QFix_Resize == -1
-    call ResizeQFixWin(g:QFix_Height)
-    let g:QFix_Resize = 1
-  endif
-endfunction
-
-function! QFixExec(cmd)
-  let g:QFix_Resize = 0
-  exe a:cmd
 endfunction
 

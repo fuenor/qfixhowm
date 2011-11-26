@@ -85,6 +85,7 @@ augroup HowmFiles
   au!
   au BufWinEnter __HOWM_MENU__ call <SID>BufWinEnterMenu(g:QFixHowm_MenuPreviewEnable, s:filehead)
   au BufWinLeave __HOWM_MENU__ call <SID>BufWinLeaveMenu()
+  au BufEnter    __HOWM_MENU__ call <SID>BufEnterMenu()
   au BufLeave    __HOWM_MENU__ call <SID>BufLeaveMenu()
   au CursorHold  __HOWM_MENU__ call <SID>PreviewMenu(s:filehead)
   exe 'au BufNewFile,BufRead '.g:QFixHowm_Menufile.' let b:qfixmemo_bufwrite_pre = 0'
@@ -631,6 +632,8 @@ function! s:BufWinEnterMenu(preview, head)
   nnoremap <buffer> <silent> <CR> :<C-u>call <SID>HowmMenuCR()<CR>
   nnoremap <buffer> <silent> <2-LeftMouse> <ESC>:<C-u>call <SID>HowmMenuCR()<CR>
   silent! exe 'lchdir ' . escape(g:qfixmemo_dir, ' ')
+  let s:howm_menu_height = winheight(0)
+  let s:howm_menu_width = winwidth(0)
 endfunction
 
 function! s:BufWinLeaveMenu()
@@ -667,7 +670,17 @@ function! s:Close()
 endfunction
 
 let g:HowmMenuLnum = [0, 1, 1, 0]
+function! s:BufEnterMenu()
+  let w = &lines - winheight(0) - &cmdheight - (&laststatus > 0 ? 1 : 0)
+  if w > 0
+    exe 'resize' . s:howm_menu_height
+  endif
+  " exe 'vertical resize' . s:howm_menu_width
+endfunction
+
 function! s:BufLeaveMenu()
+  let s:howm_menu_height = winheight(0)
+  let s:howm_menu_width = winwidth(0)
   let g:HowmMenuLnum = getpos('.')
   if b:PreviewEnable
     call QFixPclose()

@@ -326,9 +326,17 @@ let s:prevqf = []
 silent! function QFixMRUOpen(qf, basedir)
   if exists('g:loaded_QFixWin')
     let g:QFix_SearchPath = a:basedir
+    let cmd = ''
+    if s:prevqf != QFixGetqflist()
+      let cmd = 'call cursor(1, 1)'
+    endif
     call QFixSetqflist(a:qf)
     QFixCopen
-    call cursor(1, 1)
+    if s:prevqf != QFixGetqflist()
+      let s:prevqf = QFixGetqflist()
+      let cmd = 'call cursor(1, 1)'
+    endif
+    exe cmd
   else
     silent! call setqflist(a:qf)
     silent! copen

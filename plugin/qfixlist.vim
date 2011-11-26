@@ -116,13 +116,13 @@ function! qfixlist#copen(...)
   endif
   let g:QFix_SearchPath = s:QFixList_qfdir
   redraw | echo 'QFixList : Set quickfix list...'
+  call QFixPclose()
   call QFixSetqflist(s:QFixList_qfCache)
-  call QFixPclose(1)
-  redraw | echo ''
   QFixCopen
   if a:0
     call cursor(1, 1)
   endif
+  redraw | echo ''
   if g:MyGrep_ErrorMes != ''
     echohl ErrorMsg
     redraw | echo g:MyGrep_ErrorMes

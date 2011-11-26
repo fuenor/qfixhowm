@@ -37,24 +37,20 @@ scriptencoding utf-8
 if exists('disable_MyGrep') && disable_MyGrep == 1
   finish
 endif
-if exists('disable_HowmSchedule') && disable_HowmSchedule
+if exists('g:disable_HowmSchedule') && g:disable_HowmSchedule
   finish
 endif
 if exists('g:QFixHowmSchedule_version') && g:QFixHowmSchedule_version < s:Version
-  unlet loaded_HowmSchedule
+  let g:loaded_HowmSchedule = 0
 endif
-if exists("loaded_HowmSchedule") && !exists('fudist')
-  finish
-endif
-if v:version < 700 || &cp || !has('quickfix')
+if exists("g:loaded_HowmSchedule") && g:loaded_HowmSchedule && !exists('fudist')
   finish
 endif
 let g:QFixHowmSchedule_version = s:Version
-
-let s:debug = 0
-if exists('g:fudist') && g:fudist
-  let s:debug = 1
+if v:version < 700 || &cp || !has('quickfix')
+  finish
 endif
+let s:debug = exists('g:fudist') ? g:fudist : 0
 
 """"""""""""""""""""""""""""""
 " Do you like spagehtti?

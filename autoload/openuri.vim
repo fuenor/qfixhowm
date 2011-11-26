@@ -11,16 +11,16 @@ if exists('g:disable_openuri') && g:disable_openuri == 1
   finish
 endif
 if exists('g:openuri_version') && g:openuri_version < s:Version
-  unlet loaded_openuri
+  let g:loaded_openuri = 0
 endif
-if exists('g:loaded_openuri') && !exists('fudist')
+if exists('g:loaded_openuri') && g:loaded_openuri && !exists('fudist')
   finish
 endif
 if v:version < 700 || &cp
   finish
 endif
-let g:loaded_openuri = 1
 let g:openuri_version = s:Version
+let g:loaded_openuri = 1
 
 " 文字列指定された場合は文字列をURIとして開く
 " カーソル位置のURIを開いたら 1 を返す

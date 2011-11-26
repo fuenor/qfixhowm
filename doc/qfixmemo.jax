@@ -411,8 +411,8 @@ l ra A は外部grepを使用するのでMRUリストより速度的には遅く
 
 4.1 エントリ一覧のオプション														*qfixmemo-entry-list-option*
 
-<Leader>mはカウント指定可能で 30<Leader>m だと表示数を30というように変更する事
-ができます。
+たとえば<Leader>mはカウント指定可能で 30<Leader>m だと表示数を30というように変
+更する事ができます。
 同様に<Leader>lでは更新日数の指定が可能です。
 初期値は.vimrcでも設定できます。
  >
@@ -491,6 +491,14 @@ P                   削除した行の貼付け
 u                   ソートや絞り込みのアンドゥ
 U                   絞り込み全てをアンドゥ
 
+現在のQuickfixウィンドウをロケーションリストや<Leader>aのキャシュ表示にコピー
+することも可能です。
+現在のQuickfixウィンドウを表示したまま別のgrepを行いたいときなどに使用すると便
+利でしょう。
+
+&                   ロケーションリストへコピー
+<C-g>               キャッシュリストへコピー
+
 ------------------------------------------------------------------------------
 5.2 エントリフィルタと連結表示													*qfixmemo-entry-filter*
 
@@ -517,7 +525,6 @@ U                   絞り込み全てをアンドゥ
 <Leader>rr          ランダム表示
 <F5>                ランダム表示(Quickfixウィンドウ上のみ)
 <Leader>rR          キャッシュをクリアしてランダム表示
-
  >
   " ランダム表示数
   let qfixmemo_random_columns = 10
@@ -972,7 +979,7 @@ MRUに登録したり外部grepを利用してエントリ一覧表示を行う�
  >
   " キーマップ
   function! QFixMemoKeymapPost()
-    nnoremap <silent> <Leader>a :<C-u>call qfixmemo#ListCache('open')<CR>
+    nnoremap <silent> <Leader>a :<C-u>call qfixmemo#ListCmd()<CR>
   endfunction
 
   " ローカルキーマップ

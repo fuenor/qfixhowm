@@ -6,38 +6,38 @@
 let s:Version = 1.10
 scriptencoding utf-8
 
-"What Is This:
-"  Make mru (entry) list.
+" What Is This:
+"   Make mru (entry) list.
 "
-"Install:
-"  Put this file into your runtime directory.
-"    > vimfiles/plugin or .vim/plugin
+" Install:
+"   Put this file into your runtime directory.
+"     > vimfiles/plugin or .vim/plugin
 "
-"Usage:
-" .vimrc
-" let QFixMRU_Filename = '~/.qfixmru'
+" Usage:
+"  .vimrc
+"  let QFixMRU_Filename = '~/.qfixmru'
 "
-" " directory for relative path
-" let QFixMRU_RootDir  = '~/mruroot'
+"  " directory for relative path
+"  let QFixMRU_RootDir  = '~/mruroot'
 "
-" :QFixMRU {basedir}
-" :QFixMRU /:all
+"  :QFixMRU {basedir}
+"  :QFixMRU /:all
 "=============================================================================
-if exists('disable_QFixMRU') && disable_QFixMRU == 1
+if exists('g:disable_QFixMRU') && g:disable_QFixMRU == 1
   finish
 endif
 if exists('g:QFixMRU_version') && g:QFixMRU_version < s:Version
-  unlet loaded_QFixMRU
+  let g:loaded_QFixMRU = 0
 endif
-if exists("loaded_QFixMRU") && !exists('fudist')
+if exists("g:loaded_QFixMRU") && g:loaded_QFixMRU && !exists('g:fudist')
   finish
 endif
+let g:QFixMRU_version = s:Version
+let g:loaded_QFixMRU = 1
 if v:version < 700 || &cp || !has('quickfix')
   finish
 endif
-let loaded_QFixMRU = 1
-let g:QFixMRU_version = s:Version
-let g:QFixMRU_Disable = 0
+let s:debug = exists('g:fudist') ? g:fudist : 0
 
 "=============================================================================
 " vars
@@ -109,6 +109,9 @@ endif
 "=============================================================================
 " 内部変数
 "=============================================================================
+if !exists('g:QFixMRU_Disable')
+  let g:QFixMRU_Disable = 0
+endif
 if !exists('g:QFixMRU_BaseDir')
   let g:QFixMRU_BaseDir = '~'
 endif
@@ -119,23 +122,24 @@ if !exists('g:qfixtempname')
 endif
 let s:tempfile = g:qfixtempname
 
-let s:debug = 0
-if exists('g:fudist') && g:fudist
-  let s:debug = 1
-endif
-
 command! -count -nargs=* QFixMRU call QFixMRU(<f-args>)
 command! -nargs=* QFixMRUread call QFixMRURead(<f-args>)
 command! -nargs=* QFixMRURead call QFixMRURead(<f-args>)
 
+au VimEnter * call <SID>VimEnter()
+function! s:VimEnter()
+  if exists('*QFixMRUAddEntryRegxp')
+    call QFixMRUAddEntryRegxp()
+  endif
+endfunction
+
 augroup QFixMRU
-  autocmd!
-  autocmd VimEnter                    * call <SID>VimEnter()
-  autocmd VimLeave                    * call <SID>VimLeave()
-  autocmd BufRead,BufNewFile,BufEnter * call <SID>BufEnter()
-  autocmd BufLeave                    * call <SID>BufLeave()
-  autocmd BufWritePost                * call <SID>BufWritePost()
-  autocmd CursorMoved                 * call <SID>CursorMoved()
+  au!
+  au VimLeave                    * call <SID>VimLeave()
+  au BufRead,BufNewFile,BufEnter * call <SID>BufEnter()
+  au BufLeave                    * call <SID>BufLeave()
+  au BufWritePost                * call <SID>BufWritePost()
+  au CursorMoved                 * call <SID>CursorMoved()
 augroup END
 
 " MRU表示
@@ -247,7 +251,7 @@ function! QFixMRUPrecheck(sq, entries, dir)
   wincmd p
   let w = &lines - winheight(0) - &cmdheight - (&laststatus > 0 ? 1 : 0)
   if w > 0
-    exe 'normal! '. wh ."\<C-W>_"
+    exe 'resize '. wh
   endif
   return mru
 endfunction
@@ -324,10 +328,7 @@ silent! function QFixMRUOpen(qf, basedir)
     let g:QFix_SearchPath = a:basedir
     call QFixSetqflist(a:qf)
     QFixCopen
-    if QFixGetqflist() != s:prevqf
-      let s:prevqf = QFixGetqflist()
-      call cursor(1, 1)
-    endif
+    call cursor(1, 1)
   else
     silent! call setqflist(a:qf)
     silent! copen
@@ -752,12 +753,6 @@ silent! function QFixMRURegisterCheck(mru)
   let lnum  = a:mru['lnum']
   let text  = a:mru['text']
   return 0
-endfunction
-
-function! s:VimEnter()
-  if exists('*QFixMRUAddEntryRegxp')
-    call QFixMRUAddEntryRegxp()
-  endif
 endfunction
 
 function! s:BufEnter()

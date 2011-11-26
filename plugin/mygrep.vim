@@ -6,24 +6,21 @@
 let s:Version = 2.84
 scriptencoding utf-8
 
-if exists('enable_MyGrep')
-  let disable_MyGrep = !enable_MyGrep
-endif
-if exists('disable_MyGrep') && disable_MyGrep
+if exists('g:disable_MyGrep') && g:disable_MyGrep == 1
   finish
 endif
-if exists("loaded_MyGrep") && !exists('fudist')
+if exists('g:MyGrep_version') && g:MyGrep_version < s:Version
+  let g:loaded_MyGrep = 0
+endif
+if exists("g:loaded_MyGrep") && g:loaded_MyGrep && !exists('g:fudist')
   finish
 endif
+let g:MyGrep_version = s:Version
+let g:loaded_MyGrep = 1
 if v:version < 700 || &cp
   finish
 endif
-let loaded_MyGrep = 1
-
-let s:debug = 0
-if exists('g:fudist') && g:fudist
-  let s:debug = 1
-endif
+let s:debug = exists('g:fudist') ? g:fudist : 0
 
 "メニューへの登録
 if !exists('MyGrep_MenuBar')

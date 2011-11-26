@@ -1,5 +1,9 @@
 "=============================================================================
-"    Description: Title list (with QFixPreview)
+"    Description: grep & list
+"                 required  : mygrep.vim
+"                             http://sites.google.com/site/fudist/Home/grep
+"                 addtional : myqfix.vim (preview)
+"                             http://sites.google.com/site/fudist/Home/grep
 "         Author: fuenor <fuenor@gmail.com>
 "=============================================================================
 let s:Version = 1.00
@@ -11,18 +15,30 @@ scriptencoding utf-8
 " Install:
 "   Put this file and mygrep.vim into your runtime directory.
 "     > vimfiles/plugin or .vim/plugin
-"   (*) addtional myqfix.vim
+"   * addtional myqfix.vim
 "
-"  Usage: qfixlist#grep(pattern, path, filepattern, fileencoding)
+"   Windows : if you have grep.exe, set mygrepprg.
+"             findstr(default) can not search utf-8 fileencoding.
+"             > .vimrc
+"             let mygrepprg='path/to/grep'
+"             let mygrepprg='grep'
 "
+"  Usage: qfixlist#grep(pattern, path, filepattern, {fileencoding})
+"
+"    :let qflist = qfixlist#grep('^int', '~/usr/mysrc', '*.cpp')
 "    " **/ means recursive
-"    :let qflist = qfixlist#grep('^=', '~/usr/txt', '**/*', 'utf-8')
+"    :let qflist = qfixlist#grep('words', '~/usr/mytxt', '**/*', 'utf-8')
 "    " quickfix
 "    :call qfixlist#copen(qflist, search_path)
 "    " qfixlist window
 "    :call qfixlist#open(qflist, search_path)
-"
 "    also you can use setqflist()
+"
+"    cached list
+"    " quickfix
+"    :call qfixlist#copen()
+"    " qfixlist window
+"    :call qfixlist#open()
 "
 "    addtinal options
 "    | function     | option                     |
@@ -30,49 +46,254 @@ scriptencoding utf-8
 "    | FGrep        | :let MyGrep_Regexp     = 0 |
 "    | Ignorecase   | :let MyGrep_Ignorecase = 1 |
 "    | Recursive    | :let MyGrep_Recursive  = 1 |
-"    (*) these options reset to default when qfixlist#grep() finished
+"    * these options reset to default after qfixlist#grep()
 
 "=============================================================================
-if exists('disable_QFixList') && disable_QFixList == 1
+if exists('g:disable_QFixList') && g:disable_QFixList == 1
   finish
 endif
 if exists('g:QFixList_version') && g:QFixList_version < s:Version
-  unlet loaded_QFixList
+  let g:loaded_QFixList = 0
 endif
-if exists("loaded_QFixList") && !exists('fudist')
+if exists('g:loaded_QFixList') && g:loaded_QFixList && !exists('g:fudist')
   finish
 endif
+let g:QFixList_version = s:Version
+let g:loaded_QFixList = 1
 if v:version < 700 || &cp
   finish
 endif
+let s:debug = exists('g:fudist') ? g:fudist : 0
 
 if !exists('g:qfixlist_wincmd')
   let g:qfixlist_wincmd = 'rightbelow split'
 endif
-if !exists('g:qfixlist_after_wincmd')
-  let g:qfixlist_after_wincmd = 'wincmd J'
+if !exists('g:qfixlist_preview_enable')
+  let g:qfixlist_preview_enable = 1
 endif
 if !exists('g:qfixlist_close_on_jump')
   let g:qfixlist_close_on_jump = 0
 endif
-if !exists('g:qfixlist_use_fnamemodify')
-  let g:qfixlist_use_fnamemodify = 0
+if !exists('g:qfixlist_winfixheight')
+  let g:qfixlist_winfixheight = 1
 endif
+if !exists('g:qfixlist_winfixwidth')
+  let g:qfixlist_winfixwidth = 0
+endif
+
 if !exists('g:qfixlist_autoclose')
   let g:qfixlist_autoclose = 0
 endif
-if !exists('g:qfixlist_preview_enable')
-  let g:qfixlist_preview_enable = 1
+if !exists('g:qfixlist_after_wincmd')
+  let g:qfixlist_after_wincmd = ''
+endif
+if !exists('g:qfixlist_use_fnamemodify')
+  let g:qfixlist_use_fnamemodify = 0
 endif
 
-let loaded_QFixList = 1
-let g:QFixList_version = s:Version
-if !has('quickfix')
-  finish
-endif
+function! qfixlist#grep(pattern, dir, file, ...)
+  let fenc = a:0 ? a:1 : &enc
+  return qfixlist#search(a:pattern, a:dir, '', 0, fenc, a:file)
+endfunction
 
-function! qfixlist#grep(pattern, dir, file, fenc)
-  return qfixlist#search(a:pattern, a:dir, '', 0, a:fenc, a:file)
+function! qfixlist#copen(...)
+  if a:0 > 0
+    let s:QFixList_qfCache = deepcopy(a:1)
+  endif
+  if a:0 > 1
+    let s:QFixList_qfdir = a:2
+  endif
+  if len(s:QFixList_qfCache) == 0
+    echohl ErrorMsg
+    if g:MyGrep_ErrorMes != ''
+      redraw | echo g:MyGrep_ErrorMes
+      let g:MyGrep_ErrorMes = ''
+    else
+      redraw | echo 'QFixList : Nothing in list!'
+    endif
+    echohl None
+    return
+  endif
+  let g:QFix_SearchPath = s:QFixList_qfdir
+  redraw | echo 'QFixList : Set quickfix list...'
+  call QFixSetqflist(s:QFixList_qfCache)
+  call QFixPclose(1)
+  redraw | echo ''
+  QFixCopen
+  if a:0
+    call cursor(1, 1)
+  endif
+  if g:MyGrep_ErrorMes != ''
+    echohl ErrorMsg
+    redraw | echo g:MyGrep_ErrorMes
+    let g:MyGrep_ErrorMes = ''
+    echohl None
+  endif
+endfunction
+
+function! qfixlist#open(...)
+  if g:qfixlist_autoclose
+    QFixCclose
+  endif
+  let loaded = 1
+  if a:0 > 0
+    let s:QFixList_Cache = deepcopy(a:1)
+    let loaded = 0
+  endif
+  if a:0 > 1
+    let s:QFixList_dir = a:2
+  endif
+  if len(s:QFixList_Cache) == 0
+    echohl ErrorMsg
+    if g:MyGrep_ErrorMes != ''
+      redraw | echo g:MyGrep_ErrorMes
+      let g:MyGrep_ErrorMes = ''
+    else
+      redraw | echo 'QFixList : Nothing in list!'
+    endif
+    echohl None
+    return
+  endif
+  call QFixPclose(1)
+  let path = s:QFixList_dir
+  let file = fnamemodify(tempname(), ':p:h').'/__QFix_List__'
+  let winnr = bufwinnr(file)
+  if winnr != -1
+    exe winnr . 'wincmd w'
+    return
+  else
+    let aftercmd = ''
+    let prevbuf = bufnr('%')
+    if &buftype != ''
+      for i in range(1, winnr('$'))
+        exe i . 'wincmd w'
+        if &buftype == ''
+          break
+        endif
+      endfor
+      if &buftype != ''
+        exe bufwinnr(prevbuf) . 'wincmd w'
+        let aftercmd = g:qfixlist_after_wincmd
+      endif
+    endif
+    silent! exe 'silent! '.g:qfixlist_wincmd.' '.file
+    if !exists('b:qfixlist_def_height')
+      let b:qfixlist_def_height = winheight(0)
+    endif
+    if !exists('b:qfixlist_height')
+      let b:qfixlist_height = winheight(0)
+    endif
+    exe aftercmd
+  endif
+  if loaded
+    silent! exec 'lchdir ' . escape(s:QFixList_dir, ' ')
+    return
+  endif
+  silent! exec 'lchdir ' . escape(path, ' ')
+  setlocal buftype=nowrite
+  setlocal bufhidden=hide
+  setlocal noswapfile
+  setlocal nobuflisted
+  setlocal nowrap
+  setlocal cursorline
+
+  silent! exec 'lchdir ' . escape(s:QFixList_dir, ' ')
+
+  let glist = []
+  if g:qfixlist_use_fnamemodify == 0
+    let head = fnamemodify(expand(s:QFixList_dir), ':p')
+    let head = QFixNormalizePath(head)
+    for n in s:QFixList_Cache
+      if !exists("n['filename']")
+        let n['filename'] = fnamemodify(bufname(n['bufnr']), ':p')
+        let file = QFixNormalizePath(fnamemodify(n['filename'], ':.'))
+      else
+        let file = n['filename'][len(head):]
+        " let file = substitute(file, '^'.head, '', '')
+        " let file = fnamemodify(n['filename'], ':.')
+      endif
+      let lnum = n['lnum']
+      let text = n['text']
+      let res = file.'|'.lnum.'| '.text
+      call add(glist, res)
+    endfor
+  else
+    for n in s:QFixList_Cache
+      let file = fnamemodify(n['filename'], ':.')
+      let lnum = n['lnum']
+      let text = n['text']
+      let res = file.'|'.lnum.'| '.text
+      call add(glist, res)
+    endfor
+  endif
+
+  setlocal modifiable
+  exe 'set fenc='.&enc
+  silent! %delete _
+  call setline(1, glist)
+  setlocal nomodifiable
+  if a:0
+    call cursor(1, 1)
+  else
+    let b:qfixlist_lnum = exists('b:qfixlist_lnum') ? b:qfixlist_lnum : line('.')
+    call cursor(b:qfixlist_lnum, 1)
+  endif
+  nnoremap <buffer> <silent> q :<C-u>call <SID>Close()<CR>
+  nnoremap <buffer> <silent> <CR> :<C-u>call <SID>CR()<CR>
+  " nnoremap <buffer> <silent> <F5> :<C-u>call <SID>reopen()<CR>
+
+  nnoremap <buffer> <silent> i :<C-u>call <SID>TogglePreview()<CR>
+  nnoremap <buffer> <silent> J :<C-u>call <SID>ListCmd_J()<CR>
+  nnoremap <buffer> <silent> I :<C-u>call <SID>TogglePreview()<CR>
+  nnoremap <buffer> <silent> D :call <SID>Exec('delete','Delete')<CR>
+  nnoremap <buffer> <silent> R :call <SID>Exec('delete','Remove')<CR>
+  vnoremap <buffer> <silent> D :call <SID>Exec('delete','Delete')<CR>
+  vnoremap <buffer> <silent> R :call <SID>Exec('delete','Remove')<CR>
+  nnoremap <buffer> <silent> S :<C-u>call <SID>SortExec()<CR>
+  nnoremap <buffer> <silent> s :<C-u>call <SID>Search('g!')<CR>
+  nnoremap <buffer> <silent> r :<C-u>call <SID>Search('g')<CR>
+  nnoremap <buffer> <silent> dd :call <SID>Exec('delete')<CR>
+  vnoremap <buffer> <silent> d :call <SID>Exec('delete')<CR>
+  nnoremap <buffer> <silent> p :<C-u>call <SID>Exec('put')<CR>
+  nnoremap <buffer> <silent> P :<C-u>call <SID>Exec('put!')<CR>
+  nnoremap <buffer> <silent> u :<C-u>call <SID>Exec('undo')<CR>
+  nnoremap <buffer> <silent> <C-r> :<C-u>call <SID>Exec("redo")<CR>
+
+  " nnoremap <buffer> <silent> <C-g> :<C-u>call <SID>Cmd_Copy2QF()<CR>
+  nnoremap <buffer> <silent> & :<C-u>call <SID>Cmd_Copy2QF()<CR>
+  nnoremap <buffer> <silent> A :MyGrepWriteResult<CR>
+  silent! nnoremap <buffer> <unique> <silent> o :MyGrepWriteResult<CR>
+  nnoremap <buffer> <silent> O :MyGrepReadResult<CR>
+
+  if g:MyGrep_ErrorMes != ''
+    echohl ErrorMsg
+    redraw | echo g:MyGrep_ErrorMes
+    let g:MyGrep_ErrorMes = ''
+    echohl None
+    let g:MyGrep_ErrorMes = ''
+  endif
+endfunction
+
+function! qfixlist#Sort(cmd, sq)
+  if a:cmd =~ 'mtime'
+    let sq = sort(a:sq, "s:CompareTime")
+  elseif a:cmd =~ 'name'
+    let sq = sort(a:sq, "s:CompareName")
+  elseif a:cmd =~ 'text'
+    let sq = sort(a:sq, "s:CompareText")
+  endif
+  if a:cmd =~ 'r.*'
+    let sq = reverse(a:sq)
+  endif
+  return sq
+endfunction
+
+function! qfixlist#GetList(cmd)
+  if a:cmd == 'copen' || a:cmd == 'quickfix'
+    return [s:QFixList_qfCache, s:QFixList_qfdir]
+  else
+    return [s:QFixList_Cache, s:QFixList_dir]
+  endif
 endfunction
 
 function! qfixlist#search(pattern, dir, cmd, days, fenc, file)
@@ -127,14 +348,12 @@ function! qfixlist#search(pattern, dir, cmd, days, fenc, file)
   if a:cmd =~ 'r.*'
     let list = reverse(list)
   endif
-  let s:QFixList_dir = a:dir
-  let s:QFixListCache = list
+  let s:QFixList_qfdir = a:dir
+  let s:QFixList_qfCache = list
   redraw | echo ''
   return list
 endfunction
 
-""""""""""""""""""""""""""""""
-"compare
 """"""""""""""""""""""""""""""
 function! s:CompareName(v1, v2)
   if a:v1.filename == a:v2.filename
@@ -161,7 +380,7 @@ function! s:CompareText(v1, v2)
 endfunction
 
 """"""""""""""""""""""""""""""
-"" QFixFiles
+" QFixFiles
 """"""""""""""""""""""""""""""
 augroup QFixFiles
   au!
@@ -172,9 +391,10 @@ augroup QFixFiles
   autocmd BufWinEnter      quickfix call <SID>QFBufWinEnter('__QFix_List__')
 augroup END
 
-let s:lnum = line('.')
-let s:QFixListCache = []
-let s:QFixList_dir = ''
+let s:QFixList_dir   = ''
+let s:QFixList_qfdir = ''
+let s:QFixList_Cache = []
+let s:QFixList_qfCache = []
 let g:MyGrep_ErrorMes = ''
 
 function! s:QFBufWinEnter(name)
@@ -199,212 +419,29 @@ function! s:Cmd_QFixListQFcopy(mode) range
   else
     let firstline = 1
   endif
+  redraw | echo 'QFixList : Copying...'
 
   if exists('b:qfixwin_buftype')
     let qf = b:qfixwin_buftype ? getloclist(0) : getqflist()
   else
     let qf = QFixGetqflist()
   endif
-  let path = substitute(fnamemodify(bufname(qf[0]['bufnr']), ':p'), '[\\/]', '/', 'g')
-  let file = substitute(line(1), '|.*$', '', '')
-  let path = fnamemodify(strpart(0, strlen(file)), ':p:h')
+  let path = exists('g:loaded_QFixWin') ? QFixGetqfRootPath(qf) : getcwd()
   if lastline != line('$')
     call remove(qf, lastline, -1)
   endif
   if firstline > 1
     call remove(qf, 0, firstline - 2)
   endif
-  redraw | echo 'QFixList : Copying...'
   call qfixlist#open(qf, path)
   redraw | echo ''
 endfunction
 
-function! qfixlist#GetList()
-  return s:QFixListCache
-endfunction
-
-function! qfixlist#copen(...)
-  if a:0 > 0
-    let s:QFixListCache = deepcopy(a:1)
-  endif
-  if a:0 > 1
-    let s:QFixList_dir = a:2
-  endif
-  if len(s:QFixListCache) == 0
-    echohl ErrorMsg
-    if g:MyGrep_ErrorMes != ''
-      redraw | echo g:MyGrep_ErrorMes
-      let g:MyGrep_ErrorMes = ''
-    else
-      redraw | echo 'QFixList : Nothing in list!'
-    endif
-    echohl None
-    return
-  endif
-  let g:QFix_SearchPath = s:QFixList_dir
-  redraw | echo 'QFixList : Set quickfix list...'
-  call QFixSetqflist(s:QFixListCache)
-  call QFixPclose(1)
-  redraw | echo ''
-  QFixCopen
-  if a:0
-    call cursor(1, 1)
-  else
-    call cursor(s:lnum, 1)
-  endif
-  if g:MyGrep_ErrorMes != ''
-    echohl ErrorMsg
-    redraw | echo g:MyGrep_ErrorMes
-    let g:MyGrep_ErrorMes = ''
-    echohl None
-  endif
-endfunction
-
-function! qfixlist#open(...)
-  if g:qfixlist_autoclose
-    QFixCclose
-  endif
-  let loaded = 1
-  if a:0 > 0
-    let s:QFixListCache = deepcopy(a:1)
-    let loaded = 0
-  endif
-  if a:0 > 1
-    let s:QFixList_dir = a:2
-  endif
-  if len(s:QFixListCache) == 0
-    echohl ErrorMsg
-    if g:MyGrep_ErrorMes != ''
-      redraw | echo g:MyGrep_ErrorMes
-      let g:MyGrep_ErrorMes = ''
-    else
-      redraw | echo 'QFixList : Nothing in list!'
-    endif
-    echohl None
-    return
-  endif
-  call QFixPclose(1)
-  let path = s:QFixList_dir
-  let file = fnamemodify(tempname(), ':p:h').'/__QFix_List__'
-  let winnr = bufwinnr(file)
-  if winnr != -1
-    exe winnr . 'wincmd w'
-  else
-    let aftercmd = ''
-    let prevbuf = bufnr('%')
-    if &buftype != ''
-      for i in range(1, winnr('$'))
-        exe i . 'wincmd w'
-        if &buftype == ''
-          break
-        endif
-      endfor
-      if &buftype != ''
-        exe bufwinnr(prevbuf) . 'wincmd w'
-        let aftercmd = g:qfixlist_after_wincmd
-      endif
-    endif
-    silent! exe 'silent! '.g:qfixlist_wincmd.' '.file
-    exe aftercmd
-  endif
-  if loaded
-    silent! exec 'lchdir ' . escape(s:QFixList_dir, ' ')
-    return
-  endif
-  silent! exec 'lchdir ' . escape(path, ' ')
-  setlocal buftype=nowrite
-  setlocal bufhidden=hide
-  setlocal noswapfile
-  setlocal nobuflisted
-  setlocal nowrap
-  setlocal cursorline
-
-  silent! exec 'lchdir ' . escape(s:QFixList_dir, ' ')
-  " let g:QFix_SearchPath = s:QFixList_dir
-
-  let glist = []
-  if g:qfixlist_use_fnamemodify == 0
-    let head = fnamemodify(expand(s:QFixList_dir), ':p')
-    let head = QFixNormalizePath(head)
-    for n in s:QFixListCache
-      if !exists("n['filename']")
-        let n['filename'] = fnamemodify(bufname(n['bufnr']), ':p')
-        let file = QFixNormalizePath(fnamemodify(n['filename'], ':.'))
-      else
-        let file = n['filename'][len(head):]
-        " let file = substitute(file, '^'.head, '', '')
-        " let file = fnamemodify(n['filename'], ':.')
-      endif
-      let lnum = n['lnum']
-      let text = n['text']
-      let res = file.'|'.lnum.'| '.text
-      call add(glist, res)
-    endfor
-  else
-    for n in s:QFixListCache
-      let file = fnamemodify(n['filename'], ':.')
-      let lnum = n['lnum']
-      let text = n['text']
-      let res = file.'|'.lnum.'| '.text
-      call add(glist, res)
-    endfor
-  endif
-
-  setlocal modifiable
-  exe 'set fenc='.&enc
-  silent! %delete _
-  call setline(1, glist)
-  setlocal nomodifiable
-  if a:0
-    call cursor(1, 1)
-  else
-    call cursor(s:lnum, 1)
-  endif
-  if g:MyGrep_ErrorMes != ''
-    echohl ErrorMsg
-    redraw | echo g:MyGrep_ErrorMes
-    let g:MyGrep_ErrorMes = ''
-    echohl None
-    let g:MyGrep_ErrorMes = ''
-  endif
-endfunction
-
 function! s:BufWinEnter(preview)
-  if s:def_height == 0
-    let s:def_height = winheight(0)
-  endif
-  setlocal winfixheight
-  if exists('g:QFix_PreviewUpdatetime')
-    let b:updatetime = g:QFix_PreviewUpdatetime
-    exec 'setlocal updatetime='.b:updatetime
-  endif
   let b:PreviewEnable = a:preview
-
   call QFixAltWincmdMap()
-  nnoremap <buffer> <silent> q :<C-u>call <SID>Close()<CR>
-  nnoremap <buffer> <silent> <CR> :<C-u>call <SID>CR()<CR>
-  " nnoremap <buffer> <silent> <F5> :<C-u>call <SID>reopen()<CR>
-
-  nnoremap <buffer> <silent> i :<C-u>call <SID>TogglePreview()<CR>
-  nnoremap <buffer> <silent> J :<C-u>call <SID>ListCmd_J()<CR>
-  nnoremap <buffer> <silent> I :<C-u>call <SID>TogglePreview()<CR>
-  nnoremap <buffer> <silent> D :call <SID>Exec('delete','Delete')<CR>
-  nnoremap <buffer> <silent> R :call <SID>Exec('delete','Remove')<CR>
-  vnoremap <buffer> <silent> D :call <SID>Exec('delete','Delete')<CR>
-  vnoremap <buffer> <silent> R :call <SID>Exec('delete','Remove')<CR>
-  nnoremap <buffer> <silent> S :<C-u>call <SID>SortExec()<CR>
-  nnoremap <buffer> <silent> s :<C-u>call <SID>Search('g!')<CR>
-  nnoremap <buffer> <silent> r :<C-u>call <SID>Search('g')<CR>
-  nnoremap <buffer> <silent> dd :call <SID>Exec('delete')<CR>
-  vnoremap <buffer> <silent> d :call <SID>Exec('delete')<CR>
-  nnoremap <buffer> <silent> p :<C-u>call <SID>Exec('put')<CR>
-  nnoremap <buffer> <silent> P :<C-u>call <SID>Exec('put!')<CR>
-  nnoremap <buffer> <silent> u :<C-u>call <SID>Exec('undo')<CR>
-  nnoremap <buffer> <silent> <C-r> :<C-u>call <SID>Exec("redo")<CR>
-
-  nnoremap <buffer> <silent> A :MyGrepWriteResult<CR>
-  silent! nnoremap <buffer> <unique> <silent> o :MyGrepWriteResult<CR>
-  nnoremap <buffer> <silent> O :MyGrepReadResult<CR>
+  let &winfixheight = g:qfixlist_winfixheight
+  let &winfixwidth  = g:qfixlist_winfixwidth
 
   syn match	qfFileName	"^[^|]*" nextgroup=qfSeparator
   syn match	qfSeparator	"|" nextgroup=qfLineNr contained
@@ -429,26 +466,23 @@ function! s:reopen()
   call qfixlist#open()
 endfunction
 
-let s:def_height = 0
-let s:height = 0
-let s:width = 0
 function! s:BufEnter()
   let w = &lines - winheight(0) - &cmdheight - (&laststatus > 0 ? 1 : 0)
   if w > 0
-    " let s:height = s:height < s:def_height ? s:def_height : s:height
-    if s:height
-      exe 'normal! '. s:height ."\<C-W>_"
+    " let b:qfixlist_height = b:qfixlist_height < b:qfixlist_def_height ? b:qfixlist_def_height : b:qfixlist_height
+    if b:qfixlist_height
+      exe 'resize '. b:qfixlist_height
     endif
   endif
-  if s:width
-    " exe 'normal! '. s:width ."\<C-W>|"
+  if b:qfixlist_width
+    " exe 'vertical resize '. s:qfixlist_width
   endif
 endfunction
 
 function! s:BufLeave()
-  let s:height = winheight(0)
-  let s:width = winwidth(0)
-  let s:lnum = line('.')
+  let b:qfixlist_height = winheight(0)
+  let b:qfixlist_width = winwidth(0)
+  let b:qfixlist_lnum = line('.')
   if b:PreviewEnable
     call QFixPclose(1)
   endif
@@ -592,20 +626,6 @@ function! s:SortExec(...)
   redraw|echo 'Sorted by '.g:QFix_Sort.'.'
 endfunction
 
-function! qfixlist#Sort(cmd, sq)
-  if a:cmd =~ 'mtime'
-    let sq = sort(a:sq, "s:CompareTime")
-  elseif a:cmd =~ 'name'
-    let sq = sort(a:sq, "s:CompareName")
-  elseif a:cmd =~ 'text'
-    let sq = sort(a:sq, "s:CompareText")
-  endif
-  if a:cmd =~ 'r.*'
-    let sq = reverse(a:sq)
-  endif
-  return sq
-endfunction
-
 function! s:Exec(cmd, ...) range
   let cmd = a:cmd
   if a:firstline != a:lastline
@@ -622,12 +642,24 @@ function! s:Exec(cmd, ...) range
   exec 'setlocal '.mod.'modifiable'
 endfunction
 
+function! s:Cmd_Copy2QF()
+  redraw|echo 'QFixList : Copying...'
+  let s:QFixList_qfdir = s:QFixList_dir
+  let s:QFixList_qfCache = s:QFixList_Cache
+  call qfixlist#copen()
+  call cursor(1, 1)
+  echo ''
+endfunction
+
+if !exists('g:qfixmemo_dir')
+  let g:qfixmemo_dir = '~/qfixmemo'
+endif
 function! s:Cmd_RD(cmd, fline, lline)
   let [file, lnum] = s:Getfile(a:fline)
   if a:cmd == 'Delete'
     let mes = "!!! Delete file(s) !!!"
   elseif a:cmd == 'Remove'
-    let mes = "!!! Remove to (".g:howm_dir.")"
+    let mes = "!!! Remove to (".g:qfixmemo_dir.")"
   else
     return 0
   endif

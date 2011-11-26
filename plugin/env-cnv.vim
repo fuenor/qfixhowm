@@ -9,7 +9,7 @@ scriptencoding utf-8
 if !exists('g:QFixHowm_Convert')
   let g:QFixHowm_Convert = 1
 endif
-if exists('g:loaded_envcnv') && !exists('fudist')
+if exists('g:loaded_envcnv') && !exists('g:fudist')
   finish
 endif
 if g:QFixHowm_Convert == 0
@@ -342,7 +342,7 @@ let s:cnvopt = [
   \ ['let g:qfixmemo_grep_cword              = %s', 'g:QFixHowm_DefaultSearchWord'],
   \ ['let g:qfixmemo_splitmode               = %s', 'g:QFixHowm_SplitMode'],
   \ ['let g:qfixmemo_rename_length           = %s', 'g:QFixHowm_FilenameLen'],
-  \ ['let g:qfixmemo_use_list_cache          = %s', 'g:QFixHowm_TitleListCache'],
+  \ ['let g:qfixmemo_qfixlist_cache          = %s', 'g:QFixHowm_TitleListCache'],
   \ ['let g:qfixlist_autoclose               = %s', 'g:QFixHowm_ListAutoClose'],
   \ ['let g:qfixlist_wincmd                  = %s', 'g:QFixHowm_ListWinCmd'],
   \ ['let g:qfixmemo_swlist_action           = %s', 'g:QFixHowm_SwitchListActionLock'],
@@ -397,26 +397,32 @@ function! QFixHowmSetup()
     if exists('g:QFixHowm_QuickMemoFile'.i)
       exe printf('let g:qfixmemo_quickmemo%d=g:QFixHowm_QuickMemoFile%d', i, i)
     endif
-    if exists('g:SubWindow_Title'.i)
-      exe printf('let g:qfixmemo_submenu_title%d=g:SubWindow_Title%d', i, i)
-    endif
-    if exists('g:SubWindow_Direction'.i)
-      exe printf('let g:qfixmemo_submenu_direction%d=g:SubWindow_Direction%d', i, i)
-    endif
-    if exists('g:SubWindow_Size'.i)
-      exe printf('let g:qfixmemo_submenu_size%d=g:SubWindow_Size%d', i, i)
-    endif
-    if exists('g:SubWindow_KeepSize'.i)
-      exe printf('let g:qfixmemo_submenu_keepsize%d=g:SubWindow_KeepSize%d', i, i)
-    endif
-    if exists('g:SubWindow_Wrap'.i)
-      exe printf('let g:qfixmemo_submenu_wrap%d=g:SubWindow_Wrap%d', i, i)
-    endif
-    if exists('g:SubWindow_CalendarWinCmd'.i)
-      exe printf('let g:qfixmemo_submenu_calendar_wincmd%d=g:SubWindow_CalendarWinCmd%d', i, i)
-    endif
     if exists('g:QFixHowm_UserSwActionLock'.i)
       exe printf('let g:qfixmemo_switch_action%d=g:QFixHowm_UserSwActionLock%d', i, i)
+    endif
+    if exists('g:SubWindow_Title'.i)
+      exe printf('let g:qfixmemo_submenu_title%d=g:SubWindow_Title%d', i, i)
+      if exists('g:SubWindow_Direction'.i)
+        exe printf('let g:qfixmemo_submenu_direction%d=g:SubWindow_Direction%d', i, i)
+      endif
+      if exists('g:SubWindow_Size'.i)
+        exe printf('let g:qfixmemo_submenu_size%d=g:SubWindow_Size%d', i, i)
+      endif
+      if exists('g:SubWindow_KeepSize'.i)
+        exe printf('let g:qfixmemo_submenu_keepsize%d=g:SubWindow_KeepSize%d', i, i)
+      endif
+      if exists('g:SubWindow_Wrap'.i)
+        exe printf('let g:qfixmemo_submenu_wrap%d=g:SubWindow_Wrap%d', i, i)
+      endif
+      if exists('g:SubWindow_CalendarWinCmd'.i)
+        exe printf('let g:qfixmemo_submenu_calendar_wincmd%d=g:SubWindow_CalendarWinCmd%d', i, i)
+      endif
+      if exists('g:SubWindow_winfixheight'.i)
+        exe printf('let g:qfixmemo_submenu_winfixheight%d=g:SubWindow_winfixheight%d', i, i)
+      endif
+      if exists('g:SubWindow_winfixwidth'.i)
+        exe printf('let g:qfixmemo_submenu_winfixwidth%d=g:SubWindow_winfixwidth%d', i, i)
+      endif
     endif
   endfor
 endfunction

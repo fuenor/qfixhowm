@@ -5,11 +5,10 @@
 "=============================================================================
 scriptencoding utf-8
 
-if exists('loaded_HowmMenu') && !exists('fudist')
+if exists('g:loaded_HowmMenu') && g:loaded_HowmMenu && !exists('fudist')
   finish
 endif
-let loaded_HowmMenu = 1
-
+let g:loaded_HowmMenu = 1
 if v:version < 700
   finish
 endif
@@ -47,6 +46,12 @@ if !exists('g:QFixHowm_MenuCalendar')
 endif
 if !exists('g:QFixHowm_MenuPreviewEnable')
   let g:QFixHowm_MenuPreviewEnable = 1
+endif
+if !exists('g:QFixHowm_Menu_winfixheight')
+  let g:QFixHowm_Menu_winfixheight = 1
+endif
+if !exists('g:QFixHowm_Menu_winfixwidth')
+  let g:QFixHowm_Menu_winfixwidth = 0
 endif
 
 let s:howmsuffix = 'howm'
@@ -382,6 +387,8 @@ function! QFixHowmOpenMenu(...)
   setlocal modifiable
   exe 'setlocal fenc='.g:qfixmemo_fileencoding
   exe 'setlocal ff='.g:qfixmemo_fileformat
+  let &winfixheight = g:QFixHowm_Menu_winfixheight
+  let &winfixwidth  = g:QFixHowm_Menu_winfixwidth
   if g:QFix_Width > 0
     exe "normal! ".g:QFixHowm_MenuWidth."\<C-W>|"
   endif
@@ -594,9 +601,8 @@ function! s:MenuCmd_J()
 endfunction
 
 function! s:BufWinEnterMenu(preview, head)
+  call QFixAltWincmdMap()
   let &wrap=g:QFixHowm_MenuWrap
-  let b:updatetime = g:QFix_PreviewUpdatetime
-  exe 'setlocal updatetime='.b:updatetime
   if !exists('b:PreviewEnable')
     let b:PreviewEnable = a:preview
   endif
@@ -622,7 +628,6 @@ function! s:BufWinEnterMenu(preview, head)
   nnoremap <buffer> <silent> J :<C-u>call <SID>MenuCmd_J()<CR>
   nnoremap <buffer> <silent> q :call <SID>Close()<CR>
   nnoremap <buffer> <silent> i :<C-u>call <SID>TogglePreview('menu')<CR>
-  call QFixAltWincmdMap()
   nnoremap <buffer> <silent> <CR> :<C-u>call <SID>HowmMenuCR()<CR>
   nnoremap <buffer> <silent> <2-LeftMouse> <ESC>:<C-u>call <SID>HowmMenuCR()<CR>
   silent! exe 'lchdir ' . escape(g:qfixmemo_dir, ' ')

@@ -77,9 +77,9 @@ function! s:CalendarPost(win)
   augroup Calendar
     au!
     if a:win
-      exe 'au BufEnter __Calendar normal! '.winheight(0) ."\<C-W>_"
+      exe 'au BufEnter __Calendar resize '.winheight(0)
     else
-      exe 'au BufEnter __Calendar normal! '.winwidth(0) ."\<C-W>|"
+      exe 'au BufEnter __Calendar vertical resize '.winwidth(0)
     endif
   augroup END
 endfunction
@@ -168,13 +168,13 @@ if v:version < 700 || &cp
 endif
 
 if exists('g:QFixMemoCalendar_version') && g:QFixMemoCalendar_version < s:Version
-  unlet loaded_QFixMemoCalendar_vim
+  let g:loaded_QFixMemoCalendar_vim = 0
 endif
-if exists("loaded_QFixMemoCalendar_vim") && !exists('fudist')
+if exists("g:loaded_QFixMemoCalendar_vim") && g:loaded_QFixMemoCalendar_vim && !exists('fudist')
   finish
 endif
 let g:QFixMemoCalendar_version = s:Version
-let loaded_QFixMemoCalendar_vim = 1
+let g:loaded_QFixMemoCalendar_vim = 1
 
 " 休日定義ファイル
 " https://sites.google.com/site/fudist/Home/qfixhowm#downloads
@@ -197,8 +197,8 @@ if !exists('g:calendar_footer')
     \ '  -----------------',
     \ '  <S-Left>|<S-Right>',
     \ '  -----------------',
-    \ '   <  > : Prev/Next',
     \ '   i  o : Prev/Next',
+    \ '   <  > : Prev/Next',
     \ '    .   : Command',
     \ '    t   : Today',
     \ '    q   : Close',
@@ -507,6 +507,12 @@ endif
 if !exists('g:submenu_calendar_lmargin')
   let g:submenu_calendar_lmargin = ''
 endif
+if !exists('g:submenu_calendar_winfixheight')
+  let g:submenu_calendar_winfixheight = 1
+endif
+if !exists('g:submenu_calendar_winfixwidth')
+  let g:submenu_calendar_winfixwidth = 1
+endif
 if !exists('g:qfixtempname')
   let g:qfixtempname = tempname()
 endif
@@ -546,8 +552,8 @@ function! QFixMemoCalendar(dircmd, file, cnt, ...)
   setlocal nowrap
   setlocal nonumber
   setlocal nomodifiable
-  setlocal winfixwidth
-  setlocal winfixheight
+  let &winfixheight = g:submenu_calendar_winfixheight
+  let &winfixwidth  = g:submenu_calendar_winfixwidth
   setlocal foldcolumn=0
   let cbufnr = bufnr('%')
   if a:0 && a:1 =~ 'parent'
@@ -821,6 +827,7 @@ function! s:CalendarStr(...)
     endif
     let str = substitute(str, '\(.\{21}\)', '\1|', 'g')
     let list = split(str, '|')
+    exe 'let list[-1] .= printf("%'.(strlen(list[0])-strlen(list[-1])).'s", "")'
     call insert(list, g:calendar_dow)
     let mruler = printf(' < . > %4.4d/%2.2d %s', year, month, g:calendar_month[month-1])
     call insert(list, mruler)
@@ -862,7 +869,7 @@ function! s:SCBufEnter(pbuf, cbuf)
   if expand('<abuf>') == a:cbuf
     if b:calendar_resize
       if winwidth(0) < b:calendar_width || b:calendar_resize == 1
-        exe 'normal! '.b:calendar_width  ."\<C-W>|"
+        exe 'vertical resize '.b:calendar_width
       endif
       call s:winfixheight(b:calendar_height)
     endif
@@ -875,13 +882,13 @@ endfunction
 
 function! s:winfixheight(h)
   if b:calendar_winfixheight
-    exe 'normal! '.a:h ."\<C-W>_"
+    exe 'resize '.a:h
   endif
 endfunction
 
 function! s:syntax()
   syn clear
-  exe 'syn match CalSaturday display /.\%>'.(3*7+strlen(b:submenu_calendar_lmargin)-2).'v[+!$%&?]\? *\d\+$/'
+  exe 'syn match CalSaturday display /\d\+.\?$/'
 
   " today
   if g:calendar_mark =~ 'left-fit'

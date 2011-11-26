@@ -102,6 +102,7 @@ function! s:TogglePreview(...)
     let g:QFixHowm_MenuPreviewEnable = b:PreviewEnable
   endif
   call QFixPclose(1)
+  call s:keepsize()
 endfunction
 
 function! s:Getfile(lnum, ...)
@@ -672,6 +673,10 @@ endfunction
 
 let g:HowmMenuLnum = [0, 1, 1, 0]
 function! s:BufEnterMenu()
+  call s:keepsize()
+endfunction
+
+function! s:keepsize()
   let w = &lines - winheight(0) - &cmdheight - (&laststatus > 0 ? 1 : 0)
   if w > 0
     exe 'resize' . s:howm_menu_height
@@ -697,6 +702,7 @@ function! s:PreviewMenu(head)
   let [file, lnum] = s:Getfile('.', a:head)
   if file == '' && g:QFixHowm_MenuPreview == 0
     call QFixPclose()
+    call s:keepsize()
     return
   endif
   call QFixPreviewOpen(file, lnum)

@@ -409,16 +409,8 @@ endfunction
 
 " Quickfix ウィンドウPreview ON/OFF。
 function! s:QFixTogglePreview()
-  if g:QFix_PreviewEnable <= 0
-    let g:QFix_PreviewEnable = 1
-  else
-    let g:QFix_PreviewEnable = 0
-    if winnr('$') == 2
-      wincmd o
-      return
-    endif
-  endif
-  silent! pclose!
+  let g:QFix_PreviewEnable = !g:QFix_PreviewEnable
+  call QFixPclose(1)
 endfunction
 
 " BufEnter

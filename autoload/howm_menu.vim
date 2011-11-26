@@ -53,6 +53,9 @@ endif
 if !exists('g:QFixHowm_Menu_winfixwidth')
   let g:QFixHowm_Menu_winfixwidth = 0
 endif
+if !exists('g:QFixHowm_MenuHeightMode')
+  let g:QFixHowm_MenuHeightMode = 0
+endif
 
 let s:howmsuffix = 'howm'
 let s:filehead = '\(howm\|sche\)://'
@@ -98,9 +101,7 @@ function! s:TogglePreview(...)
   else
     let g:QFixHowm_MenuPreviewEnable = b:PreviewEnable
   endif
-  if !b:PreviewEnable
-    call QFixPclose()
-  endif
+  call QFixPclose(1)
 endfunction
 
 function! s:Getfile(lnum, ...)
@@ -679,8 +680,10 @@ function! s:BufEnterMenu()
 endfunction
 
 function! s:BufLeaveMenu()
-  let s:howm_menu_height = winheight(0)
-  let s:howm_menu_width = winwidth(0)
+  if g:QFixHowm_MenuHeightMode
+    let s:howm_menu_height = winheight(0)
+    let s:howm_menu_width = winwidth(0)
+  endif
   let g:HowmMenuLnum = getpos('.')
   if b:PreviewEnable
     call QFixPclose()

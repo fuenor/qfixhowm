@@ -280,7 +280,11 @@ if !exists('QFixHowm_Edit')
   let QFixHowm_Edit = ''
 endif
 
-if g:QFixHowm_Default_Key > 0
+if !exists('g:howm_schedule_key')
+  let g:howm_schedule_key = 0
+endif
+
+if g:QFixHowm_Default_Key > 0 && g:howm_schedule_key
   let s:QFixHowm_Key = g:QFixHowm_Key . g:QFixHowm_KeyB
   exe 'silent! nnoremap <unique> <silent> '.s:QFixHowm_Key.'t     :<C-u>call QFixHowmListReminderCache("todo")<CR>'
   exe 'silent! nnoremap <unique> <silent> '.s:QFixHowm_Key.'rt    :<C-u>call QFixHowmListReminder("todo")<CR>'
@@ -439,7 +443,9 @@ function! s:QFixHowmListReminder_(mode,...)
     let l:howm_dir = g:QFixHowm_ScheduleSearchDir
   endif
   let l:SearchFile = '**/*.*'
-  silent! let l:SearchFile = g:QFixHowm_SearchHowmFile
+  if exists('g:QFixHowm_SearchHowmFile')
+    let l:SearchFile = g:QFixHowm_SearchHowmFile
+  endif
   if g:QFixHowm_ScheduleSearchFile != ''
     let l:SearchFile = g:QFixHowm_ScheduleSearchFile
   endif
@@ -1818,9 +1824,11 @@ if !exists('g:QFixHowm_Link')
   let g:QFixHowm_Link = '\('.g:howm_clink_pattern.'\|'.g:howm_glink_pattern.'\)'
 endif
 
-silent! function QFixHowmOpenKeywordLink()
+if !exists('*QFixHowmOpenKeywordLink')
+function QFixHowmOpenKeywordLink()
   return "\<CR>"
 endfunction
+endif
 
 "=============================================================================
 " アクションロック

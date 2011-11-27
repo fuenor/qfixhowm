@@ -470,11 +470,11 @@ function! s:BufEnter()
   let w = &lines - winheight(0) - &cmdheight - (&laststatus > 0 ? 1 : 0)
   if w > 0
     " let b:qfixlist_height = b:qfixlist_height < b:qfixlist_def_height ? b:qfixlist_def_height : b:qfixlist_height
-    if b:qfixlist_height
+    if exists('b:qfixlist_height') && b:qfixlist_height
       exe 'resize '. b:qfixlist_height
     endif
   endif
-  if b:qfixlist_width
+  if exists('b:qfixlist_width') && b:qfixlist_width
     " exe 'vertical resize '. s:qfixlist_width
   endif
 endfunction

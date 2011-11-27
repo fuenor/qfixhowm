@@ -179,7 +179,6 @@ command! -count OpenQFixWin call OpenQFixWin(<line2>-<line1>+1)
 command! CloseQFixWin call QFixCclose()
 command! -count ToggleQFixWin call ToggleQFixWin(<line2>-<line1>+1)
 command! -count MoveToQFixWin call MoveToQFixWin(<line2>-<line1>+1)
-command! -count ResizeQFixWin call ResizeQFixWin(<line2>-<line1>+1)
 command! -nargs=* -bang QFixCopen call QFixCopen(<q-args>, <bang>0)
 command! QFixCclose   call QFixCclose()
 command! -count ResizeOnQFix call ResizeOnQFix(<count>)
@@ -219,7 +218,6 @@ let g:QFix_HSPSearchPath = ''
 let g:QFix_Disable = 0
 let g:QFix_Resize = 1
 let g:QFix_PreviewEnableLock = 0
-let g:QFix_PreviousPath = getcwd()
 
 if !exists('g:qfixtempname')
   let g:qfixtempname = tempname()
@@ -442,9 +440,6 @@ function! s:QFixBufEnter(...)
       if g:QFix_PreviewEnable > 0
         call QFixPclose()
       endif
-      silent! wincmd p
-      let g:QFix_PreviousPath = getcwd()
-      silent! wincmd p
       if g:QFix_HighSpeedPreview
         let cmd = g:QFix_UseLocationList ? 'lopen' : 'copen'
         exe cmd
@@ -1025,21 +1020,6 @@ endfunction
 """"""""""""""""""""""""""""""
 " サイズを変更する
 """"""""""""""""""""""""""""""
-function! ResizeQFixWin(...)
-  if &buftype != 'quickfix'
-    return
-  endif
-  let size = g:QFix_HeightDefault
-  if a:0 && a:1 > 1
-    let size = a:1
-  endif
-  let g:QFix_Height = size
-  MoveToQFixWin
-  call QFixResize(g:QFix_Height)
-  let g:QFix_Height = size
-  silent! wincmd p
-endfunction
-
 function! ResizeOnQFix(...)
   if &buftype != 'quickfix'
     return

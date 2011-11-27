@@ -1432,7 +1432,7 @@ function! QFixPreviewOpen(file, line, ...)
     let file = substitute(file, '\\', '/', 'g')
     let cmd = cmd . QFixPreviewReadOpt(file)
     if filereadable(file)
-      exe cmd.' '.escape(file, ' %#')
+      silent! exe cmd.' '.escape(file, ' %#')
       silent! $delete _
     endif
   endif

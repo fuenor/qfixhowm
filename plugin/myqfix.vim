@@ -582,7 +582,7 @@ endfunction
 " After <CR>
 """"""""""""""""""""""""""""""
 function! s:AfterJump(...)
-  " exe "normal! zz"
+  exe "normal! zz"
   call QFixCR('after')
   if g:QFix_CloseOnJump
     QFixCclose

@@ -210,7 +210,7 @@ function! QFixMRUPrecheck(sq, entries, dir)
 
   " 高速化のためtempバッファ使用
   let wh = winheight(0)
-  silent! exec 'silent! split '.s:tempfile
+  silent! exe 'silent! split '.s:tempfile
   setlocal buftype=nofile
   setlocal bufhidden=hide
   setlocal noswapfile
@@ -248,7 +248,7 @@ function! QFixMRUPrecheck(sq, entries, dir)
   endfor
   silent! bd
 
-  wincmd p
+  silent! wincmd p
   let w = &lines - winheight(0) - &cmdheight - (&laststatus > 0 ? 1 : 0)
   if w > 0
     exe 'resize '. wh
@@ -306,7 +306,7 @@ function! s:read(mfile)
   let cmd = '0read '
   let opt = ''
   let cmd = cmd . QFixPreviewReadOpt(mfile)
-  silent! exec cmd . ' ' . opt .' '. escape(mfile, ' #%')
+  silent! exe cmd . ' ' . opt .' '. escape(mfile, ' #%')
   silent! $delete _
 endfunction
 
@@ -400,8 +400,8 @@ function! QFixMRURead(...)
     let mergedic = deepcopy(s:MruDic)
   endif
   let prevPath = escape(getcwd(), ' ')
-  silent! exec 'lchdir ' . escape(expand(g:QFixMRU_BaseDir), ' ')
-  silent! exec 'lchdir ' . escape(expand(basedir), ' ')
+  silent! exe 'lchdir ' . escape(expand(g:QFixMRU_BaseDir), ' ')
+  silent! exe 'lchdir ' . escape(expand(basedir), ' ')
   let bpath = getcwd()
   let bpath = substitute(bpath, '\\', '/', 'g')
   let s:MruDic = []
@@ -434,7 +434,7 @@ function! QFixMRURead(...)
       call s:Register(m)
     endfor
   endif
-  silent! exec 'lchdir ' . prevPath
+  silent! exe 'lchdir ' . prevPath
   if basedir != ''
     let g:QFixMRU_BaseDir = basedir
   elseif a:0 > 1
@@ -499,7 +499,7 @@ function! QFixMRUGet(mode, mfile, lnum, ...)
   endif
 
   if mfile != '%'
-    silent! exec 'silent! split '.s:tempfile
+    silent! exe 'silent! split '.s:tempfile
     setlocal buftype=nofile
     setlocal bufhidden=hide
     setlocal noswapfile
@@ -736,7 +736,7 @@ function! s:WriteMru(mru, mrufile)
   let mlist = []
   let mline = g:QFixMRU_BaseDir
   call add(mlist, mline)
-  silent! exec 'lchdir ' . escape(expand(g:QFixMRU_BaseDir), ' ')
+  silent! exe 'lchdir ' . escape(expand(g:QFixMRU_BaseDir), ' ')
   for d in mrudic
     let file = d['filename']
     if !g:QFixMRU_FullPathMode
@@ -747,7 +747,7 @@ function! s:WriteMru(mru, mrufile)
     let mline = iconv(mline, from, to)
     call add(mlist, mline)
   endfor
-  silent! exec 'lchdir ' . prevPath
+  silent! exe 'lchdir ' . prevPath
   let ostr = []
   silent! let ostr = readfile(mrufile)
   if mlist != ostr

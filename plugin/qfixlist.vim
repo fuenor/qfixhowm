@@ -104,14 +104,14 @@ function! qfixlist#copen(...)
     let s:QFixList_qfdir = a:2
   endif
   if len(s:QFixList_qfCache) == 0
-    echohl ErrorMsg
     if g:MyGrep_ErrorMes != ''
+      echohl ErrorMsg
       redraw | echo g:MyGrep_ErrorMes
       let g:MyGrep_ErrorMes = ''
+      echohl None
     else
       redraw | echo 'QFixList : Nothing in list!'
     endif
-    echohl None
     return
   endif
   let g:QFix_SearchPath = s:QFixList_qfdir
@@ -186,10 +186,10 @@ function! qfixlist#open(...)
     exe aftercmd
   endif
   if loaded
-    silent! exec 'lchdir ' . escape(s:QFixList_dir, ' ')
+    silent! exe 'lchdir ' . escape(s:QFixList_dir, ' ')
     return
   endif
-  silent! exec 'lchdir ' . escape(path, ' ')
+  silent! exe 'lchdir ' . escape(path, ' ')
   setlocal buftype=nowrite
   setlocal bufhidden=hide
   setlocal noswapfile
@@ -197,7 +197,7 @@ function! qfixlist#open(...)
   setlocal nowrap
   setlocal cursorline
 
-  silent! exec 'lchdir ' . escape(s:QFixList_dir, ' ')
+  silent! exe 'lchdir ' . escape(s:QFixList_dir, ' ')
 
   let glist = []
   if g:qfixlist_use_fnamemodify == 0
@@ -307,7 +307,7 @@ function! qfixlist#search(pattern, dir, cmd, days, fenc, file)
   let list = MyGrep(a:pattern, a:dir, a:file, a:fenc, 0)
 
   redraw | echo 'QFixList : Formatting...'
-  silent! exec 'lchdir ' . escape(expand(a:dir), ' ')
+  silent! exe 'lchdir ' . escape(expand(a:dir), ' ')
   if g:qfixlist_use_fnamemodify == 0
     let head = fnamemodify(expand(a:dir), ':p')
     let head = QFixNormalizePath(head)
@@ -324,7 +324,7 @@ function! qfixlist#search(pattern, dir, cmd, days, fenc, file)
       let d['lnum'] = d['lnum'] + 0
     endfor
   endif
-  silent! exec 'lchdir ' . prevPath
+  silent! exe 'lchdir ' . prevPath
 
   redraw | echo 'QFixList : Sorting...'
   if cmd =~ 'mtime'
@@ -407,7 +407,7 @@ function! s:QFBufWinEnter(name)
   if winnr != -1
     exe winnr.'wincmd w'
     close
-    wincmd p
+    silent! wincmd p
   endif
 endfunction
 
@@ -453,7 +453,7 @@ function! s:BufWinEnter(preview)
   hi def link qfLineNr	LineNr
   hi def link qfError	Error
 
-  silent! exec 'lchdir ' . escape(s:QFixList_dir, ' ')
+  silent! exe 'lchdir ' . escape(s:QFixList_dir, ' ')
 endfunction
 
 function! s:ListCmd_J()
@@ -512,12 +512,12 @@ function! s:CR()
   let [file, lnum] = s:Getfile('.')
   if g:qfixlist_close_on_jump
     silent! close
-    exec 'edit '.escape(file, ' %#')
+    exe 'edit '.escape(file, ' %#')
   else
     call QFixEditFile(file)
   endif
   call cursor(lnum, 1)
-  exec 'normal! zz'
+  exe 'normal! zz'
 endfunction
 
 function! s:Close()
@@ -544,7 +544,7 @@ function! s:Getfile(lnum, ...)
     let str = substitute(str, '^'.head, '', '')
   endif
   let file = substitute(str, '|.*$', '', '')
-  silent! exec 'lchdir ' . escape(s:QFixList_dir, ' ')
+  silent! exe 'lchdir ' . escape(s:QFixList_dir, ' ')
   let file = fnamemodify(file, ':p')
   if !filereadable(file)
     return ['', 0]
@@ -611,7 +611,7 @@ function! s:SortExec(...)
   elseif g:QFix_Sort == 'reverse'
     let sq = reverse(sq)
   endif
-  silent! exec 'lchdir ' . escape(s:QFixList_dir, ' ')
+  silent! exe 'lchdir ' . escape(s:QFixList_dir, ' ')
   let s:glist = []
   for d in sq
     let filename = fnamemodify(d['filename'], ':.')
@@ -638,8 +638,8 @@ function! s:Exec(cmd, ...) range
   endif
   let mod = &modifiable ? '' : 'no'
   setlocal modifiable
-  exec cmd
-  exec 'setlocal '.mod.'modifiable'
+  exe cmd
+  exe 'setlocal '.mod.'modifiable'
 endfunction
 
 function! s:Cmd_Copy2QF()

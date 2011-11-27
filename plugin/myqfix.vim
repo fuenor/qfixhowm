@@ -440,9 +440,9 @@ function! s:QFixBufEnter(...)
       if g:QFix_PreviewEnable > 0
         call QFixPclose()
       endif
-      wincmd p
+      silent! wincmd p
       let g:QFix_PreviousPath = getcwd()
-      wincmd p
+      silent! wincmd p
       if g:QFix_HighSpeedPreview
         let cmd = g:QFix_UseLocationList ? 'lopen' : 'copen'
         exe cmd
@@ -526,7 +526,7 @@ function! s:QFixEdit()
   call QFixEditFile(file)
   if g:QFix_TabEditMode == 1
     QFixCopen
-    wincmd p
+    silent! wincmd p
   endif
   return
 endfunction

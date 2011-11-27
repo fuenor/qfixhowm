@@ -496,10 +496,10 @@ endfunction
 " ヘルプ
 function! QFixHowmHelp()
   call qfixmemo#Init()
-  silent! exec 'split '
+  silent! exe 'split '
   let file = escape(expand(g:qfixmemo_dir), ' ')
   let file .= '/' . 'QFixMemoHelp'
-  silent! exec 'edit ' . file
+  silent! exe 'edit ' . file
   setlocal buftype=nofile
   setlocal bufhidden=hide
   setlocal noswapfile

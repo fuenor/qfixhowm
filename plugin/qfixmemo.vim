@@ -704,8 +704,8 @@ function! s:BufRead()
         let mes= "Invalid qfixmemo_fileencording (".&fenc.")\nConvert to ".g:qfixmemo_fileencoding."?"
         let choice = g:qfixmemo_forceencoding == 2 ? 1 : confirm(mes, "&Yes\n&Cancel", 1, "W")
         if choice == 1
-          exec 'set fenc='.g:qfixmemo_fileencoding
-          exec 'set ff='.g:qfixmemo_fileformat
+          exe 'set fenc='.g:qfixmemo_fileencoding
+          exe 'set ff='.g:qfixmemo_fileformat
           write!
         endif
       endif
@@ -1411,7 +1411,6 @@ function! qfixmemo#ListMru()
   endif
   redraw | echo 'QFixMemo : Read MRU...'
   call QFixMRU(g:qfixmemo_dir, '/:dir')
-  redraw|echo ''
 endfunction
 
 " 最近編集されたファイル内のエントリ一覧
@@ -1532,7 +1531,7 @@ function! qfixmemo#ListCmd(...)
     redraw|echo 'QFixMemo : Cached list.'
     return
   endif
-  let pattern = a:0 ? a:1 : QFixMRUGetTitleGrepRegxp(g:qfixmemo_ext)
+  let pattern = QFixMRUGetTitleGrepRegxp(g:qfixmemo_ext)
   let qflist = qfixlist#search(pattern, g:qfixmemo_dir, 'reverse', 0, g:qfixmemo_fileencoding, '**/*')
   if cmd =~ 'copen'
     call qfixlist#copen(qflist, g:qfixmemo_dir)
@@ -2434,7 +2433,7 @@ function! qfixmemo#Cmd_AT(mode) range
 
   call setpos('.', save_cursor)
   exe 'normal! z.'
-  wincmd p
+  silent! wincmd p
   let g:QFixMRU_Disable = 0
 endfunction
 
@@ -2528,7 +2527,7 @@ function! qfixmemo#Cmd_X(...) range
     let s:qfixmemoWriteUpdateTime = 0
     write!
     let s:qfixmemoWriteUpdateTime = 1
-    wincmd p
+    silent! wincmd p
     let qf = QFixGetqflist()
     call remove(qf, l)
     call QFixSetqflist(qf)

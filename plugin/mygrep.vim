@@ -43,12 +43,17 @@ let s:MSWindows = has('win95') + has('win16') + has('win32') + has('win64')
 if !exists('myjpgrepprg')
   let myjpgrepprg = ''
 endif
-"使用するgrepのエンコーディング指定
+" 使用するgrepのエンコーディング指定
 if !exists('g:MyGrep_ShellEncoding')
   let g:MyGrep_ShellEncoding = 'utf-8'
   if s:MSWindows
     let g:MyGrep_ShellEncoding = 'cp932'
   endif
+endif
+" grep側でファイルエンコーディングを変換している場合に
+" 変換後のファイルエンコーディングを指定する
+if !exists('g:MyGrep_FileEncoding')
+  let g:MyGrep_FileEncoding = ''
 endif
 "検索対象外のファイル指定
 if !exists('g:MyGrep_ExcludeReg')
@@ -816,6 +821,7 @@ function! s:SetGrepEnv(mode, ...)
     let s:MyGrep_Damemoji           = g:MyGrep_Damemoji
     let s:MyGrep_DamemojiReplaceReg = g:MyGrep_DamemojiReplaceReg
     let s:MyGrep_ShellEncoding      = g:MyGrep_ShellEncoding
+    let s:MyGrep_FileEncoding       = g:MyGrep_FileEncoding
 
     if g:mygrepprg == 'findstr'
       let g:MyGrepcmd                 = '#prg# #defopt# #recopt# #opt# #useropt# /G:#searchWordFile# #searchPath#'
@@ -826,6 +832,7 @@ function! s:SetGrepEnv(mode, ...)
       let g:MyGrep_RecOpt             = '/s'
       let g:MyGrep_DamemojiReplaceReg = '..'
       let g:MyGrep_ShellEncoding      = 'cp932'
+      let g:MyGrep_FileEncoding       = ''
     elseif g:mygrepprg =~ 'jvgrep'
       let g:MyGrepcmd_regexp          = ''
       let g:MyGrepcmd_regexp_ignore   = '-i' " TODO: works fixed match only.
@@ -849,6 +856,7 @@ function! s:SetGrepEnv(mode, ...)
     let g:MyGrep_Damemoji           = s:MyGrep_Damemoji
     let g:MyGrep_DamemojiReplaceReg = s:MyGrep_DamemojiReplaceReg
     let g:MyGrep_ShellEncoding      = s:MyGrep_ShellEncoding
+    let g:MyGrep_FileEncoding       = s:MyGrep_FileEncoding
   endif
 endfunction
 
@@ -983,8 +991,8 @@ function! s:ParseSearchResult(searchPath, searchResult, filepattern, shellenc, f
   let wipetime = g:MyGrep_FileListWipeTime
   let g:MyGrep_FileListWipeTime = 0
   let fe=a:fenc
-  if g:mygrepprg =~ 'jvgrep'
-    let fe = g:MyGrep_ShellEncoding
+  if g:MyGrep_FileEncoding != ''
+    let fe = g:MyGrep_FileEncoding
   endif
   let parseResult = ''
   let searchResult = a:searchResult
@@ -1063,8 +1071,9 @@ endfunction
 """"""""""""""""""""""""""""""
 "代替コマンド
 """"""""""""""""""""""""""""""
-"setqflist代替
-silent! function QFixSetqflist(sq, ...)
+" setqflist代替
+if !exists('*QFixGetqflist')
+function QFixSetqflist(sq, ...)
   let cmd = 'a:sq'. (a:0 == 0 ? '' : ",'".a:1."'")
   if g:QFix_UseLocationList
     exe 'call setloclist(0, '.cmd.')'
@@ -1072,27 +1081,62 @@ silent! function QFixSetqflist(sq, ...)
     exe 'call setqflist('.cmd.')'
   endif
 endfunction
+endif
 
-"getqflist代替
-silent! function QFixGetqflist()
+" getqflist代替
+if !exists('*QFixGetqflist')
+function QFixGetqflist()
   if g:QFix_UseLocationList
     return getloclist(0)
   else
     return getqflist()
   endif
 endfunction
+endif
 
-"ロケーションリスト設定
+"copen代替
+if !exists('*QFixCopen')
+command -nargs=* -bang QFixCopen call QFixCopen(<q-args>, <bang>0)
+function QFixCopen(cmd, mode)
+  if g:QFix_UseLocationList
+    silent! lopen
+  else
+    silent! copen
+  endif
+endfunction
+endif
+
+"cclose代替
+if !exists('*QFixCclose')
+command QFixCclose call QFixCclose()
+function QFixCclose()
+  if g:QFix_UseLocationList
+    silent! lclose
+  else
+    silent! cclose
+  endif
+endfunction
+endif
+
+"pclose代替
+if !exists('*QFixPclose')
+command QFixPclose call QFixPclose()
+function QFixPclose(...)
+  silent! pclose!
+endfunction
+endif
+
+" ロケーションリスト設定
 if !exists('*QFixGrepLocationMode')
-  function QFixGrepLocationMode(...)
-    let mode = a:0 ? a:1 : 0
-    let mode = count ? count : mode
-    call QFixLocationMode(mode)
-    if a:0 > 1
-      return
-    endif
-    echo printf('QFixWin (%s) : QFixGrep (%s)', (g:QFix_UseLocationList ? 'L' : 'Q'), (g:MyGrep_UseLocationList ? 'L' : 'Q'))
-  endfunction
+function QFixGrepLocationMode(...)
+  let mode = a:0 ? a:1 : 0
+  let mode = count ? count : mode
+  call QFixLocationMode(mode)
+  if a:0 > 1
+    return
+  endif
+  echo printf('QFixWin (%s) : QFixGrep (%s)', (g:QFix_UseLocationList ? 'L' : 'Q'), (g:MyGrep_UseLocationList ? 'L' : 'Q'))
+endfunction
 endif
 
 function! QFixLocationMode(...)
@@ -1116,40 +1160,12 @@ function! QFixLocationMode(...)
   endif
 endfunction
 
-"copen代替
-silent! command -nargs=* -bang QFixCopen call QFixCopen(<q-args>, <bang>0)
-silent! function QFixCopen(cmd, mode)
-  if g:QFix_UseLocationList
-    silent! lopen
-  else
-    silent! copen
-  endif
-endfunction
-
-"cclose代替
-command! QFixCclose call QFixCclose()
-function! QFixCclose()
-  if g:QFix_UseLocationList
-    silent! lclose
-  else
-    silent! cclose
-  endif
-endfunction
-
-"pclose代替
-silent! command QFixPclose call QFixPclose()
-if !exists('*QFixPclose')
-function QFixPclose(...)
-  silent! pclose!
-endfunction
-endif
-
 " MyGrepReadResult stab
 if !exists('*MyGrepReadResult')
-  command! -count -nargs=* -bang MyGrepReadResult call MyGrepReadResult(<bang>0, <q-args>)
-  function! MyGrepReadResult(readflag, ...)
-    echoe "MyGrepReadResult : cannot read QFixlib!"
-  endfunction
+command! -count -nargs=* -bang MyGrepReadResult call MyGrepReadResult(<bang>0, <q-args>)
+function! MyGrepReadResult(readflag, ...)
+  echoe "MyGrepReadResult : cannot read QFixlib!"
+endfunction
 endif
 
 """"""""""""""""""""""""""""""

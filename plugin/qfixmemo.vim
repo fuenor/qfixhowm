@@ -404,6 +404,7 @@ function s:QFixMemoKeymap()
   silent! nnoremap <silent> <unique> <Leader>o       :<C-u>call QFixMemoOutline()<CR>
 
   if g:qfixmemo_use_howm_schedule
+    let g:qfixmemo_howm_schedule_key = 1
     silent! nnoremap <silent> <unique> <Leader>t     :<C-u>call qfixmemo#ListReminderCache("todo")<CR>
     silent! nnoremap <silent> <unique> <Leader>rt    :<C-u>call qfixmemo#ListReminder("todo")<CR>
     silent! nnoremap <silent> <unique> <Leader>y     :<C-u>call qfixmemo#ListReminderCache("schedule")<CR>
@@ -1033,7 +1034,6 @@ function! qfixmemo#EditFile(file)
   exe 'lchdir ' . escape(expand(g:qfixmemo_dir), ' ')
   let file = strftime(a:file)
   let file = fnamemodify(file, ':p')
-  exe 'lchdir ' . prevPath
   if s:isQFixMemo(file)
     let opt = '++enc=' . g:qfixmemo_fileencoding . ' ++ff=' . g:qfixmemo_fileformat . ' '
     let mode = g:qfixmemo_splitmode ? 'split' : ''
@@ -1042,6 +1042,7 @@ function! qfixmemo#EditFile(file)
     let mode = g:qfixmemo_splitmode ? 'split' : ''
     call QFixEditFile(file, mode)
   endif
+  exe 'lchdir ' . prevPath
 endfunction
 
 " 新規メモ作成

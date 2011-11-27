@@ -426,7 +426,9 @@ function! QFixHowmOpenMenu(...)
   if g:QFixHowm_MenuKey
     call HowmMenuCmd_()
   endif
-  silent! call HowmMenuCmd()
+  if exists("*HowmMenuCmd")
+    call HowmMenuCmd()
+  endif
   if firstwin
     enew
     b #

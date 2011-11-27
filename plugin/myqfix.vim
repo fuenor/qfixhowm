@@ -225,8 +225,10 @@ if !exists('g:qfixtempname')
   let g:qfixtempname = tempname()
 endif
 let s:tempdir = fnamemodify(g:qfixtempname, ':p:h')
-silent! function FudistPerf(...)
+if !exists('*FudistPerf')
+function FudistPerf(...)
 endfunction
+endif
 function! FudistEnv()
   if has('unix')
     silent! redir @">
@@ -1449,8 +1451,10 @@ function! QFixPreviewOpen(file, line, ...)
     let cmd = '-r '
     let file = substitute(file, '\\', '/', 'g')
     let cmd = cmd . QFixPreviewReadOpt(file)
-    silent! exe cmd.' '.escape(file, ' %#')
-    silent! $delete _
+    if filereadable(file)
+      exe cmd.' '.escape(file, ' %#')
+      silent! $delete _
+    endif
   endif
   silent! exe 'normal! '. a:line .'Gzz'
   if g:QFix_PreviewCursorLine

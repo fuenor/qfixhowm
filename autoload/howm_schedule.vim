@@ -282,14 +282,14 @@ endif
 
 if g:QFixHowm_Default_Key > 0
   let s:QFixHowm_Key = g:QFixHowm_Key . g:QFixHowm_KeyB
-  exec 'silent! nnoremap <unique> <silent> '.s:QFixHowm_Key.'t     :<C-u>call QFixHowmListReminderCache("todo")<CR>'
-  exec 'silent! nnoremap <unique> <silent> '.s:QFixHowm_Key.'rt    :<C-u>call QFixHowmListReminder("todo")<CR>'
-  exec 'silent! nnoremap <unique> <silent> '.s:QFixHowm_Key.'y     :<C-u>call QFixHowmListReminderCache("schedule")<CR>'
-  exec 'silent! nnoremap <unique> <silent> '.s:QFixHowm_Key.'<Tab> :<C-u>call QFixHowmListReminderCache("schedule")<CR>'
-  exec 'silent! nnoremap <unique> <silent> '.s:QFixHowm_Key.'ry    :<C-u>call QFixHowmListReminder("schedule")<CR>'
-  exec 'silent! nnoremap <unique> <silent> '.s:QFixHowm_Key.'rd    :<C-u>call QFixHowmGenerateRepeatDate()<CR>'
-  exec "silent! nnoremap <unique> <silent> ".s:QFixHowm_Key."d :call QFixHowmInsertDate('Date')<CR>"
-  exec "silent! nnoremap <unique> <silent> ".s:QFixHowm_Key."T :call QFixHowmInsertDate('Time')<CR>"
+  exe 'silent! nnoremap <unique> <silent> '.s:QFixHowm_Key.'t     :<C-u>call QFixHowmListReminderCache("todo")<CR>'
+  exe 'silent! nnoremap <unique> <silent> '.s:QFixHowm_Key.'rt    :<C-u>call QFixHowmListReminder("todo")<CR>'
+  exe 'silent! nnoremap <unique> <silent> '.s:QFixHowm_Key.'y     :<C-u>call QFixHowmListReminderCache("schedule")<CR>'
+  exe 'silent! nnoremap <unique> <silent> '.s:QFixHowm_Key.'<Tab> :<C-u>call QFixHowmListReminderCache("schedule")<CR>'
+  exe 'silent! nnoremap <unique> <silent> '.s:QFixHowm_Key.'ry    :<C-u>call QFixHowmListReminder("schedule")<CR>'
+  exe 'silent! nnoremap <unique> <silent> '.s:QFixHowm_Key.'rd    :<C-u>call QFixHowmGenerateRepeatDate()<CR>'
+  exe "silent! nnoremap <unique> <silent> ".s:QFixHowm_Key."d :call QFixHowmInsertDate('Date')<CR>"
+  exe "silent! nnoremap <unique> <silent> ".s:QFixHowm_Key."T :call QFixHowmInsertDate('Time')<CR>"
 endif
 
 """"""""""""""""""""""""""""""
@@ -395,13 +395,13 @@ function! QFixHowmListReminderCache(mode)
   if exists('*QFixHowmInit') && QFixHowmInit()
     return
   endif
-  exec 'let lt = localtime() - s:LT_' . a:mode
+  exe 'let lt = localtime() - s:LT_' . a:mode
   if count
     " let lt = g:QFixHowm_ListReminderCacheTime + 1
   endif
   if g:QFixHowm_ListReminderCacheTime > 0 && lt < g:QFixHowm_ListReminderCacheTime
     let s:reminder_cache = 1
-    exec 'let sq_reminder = s:sq_' . a:mode
+    exe 'let sq_reminder = s:sq_' . a:mode
     return QFixHowmListReminder(a:mode)
   else
     return QFixHowmListReminder(a:mode)
@@ -449,7 +449,7 @@ function! s:QFixHowmListReminder_(mode,...)
   endif
   call QFixPclose(1)
   let prevPath = escape(getcwd(), ' ')
-  silent! exec 'lchdir ' . escape(l:howm_dir, ' ')
+  silent! exe 'lchdir ' . escape(l:howm_dir, ' ')
   let ext = s:sch_Ext
   if a:mode =~ 'todo'
     let ext = g:QFixHowm_ListReminder_TodoExt
@@ -487,7 +487,7 @@ function! s:QFixHowmListReminder_(mode,...)
   endif
   let searchPath = l:howm_dir
   if s:reminder_cache == 0
-    redraw | echo 'QFixHowm : exec grep...'
+    redraw | echo 'QFixHowm : execute grep...'
     if exists('*MultiHowmDirGrep')
       if g:QFixHowm_ScheduleSearchDir == ''
         let addflag = MultiHowmDirGrep(searchWord, searchPath, l:SearchFile, g:howm_fileencoding, addflag)
@@ -502,10 +502,10 @@ function! s:QFixHowmListReminder_(mode,...)
     call QFixHowmTitleFilter(sq)
     redraw|echo 'QFixHowm : Sorting...'
     let sq = s:QFixHowmSortReminderPre(sq)
-    exec 'let s:sq_' . a:mode . ' = deepcopy(sq)'
-    exec 'let s:LT_' . a:mode . ' = localtime()'
+    exe 'let s:sq_' . a:mode . ' = deepcopy(sq)'
+    exe 'let s:LT_' . a:mode . ' = localtime()'
   else
-    exec 'let sq = deepcopy(s:sq_' . a:mode . ')'
+    exe 'let sq = deepcopy(s:sq_' . a:mode . ')'
   endif
   let sq = s:QFixHowmSortReminder(sq, a:mode)
   let sq = s:AddTodayLine(sq)
@@ -528,11 +528,11 @@ function! s:QFixHowmListReminder_(mode,...)
     endif
     exe 'normal! zz'
     if s:reminder_cache
-      exec 'let lt = localtime() - s:LT_' . a:mode
+      exe 'let lt = localtime() - s:LT_' . a:mode
       redraw|echo 'QFixHowm : Cached '.a:mode . '. ('.lt/60.' minutes ago)'
     endif
   endif
-  silent! exec 'lchdir ' . prevPath
+  silent! exe 'lchdir ' . prevPath
   let s:reminder_cache = 0
   return sq
 endfunction
@@ -621,12 +621,12 @@ function! s:HolidayVimgrep(dir, file)
   let ext = '[@]'
   let pattern = '^'.s:sch_dateT.ext
   let prevPath = escape(getcwd(), ' ')
-  exec 'lchdir ' . escape(dir, ' ')
+  exe 'lchdir ' . escape(dir, ' ')
   let saved_sq = getloclist(0)
   lexpr ""
   let cmd = 'lvimgrep /' . escape(pattern, '/') . '/j ' . escape(file, ' ')
-  silent! exec cmd
-  silent! exec 'lchdir ' . prevPath
+  silent! exe cmd
+  silent! exe 'lchdir ' . prevPath
   let sq = getloclist(0)
   let sq = s:QFixHowmSortReminderPre(sq)
   let sq = s:QFixHowmSortReminder(sq, 'holiday')
@@ -1620,7 +1620,7 @@ augroup END
 function! s:QFixHowmBufWinEnter()
   "後で再定義される
   let name='howm_schedule'
-  exec "runtime! syntax/" . name . ".vim syntax/" . name . "/*.vim"
+  exe "runtime! syntax/" . name . ".vim syntax/" . name . "/*.vim"
   setlocal ft=qf
   call QFixHowmQFsyntax()
 endfunction
@@ -1629,21 +1629,21 @@ endfunction
 function! QFixHowmQFsyntax()
   let pattern = s:sch_dateT
   let dowpat = '\s*'. g:QFixHowm_DayOfWeekReg . '\?'
-  exec 'syntax match howmSchedule "'.pattern.'@\d*' .dowpat.' "'
-  exec 'syntax match howmDeadline "'.pattern.'!\d*' .dowpat.' "'
-  exec 'syntax match howmTodo     "'.pattern.'+\d*' .dowpat.' "'
-  exec 'syntax match howmReminder "'.pattern.'-\d*' .dowpat.' "'
-  exec 'syntax match howmTodoUD   "'.pattern.'\~\d*'.dowpat.' "'
-  exec 'syntax match howmFinished "'.pattern.'\."'
+  exe 'syntax match howmSchedule "'.pattern.'@\d*' .dowpat.' "'
+  exe 'syntax match howmDeadline "'.pattern.'!\d*' .dowpat.' "'
+  exe 'syntax match howmTodo     "'.pattern.'+\d*' .dowpat.' "'
+  exe 'syntax match howmReminder "'.pattern.'-\d*' .dowpat.' "'
+  exe 'syntax match howmTodoUD   "'.pattern.'\~\d*'.dowpat.' "'
+  exe 'syntax match howmFinished "'.pattern.'\."'
   let pattern = ' \?'. g:QFixHowm_ReminderHolidayName
-  exec 'syntax match howmHoliday "'.pattern .'"'
+  exe 'syntax match howmHoliday "'.pattern .'"'
   if exists('g:QFixHowm_UserHolidayName')
     let pattern = ' \?'.g:QFixHowm_UserHolidayName
-    exec 'syntax match howmHoliday "'.pattern .'"'
+    exe 'syntax match howmHoliday "'.pattern .'"'
   endif
   if exists('g:QFixHowm_UserSpecialdayName')
     let pattern = ' \?'.g:QFixHowm_UserSpecialdayName
-    exec 'syntax match howmSpecial "'.pattern .'"'
+    exe 'syntax match howmSpecial "'.pattern .'"'
   endif
 endfunction
 
@@ -1697,7 +1697,7 @@ function! QFixHowmUserModeCR(...)
     return
   endif
   let cmd = a:0 ? a:1 : "normal! \<CR>"
-  exec cmd
+  exe cmd
 endfunction
 
 function! QFixHowmScheduleAction()
@@ -1710,7 +1710,7 @@ function! QFixHowmScheduleAction()
   endif
   let str = substitute(str, "\<CR>", "|", "g")
   let str = substitute(str, "|$", "", "")
-  silent! exec str
+  silent! exe str
   return 1
 endfunction
 
@@ -1767,7 +1767,7 @@ function! QFixHowmScheduleActionStr()
       continue
     endif
     call setpos('.', save_cursor)
-    exec 'let action = '.swaction.i
+    exe 'let action = '.swaction.i
     if action != []
       let ret = QFixHowmSwitchActionLock(action)
       if ret != "\<CR>"
@@ -1872,17 +1872,17 @@ function! QFixHowmActionLock()
   let s:QFixHowmMA = 0
   let str = QFixHowmActionLockStr()
   if s:QFixHowmMA
-    exec 'normal '. str
+    exe 'normal '. str
   elseif str == "\<CR>"
-    silent! exec "normal! \<CR>"
+    silent! exe "normal! \<CR>"
   elseif str == "\<ESC>"
   else
     let str = substitute(str, "\<CR>", "|", "g")
     let str = substitute(str, "|$", "", "")
-    silent! exec str
+    silent! exe str
   endif
   for n in range(10)
-    silent! exec 'let @'.n.'=RegisterBackup['.n.']'
+    silent! exe 'let @'.n.'=RegisterBackup['.n.']'
   endfor
   let @/ = RegisterBackup[10]
   let @" = RegisterBackup[11]
@@ -1970,7 +1970,7 @@ function! QFixHowmActionLockStr()
       continue
     endif
     call setpos('.', save_cursor)
-    exec 'let action = '.'g:QFixHowm_UserSwActionLock'.i
+    exe 'let action = '.'g:QFixHowm_UserSwActionLock'.i
     if action != []
       let ret = QFixHowmSwitchActionLock(action)
       if ret != "\<CR>"
@@ -2064,7 +2064,7 @@ function! QFixHowmMacroAction()
   endif
   let text = substitute(text, '.*'.g:QFixHowm_MacroActionPattern, "", "")
   let s:QFixHowm_MacroActionCmd = text
-  exec "nmap <silent> <buffer>" . s:QFixHowm_Key . g:QFixHowm_MacroActionKey . " " . ":<C-u>:QFixCclose<CR>" .substitute(s:QFixHowm_MacroActionCmd, '^\s*', '', '')
+  exe "nmap <silent> <buffer>" . s:QFixHowm_Key . g:QFixHowm_MacroActionKey . " " . ":<C-u>:QFixCclose<CR>" .substitute(s:QFixHowm_MacroActionCmd, '^\s*', '', '')
   return s:QFixHowm_Key . g:QFixHowm_MacroActionKey
 endfunction
 
@@ -2087,7 +2087,7 @@ function! QFixHowmSwitchActionLock(list, ...)
     endif
     let prevcol = (a:0 == 0 ? start : col('.'))
     let nr = strlen(substitute(pattern, '.', '.', 'g'))
-    return ":call cursor(".prevline.",".start.")\<CR>:exec 'normal! c".nr."l".cpattern."'\<CR>:call cursor(".prevline.",".prevcol.")\<CR>"
+    return ":call cursor(".prevline.",".start.")\<CR>:exe 'normal! c".nr."l".cpattern."'\<CR>:call cursor(".prevline.",".prevcol.")\<CR>"
   endfor
   return "\<CR>"
 endfunction
@@ -2162,7 +2162,7 @@ function! QFixHowmTimeActionLock()
   else
     return ":call cursor(".prevline.",".prevcol.")\<CR>"
   endif
-  return ":call cursor(line('.'),".start.")\<CR>:exec 'normal! c".len."l".cpattern."'\<CR>:call cursor(".prevline.",".prevcol.")\<CR>"
+  return ":call cursor(line('.'),".start.")\<CR>:exe 'normal! c".len."l".cpattern."'\<CR>:call cursor(".prevline.",".prevcol.")\<CR>"
 endfunction
 
 " 日付のアクションロック
@@ -2264,7 +2264,7 @@ function! QFixHowmDateActionLock()
   else
     return ":call cursor(".prevline.",".prevcol.")\<CR>"
   endif
-  return ":call cursor(line('.'),".start.")\<CR>:exec 'normal! c".len."l".cpattern."'\<CR>:call cursor(".prevline.",".prevcol.")\<CR>"
+  return ":call cursor(line('.'),".start.")\<CR>:exe 'normal! c".len."l".cpattern."'\<CR>:call cursor(".prevline.",".prevcol.")\<CR>"
 endfunction
 
 " 繰り返し予定のアクションロック
@@ -2293,14 +2293,14 @@ function! QFixHowmRepeatDateActionLock()
   if strlen(ccmd) == 0 && strlen(clen) == 1
     let searchWord = '^\s*'.s:sch_dateT
     let len = matchend(getline('.'), searchWord) + 1
-    return ":call cursor(line('.'),".len.")\<CR>:exec 'normal! r.'\<CR>:call cursor(".prevline.",".prevcol.")\<CR>"
+    return ":call cursor(line('.'),".len.")\<CR>:exe 'normal! r.'\<CR>:call cursor(".prevline.",".prevcol.")\<CR>"
   endif
   let cpattern = s:CnvRepeatDate(cmd, opt, str, -1)
   if match(str, '\d\{4}.\d\{2}.00') == 0
     let cpattern = substitute(cpattern, '\(\d\{4}.\d\{2}.\)\d\{2}', '\100', '')
   endif
   let start = 2 + match(getline('.'), s:sch_dateT)
-  return ":call cursor(line('.'),".start.")\<CR>:exec 'normal! c".len."l".cpattern."'\<CR>:call cursor(".prevline.",".prevcol.")\<CR>"
+  return ":call cursor(line('.'),".start.")\<CR>:exe 'normal! c".len."l".cpattern."'\<CR>:call cursor(".prevline.",".prevcol.")\<CR>"
 endfunction
 
 """"""""""""""""""""""""""""""
@@ -2581,3 +2581,19 @@ silent! function CnvWildcardChapter(...) range
   call setpos('.', save_cursor)
 endfunction
 
+if !exists('*QFixHowmInit')
+let s:QFixHowm_Init  = 0
+function QFixHowmInit()
+  if s:QFixHowm_Init
+    return 0
+  endif
+  let dir = expand(g:howm_dir)
+  if isdirectory(dir) == 0
+    let mes = printf('"%s" is not directory!', g:howm_dir)
+    let choice = confirm(mes, "&OK", 1, "W")
+    return 1
+  endif
+  let s:QFixHowm_Init = 1
+  return 0
+endfunction
+endif

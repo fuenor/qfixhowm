@@ -188,33 +188,33 @@ if MyGrep_MenuBar
   elseif MyGrep_MenuBar == 3
     let s:menu = 'QFixApp(&Q).QFixGrep(&G)'
   endif
-  exec 'amenu <silent> 41.331 '.s:menu.'.Grep(&G)<Tab>'.s:MyGrep_Key.'e  :QFGrep!<CR>'
-  exec 'amenu <silent> 41.331 '.s:menu.'.FGrep(&F)<Tab>'.s:MyGrep_Key.'f  :QFFGrep!<CR>'
-  exec 'amenu <silent> 41.331 '.s:menu.'.RGrep(&R)<Tab>'.s:MyGrep_Key.'re  :QFRGrep!<CR>'
-  exec 'amenu <silent> 41.331 '.s:menu.'.RFGrep(&R)<Tab>'.s:MyGrep_Key.'rf  :QFRFGrep!<CR>'
-  exec 'amenu <silent> 41.331 '.s:menu.'.GrepBuffer(&B)<TAB>'.s:MyGrep_Key.'b :BGrep<CR>'
-  exec 'amenu <silent> 41.331 '.s:menu.'.Vimgrep(&V)<Tab>'.s:MyGrep_Key.'v  :QFVGrep!<CR>'
-  exec 'amenu <silent> 41.331 '.s:menu.'.-sep1-			<Nop>'
+  exe 'amenu <silent> 41.331 '.s:menu.'.Grep(&G)<Tab>'.s:MyGrep_Key.'e  :QFGrep!<CR>'
+  exe 'amenu <silent> 41.331 '.s:menu.'.FGrep(&F)<Tab>'.s:MyGrep_Key.'f  :QFFGrep!<CR>'
+  exe 'amenu <silent> 41.331 '.s:menu.'.RGrep(&R)<Tab>'.s:MyGrep_Key.'re  :QFRGrep!<CR>'
+  exe 'amenu <silent> 41.331 '.s:menu.'.RFGrep(&R)<Tab>'.s:MyGrep_Key.'rf  :QFRFGrep!<CR>'
+  exe 'amenu <silent> 41.331 '.s:menu.'.GrepBuffer(&B)<TAB>'.s:MyGrep_Key.'b :BGrep<CR>'
+  exe 'amenu <silent> 41.331 '.s:menu.'.Vimgrep(&V)<Tab>'.s:MyGrep_Key.'v  :QFVGrep!<CR>'
+  exe 'amenu <silent> 41.331 '.s:menu.'.-sep1-			<Nop>'
 
-  exec 'amenu <silent> 41.331 '.s:menu.'.Grepadd(&G)<Tab>'.s:MyGrep_Key.'E  :QFGrepadd!<CR>'
-  exec 'amenu <silent> 41.331 '.s:menu.'.FGrepadd(&F)<Tab>'.s:MyGrep_Key.'F  :QFFGrepadd!<CR>'
-  exec 'amenu <silent> 41.331 '.s:menu.'.RGrepadd(&R)<Tab>'.s:MyGrep_Key.'rE  :QFRGrepadd!<CR>'
-  exec 'amenu <silent> 41.331 '.s:menu.'.RFGrepadd(&R)<Tab>'.s:MyGrep_Key.'rF  :QFRFGrepadd!<CR>'
-  exec 'amenu <silent> 41.331 '.s:menu.'.GrepBufferadd(&B)<TAB>'.s:MyGrep_Key.'B  :BGrepadd<CR>'
-  exec 'amenu <silent> 41.331 '.s:menu.'.Vimgrepadd(&V)<Tab>'.s:MyGrep_Key.'V  :QFVGrepadd!<CR>'
-  exec 'amenu <silent> 41.331 '.s:menu.'.-sep2-			<Nop>'
-  exec 'amenu <silent> 41.331 '.s:menu.'.CurrentDirMode(&D)<Tab>'.s:MyGrep_Key.'rD  :ToggleGrepCurrentDirMode<CR>'
-  exec 'amenu <silent> 41.331 '.s:menu.'.SetFileEncoding(&G)<Tab>'.s:MyGrep_Key.'rG  :call s:SetFileEncoding()<CR>'
-  exec 'amenu <silent> 41.331 '.s:menu.'.RecursiveMode(&M)<Tab>'.s:MyGrep_Key.'rM  :ToggleGrepRecursiveMode<CR>'
-  exec 'amenu <silent> 41.331 '.s:menu.'.-sep3-			<Nop>'
-  exec 'amenu <silent> 41.331 '.s:menu.'.Load\ Quickfix(&L)<Tab>'.s:MyGrep_Key.'k  :MyGrepReadResult<CR>\|:QFixCopen<CR>'
-  exec 'amenu <silent> 41.331 '.s:menu.'.Load\ Quickfix[Local]\ (&O)<Tab>O :MyGrepReadResult<CR>'
-  exec 'amenu <silent> 41.331 '.s:menu.'.Save\ Quickfix[Local]\ (&A)<Tab>A :MyGrepWriteResult<CR>'
-  exec 'amenu <silent> 41.331 '.s:menu.'.-sep4-			<Nop>'
-  exec 'amenu <silent> 41.331 '.s:menu.'.Help(&H)<Tab>'.s:MyGrep_Key.'H  :<C-u>call QFixGrepHelp_()<CR>'
+  exe 'amenu <silent> 41.331 '.s:menu.'.Grepadd(&G)<Tab>'.s:MyGrep_Key.'E  :QFGrepadd!<CR>'
+  exe 'amenu <silent> 41.331 '.s:menu.'.FGrepadd(&F)<Tab>'.s:MyGrep_Key.'F  :QFFGrepadd!<CR>'
+  exe 'amenu <silent> 41.331 '.s:menu.'.RGrepadd(&R)<Tab>'.s:MyGrep_Key.'rE  :QFRGrepadd!<CR>'
+  exe 'amenu <silent> 41.331 '.s:menu.'.RFGrepadd(&R)<Tab>'.s:MyGrep_Key.'rF  :QFRFGrepadd!<CR>'
+  exe 'amenu <silent> 41.331 '.s:menu.'.GrepBufferadd(&B)<TAB>'.s:MyGrep_Key.'B  :BGrepadd<CR>'
+  exe 'amenu <silent> 41.331 '.s:menu.'.Vimgrepadd(&V)<Tab>'.s:MyGrep_Key.'V  :QFVGrepadd!<CR>'
+  exe 'amenu <silent> 41.331 '.s:menu.'.-sep2-			<Nop>'
+  exe 'amenu <silent> 41.331 '.s:menu.'.CurrentDirMode(&D)<Tab>'.s:MyGrep_Key.'rD  :ToggleGrepCurrentDirMode<CR>'
+  exe 'amenu <silent> 41.331 '.s:menu.'.SetFileEncoding(&G)<Tab>'.s:MyGrep_Key.'rG  :call s:SetFileEncoding()<CR>'
+  exe 'amenu <silent> 41.331 '.s:menu.'.RecursiveMode(&M)<Tab>'.s:MyGrep_Key.'rM  :ToggleGrepRecursiveMode<CR>'
+  exe 'amenu <silent> 41.331 '.s:menu.'.-sep3-			<Nop>'
+  exe 'amenu <silent> 41.331 '.s:menu.'.Load\ Quickfix(&L)<Tab>'.s:MyGrep_Key.'k  :MyGrepReadResult<CR>\|:QFixCopen<CR>'
+  exe 'amenu <silent> 41.331 '.s:menu.'.Load\ Quickfix[Local]\ (&O)<Tab>O :MyGrepReadResult<CR>'
+  exe 'amenu <silent> 41.331 '.s:menu.'.Save\ Quickfix[Local]\ (&A)<Tab>A :MyGrepWriteResult<CR>'
+  exe 'amenu <silent> 41.331 '.s:menu.'.-sep4-			<Nop>'
+  exe 'amenu <silent> 41.331 '.s:menu.'.Help(&H)<Tab>'.s:MyGrep_Key.'H  :<C-u>call QFixGrepHelp_()<CR>'
 
   if MyGrep_MenuBar == 1
-    exec 'amenu <silent> 40.333 &Tools.-sepend-			<Nop>'
+    exe 'amenu <silent> 40.333 &Tools.-sepend-			<Nop>'
   endif
   let s:MyGrep_Key = g:MyGrep_Key . g:MyGrep_KeyB
 endif
@@ -261,7 +261,7 @@ exec 'silent! nnoremap <unique> <silent> '.s:MyGrep_Key.'2 :<C-u>call QFixGrepLo
 exec 'silent! nnoremap <unique> <silent> '.s:MyGrep_Key.'3 :<C-u>call QFixGrepLocationMode(3)<CR>'
 exec 'silent! nnoremap <unique> <silent> '.s:MyGrep_Key.'4 :<C-u>call QFixGrepLocationMode(4)<CR>'
 
-autocmd BufWinEnter quickfix exec 'silent! nnoremap <unique> <buffer> <silent> '.s:MyGrep_Key.'w :MyGrepWriteResult<CR>'
+autocmd BufWinEnter quickfix exe 'silent! nnoremap <unique> <buffer> <silent> '.s:MyGrep_Key.'w :MyGrepWriteResult<CR>'
 
 """"""""""""""""""""""""""""""
 "ユーザ呼び出し用コマンド本体
@@ -331,11 +331,11 @@ function! UGrep(cmd, args, mode, addflag)
   let save_cursor = getpos('.')
   if addflag == 0
     let ccmd = g:QFix_UseLocationList ? 'lexpr ""' : 'cexpr ""'
-    exec ccmd
+    exe ccmd
   endif
   call QFixPclose()
   if g:QFix_SearchPath != ''
-  " silent! exec 'lchdir ' . escape(g:QFix_SearchPath, ' ')
+  " silent! exe 'lchdir ' . escape(g:QFix_SearchPath, ' ')
   endif
   if addflag
     let g:QFix_SearchPath = disppath
@@ -346,7 +346,7 @@ function! UGrep(cmd, args, mode, addflag)
     let cmd = 'l'.cmd
   endif
   let cmd = cmd.' '. a:args
-  exec cmd
+  exe cmd
   let g:QFix_SearchResult = []
   let save_qflist = QFixGetqflist()
   if empty(save_qflist)
@@ -387,7 +387,7 @@ function! Grep(word, mode, title, addflag)
       let pattern = ''
     endif
     if a:mode == -1
-      exec 'normal! vgvy'
+      exe 'normal! vgvy'
       let pattern = @0
     endif
     let pattern = input(a:title." : ", pattern)
@@ -447,7 +447,7 @@ function! Grep(word, mode, title, addflag)
   call QFixPclose()
   call MyGrep(pattern, searchPath, filepattern, fenc, addflag)
   if g:QFix_SearchPath != ''
-  " silent! exec 'lchdir ' . escape(g:QFix_SearchPath, ' ')
+  " silent! exe 'lchdir ' . escape(g:QFix_SearchPath, ' ')
   endif
   let save_qflist = QFixGetqflist()
   if empty(save_qflist)
@@ -469,7 +469,7 @@ function! Grep(word, mode, title, addflag)
     redraw | echo g:MyGrep_ErrorMes
     echohl None
   endif
-  " silent! exec 'lchdir ' . prevPath
+  " silent! exe 'lchdir ' . prevPath
   call s:restore()
 endfunction
 
@@ -532,12 +532,12 @@ function! BGrep(word, mode, addflag)
   let save_cursor = getpos('.')
   if a:addflag == 0
     let ccmd = g:QFix_UseLocationList ? 'lexpr ""' : 'cexpr ""'
-    silent! exec ccmd
+    silent! exe ccmd
   endif
   call QFixPclose()
   let vopt = g:QFix_UseLocationList ? 'l' : ''
-  silent! exec ':bufdo | try | '.vopt.'vimgrepadd /' . pattern . '/j % | catch | endtry'
-  silent! exec 'b'.bufnr
+  silent! exe ':bufdo | try | '.vopt.'vimgrepadd /' . pattern . '/j % | catch | endtry'
+  silent! exe 'b'.bufnr
   if a:addflag
     let g:QFix_SearchPath = disppath
   endif
@@ -657,13 +657,13 @@ function! MyGrep(pattern, searchPath, filepattern, fenc, addflag, ...)
     endif
   endif
   if g:mygrepprg == 'internal' || g:mygrepprg == '' || g:MyGrep_UseVimgrep != 0
-    silent! exec 'lchdir ' . escape(searchPath, ' ')
+    silent! exe 'lchdir ' . escape(searchPath, ' ')
     let pattern = escape(pattern, '/')
     let vopt = g:QFix_UseLocationList ? 'l' : ''
     if addflag
-      silent! exec ':'.vopt.'vimgrepadd /' . pattern . '/j ' . a:filepattern
+      silent! exe ':'.vopt.'vimgrepadd /' . pattern . '/j ' . a:filepattern
     else
-      silent! exec ':'.vopt.'vimgrep /' . pattern . '/j ' . a:filepattern
+      silent! exe ':'.vopt.'vimgrep /' . pattern . '/j ' . a:filepattern
     endif
     "ここでバッファ削除
     let idx = 0
@@ -671,14 +671,14 @@ function! MyGrep(pattern, searchPath, filepattern, fenc, addflag, ...)
     for d in save_qflist
       if bufname(d.bufnr) =~ g:MyGrep_ExcludeReg
         call remove(save_qflist, idx)
-        silent! exec 'silent! bd ' . d.bufnr
+        silent! exe 'silent! bd ' . d.bufnr
       else
         let idx = idx + 1
       endif
     endfor
     call QFixSetqflist(save_qflist)
     if g:MyGrep_StayGrepDir == 0
-      silent! exec 'lchdir ' . prevPath
+      silent! exe 'lchdir ' . prevPath
     endif
     let g:MyGrep_Regexp = 1
     let g:MyGrep_Ignorecase = 1
@@ -734,7 +734,7 @@ function! MyGrep(pattern, searchPath, filepattern, fenc, addflag, ...)
         let g:MyGrep_ErrorMes = printf("QFixGrep : ダメ文字が含まれていました! regxp = %s", pattern)
         if pattern =~ '^[.*]\+$'
           let g:MyGrep_ErrorMes = "QFixGrep : ダメ文字しか含まれていません!"
-          silent! exec ccmd
+          silent! exe ccmd
           let g:MyGrep_Regexp = 1
           let g:MyGrep_Ignorecase = 1
           let g:MyGrep_Recursive  = 0
@@ -751,7 +751,7 @@ function! MyGrep(pattern, searchPath, filepattern, fenc, addflag, ...)
   let g:MyGrep_Ignorecase = 1
   let grepcmd = substitute(g:MyGrepcmd, '#defopt#', {_grepcmd}, '')
   let grepcmd = substitute(grepcmd, '#useropt#', g:MyGrepcmd_useropt, '')
-  silent! exec 'lchdir ' . escape(searchPath, ' ')
+  silent! exe 'lchdir ' . escape(searchPath, ' ')
   let retval = s:ExecGrep(grepcmd, g:mygrepprg, searchPath, pattern, &enc, a:fenc, a:filepattern)
   let pattern = s:ParseFilepattern(a:filepattern)
   let file = ''
@@ -761,7 +761,7 @@ function! MyGrep(pattern, searchPath, filepattern, fenc, addflag, ...)
   if g:MyGrep_Return
     let g:MyGrep_Return = 0
     if g:MyGrep_StayGrepDir == 0
-      silent! exec 'lchdir ' . prevPath
+      silent! exe 'lchdir ' . prevPath
     endif
     redraw|echo ''
     return g:MyGrep_qflist
@@ -774,7 +774,7 @@ function! MyGrep(pattern, searchPath, filepattern, fenc, addflag, ...)
     call QFixSetqflist(g:MyGrep_qflist, flag)
   endif
   if g:MyGrep_StayGrepDir == 0
-    silent! exec 'lchdir ' . prevPath
+    silent! exe 'lchdir ' . prevPath
   endif
   call QFixEnable(searchPath)
   redraw | echo ''
@@ -937,7 +937,7 @@ function! s:ExecGrep(cmd, prg, searchPath, searchWord, from_encoding, to_encodin
 
   " 検索実行
   let prevPath = escape(getcwd(), ' ')
-  silent! exec 'lchdir ' . escape(a:searchPath, ' ')
+  silent! exe 'lchdir ' . escape(a:searchPath, ' ')
   silent! let saved_path = $PATH
   let dir = fnamemodify(a:prg, ':h')
   if dir != '.'
@@ -1044,7 +1044,7 @@ function! s:ParseSearchResult(searchPath, searchResult, filepattern, shellenc, f
       endif
     endwhile
   endfor
-  silent! exec 'lchdir ' . prevPath
+  silent! exe 'lchdir ' . prevPath
   if s:debug && len(qflist) == 0 && a:searchResult != ''
     " let mes = iconv(g:MyGrep_retval, a:shellenc, &enc)
     " redraw | echoe string(mes)
@@ -1067,9 +1067,9 @@ endfunction
 silent! function QFixSetqflist(sq, ...)
   let cmd = 'a:sq'. (a:0 == 0 ? '' : ",'".a:1."'")
   if g:QFix_UseLocationList
-    exec 'call setloclist(0, '.cmd.')'
+    exe 'call setloclist(0, '.cmd.')'
   else
-    exec 'call setqflist('.cmd.')'
+    exe 'call setqflist('.cmd.')'
   endif
 endfunction
 
@@ -1248,7 +1248,7 @@ endfunction
 
 function! QFixGrepHelp_()
   call mygrep_msg#help()
-  silent! exec 'split ' . s:QFixGrep_Helpfile
+  silent! exe 'split ' . s:QFixGrep_Helpfile
   setlocal buftype=nofile
   setlocal bufhidden=hide
   setlocal noswapfile

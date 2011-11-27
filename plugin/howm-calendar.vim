@@ -116,7 +116,7 @@ function! QFixMemoCalendarDiary(day, month, year, week, dir)
   let lwinnr = winnr('$')
   if lwinnr == 1
     Calendar
-    wincmd p
+    silent! wincmd p
   endif
 endfunction
 
@@ -613,7 +613,7 @@ function! QFixMemoCalendar(dircmd, file, cnt, ...)
   nnoremap <silent> <buffer> <S-Right> :<C-u>call <SID>CR('>>')<CR>
   nnoremap <silent> <buffer> <S-Left>  :<C-u>call <SID>CR('<<')<CR>
   if a:0
-    wincmd p
+    silent! wincmd p
   endif
 endfunction
 
@@ -847,7 +847,7 @@ function! s:SCBufWinLeave(pbuf, cbuf)
     if winnr != -1
       exe winnr.'wincmd w'
       silent! close
-      wincmd p
+      silent! wincmd p
     endif
     exe 'augroup SubmenuCalendar'.a:cbuf
       au!

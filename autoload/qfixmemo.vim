@@ -405,23 +405,6 @@ augroup QFixMemo
   au BufWinEnter quickfix call <SID>qfBufWinEnter()
 augroup END
 
-function! IsQFixMemo(file)
-  let file = fnamemodify(a:file, ':p')
-  if g:qfixmemo_isqfixmemo_regxp != '' && file =~ g:qfixmemo_isqfixmemo_regxp
-    return 1
-  endif
-  if tolower(fnamemodify(file, ':e')) != tolower(g:qfixmemo_ext)
-    return 0
-  endif
-  let file = QFixNormalizePath(file, 'compare')
-  let head = expand(g:qfixmemo_dir)
-  let head = QFixNormalizePath(head, 'compare')
-  if stridx(file, head) == 0
-    return 1
-  endif
-  return 0
-endfunction
-
 function! s:BufRead()
   if !IsQFixMemo(expand('%'))
     return

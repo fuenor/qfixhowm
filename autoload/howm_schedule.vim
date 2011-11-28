@@ -2006,13 +2006,6 @@ function! QFixHowmActionLockStr()
   return "\<CR>"
 endfunction
 
-"Wikiスタイルリンクの扱い
-if !exists('g:QFixHowm_Wiki')
-  let g:QFixHowm_Wiki = 0
-  if exists('g:qfixmemo_keyword_mode')
-    let g:QFixHowm_Wiki = g:qfixmemo_keyword_mode
-  endif
-endif
 let g:QFixHowm_KeywordList = []
 
 "キーワードリンク検索
@@ -2031,16 +2024,23 @@ function! QFixHowmKeywordLinkSearch()
     let str = strpart(lstr, col-len, 2*len)
     if stridx(str, word) > -1
       let s:QFixHowmALSPat = word
-      if g:QFixHowm_Wiki > 0
+
+      let l:QFixHowm_Wiki = 0
+      if exists('g:QFixHowm_Wiki')
+        let l:QFixHowm_Wiki = g:QFixHowm_Wiki
+      elseif exists('g:qfixmemo_keyword_mode')
+        let l:QFixHowm_Wiki = g:qfixmemo_keyword_mode
+      endif
+      if l:QFixHowm_Wiki > 0
         let link = word
-        if g:QFixHowm_Wiki == 1
+        if l:QFixHowm_Wiki == 1
           let file = g:howm_dir
           if exists('g:QFixHowm_WikiDir')
             let file = g:howm_dir . '/'.g:QFixHowm_WikiDir
           endif
           let file = file .'/'.link.'.'.g:QFixHowm_FileExt
           call QFixEditFile(file)
-        elseif g:QFixHowm_Wiki == 2
+        elseif l:QFixHowm_Wiki == 2
           let cmd = ':e '
           let subdir = vimwiki#current_subdir()
           call vimwiki#open_link(cmd, subdir.link)

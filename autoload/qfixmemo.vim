@@ -273,6 +273,7 @@ if !exists('g:qfixmemo_swlist_action')
   let qfixmemo_swlist_action = ['{ }', '{-}', '{*}']
 endif
 
+let s:howm_ext = 'howm'
 " 常にqfixmemoファイルとして扱うファイルの正規表現
 if !exists('g:qfixmemo_isqfixmemo_regxp')
   let g:qfixmemo_isqfixmemo_regxp = '\c\.'.s:howm_ext.'$'
@@ -1176,12 +1177,6 @@ function! qfixmemo#Readfile(file, fileencoding)
 endfunction
 
 """"""""""""""""""""""""""""""
-" List
-" copen  : quickfix
-" ccache : cache (quickfix)
-" open   : qfixlist
-" cache  : cache (qfixlist)
-
 " MRUを開く
 function! qfixmemo#ListMru()
   if qfixmemo#Init()

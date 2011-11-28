@@ -3,12 +3,12 @@
 "         Author: fuenor <fuenor@gmail.com>
 "                 http://sites.google.com/site/fudist/Home/qfixhowm
 "=============================================================================
-let s:Version = 2.55
+let s:Version = 2.56
 scriptencoding utf-8
 
 "=============================================================================
 "    howmスタイルの予定・TODOを表示
-"    (必要 mygrep.vim)
+"    (必要 qfixlist.vim)
 "    (推奨 myqfix.vim, /syntax/howm_schedule.vim)
 "    (アクションロックを使用する場合は要openuri.vim)
 "
@@ -18,19 +18,26 @@ scriptencoding utf-8
 "    QFixHowm以外でhowmスタイルの予定・TODOを使用したい場合は
 "    /doc/howm_schedule.jaxを参照してください。
 "
-"     autoloadで読み込んでいる場合は howm_schedule#init()が必要です。
-"        :call howm_schedule#init()
+"     autoloadで読み込む場合は howm_schedule#Init()が必要です。
+"        :call howm_schedule#Init()
 "
 "     予定・TODO表示 (type : 'schedule' or 'todo')
 "        :call QFixHowmSchedule('schedule', 'c:/temp', 'utf-8')
 "
 "     QuickFixウィンドウを表示せずにQuickFixリスト取得も可能です。
 "        " c:/temp以下を検索して予定・TODOのQuickFixリストを取得
-"        let [qflist, time] = QFixHowmScheduleQFList('schedule', 'c:/temp', 'utf-8')
-"        (qflistは getqflist()、timeは localtime() 参照)
+"        let qflist = QFixHowmScheduleQFList('schedule', 'c:/temp', 'utf-8')
 "
 "        " キャッシュされたQuickFixリスト取得
 "        let [qflist, time] = QFixHowmScheduleCachedQFList('schedule')
+"
+"        *qflistは getqflist()、timeは localtime() 参照
+"
+"     取得したqflistはqfixlist.vimでも表示可能です。
+"        " QuickFix
+"        :call qfixlist#copen(qflist, 'c:/temp')
+"        " QFixList window
+"        :call qfixlist#open(qflist, 'c:/temp')
 "
 "=============================================================================
 
@@ -56,7 +63,7 @@ let s:debug = exists('g:fudist') ? g:fudist : 0
 " Do you like spagehtti?
 " OK, go ahead. You have been warned!
 
-function! QFixHowmSchedule(type, dir, fenc)
+function! QFixHowmSchedule(type, dir, fenc, ...)
   let l:howm_dir          = g:howm_dir
   let l:howm_fileencoding = g:howm_fileencoding
   let g:howm_dir          = a:dir
@@ -95,7 +102,7 @@ if !exists('QFixHowm_FileExt')
     let g:QFixHowm_FileExt  = fnamemodify(g:howm_filename,':e')
   endif
   if g:QFixHowm_FileExt == ''
-    let g:QFixHowm_FileExt == 'txt'
+    let g:QFixHowm_FileExt = 'txt'
   endif
 endif
 if !exists('howm_fileencoding')
@@ -502,7 +509,7 @@ function! s:QFixHowmListReminder_(mode,...)
       endif
     endif
     let g:MyGrep_Return = 1
-    let sq = MyGrep(searchWord, searchPath, l:SearchFile, g:howm_fileencoding, addflag)
+    let sq = qfixlist#MyGrep(searchWord, searchPath, l:SearchFile, g:howm_fileencoding, addflag)
     call extend(sq, holiday_sq)
     let s:UseTitleFilter = 1
     call QFixHowmTitleFilter(sq)
@@ -518,6 +525,7 @@ function! s:QFixHowmListReminder_(mode,...)
   let sq = s:CnvDayOfWeek(sq)
   if a:mode == 'menu' || (a:0 && a:1 == 'qflist')
     let s:reminder_cache = 0
+    redraw | echo ''
     return sq
   endif
   if empty(sq)
@@ -2603,5 +2611,12 @@ function QFixHowmInit()
   endif
   let s:QFixHowm_Init = 1
   return 0
+endfunction
+endif
+
+if !exists('*QFixPclose')
+command QFixPclose call QFixPclose()
+function QFixPclose(...)
+  silent! pclose!
 endfunction
 endif

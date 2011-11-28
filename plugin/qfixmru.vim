@@ -226,7 +226,10 @@ function! QFixMRUPrecheck(sq, entries, dir)
       continue
     endif
     let tpattern = ''
-    silent! let tpattern = g:QFixMRU_Title[tolower(fnamemodify(file, ':e'))]
+    let ext = tolower(fnamemodify(file, ':e'))
+    if exists('g:QFixMRU_Title[ext]')
+      let tpattern = g:QFixMRU_Title[ext]
+    endif
     if tpattern != ''
       let [min, max] = s:QFixMRUEntryRange(file, d['lnum'], d['text'], tpattern)
       if min == 0
@@ -312,7 +315,7 @@ endfunction
 
 " プレビューのエンコーディング強制オプション
 if !exists('*QFixPreviewReadOpt')
-silent! function QFixPreviewReadOpt(file)
+function QFixPreviewReadOpt(file)
   return ''
 endfunction
 endif
@@ -493,7 +496,10 @@ function! QFixMRUGet(mode, mfile, lnum, ...)
   endif
   let lnum = a:lnum
   let tpattern = ''
-  silent! let tpattern = g:QFixMRU_Title[tolower(fnamemodify(expand(mfile), ':e'))]
+  let ext = tolower(fnamemodify(expand(mfile), ':e'))
+  if exists('g:QFixMRU_Title[ext]')
+    let tpattern = g:QFixMRU_Title[ext]
+  endif
   if a:0
     let tpattern = a:1
   endif
@@ -566,20 +572,28 @@ endfunction
 
 "Get mru title regular expression
 function! QFixMRUGetTitleGrepRegxp(suffix)
-  let t = ''
-  silent! let t = g:QFixMRU_Title[a:suffix.'_regxp']
-  if t == ''
-    silent! let t = g:QFixMRU_Title[a:suffix]
+  let tpattern = ''
+  let suffix = tolower(a:suffix)
+  let ext = suffix.'_regxp'
+  if exists('g:QFixMRU_Title[ext]')
+    let tpattern = g:QFixMRU_Title[ext]
+  else
+    let ext = suffix
+    if exists('g:QFixMRU_Title[ext]')
+      let tpattern = g:QFixMRU_Title[ext]
+    endif
   endif
-  return t
+  return tpattern
 endfunction
 
 "Get mru title regular expression for vim
 function! QFixMRUGetTitleRegxp(suffix)
+  let tpattern = ''
   let suffix = tolower(a:suffix)
-  let t = ''
-  silent! let t = g:QFixMRU_Title[suffix]
-  return t
+  if exists('g:QFixMRU_Title[suffix]')
+    let tpattern = g:QFixMRU_Title[suffix]
+  endif
+  return tpattern
 endfunction
 
 " Change basedir
@@ -614,7 +628,10 @@ function! QFixMRUClear()
   let idx = 0
   for d in s:MruDic
     let tpattern = ''
-    silent! let tpattern = g:QFixMRU_Title[tolower(fnamemodify(d['filename'], ':e'))]
+    let suffix tolower(fnamemodify(d['filename'], ':e'))
+    if exists('g:QFixMRU_Title[suffix]')
+      let tpattern = g:QFixMRU_Title[suffix]
+    endif
     if tpattern != '' && d['text'] =~ tpattern.'\s*$'
       call remove(s:MruDic, idx)
       continue
@@ -696,7 +713,10 @@ function! s:Register(mru)
 
   " 重複エントリの削除
   let tpattern = ''
-  silent! let tpattern = g:QFixMRU_Title[tolower(fnamemodify(mfile, ':e'))]
+  let suffix = tolower(fnamemodify(mfile, ':e'))
+  if exists('g:QFixMRU_Title[suffix]')
+    let tpattern = g:QFixMRU_Title[suffix]
+  endif
 
   let idx = 0
   for d in s:MruDic

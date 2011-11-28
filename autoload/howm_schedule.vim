@@ -2009,6 +2009,9 @@ endfunction
 "Wikiスタイルリンクの扱い
 if !exists('g:QFixHowm_Wiki')
   let g:QFixHowm_Wiki = 0
+  if exists('g:qfixmemo_keyword_mode')
+    let g:QFixHowm_Wiki = g:qfixmemo_keyword_mode
+  endif
 endif
 let g:QFixHowm_KeywordList = []
 

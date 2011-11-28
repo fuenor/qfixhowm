@@ -196,7 +196,7 @@ if !exists('g:qfixmemo_pairfile_dir')
   let g:qfixmemo_pairfile_dir = 'pairlink'
 endif
 if !exists('g:qfixmemo_keyword_mode')
-  let g:qfixmemo_keyword_mode = 1
+  let g:qfixmemo_keyword_mode = 0
 endif
 if !exists('g:qfixmemo_keyword_file')
   let g:qfixmemo_keyword_file = '~/.howm-keys'

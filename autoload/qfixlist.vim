@@ -96,6 +96,11 @@ function! qfixlist#getqflist(pattern, dir, file, ...)
   return qfixlist#search(a:pattern, a:dir, '', 0, fenc, a:file)
 endfunction
 
+function! qfixlist#grep(pattern, dir, file, ...)
+  let fenc = a:0 ? a:1 : &enc
+  return qfixlist#search(a:pattern, a:dir, '', 0, fenc, a:file)
+endfunction
+
 function! qfixlist#copen(...)
   if a:0 > 0
     let s:QFixList_qfCache = deepcopy(a:1)

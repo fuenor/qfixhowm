@@ -535,7 +535,7 @@ function! s:QFixHowmListReminder_(mode,...)
     call QFixSetqflist(sq)
     redraw | echo ''
     let g:QFix_SearchPath = l:howm_dir
-    QFixCopen
+    call QFixCopen()
     call cursor(1, 1)
     if g:QFixHowm_SchedulePreview == 0 && g:QFix_PreviewEnable == 1
       let g:QFix_PreviewEnable = -1
@@ -2375,7 +2375,7 @@ function! QFixHowmCmd_ScheduleList(...) range
     call s:QFixHowmParseScheduleList(schlist)
     call QFixHowmExportSchedule(schlist)
   else
-    QFixCopen
+    call QFixCopen()
     call cursor(1, 1)
   endif
   return schlist
@@ -2620,6 +2620,5 @@ endif
 if !exists('*QFixPclose')
 command QFixPclose call QFixPclose()
 function QFixPclose(...)
-  silent! pclose!
 endfunction
 endif

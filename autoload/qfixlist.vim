@@ -118,7 +118,7 @@ function! qfixlist#copen(...)
   redraw | echo 'QFixList : Set QuickFix list...'
   call QFixPclose()
   call QFixSetqflist(s:QFixList_qfCache)
-  QFixCopen
+  call QFixCopen()
   if a:0
     call cursor(1, 1)
   endif
@@ -133,7 +133,7 @@ endfunction
 
 function! qfixlist#open(...)
   if g:qfixlist_autoclose
-    QFixCclose
+    call QFixCclose()
   endif
   let loaded = 1
   if a:0 > 0
@@ -530,6 +530,10 @@ function! s:CR()
 endfunction
 
 function! s:Close()
+  if !exists('g:loaded_QFixWin')
+    close
+    return
+  endif
   if winnr('$') == 1 || (winnr('$') == 2 && b:PreviewEnable == 1)
     if tabpagenr('$') > 1
       tabclose
@@ -856,7 +860,7 @@ function! qfixlist#BGrep(word, mode, addflag)
     if g:QFix_HeightFixMode == 1
       let g:QFix_Height = g:QFix_HeightDefault
     endif
-    QFixCopen
+    call QFixCopen()
     call cursor(1, 1)
     redraw | echo ''
   endif
@@ -1397,7 +1401,7 @@ endif
 " copen
 if !exists('*QFixCopen')
 command -nargs=* -bang QFixCopen call QFixCopen(<q-args>, <bang>0)
-function QFixCopen(cmd, mode)
+function QFixCopen(...)
   if g:QFix_UseLocationList
     silent! lopen
   else
@@ -1408,7 +1412,7 @@ endif
 " cclose
 if !exists('*QFixCclose')
 command! QFixCclose call QFixCclose()
-function! QFixCclose()
+function! QFixCclose(...)
   if g:QFix_UseLocationList
     silent! lclose
   else
@@ -1416,11 +1420,19 @@ function! QFixCclose()
   endif
 endfunction
 endif
+" preview
+if !exists('*QFixPreviewOpen')
+function QFixPreviewOpen(...)
+endfunction
+endif
 " pclose
 if !exists('*QFixPclose')
 command QFixPclose call QFixPclose()
 function QFixPclose(...)
-  silent! pclose!
+endfunction
+endif
+if !exists('*QFixAltWincmdMap')
+function QFixAltWincmdMap(...)
 endfunction
 endif
 " MyGrepReadResult stab

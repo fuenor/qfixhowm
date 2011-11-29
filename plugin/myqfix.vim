@@ -168,24 +168,23 @@ endif
 """"""""""""""""""""""""""""""
 " キーマップ
 """"""""""""""""""""""""""""""
-silent! nnoremap <unique> <silent> <C-w>, :ToggleQFixWin<CR>
-silent! nnoremap <unique> <silent> <C-w>. :MoveToQFixWin<CR>
+silent! nnoremap <unique> <silent> <C-w>, :<C-u>ToggleQFixWin<CR>
+silent! nnoremap <unique> <silent> <C-w>. :<C-u>MoveToQFixWin<CR>
 " silent! nnoremap <unique> <silent> <C-w>/ :<C-u>call QFixLocationMode()<CR>
 
 """"""""""""""""""""""""""""""
 " コマンド
 """"""""""""""""""""""""""""""
-command! -count OpenQFixWin call OpenQFixWin(<line2>-<line1>+1)
-command! CloseQFixWin call QFixCclose()
-command! -count ToggleQFixWin call ToggleQFixWin(<line2>-<line1>+1)
-command! -count MoveToQFixWin call MoveToQFixWin(<line2>-<line1>+1)
-command! -nargs=* -bang QFixCopen call QFixCopen(<q-args>, <bang>0)
-command! QFixCclose   call QFixCclose()
-command! -count ResizeOnQFix call ResizeOnQFix(<count>)
-command! -nargs=? -count QFdo call QFdo(<q-args>, <count>)
+command! OpenQFixWin   call OpenQFixWin()
+command! CloseQFixWin  call QFixCclose()
+command! ToggleQFixWin call ToggleQFixWin()
+command! MoveToQFixWin call MoveToQFixWin()
 command! -nargs=* -bang -count MyGrepWriteResult call MyGrepWriteResult(<bang>0, <q-args>)
 command! -count -nargs=* -bang MyGrepReadResult call MyGrepReadResult(<bang>0, <q-args>)
+command! -nargs=? -count QFdo call QFdo(<q-args>, <count>)
 command! -nargs=* FList call s:FL(<q-args>)
+command! -nargs=* -bang QFixCopen call QFixCopen(<q-args>, <bang>0)
+command! QFixCclose call QFixCclose()
 
 """"""""""""""""""""""""""""""
 " 内部変数
@@ -330,7 +329,7 @@ function! s:QFBufWinEnter(...)
     nnoremap <buffer> <silent> <S-CR> :call <SID>BeforeJump()<CR>:call <SID>QFixEdit()<CR>:call <SID>AfterJump()<CR>
   endif
 
-  nnoremap <buffer> <silent> <C-w>. :ResizeOnQFix<CR>
+  nnoremap <buffer> <silent> <C-w>. :<C-u>call <SID>ResizeOnQFix()<CR>
   nnoremap <buffer> <silent> i      :<C-u>call <SID>QFixTogglePreview()<CR>
   nnoremap <buffer> <silent> I      :<C-u>call <SID>QFixToggleHighlight()<CR>
   nnoremap <buffer> <silent> &      :<C-u>call <SID>QFixCmd_LocListCopy('normal')<CR>
@@ -358,7 +357,7 @@ function! s:QFBufWinEnter(...)
   nnoremap <buffer> <silent> Q :<C-u>call <SID>QFdofe('', 'normal')<CR>
   vnoremap <buffer> <silent> Q :<C-u>call <SID>QFdofe('', 'visual')<CR>
 
-  call QFixResize(g:QFix_Height)
+  call s:QFixResize()
   if &buftype == 'quickfix'
     let b:qfixwin_height = winheight(0)
     let b:qfixwin_width  = winwidth(0)
@@ -518,11 +517,11 @@ function! s:QFixEdit()
   let file = fnamemodify(bufname(bufnum), ':p')
   let file = escape(file, ' ')
   if g:QFix_TabEditMode == 1
-    QFixCclose
+    call QFixCclose()
   endif
   call QFixEditFile(file)
   if g:QFix_TabEditMode == 1
-    QFixCopen
+    call QFixCopen()
     silent! wincmd p
   endif
   return
@@ -585,7 +584,7 @@ function! s:AfterJump(...)
   exe "normal! zz"
   call QFixCR('after')
   if g:QFix_CloseOnJump
-    QFixCclose
+    call QFixCclose()
   endif
 endfunction
 
@@ -607,7 +606,7 @@ function! s:VisCR() range
   endfor
   call QFixCR('after')
   if g:QFix_CloseOnJump
-    QFixCclose
+    call QFixCclose()
   endif
 endfunction
 
@@ -648,13 +647,16 @@ endfunction
 """"""""""""""""""""""""""""""
 " リサイズ
 """"""""""""""""""""""""""""""
-function! QFixResize(size)
-  let size = a:size
+function! s:QFixResize(...)
+  let size = g:QFix_Height
   if exists('b:qfixwin_height') && size < b:qfixwin_height
     let size = b:qfixwin_height
   endif
   if size < g:QFix_HeightDefault
     let size = g:QFix_HeightDefault
+  endif
+  if a:0
+    let size = a:1
   endif
   let w = &lines - winheight(0) - &cmdheight - (&laststatus > 0 ? 1 : 0)
   if w  > 0
@@ -738,7 +740,7 @@ function! QFixSortExec(...)
     let sq = reverse(sq)
   endif
   call s:SetBufqflistOpen(sq)
-  MoveToQFixWin
+  call MoveToQFixWin()
   call cursor(1,1)
   redraw|echo 'Sorted by '.g:QFix_Sort.'.'
 endfunction
@@ -961,11 +963,8 @@ endfunction
 " Quickfixウィンドウを開く
 """"""""""""""""""""""""""""""
 function! OpenQFixWin(...)
-  QFixCopen
-  if a:0 && a:1 > 1
-    let g:QFix_Height = a:1
-  endif
-  call QFixResize(g:QFix_Height)
+  call QFixCopen()
+  call s:QFixResize()
 endfunction
 
 """"""""""""""""""""""""""""""
@@ -974,16 +973,13 @@ endfunction
 function! MoveToQFixWin(...)
   let winnum = bufwinnr(g:QFix_Win)
   if winnum == -1
-    QFixCopen
+    call QFixCopen()
   else
     if winnum != winnr()
       exe winnum . 'wincmd w'
     endif
   endif
-  if a:0 && a:1 > 1
-    let g:QFix_Height = a:1
-    call QFixResize(g:QFix_Height)
-  endif
+  call s:QFixResize()
 endfunction
 
 """"""""""""""""""""""""""""""
@@ -997,7 +993,7 @@ function! ToggleQFixWin(...)
   let winnr = bufwinnr(g:QFix_Win)
   if winnr != -1
     let bufnr = bufnr('%')
-    QFixPclose
+    call QFixPclose()
     let winnr = bufwinnr(g:QFix_Win)
     exe winnr . 'wincmd w'
     close
@@ -1005,7 +1001,7 @@ function! ToggleQFixWin(...)
     exe winnr . 'wincmd w'
     return
   elseif &buftype == 'quickfix'
-    QFixPclose
+    call QFixPclose()
     let winnr = QFixWinnr()
     if winnr < 1
       close
@@ -1014,29 +1010,28 @@ function! ToggleQFixWin(...)
       exe winnr.'wincmd w'
     endif
   endif
-  QFixCopen
+  call QFixCopen()
 endfunction
 
 """"""""""""""""""""""""""""""
 " サイズを変更する
 """"""""""""""""""""""""""""""
-function! ResizeOnQFix(...)
+function! s:ResizeOnQFix(...)
   if &buftype != 'quickfix'
     return
   endif
   let size = g:QFix_HeightDefault
   if count > 1
-    let size = a:1
+    let size = count
   endif
-  let g:QFix_Height = size
-  call QFixResize(g:QFix_Height)
+  call s:QFixResize(size)
 endfunction
 
 """"""""""""""""""""""""""""""
 " copen代替
 " CAUTION: cclose/copenでバッファ番号が変わるので b: は実質的に保存されない
 """"""""""""""""""""""""""""""
-function! QFixCopen(cmd, mode)
+function! QFixCopen(...)
   if g:QFix_Disable
     return
   endif
@@ -1057,13 +1052,13 @@ function! QFixCopen(cmd, mode)
     echohl None
     return
   endif
-  if a:cmd == ''
+  if a:0 && a:1 != ''
+    let cmd = a:1
+  else
     let cmd = g:QFix_CopenCmd
     if exists('g:QFix_CopenCmd'.g:QFix_UseLocationList)
       exe 'let cmd = g:QFix_CopenCmd'.g:QFix_UseLocationList
     endif
-  else
-    let cmd = a:cmd
   endif
   let cmd = cmd . (g:QFix_UseLocationList ? ' l' : ' c')
   let saved_pe = g:QFix_PreviewEnable
@@ -1682,8 +1677,8 @@ function! MyGrepReadResult(readflag, ...)
   cgetexpr s:result
   let &errorformat = saved_efm
   redraw|echo 'QFixGrep : ReadResult "'.file.'"'
-  QFixCopen
-  MoveToQFixWin
+  call QFixCopen()
+  call MoveToQFixWin()
   call cursor(lnum, 1)
 endfunction
 
@@ -1729,9 +1724,9 @@ function! s:ShowFileList(path, list)
   let prevPath = escape(getcwd(), ' ')
   let g:QFix_SearchResult = []
   let g:QFix_SearchPath = a:path
-  QFixCclose
+  call QFixCclose()
   call QFixSetqflist(a:list)
-  QFixCopen
+  call QFixCopen()
   call cursor(1, 1)
 endfunction
 " サマリー

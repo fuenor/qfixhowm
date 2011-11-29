@@ -162,7 +162,7 @@ if MyGrep_MenuBar
   exe 'amenu <silent> 41.331 '.s:menu.'.SetFileEncoding(&G)<Tab>'.s:MyGrep_Key.'rG  :call s:SetFileEncoding()<CR>'
   exe 'amenu <silent> 41.331 '.s:menu.'.RecursiveMode(&M)<Tab>'.s:MyGrep_Key.'rM  :ToggleGrepRecursiveMode<CR>'
   exe 'amenu <silent> 41.331 '.s:menu.'.-sep3-			<Nop>'
-  exe 'amenu <silent> 41.331 '.s:menu.'.Load\ Quickfix(&L)<Tab>'.s:MyGrep_Key.'k  :MyGrepReadResult<CR>\|:QFixCopen<CR>'
+  exe 'amenu <silent> 41.331 '.s:menu.'.Load\ Quickfix(&L)<Tab>'.s:MyGrep_Key.'k  :MyGrepReadResult<CR>\|:call QFixCopen()<CR>'
   exe 'amenu <silent> 41.331 '.s:menu.'.Load\ Quickfix[Local]\ (&O)<Tab>O :MyGrepReadResult<CR>'
   exe 'amenu <silent> 41.331 '.s:menu.'.Save\ Quickfix[Local]\ (&A)<Tab>A :MyGrepWriteResult<CR>'
   exe 'amenu <silent> 41.331 '.s:menu.'.-sep4-			<Nop>'
@@ -206,7 +206,7 @@ exec 'silent! nnoremap <unique> <silent> '.s:MyGrep_Key.'RF  :QFRFGrepadd!<CR>'
 exec 'silent! vnoremap <unique> <silent> '.s:MyGrep_Key.'RF  :call RFGrep("", -1, 1)<CR>'
 exec 'silent! nnoremap <unique> <silent> '.s:MyGrep_Key.'V  :QFVGrepadd!<CR>'
 exec 'silent! vnoremap <unique> <silent> '.s:MyGrep_Key.'V  :call VGrep("", -1, 1)<CR>'
-exec 'silent! nnoremap <unique> <silent> '.s:MyGrep_Key.'k :MyGrepReadResult<CR>\|:QFixCopen<CR>'
+exec 'silent! nnoremap <unique> <silent> '.s:MyGrep_Key.'k :MyGrepReadResult<CR>\|:call QFixCopen()<CR>'
 exec 'silent! nnoremap <unique> <silent> '.s:MyGrep_Key.'H :call QFixGrepHelp()<CR>'
 
 exec 'silent! nnoremap <unique> <silent> '.s:MyGrep_Key.'. :<C-u>call QFixGrepLocationMode()<CR>'
@@ -310,7 +310,7 @@ function! UGrep(cmd, args, mode, addflag)
     if g:QFix_HeightFixMode == 1
       let g:QFix_Height = g:QFix_HeightDefault
     endif
-    QFixCopen
+    call QFixCopen()
     call cursor(1, 1)
     redraw | echo ''
   endif
@@ -418,7 +418,7 @@ function! Grep(word, mode, title, addflag)
     if a:addflag
       let g:QFix_SearchPath = disppath
     endif
-    QFixCopen
+    call QFixCopen()
     call cursor(1, 1)
     redraw | echo ''
   endif
@@ -536,7 +536,7 @@ function! CGrep(mode, bang, addflag,  arg)
     if g:QFix_HeightFixMode == 1
       let g:QFix_Height = g:QFix_HeightDefault
     endif
-    QFixCopen
+    call QFixCopen()
     call cursor(1, 1)
   endif
   call s:restore()

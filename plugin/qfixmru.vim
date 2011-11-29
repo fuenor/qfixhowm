@@ -334,7 +334,7 @@ silent! function QFixMRUOpen(qf, basedir)
       let cmd = 'call cursor(1, 1)'
     endif
     call QFixSetqflist(a:qf)
-    QFixCopen
+    call QFixCopen()
     if s:prevqf != QFixGetqflist()
       let s:prevqf = QFixGetqflist()
       let cmd = 'call cursor(1, 1)'

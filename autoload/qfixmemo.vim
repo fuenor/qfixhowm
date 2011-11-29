@@ -2234,7 +2234,7 @@ function! qfixmemo#Cmd_Replace(mode)
   endfor
   call QFixSetqflist(nsq)
   exe 'lchdir ' . prevPath
-  QFixCopen
+  call QFixCopen()
   call cursor(1, 1)
   return
 endfunction
@@ -2269,7 +2269,7 @@ function! qfixmemo#Cmd_RD(cmd) range
     call remove(qf, idx)
   endfor
   call QFixSetqflist(qf)
-  QFixCopen
+  call QFixCopen()
   call setpos('.', save_cursor)
 endfunction
 
@@ -2515,7 +2515,7 @@ function! qfixmemo#RebuildKeyword()
   call qfixmemo#AddKeyword(str)
   if len(qflist)
     call QFixSetqflist(qflist)
-    QFixCopen
+    call QFixCopen()
     call cursor(1, 1)
     redraw | echo 'QFixMemo : done.'
   else
@@ -2576,7 +2576,7 @@ function! qfixmemo#OpenKeywordLink()
       endif
       if len(qflist)
         call QFixSetqflist(qflist)
-        QFixCopen
+        call QFixCopen()
       endif
       return 1
     endif
@@ -2599,7 +2599,7 @@ function! qfixmemo#OpenKeywordLink()
         endif
         if len(qflist)
           call QFixSetqflist(qflist)
-          QFixCopen
+          call QFixCopen()
         endif
         return 1
       elseif g:qfixmemo_keyword_mode == 1

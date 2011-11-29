@@ -101,13 +101,13 @@ endif
 
 function! qfixlist#GrepCopen(pattern, dir, file, ...)
   let fenc = a:0 ? a:1 : &enc
-  let qflist =  qfixlist#search(a:pattern, a:dir, '', 0, fenc, a:file)
+  let qflist = qfixlist#search(a:pattern, a:dir, '', 0, fenc, a:file)
   call qfixlist#copen(qflist, a:dir)
 endfunction
 
 function! qfixlist#GrepOpen(pattern, dir, file, ...)
   let fenc = a:0 ? a:1 : &enc
-  let qflist =  qfixlist#search(a:pattern, a:dir, '', 0, fenc, a:file)
+  let qflist = qfixlist#search(a:pattern, a:dir, '', 0, fenc, a:file)
   call qfixlist#open(qflist, a:dir)
 endfunction
 
@@ -231,12 +231,10 @@ function! qfixlist#open(...)
     for n in s:QFixList_Cache
       if !exists("n['filename']")
         let n['filename'] = fnamemodify(bufname(n['bufnr']), ':p')
-        let file = QFixNormalizePath(fnamemodify(n['filename'], ':.'))
-      else
-        let file = n['filename'][len(head):]
-        " let file = substitute(file, '^'.head, '', '')
-        " let file = fnamemodify(n['filename'], ':.')
       endif
+      let file = n['filename'][len(head):]
+      " let file = substitute(file, '^'.head, '', '')
+      " let file = fnamemodify(n['filename'], ':.')
       let lnum = n['lnum']
       let text = n['text']
       let res = file.'|'.lnum.'| '.text
@@ -244,6 +242,9 @@ function! qfixlist#open(...)
     endfor
   else
     for n in s:QFixList_Cache
+      if !exists("n['filename']")
+        let n['filename'] = fnamemodify(bufname(n['bufnr']), ':p')
+      endif
       let file = fnamemodify(n['filename'], ':.')
       let lnum = n['lnum']
       let text = n['text']
@@ -339,15 +340,22 @@ function! qfixlist#search(pattern, dir, cmd, days, fenc, file)
     let head = fnamemodify(expand(a:dir), ':p')
     let head = QFixNormalizePath(head)
     for d in list
-      let file = head . d['filename']
-      " let file = fnamemodify(d['filename'], ':p')
-      let d['filename'] = substitute(file, '\\', '/', 'g')
+      if !exists("d['filename']")
+        let d['filename'] = QFixNormalizePath(fnamemodify(bufname(d['bufnr']), ':p'))
+      else
+        let file = head . d['filename']
+        " let file = fnamemodify(d['filename'], ':p')
+        let d['filename'] = substitute(file, '\\', '/', 'g')
+      endif
       let d['lnum'] = d['lnum'] + 0
     endfor
   else
     for d in list
-      let file = fnamemodify(d['filename'], ':p')
-      let d['filename'] = substitute(file, '\\', '/', 'g')
+      if !exists("d['filename']")
+        let d['filename'] = QFixNormalizePath(fnamemodify(bufname(d['bufnr']), ':p'))
+      else
+        let d['filename'] = QFixNormalizePath(fnamemodify(d['filename'], ':p'))
+      endif
       let d['lnum'] = d['lnum'] + 0
     endfor
   endif
@@ -728,14 +736,21 @@ endfunction
 let s:MSWindows = has('win95') + has('win16') + has('win32') + has('win64')
 
 " 使用するgrep指定
-if !exists('mygrepprg')
-  let mygrepprg = 'internal'
+if !exists('g:mygrepprg')
+  let g:mygrepprg = 'internal'
   if has('win32') + has('win64') - has('win95') > 0
-    let mygrepprg = 'findstr'
+    let g:mygrepprg = 'findstr'
   endif
   if has('unix')
-    let mygrepprg = 'grep'
+    let g:mygrepprg = 'grep'
   endif
+endif
+" let mygrepprg=findstr, let mygrepprg=grepで切り替え可能に
+if !exists('g:grep')
+  let g:grep = g:mygrepprg
+endif
+if !exists('g:findstr')
+  let g:findstr = 'findstr'
 endif
 " 日本語が含まれる場合のgrep指定
 if !exists('myjpgrepprg')

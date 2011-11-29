@@ -82,12 +82,6 @@ endif
 if !exists('g:MyGrep_UseLocationList')
   " let g:MyGrep_UseLocationList = 0
 endif
-if !exists('g:findstr')
-  let g:findstr = 'findstr'
-endif
-if !exists('g:grep')
-  let g:grep = 'grep'
-endif
 
 """"""""""""""""""""""""""""""
 " ユーザ呼び出し用コマンド

@@ -708,17 +708,22 @@ function! s:build(...)
 endfunction
 
 function! s:Msg()
-  let msg = CalendarInfo()
-  let save_cursor = getpos('.')
+  let msg = ['']
+  call extend(msg, CalendarInfo())
+  call map(msg, "substitute(v:val, '^', '_', '')")
+  if len(msg) > 1
+    call add(msg, '')
+  endif
+  call extend(msg, g:calendar_footer)
   let lnum = search('^\s*_', 'ncw')
-  setlocal modifiable
   if lnum
+    let save_cursor = getpos('.')
+    setlocal modifiable
     silent! exe lnum.',$delete _'
     call setline(line('$')+1, msg)
-    call setline(line('$')+1, g:calendar_footer)
+    setlocal nomodifiable
+    call setpos('.', save_cursor)
   endif
-  call setpos('.', save_cursor)
-  setlocal nomodifiable
 endfunction
 
 if !exists('*CalendarInfo')
@@ -734,11 +739,11 @@ function CalendarInfo()
   let day = expand('<cword>')
 
   if day == 24 && month == 12
-    return ['_', '_ Merry Xmas!', '']
+    return [' Merry Xmas!']
   elseif day == 31 && month == 10
-    return ['_', '_ Trick or Treat?', '']
+    return [' Trick or Treat?']
   elseif day == 1 && month == 1
-    return ['_', '_ Happy New Year!', '']
+    return [' Happy New Year!']
   endif
 
   let file = expand(QFixMemoCalendarSign(day, month, year, 'filename'))
@@ -747,18 +752,15 @@ function CalendarInfo()
     if exists('g:qfixmemo_fileencoding')
       call map(info, "iconv(v:val, g:qfixmemo_fileencoding, &enc)")
     endif
-    call map(info, "substitute(v:val, '^', '_', '')")
-    call insert(info, '_')
-    call add(info, '')
     return info
   endif
 
   let tbl = GetHolidayTable(year)
   let date = printf('%4.4d%2.2d%2.2d', year, month, day)
   if exists('tbl[date]') && tbl[date] != ''
-    return ['_', '_'.tbl[date], '']
+    return [tbl[date]]
   endif
-  return ['_']
+  return []
 endfunction
 endif
 

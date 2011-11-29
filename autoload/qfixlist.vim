@@ -5,7 +5,7 @@
 "                   http://sites.google.com/site/fudist/Home/grep
 "         Author: fuenor <fuenor@gmail.com>
 "=============================================================================
-let s:Version = 2.85
+let s:Version = 2.86
 scriptencoding utf-8
 
 " What Is This:
@@ -22,33 +22,41 @@ scriptencoding utf-8
 "             let mygrepprg='path/to/grep'
 "             let mygrepprg='grep'
 "
-"  Usage: qfixlist#getqflist(pattern, path, filepattern, {fileencoding})
+"  Usage:
 "
-"    :let qflist = qfixlist#getqflist('^int', '~/usr/mysrc', '*.cpp')
-"    " **/ means recursive
-"    :let qflist = qfixlist#getqflist('words', '~/usr/mytxt', '**/*', 'utf-8')
+"    " **/ means recursive (in filepattern)
+"    " Without {fileencoding} default is &enc
 "
-"    " QuickFix
-"    :call qfixlist#copen(qflist, search_path)
-"    " QFixList window
-"    :call qfixlist#open(qflist, search_path)
-"    also you can use setqflist()
+"    QuickFix
+"    qfixlist#GrepCopen(pattern, path, filepattern, {fileencoding})
+"    QFixList
+"    qfixlist#GrepOpen(pattern, path, filepattern, {fileencoding})
+"      :call qfixlist#GrepCopen('words', '~/usr/mytxt', '*.txt', 'utf-8')
+"      :call qfixlist#GrepOpen('words', '~/usr/mytxt', '**/*.txt')
+"    or
+"    qfixlist#grep(pattern, path, filepattern, {fileencoding})
+"      :let qflist = qfixlist#grep('^int', '~/usr/mysrc', '*.cpp')
+"      :let qflist = qfixlist#grep('words', '~/usr/mytxt', '**/*', 'utf-8')
+"      " QuickFix
+"      :call qfixlist#copen(qflist, search_path)
+"      " QFixList
+"      :call qfixlist#open(qflist, search_path)
+"      also you can use setqflist()
 "
-"    cached list
-"    " quickfix
-"    :call qfixlist#copen()
-"    " qfixlist window
-"    :call qfixlist#open()
+"      cached list
+"      " QuickFix
+"      :call qfixlist#copen()
+"      " QFixList
+"      :call qfixlist#open()
 "
 "    addtinal options
-"    | function     | option                     |
-"    | Grep         | :let MyGrep_Regexp     = 1 |
-"    | FGrep        | :let MyGrep_Regexp     = 0 |
-"    | Ignorecase   | :let MyGrep_Ignorecase = 1 |
-"    | Recursive    | :let MyGrep_Recursive  = 1 |
-"    * these options reset to default after qfixlist#getqflist()
+"    | function     | option                     |           |
+"    | Grep         | :let MyGrep_Regexp     = 1 | * default |
+"    | FGrep        | :let MyGrep_Regexp     = 0 |           |
+"    | Ignorecase   | :let MyGrep_Ignorecase = 1 | * default |
+"    | Recursive    | :let MyGrep_Recursive  = 0 | * default |
+"    * these options reset to default after qfixlist#grep()
 
-"=============================================================================
 if exists('g:disable_QFixList') && g:disable_QFixList == 1
   finish
 endif
@@ -91,12 +99,24 @@ if !exists('g:qfixlist_use_fnamemodify')
   let g:qfixlist_use_fnamemodify = 0
 endif
 
-function! qfixlist#getqflist(pattern, dir, file, ...)
+function! qfixlist#GrepCopen(pattern, dir, file, ...)
+  let fenc = a:0 ? a:1 : &enc
+  let qflist =  qfixlist#search(a:pattern, a:dir, '', 0, fenc, a:file)
+  call qfixlist#copen(qflist, a:dir)
+endfunction
+
+function! qfixlist#GrepOpen(pattern, dir, file, ...)
+  let fenc = a:0 ? a:1 : &enc
+  let qflist =  qfixlist#search(a:pattern, a:dir, '', 0, fenc, a:file)
+  call qfixlist#open(qflist, a:dir)
+endfunction
+
+function! qfixlist#grep(pattern, dir, file, ...)
   let fenc = a:0 ? a:1 : &enc
   return qfixlist#search(a:pattern, a:dir, '', 0, fenc, a:file)
 endfunction
 
-function! qfixlist#grep(pattern, dir, file, ...)
+function! qfixlist#getqflist(pattern, dir, file, ...)
   let fenc = a:0 ? a:1 : &enc
   return qfixlist#search(a:pattern, a:dir, '', 0, fenc, a:file)
 endfunction

@@ -1532,3 +1532,9 @@ function! QFixNormalizePath(path, ...)
   return path
 endfunction
 
+function! qfixlist#init()
+endfunction
+
+function! qfixlist#Init()
+endfunction
+

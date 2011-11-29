@@ -1207,6 +1207,7 @@ function! qfixmemo#ListRecentTimeStamp(...)
   if qfixmemo#Init()
     return
   endif
+  call qfixlist#Init()
   if count
     let g:qfixmemo_recentdays = count
   endif

@@ -139,9 +139,12 @@ function! qfixlist#copen(...)
     endif
     return
   endif
-  let g:QFix_SearchPath = s:QFixList_qfdir
+  if exists('*QFixListAltCopen')
+    return QFixListAltCopen(s:QFixList_qfCache, s:QFixList_qfdir)
+  endif
   redraw | echo 'QFixList : Set QuickFix list...'
   call QFixPclose()
+  let g:QFix_SearchPath = s:QFixList_qfdir
   call QFixSetqflist(s:QFixList_qfCache)
   call QFixCopen()
   if a:0
@@ -178,6 +181,9 @@ function! qfixlist#open(...)
     endif
     echohl None
     return
+  endif
+  if exists('*QFixListAltOpen')
+    return QFixListAltOpen(s:QFixList_Cache, s:QFixList_dir)
   endif
   call QFixPclose(1)
   let path = s:QFixList_dir

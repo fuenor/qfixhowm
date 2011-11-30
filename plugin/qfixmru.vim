@@ -3,7 +3,7 @@
 "         Author: fuenor <fuenor@gmail.com>
 "                 http://sites.google.com/site/fudist/Home  (Japanese)
 "=============================================================================
-let s:Version = 1.10
+let s:Version = 1.11
 scriptencoding utf-8
 
 " What Is This:
@@ -62,6 +62,10 @@ endif
 " MRUをフルパスで保存する
 if !exists('g:QFixMRU_FullPathMode')
   let g:QFixMRU_FullPathMode = 0
+endif
+" QFixMRUコマンドが呼び出されていなくてもVim終了時に保存
+if !exists('g:QFixMRU_VimLeaveWrite')
+  let g:QFixMRU_VimLeaveWrite = 1
 endif
 " MRU最大表示数
 if !exists('g:QFixMRU_Entries')
@@ -146,7 +150,6 @@ augroup END
 function! QFixMRU(...)
   if g:QFixMRU_state == 0
     call QFixMRURead()
-    call QFixMRUWrite(0)
   endif
   if len(s:MruDic) == 0
     redraw|echo 'QFixMRU: No mru list'
@@ -175,8 +178,11 @@ function! QFixMRU(...)
   let dir = dirmode ? basedir : ''
 
   call QFixMRUWrite(0)
+  let saved_ei = &eventignore
+  set eventignore=all
   call QFixMRUOpenPre(s:MruDic, entries, dir)
   let sq = QFixMRUPrecheck(s:MruDic, entries, dir)
+  let &eventignore = saved_ei
   call QFixMRUOpen(sq, basedir)
   redraw | echo ''
   if len(sq) == 0
@@ -443,6 +449,7 @@ function! QFixMRURead(...)
   elseif a:0 > 1
     let g:QFixMRU_BaseDir = substitute(a:2, '\\', '/', 'g')
   endif
+  call QFixMRUWrite(0)
   " redraw | echo ''
 endfunction
 
@@ -603,6 +610,9 @@ endfunction
 
 " Get mru list
 function! QFixMRUGetList(...)
+  if g:QFixMRU_state == 0
+    call QFixMRURead()
+  endif
   let entries = 0
   let dir = ''
   for index in range (1, a:0)
@@ -784,6 +794,8 @@ silent! function QFixMRURegisterCheck(mru)
 endfunction
 
 function! s:BufEnter()
+  " BufEnterでQFixMRUWrite(0)を行うとbuftype設定前の特殊バッファも登録される
+  " buftype設定後に特殊バッファ判定してMRU登録するためCursorMovedを使用
   let b:QFixMRU_moved = 0
 endfunction
 
@@ -796,10 +808,7 @@ function! s:BufWritePost()
 endfunction
 
 function! s:CursorMoved()
-  if !exists('b:QFixMRU_moved')
-    let b:QFixMRU_moved = 0
-  endif
-  if b:QFixMRU_moved == 0
+  if exists('b:QFixMRU_moved') && b:QFixMRU_moved == 0
     call QFixMRUWrite(0)
     let b:QFixMRU_moved = 1
   endif
@@ -807,6 +816,9 @@ endfunction
 
 function! s:VimLeave()
   call QFixMRUVimLeave()
+  if g:QFixMRU_state == 0 && g:QFixMRU_VimLeaveWrite
+    call QFixMRURead()
+  endif
   if g:QFixMRU_state == 1
     call QFixMRUWrite(0)
     call QFixMRUWrite(1)

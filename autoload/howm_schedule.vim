@@ -98,7 +98,7 @@ if !exists('QFixHowm_FileExt')
   if exists('g:qfixmemo_filename')
     let QFixHowm_FileExt = fnamemodify(g:qfixmemo_filename,':e')
   endif
-  if g:QFixHowm_FileExt == '' && exists('howm_filename')
+  if g:QFixHowm_FileExt == '' && exists('g:howm_filename')
     let g:QFixHowm_FileExt  = fnamemodify(g:howm_filename,':e')
   endif
   if g:QFixHowm_FileExt == ''
@@ -531,11 +531,11 @@ function! s:QFixHowmListReminder_(mode,...)
   if empty(sq)
     redraw | echo 'QFixHowm : Not found!'
   else
-    redraw|echo 'QFixHowm : Set quickfix list...'
-    call QFixSetqflist(sq)
-    redraw | echo ''
     let g:QFix_SearchPath = l:howm_dir
-    call QFixCopen()
+    " redraw|echo 'QFixHowm : Set quickfix list...'
+    " call QFixSetqflist(sq)
+    " call QFixCopen()
+    call qfixlist#copen(sq, g:QFix_SearchPath)
     call cursor(1, 1)
     if g:QFixHowm_SchedulePreview == 0 && g:QFix_PreviewEnable == 1
       let g:QFix_PreviewEnable = -1

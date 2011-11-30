@@ -78,8 +78,8 @@ endif
 " メニュー画面に表示する MRUリストのエントリ数
 if !exists('g:QFixHowm_MenuRecent')
   let g:QFixHowm_MenuRecent = 5
-  if exists('g:qfixmemo_recentdays')
-    let g:QFixHowm_MenuRecent = g:qfixmemo_recentdays
+  if exists('g:qfixmemo_random_columns')
+    let g:QFixHowm_MenuRecent = g:qfixmemo_random_columns
   endif
 endif
 
@@ -346,7 +346,9 @@ function! QFixHowmOpenMenu(...)
   let to   = &enc
 
   redraw|echo 'QFixHowm : Make mru list...'
-  let recent = QFixMRUGetList(g:qfixmemo_dir, g:QFixHowm_MenuRecent)
+  if use_recent
+    let recent = QFixMRUGetList(g:qfixmemo_dir, g:QFixHowm_MenuRecent)
+  endif
   if use_random
     redraw|echo 'QFixHowm : Read random cache...'
     let random = qfixmemo#RandomWalk(g:qfixmemo_random_file, 'qflist')

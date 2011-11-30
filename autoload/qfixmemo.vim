@@ -414,6 +414,7 @@ function! s:BufRead()
 endfunction
 
 function! qfixmemo#BufRead()
+  call qfixmemo#Init()
   " qfixmemo_dir以下のファイルであればファイル属性を設定
   if &readonly == 0
     if g:qfixmemo_forceencoding && &fenc != g:qfixmemo_fileencoding
@@ -783,11 +784,11 @@ function! qfixmemo#Init(...)
   if s:init
     return 0
   endif
+  call qfixmemo#MRUInit()
   call QFixGrepLocationMode(g:qfixmemo_use_location_list, 'silent')
   if g:qfixmemo_use_howm_schedule
     call howm_schedule#Init()
   endif
-  call qfixmemo#MRUInit()
   call qfixmemo#LoadKeyword()
   if has('unix') && !has('win32unix')
     silent! call libcallnr("", "srand", localtime())
@@ -2124,17 +2125,12 @@ function! QFixPreviewReadOpt(file)
   return opt
 endfunction
 
-" for qfixmru
-let s:mru_init = 0
 function! qfixmemo#MRUInit()
-  if s:mru_init
+  if g:QFixMRU_state || g:QFixMRU_VimLeaveWrite
     return
   endif
-  if g:QFixMRU_state == 0
-    call QFixMRURead(g:QFixMRU_Filename)
-    call QFixMRUWrite(0)
-  endif
-  let s:mru_init = 1
+  " call QFixMRURead()
+  let g:QFixMRU_VimLeaveWrite = 1
 endfunction
 
 function! qfixmemo#TitleRegxp()
@@ -2576,8 +2572,7 @@ function! qfixmemo#OpenKeywordLink()
         let qflist = sort(qflist, "<SID>qfixmemoSortHowmClink")
       endif
       if len(qflist)
-        call QFixSetqflist(qflist)
-        call QFixCopen()
+        call qfixlist#copen(qflist, g:qfixmemo_dir)
       endif
       return 1
     endif
@@ -2599,8 +2594,7 @@ function! qfixmemo#OpenKeywordLink()
           let qflist = sort(qflist, "<SID>qfixmemoSortHowmClink")
         endif
         if len(qflist)
-          call QFixSetqflist(qflist)
-          call QFixCopen()
+          call qfixlist#copen(qflist, g:qfixmemo_dir)
         endif
         return 1
       elseif g:qfixmemo_keyword_mode == 1

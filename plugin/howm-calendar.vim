@@ -180,6 +180,8 @@ if exists("g:loaded_QFixMemoCalendar_vim") && g:loaded_QFixMemoCalendar_vim && !
 endif
 let g:QFixMemoCalendar_version = s:Version
 let g:loaded_QFixMemoCalendar_vim = 1
+let g:calendar_action = "<SID>CalendarDiary"
+let g:calendar_sign = "CalendarSign_"
 
 " 曜日表示
 " 0 : 英語
@@ -514,12 +516,11 @@ function! s:CalendarStr(...)
     let tm = strftime('%m')
     let td = str2nr(strftime('%d'))
     for n in range(1, eom)
-      if n == td && month == tm && year == ty
-        let str = substitute(str, printf(' \(%2d\)', n), '\*\1', '')
-        continue
-      endif
       let hday = HolidayCheck(year, month, n, 'Sun')
       exe 'let id = '.g:calendar_sign.'(n, month, year)'
+      if n == td && month == tm && year == ty
+        let id = '*'
+      endif
       if id != ''
         if g:calendar_mark =~ 'left-fit'
           let str = substitute(str, printf('%3d', n), printf('%3s', id.string(n)), '')
@@ -530,9 +531,6 @@ function! s:CalendarStr(...)
         endif
       endif
     endfor
-    if month == str2nr(strftime('%m')) && year == strftime('%Y')
-      let str = substitute(str, printf('.\(%2.2d\)', day), '\*\1', '')
-    endif
     let str = substitute(str, '\(.\{21}\)', '\1|', 'g')
     let list = split(str, '|')
     exe 'let list[-1] .= printf("%'.(strlen(list[0])-strlen(list[-1])).'s", "")'

@@ -329,7 +329,6 @@ function! s:QFBufWinEnter(...)
     nnoremap <buffer> <silent> <S-CR> :call <SID>BeforeJump()<CR>:call <SID>QFixEdit()<CR>:call <SID>AfterJump()<CR>
   endif
 
-  nnoremap <buffer> <silent> <C-w>. :<C-u>call <SID>ResizeOnQFix()<CR>
   nnoremap <buffer> <silent> i      :<C-u>call <SID>QFixTogglePreview()<CR>
   nnoremap <buffer> <silent> I      :<C-u>call <SID>QFixToggleHighlight()<CR>
   nnoremap <buffer> <silent> &      :<C-u>call <SID>QFixCmd_LocListCopy('normal')<CR>
@@ -977,6 +976,9 @@ function! MoveToQFixWin(...)
   else
     if winnum != winnr()
       exe winnum . 'wincmd w'
+    else
+      call s:ResizeOnQFix()
+      return
     endif
   endif
   call s:QFixResize()

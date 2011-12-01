@@ -40,10 +40,6 @@ scriptencoding utf-8
 "        :call qfixlist#open(qflist, 'c:/temp')
 "
 "=============================================================================
-
-if exists('disable_MyGrep') && disable_MyGrep == 1
-  finish
-endif
 if exists('g:disable_HowmSchedule') && g:disable_HowmSchedule
   finish
 endif

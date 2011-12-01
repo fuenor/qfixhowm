@@ -2,7 +2,6 @@
 "    Description: QFixMemo
 "         Author: fuenor <fuenor@gmail.com>
 "                 http://sites.google.com/site/fudist/Home  (Japanese)
-"  Last Modified: 0000-00-00 00:00
 "=============================================================================
 let s:Version = 1.00
 scriptencoding utf-8
@@ -307,6 +306,12 @@ endfunction
 endif
 
 function! s:VimEnter()
+  if exists('*QFixMemoCalendarDiary')
+    let g:calendar_action = "QFixMemoCalendarDiary"
+  endif
+  if exists('*QFixMemoCalendarSign')
+    let g:calendar_sign   = "QFixMemoCalendarSign"
+  endif
   call QFixMemoTitleRegxp()
   call QFixMemoVimEnter()
   if g:qfixmemo_use_howm_schedule == 2

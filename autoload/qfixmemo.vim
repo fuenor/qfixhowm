@@ -2,7 +2,6 @@
 "    Description: QFixMemo
 "         Author: fuenor <fuenor@gmail.com>
 "                 http://sites.google.com/site/fudist/Home  (Japanese)
-"  Last Modified: 0000-00-00 00:00
 "=============================================================================
 let s:Version = 1.00
 scriptencoding utf-8
@@ -93,17 +92,6 @@ endif
 " 日記ファイル名
 if !exists('g:qfixmemo_diary')
   let g:qfixmemo_diary         = 'diary/%Y/%m/%Y-%m-%d'
-endif
-" howm-calendar.vim
-if exists('*QFixMemoCalendarDiary')
-  let calendar_action = "QFixMemoCalendarDiary"
-elseif exists('*QFixHowmCalendarDiary')
-  let calendar_action = "QFixHowmCalendarDiary"
-endif
-if exists('*QFixMemoCalendarSign')
-  let calendar_sign   = "QFixMemoCalendarSign"
-elseif exists('*QFixHowmCalendarSign')
-  let calendar_sign   = "QFixHowmCalendarSign"
 endif
 " ペアファイルの作成先ディレクトリ
 if !exists('g:qfixmemo_pairfile_dir')

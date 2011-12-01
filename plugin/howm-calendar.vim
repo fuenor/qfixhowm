@@ -180,10 +180,6 @@ if exists("g:loaded_QFixMemoCalendar_vim") && g:loaded_QFixMemoCalendar_vim && !
 endif
 let g:QFixMemoCalendar_version = s:Version
 let g:loaded_QFixMemoCalendar_vim = 1
-if exists('g:qfixmemo_autoload') && g:qfixmemo_autoload
-  let g:calendar_action = "<SID>CalendarDiary"
-  let g:calendar_sign   = "CalendarSign_"
-endif
 
 " 曜日表示
 " 0 : 英語

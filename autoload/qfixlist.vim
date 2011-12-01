@@ -191,7 +191,9 @@ function! qfixlist#open(...)
   let winnr = bufwinnr(file)
   if winnr != -1
     exe winnr . 'wincmd w'
-    return
+    if loaded
+      return
+    endif
   else
     let aftercmd = ''
     let prevbuf = bufnr('%')

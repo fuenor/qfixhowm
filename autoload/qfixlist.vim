@@ -5,7 +5,7 @@
 "                   http://sites.google.com/site/fudist/Home/grep
 "         Author: fuenor <fuenor@gmail.com>
 "=============================================================================
-let s:Version = 2.86
+let s:Version = 2.87
 scriptencoding utf-8
 
 " What Is This:
@@ -751,6 +751,13 @@ if !exists('g:mygrepprg')
     let g:mygrepprg = 'grep'
   endif
 endif
+" grepを実行する際に$LANGも設定する
+if !exists('g:MyGrep_LANG')
+  let g:MyGrep_LANG = ''
+  if s:MSWindows && exists('$LANG') && $LANG=~ 'ja'
+    let MyGrep_LANG = 'ja_JP.SJIS'
+  endif
+endif
 " let mygrepprg=findstr, let mygrepprg=grepで切り替え可能に
 if !exists('g:grep')
   let g:grep = g:mygrepprg
@@ -1297,7 +1304,14 @@ function! s:ExecGrep(cmd, prg, searchPath, searchWord, from_encoding, to_encodin
     let delimiter = has('unix') ? ':' : ';'
     let $PATH = dir.delimiter.$PATH
   endif
+  let saved_LANG = exists('$LANG') ? $LANG : ''
+  if g:MyGrep_LANG != ''
+    let $LANG = g:MyGrep_LANG
+  endif
   let g:MyGrep_retval = system(cmd)
+  if g:MyGrep_LANG != ''
+    let $LANG = saved_LANG
+  endif
   let g:MyGrep_path   = a:searchPath
   if s:debug
     let g:fudist_cmd = cmd

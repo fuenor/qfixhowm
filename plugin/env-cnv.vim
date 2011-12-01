@@ -503,6 +503,7 @@ function! QFixHowmHelp()
   setlocal buftype=nofile
   setlocal bufhidden=hide
   setlocal noswapfile
+  setlocal modifiable
   call myhowm_msg#HelpInit()
   call setline(1, g:QFixHowmHelpList)
   call cursor(1, 1)

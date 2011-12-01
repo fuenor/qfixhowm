@@ -103,8 +103,9 @@ function s:QFixMemoKeymap()
 endfunction
 
 silent! function QFixMemoMenubar(menu, leader)
+  let leader  = escape(a:leader, '\\')
   let sepcmd  = 'amenu <silent> 41.333 '.a:menu.'.-sep%d-			<Nop>'
-  let menucmd = 'amenu <silent> 41.333 '.a:menu.'.%s<Tab>'.a:leader.'%s %s'
+  let menucmd = 'amenu <silent> 41.333 '.a:menu.'.%s<Tab>'.leader.'%s %s'
   call s:addMenu(menucmd, 'CreateNew(&C)'      , 'c', ':<C-u>call qfixmemo#EditNew()<CR>')
   call s:addMenu(menucmd, 'CreateNew(Name)(&N)', 'C', ':<C-u>call qfixmemo#EditInput()<CR>')
   call s:addMenu(menucmd, 'QuickMemo(&U)'      , 'u', ':<C-u>call qfixmemo#Quickmemo()<CR>')
@@ -113,7 +114,7 @@ silent! function QFixMemoMenubar(menu, leader)
   call s:addMenu(menucmd, 'SubMenu(&I)'        , 'i', ':<C-u>call qfixmemo#SubMenu()<CR>')
   exe printf(sepcmd, 1)
   let sepcmd  = 'amenu <silent> 41.334 '.a:menu.'.-sep%d-			<Nop>'
-  let menucmd = 'amenu <silent> 41.334 '.a:menu.'.%s<Tab>'.a:leader.'%s %s'
+  let menucmd = 'amenu <silent> 41.334 '.a:menu.'.%s<Tab>'.leader.'%s %s'
   call s:addMenu(menucmd, 'MRU(&M)'              , 'm', ':<C-u>call qfixmemo#ListMru()<CR>')
   call s:addMenu(menucmd, 'ListRecent(&L)'       , 'l', ':<C-u>call qfixmemo#ListRecent()<CR>')
   call s:addMenu(menucmd, 'ListRecent(Stamp)(&2)', 'L', ':<C-u>call qfixmemo#ListRecentTimeStamp()<CR>')
@@ -155,7 +156,7 @@ silent! function QFixMemoMenubar(menu, leader)
   exe printf(sepcmd, 9)
   let submenu = '.Buffer[Local]\ (&B)'
   let sepcmd  = 'amenu <silent> 41.335 '.a:menu.submenu.'.-sep%d-			<Nop>'
-  let menucmd = 'amenu <silent> 41.335 '.a:menu.submenu.'.%s<Tab>'.a:leader.'%s %s'
+  let menucmd = 'amenu <silent> 41.335 '.a:menu.submenu.'.%s<Tab>'.leader.'%s %s'
   exe printf(sepcmd, 1)
   call s:addMenu(menucmd, 'Outline(&O)', 'o',  ':<C-u>call QFixMemoOutline()<CR>')
   exe printf(sepcmd, 2)

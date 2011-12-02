@@ -311,7 +311,7 @@ function QFixMemoBufWritePre()
   " ファイル末の空行を削除
   call qfixmemo#DeleteNullLines()
   " キーワードリンク
-  call qfixmemo#AddKeyword(...)
+  call qfixmemo#AddKeyword()
 endfunction
 endif
 

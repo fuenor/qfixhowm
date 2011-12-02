@@ -886,7 +886,9 @@ endif
 if !exists('g:MyGrep_yagrep_opt')
   let g:MyGrep_yagrep_opt = 0
 endif
-let g:MyGrep_cmdopt = ''
+if !exists('g:MyGrep_cmdopt')
+  let g:MyGrep_cmdopt = ''
+endif
 " 一時的にvimgrepを使用したいときに非0。使用後リセットされる。
 let g:MyGrep_UseVimgrep = 0
 " QuickFixに登録しない
@@ -981,6 +983,7 @@ function! qfixlist#MyGrep(pattern, searchPath, filepattern, fenc, addflag, ...)
     let g:MyGrep_Ignorecase = g:MyGrep_DefaultIgnorecase
     let g:MyGrep_Recursive  = 0
     let g:MyGrep_UseVimgrep = 0
+    let g:MyGrep_cmdopt = ''
     return []
   endif
   if g:MyGrep_ShellEncoding =~ 'utf8\c'
@@ -1011,6 +1014,7 @@ function! qfixlist#MyGrep(pattern, searchPath, filepattern, fenc, addflag, ...)
           let g:MyGrep_Ignorecase = g:MyGrep_DefaultIgnorecase
           let g:MyGrep_Recursive  = 0
           let g:MyGrep_UseVimgrep = 0
+          let g:MyGrep_cmdopt = ''
           call s:SetGrepEnv('restore')
           return []
         endif
@@ -1093,7 +1097,7 @@ function! s:SetGrepEnv(mode, ...)
     let s:MyGrep_FileEncoding       = g:MyGrep_FileEncoding
 
     if g:mygrepprg == 'findstr'
-      let g:MyGrepcmd                 = '#prg# #defopt# #recopt# #opt# #useropt# /G:#searchWordFile# #searchPath#'
+      let g:MyGrepcmd                 = '#prg# #defopt# #recopt# #opt# #useropt# #cmdopt# /G:#searchWordFile# #searchPath#'
       let g:MyGrepcmd_regexp          = '/n /p /r'
       let g:MyGrepcmd_regexp_ignore   = '/n /p /r /i'
       let g:MyGrepcmd_fix             = '/n /p /l'

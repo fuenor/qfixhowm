@@ -505,7 +505,7 @@ function! s:QFixHowmListReminder_(mode,...)
       endif
     endif
     let g:MyGrep_Return = 1
-    let sq = qfixlist#MyGrep(searchWord, searchPath, l:SearchFile, g:howm_fileencoding, addflag)
+    let sq = qfixlist#grep(searchWord, searchPath, l:SearchFile, g:howm_fileencoding)
     call extend(sq, holiday_sq)
     let s:UseTitleFilter = 1
     call QFixHowmTitleFilter(sq)

@@ -29,6 +29,10 @@ let s:debug = exists('g:fudist') ? g:fudist : 0
 if !exists('g:qfixmemo_mapleader')
   let g:qfixmemo_mapleader     = 'g,'
 endif
+" デフォルトキーマップを有効
+if !exists('g:qfixmemo_default_keymap')
+  let g:qfixmemo_default_keymap = 1
+endif
 
 if !exists('g:qfixmemo_dir')
   let g:qfixmemo_dir           = '~/qfixmemo'
@@ -443,7 +447,9 @@ function! s:localkeymap()
     let s:mapleader = g:mapleader
   endif
   let g:maplocalleader = g:qfixmemo_mapleader
-  call s:QFixMemoLocalKeymap()
+  if g:qfixmemo_default_keymap
+    call s:QFixMemoLocalKeymap()
+  endif
   call QFixMemoLocalKeymapPost()
   if exists('s:maplocalleader')
     let g:maplocalleader = s:maplocalleader
@@ -773,7 +779,6 @@ function! qfixmemo#Init(...)
     return 0
   endif
   call qfixmemo#MRUInit()
-  call QFixGrepLocationMode(g:qfixmemo_use_location_list, 'silent')
   if g:qfixmemo_use_howm_schedule
     call howm_schedule#Init()
   endif
@@ -2739,21 +2744,5 @@ function! qfixmemo#Syntax()
     exe 'setlocal filetype=' . g:qfixmemo_filetype
   endif
   call s:syntaxHighlight()
-endfunction
-
-""""""""""""""""""""""""""""""
-" 表示にQuickFixではなくロケーションリストを使用する
-if !exists('g:qfixmemo_use_location_list')
-  let g:qfixmemo_use_location_list = 0
-endif
-
-function! QFixGrepLocationMode(...)
-  let mode = a:0 ? a:1 : count
-  let g:qfixmemo_use_location_list = mode
-  call QFixLocationMode(mode)
-  if a:0 > 1
-    return
-  endif
-  echo printf('QFixWin (%s) : QFixGrep (%s)', (g:QFix_UseLocationList ? 'L' : 'Q'), (g:MyGrep_UseLocationList ? 'L' : 'Q'))
 endfunction
 

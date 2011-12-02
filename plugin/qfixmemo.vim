@@ -311,6 +311,12 @@ function QFixMemoVimEnter()
 endfunction
 endif
 
+" コマンド実行前処理
+if !exists('*QFixMemoInit')
+function QFixMemoInit()
+endfunction
+endif
+
 function! s:VimEnter()
   if exists('*QFixMemoCalendarDiary')
     let g:calendar_action = "QFixMemoCalendarDiary"

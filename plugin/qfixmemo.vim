@@ -313,6 +313,7 @@ function! s:VimEnter()
   if exists('*QFixMemoCalendarSign')
     let g:calendar_sign   = "QFixMemoCalendarSign"
   endif
+  call QFixMemoInit()
   call QFixMemoTitleRegxp()
   call QFixMemoVimEnter()
   if g:qfixmemo_use_howm_schedule == 2

@@ -746,12 +746,6 @@ function! s:BufWritePost()
   call QFixMemoBufWritePost()
 endfunction
 
-" コマンド実行前処理
-if !exists('*QFixMemoInit')
-function QFixMemoInit()
-endfunction
-endif
-
 let s:init = 0
 function! qfixmemo#Init(...)
   " for qfixwin

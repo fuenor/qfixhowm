@@ -1119,6 +1119,14 @@ qfixmemo/misc/qfixmemo-chenv.vim をpluginディレクトリにコピーして�
 デフォルトではファイル名とファイルタイプ設定しか変更しないので、より細かい設定
 を行いたい場合は qfixmemo-chenv.vimを改変してください。
 
+また通常MRUリストは qfixmemo_dirを基準とする相対パスで保持していますが
+qfixmemo_dirを切り替える場合には基準ディレクトリが異なるためパスを維持できなく
+なります。
+対処としてqfixmemo-chenv.vimではQFixMRU_RootDirに適切なディレクトリを独自設定
+しています。
+ユーザー側でQFixMRU_RootDirを指定する場合はかならずqfixmemo_dirより上位のディ
+レクトリを指定する必要があります。
+
 ------------------------------------------------------------------------------
 12.7 URIを開く																					*qfixmemo-uri*
 
@@ -1143,28 +1151,8 @@ QuickFixウィンドウとロケーションリストはどちらも機能的に
 ドウ(バッファ)といえます。
 詳しくは|quickfix|や|location-list| を参照してください。
  >
-  " QFixMemoで使用するロケーションリストの指定
-  let qfixmemo_use_location_list = 0
-<
-| カウント |     QFixMemo       |     QFixQFixGrep   |
-|  0(なし) | QuickFixウィンドウ | QuickFixウィンドウ |
-|    1     | ロケーションリスト | QuickFixウィンドウ |
-|    2     | ロケーションリスト | ロケーションリスト |
-|    3     | QuickFixウィンドウ | ロケーションリスト |
-<Leader>0 <Leader>1 ...でカウント指定して使用するウィンドウを変更可能です。
-カウントはqfixmemo_use_location_listの値と対応しています。
-
-ウィンドウの開き方も個別に指定可能です。
-設定していない場合はデフォルトが使用されます。
- >
-  " ウィンドウコマンド(デフォルト)
-  let QFix_CopenCmd = ''
-  " QuickFixウィンドウコマンド指定
-  let QFix_CopenCmd0 = 'rightbelow'
-  " ロケーションリストコマンド指定
-  let QFix_CopenCmd1 = 'vertical botright'
-<
-QFixMemoで使用しないウィンドウ(リスト)は|:copen|か|:lopen|で開いてください。
+  " QFixWinで使用するロケーションリストを使用する
+  let QFix_UseLocationList = 1
 
 なおロケーションリストで使用する場合、QuickFixウィンドウとは挙動がウィンドウ周
 りで若干異なることがあります。

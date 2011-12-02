@@ -52,6 +52,13 @@ endif
 " なおdirの最後に -mkd がつくとファイルタイプが markdown、-org ならorg、
 " vimwikiなら vimwikiに設定される。
 "
+" MRUリスト
+" 通常MRUリストは qfixmemo_dirを基準とする相対パスで保持するがqfixmemo_dirを切
+" り替える場合には基準ディレクトリが異なるためパスを維持できなくなる。
+" 対処として本プラグインではQFixMRU_RootDirにqfixmemo_chenv_dirを設定するが、
+" 独自にQFixMRU_RootDirを指定する場合はqfixmemo_chenv_dirより上位のディレクト
+" リを指定する必要がある。
+"
 " format
 " 生成するファイル名指定
 " | month  | 月単位   |
@@ -84,6 +91,10 @@ if !exists('g:qfixmemo_chenv_dir')
   elseif exists('g:qfixmemo_dir')
     let g:qfixmemo_chenv_dir = g:qfixmemo_dir
   endif
+endif
+" MRUの基準ディレクトリを設定する
+if !exists('g:QFixMRU_RootDir')
+  let g:QFixMRU_RootDir = g:qfixmemo_chenv_dir
 endif
 " デフォルト拡張子設定(qfixmemo-chenv.vimのみ有効)
 if !exists('g:qfixmemo_chenv_ext')

@@ -171,6 +171,7 @@ endif
 silent! nnoremap <unique> <silent> <C-w>, :<C-u>ToggleQFixWin<CR>
 silent! nnoremap <unique> <silent> <C-w>. :<C-u>MoveToQFixWin<CR>
 " silent! nnoremap <unique> <silent> <C-w>/ :<C-u>call QFixLocationMode()<CR>
+silent! nnoremap <unique> <silent> <C-w>0 :<C-u>ToggleLocationListMode<CR>
 
 """"""""""""""""""""""""""""""
 " コマンド
@@ -185,6 +186,12 @@ command! -nargs=? -count QFdo call QFdo(<q-args>, <count>)
 command! -nargs=* FList call s:FL(<q-args>)
 command! -nargs=* -bang QFixCopen call QFixCopen(<q-args>, <bang>0)
 command! QFixCclose call QFixCclose()
+
+command! -bang ToggleLocationListMode call <SID>ToggleLocationListMode()
+function! s:ToggleLocationListMode()
+  let g:QFix_UseLocationList = !g:QFix_UseLocationList
+  echo 'QFixWin : Current window = '.(g:QFix_UseLocationList ? 'Location list' : 'QuickFix')
+endfunction
 
 """"""""""""""""""""""""""""""
 " 内部変数
@@ -932,30 +939,6 @@ function! s:QFixToggleHighlight()
   let g:QFix_PreviewFtypeHighlight = !g:QFix_PreviewFtypeHighlight
   let s:QFixPreviewfile = ''
   echo 'FileType syntax : ' . (g:QFix_PreviewFtypeHighlight? 'ON' : 'OFF')
-endfunction
-
-""""""""""""""""""""""""""""""
-" Quickfix/ロケーションリスト切替
-""""""""""""""""""""""""""""""
-function! QFixLocationMode(...)
-  let mode = a:0 ? a:1 : 0
-  let mode = count ? count : mode
-  if mode == 0
-    let g:QFix_UseLocationList   = 0
-    let g:MyGrep_UseLocationList = 0
-  elseif mode == 1
-    let g:QFix_UseLocationList   = 1
-    let g:MyGrep_UseLocationList = 0
-  elseif mode == 2
-    let g:QFix_UseLocationList   = 1
-    let g:MyGrep_UseLocationList = 1
-  elseif mode == 3
-    let g:QFix_UseLocationList   = 0
-    let g:MyGrep_UseLocationList = 1
-  elseif mode == 4
-    let g:QFix_UseLocationList   = 0
-    let g:MyGrep_UseLocationList = 0
-  endif
 endfunction
 
 """"""""""""""""""""""""""""""

@@ -82,6 +82,9 @@ if !exists('g:QFixHowm_MenuRecent')
     let g:QFixHowm_MenuRecent = g:qfixmemo_random_columns
   endif
 endif
+if !exists('g:QFix_UseLocationList')
+  let g:QFix_UseLocationList = 0
+endif
 
 """"""""""""""""""""""""""""""
 augroup HowmFiles
@@ -307,8 +310,10 @@ function! QFixHowmOpenMenu(...)
     let g:QFixHowm_ShowScheduleMenu = count
   endif
   redraw | echo 'QFixHowm : Open menu...'
-  let winnr = QFixWinnr()
-  exe winnr.'wincmd w'
+  if exists('*QFixWinnr')
+    let winnr = QFixWinnr()
+    exe winnr.'wincmd w'
+  endif
   if &buftype == 'quickfix'
     silent! wincmd w
   endif
@@ -394,7 +399,7 @@ function! QFixHowmOpenMenu(...)
   exe 'setlocal ff='.g:qfixmemo_fileformat
   let &winfixheight = g:QFixHowm_Menu_winfixheight
   let &winfixwidth  = g:QFixHowm_Menu_winfixwidth
-  if g:QFix_Width > 0
+  if g:QFixHowm_MenuWidth > 0
     exe "normal! ".g:QFixHowm_MenuWidth."\<C-W>|"
   endif
   if g:QFixHowm_MenuHeight > 0

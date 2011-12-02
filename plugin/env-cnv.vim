@@ -49,6 +49,10 @@ let g:loaded_envcnv = 1
 "   (env-cnv.vimの初期化がqfixmemo.vimより先に行われると仮定)
 "   明示的に先読みを行うにはqfixmemo_prescriptを使用します。
 "     let g:qfixmemo_prescript = '~/qfixapp/plugin/env-cnv.vim'
+"
+"   またqfixmemo.vim本体をautoload読み込みすることでも結果的にenv-cnv.vimを先
+"   読みすることになります。
+"     let g:qfixmemo_autoload = 1
 "-----------------------------------------------------------------------------
 
 """"""""""""""""""""""""""""""
@@ -296,9 +300,6 @@ if exists('g:QFixHowm_RecentDays')
 endif
 if exists('g:QFixHowm_CalendarWinCmd')
   let g:qfixmemo_calendar_wincmd = g:QFixHowm_CalendarWinCmd
-endif
-if exists('g:QFixHowm_UseLocationList')
-  let g:qfixmemo_use_location_list = g:QFixHowm_UseLocationList
 endif
 if exists('g:QFixHowm_ListCloseOnJump')
   let g:qfixlist_close_on_jump = g:QFixHowm_ListCloseOnJump

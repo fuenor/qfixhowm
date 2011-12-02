@@ -937,7 +937,7 @@ MRUに登録したり、エントリ一覧を表示するのにはタイトル�
   let qfixmemo_title    = '###'
   let qfixmemo_filename = '%Y/%m/%Y-%m-%d-%H%M%S.mkd'
 
-QFixMemoではタイトル行を利用した2のコマンドがあります。
+QFixMemoではタイトル行を利用したコマンドがあります。
 - MRU
 - grepを利用したエントリ一覧
 

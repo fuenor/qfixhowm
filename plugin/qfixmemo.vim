@@ -36,6 +36,10 @@ endif
 if !exists('g:qfixmemo_mapleader')
   let g:qfixmemo_mapleader     = 'g,'
 endif
+" デフォルトキーマップを有効
+if !exists('g:qfixmemo_default_keymap')
+  let g:qfixmemo_default_keymap = 1
+endif
 " メニューバーへ登録
 if !exists('g:qfixmemo_menubar')
   let g:qfixmemo_menubar = 1
@@ -195,16 +199,17 @@ endif
 let g:mapleader = g:qfixmemo_mapleader
 
 if g:qfixmemo_menubar
-  call QFixMemoMenubar('Memo(&M)', g:mapleader)
+  call QFixMemoMenubar('Memo(&M)', g:qfixmemo_mapleader)
 endif
-
-call s:QFixMemoKeymap()
+if g:qfixmemo_default_keymap
+  call s:QFixMemoKeymap()
+endif
 call QFixMemoKeymapPost()
 
 if exists('s:mapleader')
   let g:mapleader = s:mapleader
 else
-  unlet g:mapleader
+  silent! unlet g:mapleader
 endif
 
 """"""""""""""""""""""""""""""

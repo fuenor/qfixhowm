@@ -29,9 +29,9 @@ scriptencoding utf-8
 "
 "    QuickFix
 "    qfixlist#GrepCopen(pattern, path, filepattern, {fileencoding})
+"      :call qfixlist#GrepCopen('words', '~/usr/mytxt', '*.txt', 'utf-8')
 "    QFixList
 "    qfixlist#GrepOpen(pattern, path, filepattern, {fileencoding})
-"      :call qfixlist#GrepCopen('words', '~/usr/mytxt', '*.txt', 'utf-8')
 "      :call qfixlist#GrepOpen('words', '~/usr/mytxt', '**/*.txt')
 "    or
 "    qfixlist#grep(pattern, path, filepattern, {fileencoding})
@@ -50,11 +50,11 @@ scriptencoding utf-8
 "      :call qfixlist#open()
 "
 "    addtinal options
-"    | function     | option                     |           |
-"    | Grep         | :let MyGrep_Regexp     = 1 | * default |
-"    | FGrep        | :let MyGrep_Regexp     = 0 |           |
-"    | Ignorecase   | :let MyGrep_Ignorecase = 1 | * default |
-"    | Recursive    | :let MyGrep_Recursive  = 0 | * default |
+"    | function     | option                      | default                  |
+"    | Grep         | let g:MyGrep_Regexp     = 1 | 1                        |
+"    | FGrep        | let g:MyGrep_Regexp     = 0 |                          |
+"    | Ignorecase   | let g:MyGrep_Ignorecase = 1 | MyGrep_DefaultIgnorecase |
+"    | Recursive    | let g:MyGrep_Recursive  = 0 | 0                        |
 "    * these options reset to default after qfixlist#grep()
 
 if exists('g:disable_QFixList') && g:disable_QFixList == 1
@@ -334,18 +334,20 @@ endfunction
 
 function! qfixlist#search(pattern, dir, cmd, days, fenc, file)
   let cmd = a:cmd
+  let dir = a:dir == '' ? getcwd() : a:dir
+  let fenc = a:fenc == '' ? &enc : a:fenc
   redraw | echo 'QFixList : execute grep...'
   if a:days
     let g:MyGrep_FileListWipeTime = localtime() - a:days*24*60*60
   endif
   let prevPath = escape(getcwd(), ' ')
   let g:MyGrep_Return = 1
-  let list = qfixlist#MyGrep(a:pattern, a:dir, a:file, a:fenc, 0)
+  let list = qfixlist#MyGrep(a:pattern, dir, a:file, fenc, 0)
 
   redraw | echo 'QFixList : Formatting...'
-  silent! exe 'lchdir ' . escape(expand(a:dir), ' ')
+  silent! exe 'lchdir ' . escape(expand(dir), ' ')
   if g:qfixlist_use_fnamemodify == 0
-    let head = fnamemodify(expand(a:dir), ':p')
+    let head = fnamemodify(expand(dir), ':p')
     let head = QFixNormalizePath(head)
     for d in list
       if !exists("d['filename']")
@@ -391,7 +393,7 @@ function! qfixlist#search(pattern, dir, cmd, days, fenc, file)
   if a:cmd =~ 'r.*'
     let list = reverse(list)
   endif
-  let s:QFixList_qfdir = a:dir
+  let s:QFixList_qfdir = dir
   let s:QFixList_qfCache = list
   redraw | echo ''
   return list
@@ -753,6 +755,10 @@ if !exists('g:mygrepprg')
     let g:mygrepprg = 'grep'
   endif
 endif
+" 日本語が含まれる場合のgrep指定
+if !exists('myjpgrepprg')
+  let myjpgrepprg = ''
+endif
 " grepを実行する際に$LANGも設定する
 if !exists('g:MyGrep_LANG')
   let g:MyGrep_LANG = ''
@@ -761,15 +767,11 @@ if !exists('g:MyGrep_LANG')
   endif
 endif
 " let mygrepprg=findstr, let mygrepprg=grepで切り替え可能に
-if !exists('g:grep')
+if !exists('g:grep') && exists('g:mygrepprg')
   let g:grep = g:mygrepprg
 endif
 if !exists('g:findstr')
   let g:findstr = 'findstr'
-endif
-" 日本語が含まれる場合のgrep指定
-if !exists('myjpgrepprg')
-  let myjpgrepprg = ''
 endif
 " 検索対象外のファイル指定
 if !exists('g:MyGrep_ExcludeReg')
@@ -786,6 +788,14 @@ endif
 " 変換後のファイルエンコーディングを指定する
 if !exists('g:MyGrep_FileEncoding')
   let g:MyGrep_FileEncoding = ''
+endif
+" smartcaseを利用する
+if !exists('g:MyGrep_Smartcase')
+  let g:MyGrep_Smartcase = 1
+endif
+" デフォルトignorecase
+if !exists('g:MyGrep_DefaultIgnorecase')
+  let g:MyGrep_DefaultIgnorecase = 1
 endif
 " ダメ文字対策
 if !exists('g:MyGrep_Damemoji')
@@ -806,17 +816,15 @@ endif
 if !exists('g:MyGrep_IncludeOpt')
   let g:MyGrep_IncludeOpt = 0
 endif
+" 指定のファイルパターンを利用してgrep実行
+" FIXME: デフォルトではバグありgrep対策として常に * でgrepしている
+" バグのないgrepでは空文字列を指定する
+if !exists('g:MyGrep_GrepFilePattern')
+  let g:MyGrep_GrepFilePattern = '*'
+endif
 " 検索時にカーソル位置の単語を拾う
 if !exists('g:MyGrep_DefaultSearchWord')
   let g:MyGrep_DefaultSearchWord = 1
-endif
-" 検索ディレクトリはカレントディレクトリを基点にする
-if !exists('g:MyGrep_CurrentDirMode')
-  let g:MyGrep_CurrentDirMode = 1
-endif
-" デフォルトのファイルパターン
-if !exists('g:MyGrep_FilePattern')
-  let g:MyGrep_FilePattern = '*'
 endif
 " デフォルトのerrorformat
 if !exists('g:MyGrep_errorformat')
@@ -831,95 +839,6 @@ let g:MyGrep_qflist = []
 function! qfixlist#ToggleDamemoji()
   let g:MyGrep_Damemoji = 2 * !g:MyGrep_Damemoji
   echo 'QFixList : Damemoji = '.(g:MyGrep_Damemoji ? 'ON' : 'OFF')
-endfunction
-
-function! qfixlist#ToggleGrepCurrentDirMode()
-  let g:MyGrep_CurrentDirMode = !g:MyGrep_CurrentDirMode
-  echo 'QFixList : CurrentDirMode = '.(g:MyGrep_CurrentDirMode ? 'ON' : 'OFF')
-endfunction
-
-function! qfixlist#ToggleGrepRecursiveMode()
-  let g:MyGrep_RecursiveMode = !g:MyGrep_RecursiveMode
-  echo 'QFixList : RecursiveMode = '.(g:MyGrep_RecursiveMode ? 'ON' : 'OFF')
-endfunction
-
-""""""""""""""""""""""""""""""
-function! s:restore()
-  if !exists('g:MyGrep_UseLocationList') || s:QFix_UseLocationList == g:MyGrep_UseLocationList
-    return
-  endif
-  let g:QFix_Win             = s:QFix_Win
-  let g:QFix_SearchPath      = s:QFix_SearchPath
-  let g:QFix_UseLocationList = s:QFix_UseLocationList
-endfunction
-
-function! s:save()
-  let s:QFix_UseLocationList = g:QFix_UseLocationList
-  if !exists('g:MyGrep_UseLocationList') || g:QFix_UseLocationList == g:MyGrep_UseLocationList
-    return
-  endif
-  let s:QFix_Win             = g:QFix_Win
-  let s:QFix_SearchPath      = g:QFix_SearchPath
-  let g:QFix_UseLocationList = g:MyGrep_UseLocationList
-endfunction
-
-""""""""""""""""""""""""""""""
-" バッファのみgrep
-" 無名バッファは検索できない。
-""""""""""""""""""""""""""""""
-function! qfixlist#BGrep(word, mode, addflag)
-  let pattern = a:word
-  let mes = "Buffers grep : "
-  if a:addflag
-    let mes = "Buffers grepadd : "
-  endif
-  if pattern == '' || a:mode == -1
-    let pattern = expand("<cword>")
-    if g:MyGrep_DefaultSearchWord == 0
-      let pattern = ''
-    endif
-    if a:mode < 0
-      let pattern = @0
-    endif
-    let pattern = input(mes, pattern)
-  endif
-  if pattern == '' | return | endif
-  call s:save()
-  if a:addflag && g:QFix_SearchPath != ''
-    let disppath = g:QFix_SearchPath
-  else
-    let disppath = expand('%:p:h')
-  endif
-  let g:QFix_SearchPath = disppath
-  let @/ = pattern
-  call histadd('/', '\V' . @/)
-  call histadd('@', pattern)
-  let bufnr = bufnr('%')
-  let save_cursor = getpos('.')
-  if a:addflag == 0
-    let ccmd = g:QFix_UseLocationList ? 'lexpr ""' : 'cexpr ""'
-    silent! exe ccmd
-  endif
-  call QFixPclose()
-  let vopt = g:QFix_UseLocationList ? 'l' : ''
-  silent! exe ':bufdo | try | '.vopt.'vimgrepadd /' . pattern . '/j % | catch | endtry'
-  silent! exe 'b'.bufnr
-  if a:addflag
-    let g:QFix_SearchPath = disppath
-  endif
-  let g:QFix_SearchResult = []
-  let save_qflist = QFixGetqflist()
-  if empty(save_qflist)
-    redraw | echo 'QFixGrep : Not found!'
-  else
-    if g:QFix_HeightFixMode == 1
-      let g:QFix_Height = g:QFix_HeightDefault
-    endif
-    call QFixCopen()
-    call cursor(1, 1)
-    redraw | echo ''
-  endif
-  call s:restore()
 endfunction
 
 """"""""""""""""""""""""""""""
@@ -943,6 +862,9 @@ endif
 if !exists('g:MyGrepcmd_fix_ignore')
   let g:MyGrepcmd_fix_ignore = '-nHIFi'
 endif
+if !exists('g:MyGrepcmd_recursive')
+  let g:MyGrepcmd_recursive = '-R'
+endif
 if !exists('g:MyGrep_Ignorecase')
   let g:MyGrep_Ignorecase = 1
 endif
@@ -952,17 +874,8 @@ endif
 if !exists('g:MyGrep_Recursive')
   let g:MyGrep_Recursive = 0
 endif
-if !exists('g:MyGrep_RecursiveMode')
-  let g:MyGrep_RecursiveMode = 0
-endif
-if !exists('g:MyGrep_RecOpt')
-  let g:MyGrep_RecOpt = '-R'
-endif
 if !exists('g:QFix_UseLocationList')
   let g:QFix_UseLocationList = 0
-endif
-if !exists('g:MyGrep_UseLocationList')
-  " let g:MyGrep_UseLocationList = 0
 endif
 if !exists('g:QFix_SearchPath')
   let g:QFix_SearchPath = ''
@@ -1040,7 +953,7 @@ function! qfixlist#MyGrep(pattern, searchPath, filepattern, fenc, addflag, ...)
       silent! exe 'lchdir ' . prevPath
     endif
     let g:MyGrep_Regexp = 1
-    let g:MyGrep_Ignorecase = 1
+    let g:MyGrep_Ignorecase = g:MyGrep_DefaultIgnorecase
     let g:MyGrep_Recursive  = 0
     let g:MyGrep_UseVimgrep = 0
     if g:MyGrep_ErrorMes != ''
@@ -1065,7 +978,7 @@ function! qfixlist#MyGrep(pattern, searchPath, filepattern, fenc, addflag, ...)
     let mes = '"'.l:mygrepprg.'" is not executable!'
     let choice = confirm(mes, "&OK", 1, "W")
     let g:MyGrep_Regexp = 1
-    let g:MyGrep_Ignorecase = 1
+    let g:MyGrep_Ignorecase = g:MyGrep_DefaultIgnorecase
     let g:MyGrep_Recursive  = 0
     let g:MyGrep_UseVimgrep = 0
     return []
@@ -1095,7 +1008,7 @@ function! qfixlist#MyGrep(pattern, searchPath, filepattern, fenc, addflag, ...)
           let g:MyGrep_ErrorMes = "QFixGrep : ダメ文字しか含まれていません!"
           silent! exe ccmd
           let g:MyGrep_Regexp = 1
-          let g:MyGrep_Ignorecase = 1
+          let g:MyGrep_Ignorecase = g:MyGrep_DefaultIgnorecase
           let g:MyGrep_Recursive  = 0
           let g:MyGrep_UseVimgrep = 0
           call s:SetGrepEnv('restore')
@@ -1104,10 +1017,13 @@ function! qfixlist#MyGrep(pattern, searchPath, filepattern, fenc, addflag, ...)
       endif
     endif
   endif
+  if g:MyGrep_Smartcase && pattern =~ '\C[A-Z]'
+    let g:MyGrep_Ignorecase = 0
+  endif
   if g:MyGrep_Ignorecase > 0
     let _grepcmd = _grepcmd.'_ignore'
   endif
-  let g:MyGrep_Ignorecase = 1
+  let g:MyGrep_Ignorecase = g:MyGrep_DefaultIgnorecase
   let grepcmd = substitute(g:MyGrepcmd, '#defopt#', {_grepcmd}, '')
   let grepcmd = substitute(grepcmd, '#useropt#', g:MyGrepcmd_useropt, '')
   silent! exe 'lchdir ' . escape(searchPath, ' ')
@@ -1150,7 +1066,7 @@ if !exists('g:qfixtempname')
   let g:qfixtempname = tempname()
 endif
 """"""""""""""""""""""""""""""
-"findstr/jvgrep用に環境設定
+" 非grep互換コマンド環境設定
 """"""""""""""""""""""""""""""
 function! s:SetGrepEnv(mode, ...)
   if a:mode == 'set'
@@ -1170,7 +1086,7 @@ function! s:SetGrepEnv(mode, ...)
     let s:MyGrepcmd_fix             = g:MyGrepcmd_fix
     let s:MyGrepcmd_fix_ignore      = g:MyGrepcmd_fix_ignore
     let s:MyGrepcmd_useropt         = g:MyGrepcmd_useropt
-    let s:MyGrep_RecOpt             = g:MyGrep_RecOpt
+    let s:MyGrepcmd_recursive       = g:MyGrepcmd_recursive
     let s:MyGrep_Damemoji           = g:MyGrep_Damemoji
     let s:MyGrep_DamemojiReplaceReg = g:MyGrep_DamemojiReplaceReg
     let s:MyGrep_ShellEncoding      = g:MyGrep_ShellEncoding
@@ -1182,7 +1098,7 @@ function! s:SetGrepEnv(mode, ...)
       let g:MyGrepcmd_regexp_ignore   = '/n /p /r /i'
       let g:MyGrepcmd_fix             = '/n /p /l'
       let g:MyGrepcmd_fix_ignore      = '/n /p /l /i'
-      let g:MyGrep_RecOpt             = '/s'
+      let g:MyGrepcmd_recursive       = '/s'
       let g:MyGrep_DamemojiReplaceReg = '..'
       let g:MyGrep_ShellEncoding      = 'cp932'
       let g:MyGrep_FileEncoding       = ''
@@ -1191,7 +1107,7 @@ function! s:SetGrepEnv(mode, ...)
       let g:MyGrepcmd_regexp_ignore   = '-i' " TODO: works fixed match only.
       let g:MyGrepcmd_fix             = '-F'
       let g:MyGrepcmd_fix_ignore      = '-i -F'
-      let g:MyGrep_RecOpt             = '-R'
+      let g:MyGrepcmd_recursive       = '-R'
       let g:MyGrep_Damemoji           = 0
     endif
   elseif a:mode == 'restore'
@@ -1205,7 +1121,7 @@ function! s:SetGrepEnv(mode, ...)
     let g:MyGrepcmd_fix             = s:MyGrepcmd_fix
     let g:MyGrepcmd_fix_ignore      = s:MyGrepcmd_fix_ignore
     let g:MyGrepcmd_useropt         = s:MyGrepcmd_useropt
-    let g:MyGrep_RecOpt             = s:MyGrep_RecOpt
+    let g:MyGrepcmd_recursive       = s:MyGrepcmd_recursive
     let g:MyGrep_Damemoji           = s:MyGrep_Damemoji
     let g:MyGrep_DamemojiReplaceReg = s:MyGrep_DamemojiReplaceReg
     let g:MyGrep_ShellEncoding      = s:MyGrep_ShellEncoding
@@ -1236,20 +1152,19 @@ function! s:ExecGrep(cmd, prg, searchPath, searchWord, from_encoding, to_encodin
   let prg = fnamemodify(a:prg, ':t')
   let cmd = substitute(cmd, '#prg#', prg, 'g')
 
-  let sPath = '*'
+  let sFile = g:MyGrep_GrepFilePattern
+  if sFile == ''
+    let sFile = substitute(a:filepattern, '\*\*/', '', 'g')
+  endif
   let ropt = ''
   let opt = ''
 
   " 検索パス設定
-  if match(a:filepattern, '^\*\*/') != -1 || g:MyGrep_RecursiveMode
+  if match(a:filepattern, '^\*\*/') != -1
     let g:MyGrep_Recursive = 1
   endif
-  if s:debug
-    "let filepattern = substitute(a:filepattern, '^\*\*/', '', '')
-    "let sPath = filepattern
-  endif
   if g:MyGrep_Recursive == 1
-    let ropt = g:MyGrep_RecOpt
+    let ropt = g:MyGrepcmd_recursive
     let g:MyGrep_Recursive = 0
   endif
   if g:mygrepprg =~ 'yagrep\c'
@@ -1276,7 +1191,7 @@ function! s:ExecGrep(cmd, prg, searchPath, searchWord, from_encoding, to_encodin
   let cmd = substitute(cmd, '#opt#', opt, '')
   let cmd = substitute(cmd, '#cmdopt#', g:MyGrep_cmdopt, '')
   let g:MyGrep_cmdopt = ''
-  let cmd = substitute(cmd, '#searchPath#', escape(sPath, '\\'), 'g')
+  let cmd = substitute(cmd, '#searchPath#', escape(sFile, '\\'), 'g')
 
   " 検索語ファイル作成
   if match(cmd, '#searchWordFile#') != -1
@@ -1502,39 +1417,6 @@ if !exists('*MyGrepReadResult')
 command! -count -nargs=* -bang MyGrepReadResult call MyGrepReadResult(<bang>0, <q-args>)
 function! MyGrepReadResult(readflag, ...)
   echoe "MyGrepReadResult : cannot read QFixlib!"
-endfunction
-endif
-
-" ロケーションリスト設定
-if !exists('*QFixGrepLocationMode')
-function! QFixLocationMode(...)
-  let mode = a:0 ? a:1 : 0
-  let mode = count ? count : mode
-  if mode == 0
-    let g:QFix_UseLocationList   = 0
-    let g:MyGrep_UseLocationList = 0
-  elseif mode == 1
-    let g:QFix_UseLocationList   = 1
-    let g:MyGrep_UseLocationList = 0
-  elseif mode == 2
-    let g:QFix_UseLocationList   = 1
-    let g:MyGrep_UseLocationList = 1
-  elseif mode == 3
-    let g:QFix_UseLocationList   = 0
-    let g:MyGrep_UseLocationList = 1
-  elseif mode == 4
-    let g:QFix_UseLocationList   = 0
-    let g:MyGrep_UseLocationList = 0
-  endif
-endfunction
-function QFixGrepLocationMode(...)
-  let mode = a:0 ? a:1 : 0
-  let mode = count ? count : mode
-  call QFixLocationMode(mode)
-  if a:0 > 1
-    return
-  endif
-  echo printf('QFixWin (%s) : QFixGrep (%s)', (g:QFix_UseLocationList ? 'L' : 'Q'), (g:MyGrep_UseLocationList ? 'L' : 'Q'))
 endfunction
 endif
 

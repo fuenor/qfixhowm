@@ -341,7 +341,9 @@ function! s:QFBufWinEnter(...)
   nnoremap <buffer> <silent> I      :<C-u>call <SID>QFixToggleHighlight()<CR>
   nnoremap <buffer> <silent> &      :<C-u>call <SID>QFixCmd_LocListCopy('normal')<CR>
   vnoremap <buffer> <silent> &      :<C-u>call <SID>QFixCmd_LocListCopy('visual')<CR>
-  nnoremap <buffer> <silent> <C-g>  :<C-u>call QFixCmdCopy2QF()<CR>
+  if exists('*QFixCmdCopy2QF')
+    nnoremap <buffer> <silent> <C-g>  :<C-u>call QFixCmdCopy2QF()<CR>
+  endif
   nnoremap <buffer> <silent> J      :<C-u>call <SID>QFixCmd_J()<CR>
   nnoremap <buffer> <silent> A      :MyGrepWriteResult<CR>
   nnoremap <buffer> <silent> O      :MyGrepReadResult<CR>
@@ -375,12 +377,6 @@ function! s:QFBufWinEnter(...)
     call QFixSetupPost()
   endif
 endfunction
-
-if !exists('*QFixCmdCopy2QF')
-function! QFixCmdCopy2QF()
-  " call qfixlist#copy2qfwin()
-endfunction
-endif
 
 function! s:QFixSetBuftype(...)
   if &buftype == 'quickfix' && !exists('b:qfixwin_buftype')

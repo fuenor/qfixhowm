@@ -1553,11 +1553,6 @@ endfunction
 " 通常バッファを返す
 " 通常バッファがない場合は-1を返す
 """"""""""""""""""""""""""""""
-" ファイルを開く時、編集されているバッファを使用してhiddenにする。
-if !exists('g:QFix_HiddenModifiedBuffer')
-  let g:QFix_HiddenModifiedBuffer = 1
-endif
-
 function! QFixWinnr()
   let g:QFix_PreviewEnableLock = 1
   let pwin = winnr()
@@ -1571,7 +1566,7 @@ function! QFixWinnr()
         let w = i
         break
       endif
-      if g:QFix_UseModifiedWindow
+      if g:QFix_UseModifiedWindow && hidden
         let w = i
       endif
     endif

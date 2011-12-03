@@ -355,7 +355,7 @@ function! s:CR(...)
     endif
   elseif key =~ '^\d\+$'
     " 特殊バッファしかない
-    if exists('g:loaded_QFixWin') && QFixWinnr() == -1
+    if exists('*QFixWinnr') && QFixWinnr() == -1
       let vert = b:dircmd =~ 'vert'
       let hjkl = b:dircmd =~ '\(^\|\s*\)\(rightb\|bel\|bo\)'
       if vert

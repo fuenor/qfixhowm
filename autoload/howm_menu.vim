@@ -312,7 +312,9 @@ function! QFixHowmOpenMenu(...)
   redraw | echo 'QFixHowm : Open menu...'
   if exists('*QFixWinnr')
     let winnr = QFixWinnr()
-    exe winnr.'wincmd w'
+    if winnr != -1
+      exe winnr.'wincmd w'
+    endif
   endif
   if &buftype == 'quickfix'
     silent! wincmd w

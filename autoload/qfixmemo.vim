@@ -623,7 +623,7 @@ function! qfixmemo#AddTitle(...)
     if title =~ rpattern
       call remove(entry, 0)
       for str in entry
-        if str != '' && (altreg != '' && str !~ altreg) && str !~ g:qfixmemo_timestamp_regxp
+        if str != '' && (altreg == '' || str !~ altreg) && str !~ g:qfixmemo_timestamp_regxp
           let len = strlen(str)
           let str = substitute(str, '\%>' . g:qfixmemo_title_length .'v.*','','')
           if strlen(str) != len
@@ -672,7 +672,7 @@ endfunction
 " タイムスタンプアップデート
 let s:qfixmemoWriteUpdateTime = 1
 function! qfixmemo#UpdateTime(...)
-  if g:qfixmemo_use_updatetime && (!a:0 || !a:1)
+  if g:qfixmemo_use_updatetime == 0 && (!a:0 || !a:1)
     return
   endif
   let l:qfixmemo_title = escape(g:qfixmemo_title, g:qfixmemo_escape)

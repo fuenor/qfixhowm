@@ -294,8 +294,6 @@ function! qfixlist#open(...)
   nnoremap <buffer> <silent> u :<C-u>call <SID>Exec('undo')<CR>
   nnoremap <buffer> <silent> <C-r> :<C-u>call <SID>Exec("redo")<CR>
 
-  " nnoremap <buffer> <silent> <C-g> :<C-u>call <SID>Cmd_Copy2QF()<CR>
-  nnoremap <buffer> <silent> & :<C-u>call <SID>Cmd_Copy2QF()<CR>
   nnoremap <buffer> <silent> A :MyGrepWriteResult<CR>
   silent! nnoremap <buffer> <unique> <silent> o :MyGrepWriteResult<CR>
   nnoremap <buffer> <silent> O :MyGrepReadResult<CR>
@@ -699,13 +697,11 @@ function! s:Exec(cmd, ...) range
   exe 'setlocal '.mod.'modifiable'
 endfunction
 
-function! s:Cmd_Copy2QF()
+function! qfixlist#copy2qfwin()
   redraw|echo 'QFixList : Copying...'
-  let s:QFixList_qfdir = s:QFixList_dir
-  let s:QFixList_qfCache = s:QFixList_Cache
-  call qfixlist#copen()
+  call qfixlist#open(QFixGetqflist(), getcwd())
   call cursor(1, 1)
-  echo ''
+  redraw|echo ''
 endfunction
 
 if !exists('g:qfixmemo_dir')

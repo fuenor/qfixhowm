@@ -407,6 +407,10 @@ if !exists('g:QFix_UseLocationList')
   let g:QFix_UseLocationList = 0
 endif
 
+function! QFixCmdCopy2QF()
+  call qfixlist#copy2qfwin()
+endfunction
+
 """"""""""""""""""""""""""""""
 " Help
 """"""""""""""""""""""""""""""

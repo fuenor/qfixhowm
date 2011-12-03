@@ -20,6 +20,7 @@ let s:Version = 2.90
 " Commands:
 "   | <C-w>, | Open/Close (quickfix window)
 "   | <C-w>. | Move to the quickfix window
+"   | <C-w>/ | Toggle QuickFix/Location list
 "
 "   On the quickfix window:
 "   | q | Close
@@ -170,8 +171,8 @@ endif
 """"""""""""""""""""""""""""""
 silent! nnoremap <unique> <silent> <C-w>, :<C-u>ToggleQFixWin<CR>
 silent! nnoremap <unique> <silent> <C-w>. :<C-u>MoveToQFixWin<CR>
-" silent! nnoremap <unique> <silent> <C-w>/ :<C-u>call QFixLocationMode()<CR>
 silent! nnoremap <unique> <silent> <C-w>0 :<C-u>ToggleLocationListMode<CR>
+silent! nnoremap <unique> <silent> <C-w>/ :<C-u>ToggleLocationListMode<CR>
 
 """"""""""""""""""""""""""""""
 " コマンド

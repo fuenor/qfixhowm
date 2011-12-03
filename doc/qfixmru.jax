@@ -57,7 +57,7 @@ QFixMRUは起動時からMRU処理を行なっていますが、QFixMRUコマン
 用のMRUとして使用するような場合は終了前保存処理を好みに制御することができます。
 >
   " QFixMRUコマンドが呼び出されていなくてもVim終了時に保存
-  let g:QFixMRU_VimLeaveWrite = 0
+  let QFixMRU_VimLeaveWrite = 1
 
 なおQFixMRUコマンドが実行された場合には QFixMRU_VimLeaveWrite の値にかかわら
 ず終了前保存処理が行われます。
@@ -70,6 +70,10 @@ MRUを表示するにはQFixMRUを実行します。
 レクトリを指定する事もできます。
 :QFixMRU {basedir}
 
+パス指定するときの空白は \ でエスケープしてください。
+>
+  :QFixMRU D:/usr/My\ Dropbox/howm
+
 登録されている全MRUリストを表示するにはallを指定します。
 :QFixMRU /:all
 
@@ -79,6 +83,13 @@ g,hlを実行すると最近編集した関数のMRUリストを表示したい�
 .vimrc >
   " キーマップ
   nnoremap <silent> g,hl :QFixMRU<CR>
+
+  " カレントディレクトリをファイルと同じ場所へ移動
+  if exists('+autochdir')
+    set autochdir
+  else
+    au BufEnter * execute ":silent! lcd " . escape(expand("%:p:h"), ' ')
+  endif
 
   " MRUに登録するファイル名の正規表現
   let QFixMRU_RegisterFile = '\.\(java\|js\|py\|rb\|vim)$'
@@ -92,8 +103,10 @@ g,hlを実行すると最近編集した関数のMRUリストを表示したい�
     let g:QFixMRU_Title['vim']  = '^\s*\(silent!\?\)\?\s*function'
   endfunction
 
-表示されるのは カレントディレクトリ下にあるファイルの関数MRUリストになります。
-拡張子が vim のファイルだと関数と見なされるのは行頭が function で始まる行です。
+上記の設定を.vimrcに追加してから、Vimスクリプト(たとえばqfixmru.vim等)の
+ファイルを開き「いろんな場所へ移動してバッファ切替」を繰り返してみてください。
+こうしておいてVimスクリプトを開き g,hl を実行すると行頭が function で始まる行
+をタイトルとしたMRU(関数)リストが表示されます。
 
 ==============================================================================
 3. オプション						*qfixmru-option*

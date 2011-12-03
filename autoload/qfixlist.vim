@@ -19,7 +19,7 @@ scriptencoding utf-8
 "   Windows : if you have grep.exe, set mygrepprg.
 "             findstr(default) can not search utf-8 fileencoding.
 "             > .vimrc
-"             let mygrepprg='path/to/grep'
+"             let mygrepprg='c:/cygwin/bin/grep'
 "             let mygrepprg='grep'
 "
 "  Usage:
@@ -50,12 +50,13 @@ scriptencoding utf-8
 "      :call qfixlist#open()
 "
 "    addtinal options
-"    | function     | option                      | default                  |
-"    | Grep         | let g:MyGrep_Regexp     = 1 | 1                        |
-"    | FGrep        | let g:MyGrep_Regexp     = 0 |                          |
-"    | Ignorecase   | let g:MyGrep_Ignorecase = 1 | MyGrep_DefaultIgnorecase |
-"    | Recursive    | let g:MyGrep_Recursive  = 0 | 0                        |
-"    * these options reset to default after qfixlist#grep()
+"    | function     | option                      | default                      |
+"    | grep         | let g:MyGrep_Regexp     = 1 | 1                        (*) |
+"    | fgrep        | let g:MyGrep_Regexp     = 0 |                              |
+"    | recursive    | let g:MyGrep_Recursive  = 0 | 0                        (*) |
+"    | ignorecase   | let g:MyGrep_Ignorecase = 1 | MyGrep_DefaultIgnorecase (*) |
+"    | smartcase    | let g:MyGrep_Smartcase  = 1 | 1                            |
+"      (*) reset to default after qfixlist#grep()
 
 if exists('g:disable_QFixList') && g:disable_QFixList == 1
   finish
@@ -797,6 +798,7 @@ endif
 if !exists('g:MyGrep_DefaultIgnorecase')
   let g:MyGrep_DefaultIgnorecase = 1
 endif
+let g:MyGrep_Ignorecase = g:MyGrep_DefaultIgnorecase
 " ダメ文字対策
 if !exists('g:MyGrep_Damemoji')
   let g:MyGrep_Damemoji = 2
@@ -864,9 +866,6 @@ if !exists('g:MyGrepcmd_fix_ignore')
 endif
 if !exists('g:MyGrepcmd_recursive')
   let g:MyGrepcmd_recursive = '-R'
-endif
-if !exists('g:MyGrep_Ignorecase')
-  let g:MyGrep_Ignorecase = 1
 endif
 if !exists('g:MyGrep_Regexp')
   let g:MyGrep_Regexp = 1

@@ -1,5 +1,9 @@
 "=============================================================================
 "    Description: QFixMemo
+"                 本プラグインはキーマップ等の起動時処理のみ設定している
+"                 本体は autoload/qfixmemo.vim
+"                 デフォルトでは qfixmemo_autoload = 0 が設定されているので、
+"                 起動時に autoload/qfixmemo.vimも読み込まれる
 "         Author: fuenor <fuenor@gmail.com>
 "                 http://sites.google.com/site/fudist/Home  (Japanese)
 "=============================================================================

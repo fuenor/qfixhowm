@@ -548,13 +548,22 @@ function! s:QFixSplit()
   let lnum = qf[line('.')-1]['lnum']
   let col = qf[line('.')-1]['col']
   let file = fnamemodify(bufname(bufnum), ':p')
-  let winnr = QFixWinnr()
-  if winnr < 1
+  let winnum = bufwinnr(bufnum)
+  if g:QFix_CopenCmd !~ 'vertical'
+    exe 'split ' . escape(file, ' #%')
   else
-    exe winnr.'wincmd w'
+    if winnum == -1
+      let winnr = QFixWinnr()
+      if winnr < 1
+      else
+        exe winnr.'wincmd w'
+      endif
+      exe 'split ' . escape(file, ' #%')
+    else
+      exe winnum.'wincmd w'
+      split
+    endif
   endif
-  split
-  call QFixEditFile(file)
   call cursor(lnum, col)
 endfunction
 

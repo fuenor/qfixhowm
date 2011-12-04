@@ -4,6 +4,7 @@
 "                 http://sites.google.com/site/fudist/Home/qfixhowm
 "        Version: 2.00
 "=============================================================================
+scriptencoding utf-8
 if v:version < 700 || &cp
   finish
 endif
@@ -64,7 +65,7 @@ function! CalendarPost()
     exe 'syn match CalHoliday display "['.ch.']\s*\d*" contains=CalConceal'
   endif
   " 今日が休日
-  if HolidayCheck(strftime('%Y'), strftime('%m'), strftime('%d'), 'Sun')
+  if DatelibHolidayCheck(strftime('%Y'), strftime('%m'), strftime('%d'), 'Sun')
     hi link CalToday CalHoliday
   endif
   hi link CalMemo    PreProc
@@ -104,7 +105,7 @@ function! QFixMemoCalendarSign(day, month, year, ...)
   if a:0
     return file
   endif
-  let hday = HolidayCheck(a:year, a:month, a:day, 'Sun')
+  let hday = DatelibHolidayCheck(a:year, a:month, a:day, 'Sun')
   let id = filereadable(expand(file)) + hday*2
   return g:calendar_flag[id]
 endfunction
@@ -127,7 +128,7 @@ endfunction
 
 "=============================================================================
 " スタブ
-function! HolidayCheck(year, month, day, ...)
+function! DatelibHolidayCheck(year, month, day, ...)
   return 0
 endfunction
 
@@ -141,7 +142,7 @@ endfunction
 
 function! CalendarSign_(day, month, year)
   let sfile = g:calendar_diary."/".a:year."/".a:month."/".a:day.".cal"
-  let hday = HolidayCheck(a:year, a:month, a:day, 'Sun')
+  let hday = DatelibHolidayCheck(a:year, a:month, a:day, 'Sun')
   let id = filereadable(expand(sfile)) + hday*2
   return g:calendar_flag[id]
 endfunction
@@ -462,7 +463,7 @@ function CalendarInfo()
     return info
   endif
 
-  let tbl = GetHolidayTable(year)
+  let tbl = DatelibGetHolidayTable(year)
   let date = printf('%4.4d%2.2d%2.2d', year, month, day)
   if exists('tbl[date]') && tbl[date] != ''
     return [tbl[date]]
@@ -490,13 +491,13 @@ function! s:CalendarStr(...)
   let year  = exists('b:year' ) ? b:year  : strftime('%Y')
   let month = exists('b:month') ? b:month : strftime('%m')
   let day   = exists('b:day'  ) ? b:day   : strftime('%d')
-  let time = Date2IntStrftime(year, month, day) * 24*60*60
+  let time = DatelibDate2IntStrftime(year, month, day) * 24*60*60
   let b:year  = strftime('%Y', time)
   let b:month = strftime('%m', time)
   let b:day   = strftime('%d', time)
   let month -= (loop > 2)
   for cnt in range(loop)
-    let fday = Date2IntStrftime(year, month, 1)
+    let fday = DatelibDate2IntStrftime(year, month, 1)
     let time = fday * 24*60*60
     let year  = strftime('%Y', time)
     let month = strftime('%m', time)
@@ -504,7 +505,7 @@ function! s:CalendarStr(...)
     let str = s:cal
     let eom = s:EndOfMonth(year, month, 0)
     let str = substitute(str, printf('\s%2.2d', eom+1).'.*$', '', '')
-    let fdow = DoWIdxStrftime(fday)
+    let fdow = DatelibDoWIdxStrftime(fday)
     " 日曜から始める(0000/01/01は月曜)
     let fdow = fdow == 6 ? 0 : (fdow+1)
     for n in range(fdow)
@@ -514,7 +515,6 @@ function! s:CalendarStr(...)
     let tm = strftime('%m')
     let td = str2nr(strftime('%d'))
     for n in range(1, eom)
-      let hday = HolidayCheck(year, month, n, 'Sun')
       exe 'let id = '.g:calendar_sign.'(n, month, year)'
       if n == td && month == tm && year == ty
         let id = '*'
@@ -634,6 +634,7 @@ endfunction
 "         Author: fuenor <fuenor@gmail.com>
 "                 http://sites.google.com/site/fudist/Home/qfixhowm
 "=============================================================================
+scriptencoding utf-8
 let s:Version = 1.00
 if exists('g:datelib_version') && g:datelib_version < s:Version
   let g:loaded_datelib_vim = 0
@@ -648,13 +649,13 @@ if v:version < 700 || &cp
 endif
 
 " strftime()基準の経過日数
-function! Date2IntStrftime(year, month, day)
+function! DatelibDate2IntStrftime(year, month, day)
   return s:Date2Int(a:year, a:month, a:day) - g:DateStrftime
 endfunction
 
 " strftime()基準の曜日インデックス
 " g:DoWStrftime[idx] として使用する
-function! DoWIdxStrftime(...)
+function! DatelibDoWIdxStrftime(...)
   if a:0 == 1
     return (a:1 + g:DateStrftime)%7
   endif
@@ -684,7 +685,7 @@ endfunction
 " 曜日変換、シフトを行ったstrfime時間
 " cnvdow : 2*Mon, 3*Tue, etc.
 " sft    : -1, +2, -Sun, +Wed, etc.
-function! StrftimeCnvDoWShift(year, month, day, cnvdow, sft)
+function! DatelibStrftimeCnvDoWShift(year, month, day, cnvdow, sft)
   let year  = a:year
   let month = a:month
   let day   = a:day
@@ -695,15 +696,15 @@ function! StrftimeCnvDoWShift(year, month, day, cnvdow, sft)
 
   let cnvdow = substitute(a:cnvdow, '[^0-9]', '', 'g')
   if cnvdow == ''
-    let dday = Date2IntStrftime(year, month, day)
+    let dday = DatelibDate2IntStrftime(year, month, day)
     let time = dday * 24 * 60 *60
   else
     if cnvdow == 0 || cnvdow == ''
       let cnvdow = 1
     endif
     let dow = substitute(a:cnvdow, '[*0-9]', '', 'g')
-    let fday = Date2IntStrftime(year, month, 1)
-    let fdow = DoWIdxStrftime(fday)
+    let fday = DatelibDate2IntStrftime(year, month, 1)
+    let fdow = DatelibDoWIdxStrftime(fday)
     let dday = fday - fdow
     let dday += (cnvdow-1) * 7 + index(g:DoWStrftime, dow)
     let time = dday * 24 * 60 *60
@@ -714,9 +715,21 @@ function! StrftimeCnvDoWShift(year, month, day, cnvdow, sft)
   endif
   if sft =~ '[-+]\d\+'
     let time += str2nr(sft)*24*60*60
+  elseif sft =~ '[-+]Hdy'
+    let t = str2nr(substitute(sft, 'Hdy', '1', '')) * 24*60*60
+    while 1
+      let y = strftime('%Y', time)
+      let m = strftime('%m', time)
+      let d = strftime('%d', time)
+      let date = printf('%4.4d%2.2d%2.2d', y, m, d)
+      if exists('s:holidaytbl[date]') == 0
+        break
+      endif
+      let time += t
+    endwhile
   elseif sft =~ '[-+]'.s:DoWregxp
-    let fday = Date2IntStrftime(strftime('%Y', time), strftime('%m', time), strftime('%d', time))
-    let fdow = DoWIdxStrftime(fday)
+    let fday = DatelibDate2IntStrftime(strftime('%Y', time), strftime('%m', time), strftime('%d', time))
+    let fdow = DatelibDoWIdxStrftime(fday)
     if sft =~ g:DoWStrftime[fdow]
       let time += (sft =~ '+' ? 1 : -1) * 24*60*60
     endif
@@ -774,12 +787,12 @@ endif
 " 追加オプションがある場合、指定曜日は除く
 " (主に日曜を排除するためにある)
 """"""""""""""""""""""""""""""
-function! HolidayCheck(year, month, day, ...)
-  call s:MakeHolidayTbl(a:year)
+function! DatelibHolidayCheck(year, month, day, ...)
+  call DatelibMakeHolidayTable(a:year)
   let date = printf('%4.4d%2.2d%2.2d', a:year, a:month, a:day)
   if a:0
-    let fday = Date2IntStrftime(a:year, a:month, a:day)
-    let fdow = DoWIdxStrftime(fday)
+    let fday = DatelibDate2IntStrftime(a:year, a:month, a:day)
+    let fdow = DatelibDoWIdxStrftime(fday)
     return (g:DoWStrftime[fdow] !~ a:1) * (exists('s:holidaytbl[date]') ? 1 : 0)
   endif
   return (exists('s:holidaytbl[date]') ? 1 : 0)
@@ -788,8 +801,8 @@ endfunction
 """"""""""""""""""""""""""""""
 " 少なくとも指定年の休日定義が含まれる辞書を返す
 """"""""""""""""""""""""""""""
-function! GetHolidayTable(year)
-  call s:MakeHolidayTbl(a:year)
+function! DatelibGetHolidayTable(year)
+  call DatelibMakeHolidayTable(a:year)
   return s:holidaytbl
 endfunction
 
@@ -798,24 +811,28 @@ let s:holidaytbl  = {}
 let s:holidaydict = []
 let s:usertbl  = {}
 let s:userdict = []
-function! s:MakeHolidayTbl(year)
-  if !exists('s:holidaytbl[a:year]')
-    let s:holidaytbl[a:year] = '|exists|'
-    if len(s:holidaydict) == 0
-      let s:holidaydict = s:ReadScheduleFile(s:setholidayfile(), s:holidaytbl)
-    endif
-    call s:SetScheduleTable(a:year, s:holidaydict, s:holidaytbl)
-    if exists('g:calendar_userfile')
-      if len(s:userdict) == 0
-        let s:userdict = s:ReadScheduleFile(g:calendar_userfile, s:usertbl)
+function! DatelibMakeHolidayTable(year, ...)
+  let hdy = a:0
+  for year in range(a:year-1, a:year+1)
+    let yearid = year. (hdy ? 'Hdy' : '')
+    if !exists('s:holidaytbl[yearid]')
+      let s:holidaytbl[yearid] = '|exists|'
+      if len(s:holidaydict) == 0
+        let s:holidaydict = s:ReadScheduleFile(s:setholidayfile(), s:holidaytbl)
       endif
-      call s:SetScheduleTable(a:year, s:userdict, s:usertbl)
+      call s:SetScheduleTable(year, s:holidaydict, s:holidaytbl, hdy)
+      if exists('g:calendar_userfile')
+        if len(s:userdict) == 0
+          let s:userdict = s:ReadScheduleFile(g:calendar_userfile, s:usertbl)
+        endif
+        call s:SetScheduleTable(year, s:userdict, s:usertbl, hdy)
+      endif
     endif
-  endif
+  endfor
 endfunction
 
 " 休日定義ファイルを読み込み
-let s:DoWregxp = '\c\(Sun\|Mon\|Tue\|Wed\|Thu\|Fri\|Sat\)'
+let s:DoWregxp = '\c\(Sun\|Mon\|Tue\|Wed\|Thu\|Fri\|Sat\|Hdy\)'
 function! s:ReadScheduleFile(files, table)
   let dict = []
   for file in a:files
@@ -852,10 +869,10 @@ function! s:ReadScheduleFile(files, table)
       let repeat = substitute(repeat, '(', '', '')
       let text = substitute(str, '^'.sch_cmd, '', '')
       if cmd == '@'
-        if repeat == ''
+        if repeat == '' && sft !~ 'Hdy'
           let opt = (opt == '' || opt == 0) ? 1 : opt
           for i in range(opt)
-            let time = StrftimeCnvDoWShift(year, month, day+i, cnvdow, sft)
+            let time = DatelibStrftimeCnvDoWShift(year, month, day+i, cnvdow, sft)
             let date = strftime('%Y%m%d', time+24*60*60*i)
             let a:table[date] = text
           endfor
@@ -903,14 +920,19 @@ function! s:setholidayfile()
   return split(file, "\<NL>")
 endfunction
 
-function! s:SetScheduleTable(year, dict, table)
+function! s:SetScheduleTable(year, dict, table, hdy)
   if len(a:dict)
     for d in a:dict
       if a:year < d['year']
         continue
       endif
+      if !a:hdy && d['sft'] =~ 'Hdy'
+        continue
+      elseif a:hdy && d['sft'] !~ 'Hdy'
+        continue
+      endif
       if d['cmd'] == '@@@'
-        let time = StrftimeCnvDoWShift(a:year, d['month'], d['day'], d['cnvdow'], d['sft'])
+        let time = DatelibStrftimeCnvDoWShift(a:year, d['month'], d['day'], d['cnvdow'], d['sft'])
         let date = strftime('%Y%m%d', time)
         let a:table[date] = d['text']
         let opt = d['opt']
@@ -920,14 +942,11 @@ function! s:SetScheduleTable(year, dict, table)
           let a:table[date] = d['text']
         endfor
       elseif d['cmd'] == '@@'
-        if d['cnvdow'] =~ 'Sun' && d['sft'] == ''
-          continue
-        endif
         let opt = d['opt']
         let opt = (opt == '' || opt == 0) ? 1 : opt
         let start = a:year == d['year'] ? d['month'] : 1
         for month in range(start, 12)
-          let time = StrftimeCnvDoWShift(a:year, month, d['day'], d['cnvdow'], d['sft'])
+          let time = DatelibStrftimeCnvDoWShift(a:year, month, d['day'], d['cnvdow'], d['sft'])
           let date = strftime('%Y%m%d', time)
           for i in range(opt)
             let date = strftime('%Y%m%d', time+24*60*60*i)
@@ -943,16 +962,19 @@ function! s:SetScheduleTable(year, dict, table)
         let sday   = a:year == d['year'] ? d['day']   : 1
         let repeat = d['repeat']
         let repeat = (repeat == '' || repeat <= 0) ? 1 : repeat
-        let begin = Date2IntStrftime(d['year'], d['month'], d['day'])
-        let begin += (repeat) * ((Date2IntStrftime(a:year, smonth, sday) - begin)/repeat)
+        let begin = DatelibDate2IntStrftime(d['year'], d['month'], d['day'])
+        let begin += (repeat) * ((DatelibDate2IntStrftime(a:year, smonth, sday) - begin)/repeat)
         let time  = begin * 24*60*60
         let year  = strftime('%Y', time)
         let month = strftime('%m', time)
         let day   = strftime('%d', time)
         for rday in range(day, day+366, repeat)
           for i in range(opt)
-            let time = StrftimeCnvDoWShift(year, month, rday+i, d['cnvdow'], d['sft'])
+            let time = DatelibStrftimeCnvDoWShift(year, month, rday+i, d['cnvdow'], d['sft'])
             let date = strftime('%Y%m%d', time+24*60*60*i)
+            if stridx(date, a:year) != 0
+              continue
+            endif
             let a:table[date] = d['text']
           endfor
         endfor

@@ -17,8 +17,7 @@ CONTENTS					*howm-calendar-contents*
 1. Intro						*howm-calendar-intro*
 
 howm-calendar.vimはQFixHowm/QFixMemoでカレンダーを表示するためのプラグインです。
-QFixHowmの休日定義ファイルを利用して休日をcalendar.vimのカレンダー上で強調表示
-されます。
+QFixHowmの休日定義ファイルを利用してカレンダー上で休日が強調表示されます。
 
 ==============================================================================
 2. インストール						*howm-calendar-install*
@@ -30,11 +29,19 @@ howm_calendar.vimをruntimepathの通った場所へコピーしてください�
 ==============================================================================
 3. 設定							*howm-calendar-settings*
 
-.vimrc >
+:Calendar コマンドのオプションは次のとおりです。
+>
   " 表示するウィンドウ
   let howm_calendar_wincmd = 'vertical topleft'
   " 表示する月数
   let howm_calendar_count = 3
+
+QFixHowm/QFixMemoの場合は次の設定が有効です。
+>
+  " 表示するウィンドウ
+  let qfixmemo_calendar_wincmd = 'vertical topleft'
+  " 表示する月数
+  let qfixmemo_calendar_count = 3
 
 3.1 日記の設定
 
@@ -58,7 +65,7 @@ https://sites.google.com/site/fudist/Home/qfixhowm#downloads
 エンコーディングを合わせてください。適当なディレクトリにコピーした後、以下を
 .vimrcへ追加してます。
 >
-    " calendar.vimで使う休日定義ファイル(パス等は環境に合わせてください)
+    " 休日定義ファイル(パス等は環境に合わせてください)
     let calendar_holidayfile = '~/howm/Sche-Hd-0000-00-00-000000.howm'
 
 以降はサインが次の表のように表示されます。

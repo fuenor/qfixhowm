@@ -1890,19 +1890,14 @@ if exists('g:qfixmemo_root')
 endif
 let s:sb_id = 0
 function! qfixmemo#SubMenu(...)
-  if qfixmemo#Init()
+  if qfixmemo#Init('mkdir')
     return
   endif
-  let basedir = s:submenu_basedir
   let l:count = a:0 && a:1 ? a:1 : count
-  let prevPath = escape(getcwd(), ' ')
-  exe 'lchdir ' . escape(expand(basedir), ' ')
-  let file = fnamemodify(s:qfixmemo_submenu_title, ':p')
-  exe 'lchdir ' . prevPath
-  let dir = fnamemodify(file, ':h')
+  let basedir = s:submenu_basedir
+  let file = s:submenu_mkdir(basedir)
   let bufnum = bufnr(file)
   let winnum = bufwinnr(file)
-
   if g:qfixmemo_submenu_single_mode
     if winnum != -1 && bufnum == bufnr('%')
       wincmd c
@@ -1927,7 +1922,6 @@ function! qfixmemo#SubMenu(...)
       return
     endif
   endif
-
   if a:0 && l:count == 0
     let s:qfixmemo_submenu_title = g:qfixmemo_submenu_title
     let s:sb_id = 0
@@ -1935,10 +1929,24 @@ function! qfixmemo#SubMenu(...)
     exe 'let s:qfixmemo_submenu_title = g:qfixmemo_submenu_title'.l:count
     let s:sb_id = l:count
   endif
-  exe 'lchdir ' . escape(expand(basedir), ' ')
-  let file = fnamemodify(s:qfixmemo_submenu_title, ':p')
-  exe 'lchdir ' . prevPath
+  let file = s:submenu_mkdir(basedir)
   call s:OpenQFixSubWin(file, s:sb_id)
+endfunction
+
+function! s:submenu_mkdir(basedir)
+  let pathhead = '\([A-Za-z]:[/\\]\|\~[/\\]\|\.\.\?[/\\]\|[/\\]\)'
+  let prevPath = escape(getcwd(), ' ')
+  exe 'lchdir ' . escape(expand(a:basedir), ' ')
+  let file = expand(s:qfixmemo_submenu_title)
+  if file !~ '^'.pathhead
+    let file = expand(a:basedir).'/'.file
+  endif
+  exe 'lchdir ' . prevPath
+  let dir = fnamemodify(file, ':h')
+  if !isdirectory(dir)
+    call mkdir(dir, 'p')
+  endif
+  return file
 endfunction
 
 function! s:OpenQFixSubWin(file, id)

@@ -565,7 +565,12 @@ function! s:CR()
     silent! close
     exe 'edit '.escape(file, ' %#')
   else
-    call QFixEditFile(file)
+    if exists('*QFixEditFile')
+      call QFixEditFile(file)
+    else
+      silent! wincmd w
+      exe 'edit '.escape(file, ' %#')
+    endif
   endif
   call cursor(lnum, 1)
   exe 'normal! zz'

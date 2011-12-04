@@ -602,7 +602,11 @@ function! s:HowmMenuCR() range
   if g:QFixHowm_MenuCloseOnJump
     exe 'edit '.escape(file, ' %#')
   else
-    call QFixEditFile(file)
+    if exists('*QFixEditFile')
+      call QFixEditFile(file)
+    else
+      exe 'split '.escape(file, ' %#')
+    endif
   endif
   call cursor(lnum, 1)
   exe 'normal! zz'

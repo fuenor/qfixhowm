@@ -1521,7 +1521,7 @@ endfunction
 " 追加パラメータが'split'ならスプリットで開く
 """"""""""""""""""""""""""""""
 function! QFixEditFile(file, ...)
-  let file = fnamemodify(a:file, ':p')
+  let file = expand(a:file)
   let file = substitute(file, '\\', '/', 'g')
   let mode = a:0 > 0 ? a:1 : ''
   let opt  = a:0 > 1 ? a:2 : ''

@@ -373,7 +373,7 @@ function! IsQFixMemo(file)
 endfunction
 
 function! s:BufEnter()
-  if !IsQFixMemo(expand('%'))
+  if !IsQFixMemo(expand('%:p'))
     return
   endif
   call qfixmemo#load()
@@ -381,7 +381,7 @@ function! s:BufEnter()
 endfunction
 
 function! s:BufRead()
-  if !IsQFixMemo(expand('%'))
+  if !IsQFixMemo(expand('%:p'))
     return
   endif
   call qfixmemo#BufRead()

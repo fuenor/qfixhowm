@@ -399,7 +399,7 @@ augroup QFixMemo
 augroup END
 
 function! s:BufRead()
-  if !IsQFixMemo(expand('%'))
+  if !IsQFixMemo(expand('%:p'))
     return
   endif
   call qfixmemo#BufRead()
@@ -557,21 +557,21 @@ function! s:syntaxHighlight()
 endfunction
 
 function! s:BufEnter()
-  if !IsQFixMemo(expand('%'))
+  if !IsQFixMemo(expand('%:p'))
     return
   endif
   call QFixMemoBufEnter()
 endfunction
 
 function! s:BufWinEnter()
-  if !IsQFixMemo(expand('%'))
+  if !IsQFixMemo(expand('%:p'))
     return
   endif
   call QFixMemoBufWinEnter()
 endfunction
 
 function! s:BufLeave()
-  if !IsQFixMemo(expand('%'))
+  if !IsQFixMemo(expand('%:p'))
     return
   endif
   call QFixMemoBufLeave()
@@ -722,7 +722,7 @@ function! s:BufWritePre()
     call qfixmemo#AddKeyword()
     return
   endif
-  if !IsQFixMemo(expand('%'))
+  if !IsQFixMemo(expand('%:p'))
     return
   endif
   if s:ForceWrite
@@ -736,7 +736,7 @@ function! s:BufWritePre()
 endfunction
 
 function! s:BufWritePost()
-  if !IsQFixMemo(expand('%'))
+  if !IsQFixMemo(expand('%:p'))
     return
   endif
   if search('^.\+$', 'ncw') == 0
@@ -823,14 +823,12 @@ function! qfixmemo#EditFile(file)
   if file !~ '^'.pathhead
     let file = expand(g:qfixmemo_dir).'/'.file
   endif
+  let opt = ''
   if IsQFixMemo(file)
     let opt = '++enc=' . g:qfixmemo_fileencoding . ' ++ff=' . g:qfixmemo_fileformat . ' '
-    let mode = g:qfixmemo_splitmode ? 'split' : ''
-    call s:edit(file, mode, opt)
-  else
-    let mode = g:qfixmemo_splitmode ? 'split' : ''
-    call QFixEditFile(file, mode)
   endif
+  let mode = g:qfixmemo_splitmode ? 'split' : ''
+  call s:edit(file, mode, opt)
   exe 'lchdir ' . prevPath
 endfunction
 
@@ -943,7 +941,7 @@ function! qfixmemo#PairFile(file)
 endfunction
 
 function! s:edit(file, ...)
-  let file = fnamemodify(a:file, ':p')
+  let file = expand(a:file)
   let file = substitute(file, '\\', '/', 'g')
 
   let winnr = bufwinnr(file)
@@ -976,7 +974,7 @@ function! s:edit(file, ...)
   endif
   let editcmd = g:qfixmemo_editcmd != '' ? g:qfixmemo_editcmd : 'edit '
   exe editcmd . ' ' . opt .' ' . escape(file, ' #%')
-  if !filereadable(file)
+  if !filereadable(file) && IsQFixMemo(file)
     call qfixmemo#Template('New')
   endif
 endfunction
@@ -2360,7 +2358,7 @@ function! qfixmemo#LoadKeyword(...)
   endfor
   silent! syn clear qfixmemoKeyword
   let s:KeywordHighlight = substitute(s:KeywordHighlight, '\\|\s*$', '', '')
-  if s:KeywordHighlight != '' && IsQFixMemo(expand('%'))
+  if s:KeywordHighlight != '' && IsQFixMemo(expand('%:p'))
     exe 'syn match qfixmemoKeyword display "\V'.escape(s:KeywordHighlight, '"').'"'
   endif
 endfunction

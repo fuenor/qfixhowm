@@ -819,7 +819,10 @@ function! qfixmemo#EditFile(file)
   let prevPath = escape(getcwd(), ' ')
   exe 'lchdir ' . escape(expand(g:qfixmemo_dir), ' ')
   let file = strftime(a:file)
-  let file = fnamemodify(file, ':p')
+  let pathhead = '\([A-Za-z]:[/\\]\|\~[/\\]\|\.\.\?[/\\]\|[/\\]\)'
+  if file !~ '^'.pathhead
+    let file = expand(g:qfixmemo_dir).'/'.file
+  endif
   if IsQFixMemo(file)
     let opt = '++enc=' . g:qfixmemo_fileencoding . ' ++ff=' . g:qfixmemo_fileformat . ' '
     let mode = g:qfixmemo_splitmode ? 'split' : ''

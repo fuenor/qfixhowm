@@ -1,5 +1,6 @@
 "=============================================================================
 "    Description: howm style scheduler
+"                 (要datelib.vim)
 "         Author: fuenor <fuenor@gmail.com>
 "                 http://sites.google.com/site/fudist/Home/qfixhowm
 "=============================================================================
@@ -1378,6 +1379,11 @@ function! s:CnvDoW(year, month, sft, dow, ofs)
   endif
   let dow = a:dow
   let ofs = a:ofs
+  if exists('*datelib#StrftimeCnvDoWShift') || exists('g:loaded_QFixMemoCalendar_vim')
+    let cnvdow = sft.'*'.dow
+    let time = datelib#StrftimeCnvDoWShift(year, month, 1, cnvdow, ofs)
+    return (time/(24*60*60) + g:DateStrftime)
+  endif
   let sstr = printf(s:sch_printfDate, year, month, 1)
   let pfsec = QFixHowmDate2Int(sstr.' 00:00')
   let sstr = strftime(s:hts_date, pfsec)
@@ -1400,6 +1406,19 @@ endfunction
 function! s:DayOfWeekShift(cmd, str)
   let cmd = a:cmd
   let str = a:str
+
+  if exists('*datelib#StrftimeCnvDoWShift') || exists('g:loaded_QFixMemoCalendar_vim')
+    let str = substitute(str, '[^0-9]', '', 'g')
+    let year  = strpart(str, 0, 4)
+    let month = strpart(str, 4, 2)
+    let day   = strpart(str, 6, 2)
+    let cnvdow = ''
+    let sft = matchstr(cmd, '[-+]'.s:sch_dow)
+    call datelib#MakeHolidayTable(year)
+    let time = datelib#StrftimeCnvDoWShift(year, month, day, cnvdow, sft)
+    return strftime(s:hts_date, time)
+  endif
+
   let actday = QFixHowmDate2Int(str)
 
   let dow = matchstr(cmd, '[-+*]\?'.s:sch_dow)

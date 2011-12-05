@@ -341,7 +341,7 @@ function! qfixlist#search(pattern, dir, cmd, days, fenc, file)
   endif
   let prevPath = escape(getcwd(), ' ')
   " let g:MyGrep_Return = 1
-  let list = qfixlist#MyGrep(a:pattern, dir, a:file, fenc, 0)
+  let list = s:MyGrep(a:pattern, dir, a:file, fenc, 0)
 
   redraw | echo 'QFixList : Formatting...'
   silent! exe 'lchdir ' . escape(expand(dir), ' ')
@@ -899,7 +899,7 @@ let g:MyGrep_UseVimgrep = 0
 " vimgrepならfencは無視される。
 " addflag : grep検索結果追加
 """"""""""""""""""""""""""""""
-function! qfixlist#MyGrep(pattern, searchPath, filepattern, fenc, addflag, ...)
+function! s:MyGrep(pattern, searchPath, filepattern, fenc, addflag, ...)
   let addflag = a:addflag
   let searchPath = a:searchPath
   let pattern = a:pattern

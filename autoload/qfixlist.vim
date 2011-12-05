@@ -340,7 +340,7 @@ function! qfixlist#search(pattern, dir, cmd, days, fenc, file)
     let g:MyGrep_FileListWipeTime = localtime() - a:days*24*60*60
   endif
   let prevPath = escape(getcwd(), ' ')
-  let g:MyGrep_Return = 1
+  " let g:MyGrep_Return = 1
   let list = qfixlist#MyGrep(a:pattern, dir, a:file, fenc, 0)
 
   redraw | echo 'QFixList : Formatting...'
@@ -891,8 +891,8 @@ if !exists('g:MyGrep_cmdopt')
 endif
 " 一時的にvimgrepを使用したいときに非0。使用後リセットされる。
 let g:MyGrep_UseVimgrep = 0
-" QuickFixに登録しない
-let g:MyGrep_Return = 0
+" " QuickFixに登録しない
+" let g:MyGrep_Return = 0
 
 """"""""""""""""""""""""""""""
 " 汎用Grep関数
@@ -963,12 +963,12 @@ function! qfixlist#MyGrep(pattern, searchPath, filepattern, fenc, addflag, ...)
       redraw | echo g:MyGrep_ErrorMes
       echohl None
     endif
-    if g:MyGrep_Return
-      let g:MyGrep_Return = 0
+    " if g:MyGrep_Return
+    "   let g:MyGrep_Return = 0
       return save_qflist
-    endif
-    let g:QFix_SearchPath = searchPath
-    return []
+    " endif
+    " let g:QFix_SearchPath = searchPath
+    " return []
   endif
 
   let ccmd = g:QFix_UseLocationList ? 'lexpr ""' : 'cexpr ""'
@@ -1037,32 +1037,32 @@ function! qfixlist#MyGrep(pattern, searchPath, filepattern, fenc, addflag, ...)
   redraw|echo 'QFixGrep : Parsing...'
   let g:MyGrep_qflist = s:ParseSearchResult(searchPath, retval, pattern, g:MyGrep_ShellEncoding, a:fenc)
   call s:SetGrepEnv('restore')
-  if g:MyGrep_Return
-    let g:MyGrep_Return = 0
+  " if g:MyGrep_Return
+  "   let g:MyGrep_Return = 0
     if g:MyGrep_StayGrepDir == 0
       silent! exe 'lchdir ' . prevPath
     endif
     redraw|echo ''
     return g:MyGrep_qflist
-  endif
-  if a:0
-    redraw|echo ''
-  else
-    redraw|echo 'QFixGrep : Set quickfix list...'
-    let flag = addflag ? 'a' : ' '
-    call QFixSetqflist(g:MyGrep_qflist, flag)
-  endif
-  if g:MyGrep_StayGrepDir == 0
-    silent! exe 'lchdir ' . prevPath
-  endif
-  let g:QFix_SearchPath = searchPath
-  redraw | echo ''
-  if g:MyGrep_ErrorMes != ''
-    echohl ErrorMsg
-    redraw | echo g:MyGrep_ErrorMes
-    echohl None
-  endif
-  return []
+  " endif
+  " if a:0
+  "   redraw|echo ''
+  " else
+  "   redraw|echo 'QFixGrep : Set quickfix list...'
+  "   let flag = addflag ? 'a' : ' '
+  "   call QFixSetqflist(g:MyGrep_qflist, flag)
+  " endif
+  " if g:MyGrep_StayGrepDir == 0
+  "   silent! exe 'lchdir ' . prevPath
+  " endif
+  " let g:QFix_SearchPath = searchPath
+  " redraw | echo ''
+  " if g:MyGrep_ErrorMes != ''
+  "   echohl ErrorMsg
+  "   redraw | echo g:MyGrep_ErrorMes
+  "   echohl None
+  " endif
+  " return []
 endfunction
 
 let g:MyGrep_ErrorMes = ''

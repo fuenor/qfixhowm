@@ -508,7 +508,6 @@ function! s:QFixHowmListReminder_(mode,...)
         let addflag = MultiHowmDirGrep(searchWord, searchPath, l:SearchFile, g:howm_fileencoding, addflag, 'g:QFixHowm_ScheduleSearchDir')
       endif
     endif
-    let g:MyGrep_Return = 1
     let sq = qfixlist#grep(searchWord, searchPath, l:SearchFile, g:howm_fileencoding)
     call extend(sq, holiday_sq)
     let s:UseTitleFilter = 1

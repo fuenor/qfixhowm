@@ -1967,7 +1967,7 @@ function! s:OpenQFixSubWin(file, id)
   if bufnum == -1
     let wcmd = expand(file)
       augroup QFixMemoSubMenu
-        if keepsize && winsize > 0
+        if !keepsize && winsize > 0
           if windir =~ 'vert'
             exe 'au BufEnter '.fnamemodify(file, ':t').' call <SID>QFixMemoSubMenuResize('.winsize.', "vertical")'
           else
@@ -2014,15 +2014,21 @@ function! s:OpenQFixSubWin(file, id)
     exe 'vertical resize '.b:submenu_width
   elseif windir =~ 'vert'
     let b:submenu_width = winsize
-    exe 'vertical resize '.b:submenu_width
+    exe 'vertical resize '.winsize
   endif
   let wincmd = s:GetOptionWithID('g:qfixmemo_submenu_calendar_wincmd', swid)
   if wincmd != ''
     let wincmd = wincmd . (windir =~ 'vert' ? '' : ' vertical')
     let saved_ei = &eventignore
     set eventignore=BufLeave
-    call QFixMemoCalendar(wincmd, '__Cal__', 1, 'parent'. (keepsize ? 'resize' : ''))
+    call QFixMemoCalendar(wincmd, '__Cal__', 1, 'parent'. (keepsize ? '' : 'resize'))
     let &eventignore = saved_ei
+  endif
+  if windir =~ 'vert'
+    if keepsize
+      let b:submenu_width = s:GetOptionWithID('g:qfixmemo_submenu_size', swid)
+    endif
+    exe 'vertical resize '.b:submenu_width
   endif
   if exists('*QFixMemoSubMenuBufWinEnter')
     call QFixMemoSubMenuBufWinEnter()

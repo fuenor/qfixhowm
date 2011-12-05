@@ -816,8 +816,6 @@ function! qfixmemo#EditFile(file)
   if qfixmemo#Init('mkdir')
     return
   endif
-  let prevPath = escape(getcwd(), ' ')
-  exe 'lchdir ' . escape(expand(g:qfixmemo_dir), ' ')
   let file = strftime(a:file)
   let pathhead = '\([A-Za-z]:[/\\]\|\~[/\\]\|\.\.\?[/\\]\|[/\\]\)'
   if file !~ '^'.pathhead
@@ -829,7 +827,6 @@ function! qfixmemo#EditFile(file)
   endif
   let mode = g:qfixmemo_splitmode ? 'split' : ''
   call s:edit(file, mode, opt)
-  exe 'lchdir ' . prevPath
 endfunction
 
 " 新規メモ作成

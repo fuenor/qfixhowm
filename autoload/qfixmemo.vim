@@ -2575,6 +2575,8 @@ function! qfixmemo#OpenKeywordLink()
       endif
       if len(qflist)
         call qfixlist#copen(qflist, g:qfixmemo_dir)
+      else
+        redraw|echo 'QFixMemo : keyword not found. (use "'.escape(g:qfixmemo_mapleader, '\\').'rk" : Rebuild keyword)'
       endif
       return 1
     endif
@@ -2597,6 +2599,8 @@ function! qfixmemo#OpenKeywordLink()
         endif
         if len(qflist)
           call qfixlist#copen(qflist, g:qfixmemo_dir)
+        else
+          redraw|echo 'QFixMemo : keyword not found. (use "'.escape(g:qfixmemo_mapleader, '\\').'rk" : Rebuild keyword)'
         endif
         return 1
       elseif g:qfixmemo_keyword_mode == 1

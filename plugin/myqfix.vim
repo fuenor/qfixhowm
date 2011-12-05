@@ -122,6 +122,12 @@ endif
 if !exists('g:QFix_PreviewExclude')
   let g:QFix_PreviewExclude = '\.pdf$\|\.mp3$\|\.jpg$\|\.bmp$\|\.png$\|\.zip$\|\.rar$\|\.exe$\|\.dll$\|\.lnk$'
 endif
+" 正規表現で一行目を判定してプレビュー非表示
+" ファイルエンコーディングを判定しないのでマルチバイト文字は使用不可
+if !exists('g:QFix_PreviewExcludeLineRegxp')
+  let g:QFix_PreviewExcludeLineRegxp = ''
+  let g:QFix_PreviewExcludeLineRegxp = '^VimCrypt\~\d\{2}!'
+endif
 
 " プレビューする間隔
 " (この値でプレビューが有効か判定しているのでユニーク値を推奨)
@@ -1397,7 +1403,7 @@ function! QFixPreviewOpen(file, line, ...)
   syntax clear
   if g:QFix_PreviewFtypeHighlight != 0
     call s:QFixFtype_(file)
-    "BufReadの副作用への安全策
+    " BufReadの副作用への安全策
     silent! %delete _
     setlocal nofoldenable
   else
@@ -1411,6 +1417,15 @@ function! QFixPreviewOpen(file, line, ...)
     let file = substitute(file, '\\', '/', 'g')
     let cmd = cmd . QFixPreviewReadOpt(file)
     if filereadable(file)
+      if g:QFix_PreviewExcludeLineRegxp != ''
+        let glist = readfile(file, '', 1)
+        if glist[0] =~ g:QFix_PreviewExcludeLineRegxp
+          call setline(1, glist)
+          setlocal nomodifiable
+          silent! wincmd p
+          return
+        endif
+      endif
       silent! exe cmd.' '.escape(file, ' %#')
       silent! $delete _
     endif

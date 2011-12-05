@@ -40,6 +40,9 @@ scriptencoding utf-8
 "        " QFixList window
 "        :call qfixlist#open(qflist, 'c:/temp')
 "
+"     datelib.vim
+"       日付計算と休日定義についてはdatelib.vimを参照してください。
+"
 "=============================================================================
 if exists('g:disable_HowmSchedule') && g:disable_HowmSchedule
   finish
@@ -1702,16 +1705,16 @@ if !exists('g:QFixHowm_UserSwActionLockMax')
   let g:QFixHowm_UserSwActionLockMax = 8
 endif
 
-function! QFixHowmBufferBufEnter()
-  if !IsQFixHowmFile('%')
-    return
-  endif
-  nnoremap <silent> <buffer> <CR> :<C-u>call QFixHowmActionLock()<CR>
-  let ext = fnamemodify(expand('%'), ':e')
-  if !g:QFixHowm_HowmMode && (ext == g:QFixHowm_UserFileExt)
-    call QFixHowmUserAutocmd(ext)
-  endif
-endfunction
+" function! QFixHowmBufferBufEnter()
+"   if !IsQFixHowmFile('%')
+"     return
+"   endif
+"   nnoremap <silent> <buffer> <CR> :<C-u>call QFixHowmActionLock()<CR>
+"   let ext = fnamemodify(expand('%'), ':e')
+"   if !g:QFixHowm_HowmMode && (ext == g:QFixHowm_UserFileExt)
+"     call QFixHowmUserAutocmd(ext)
+"   endif
+" endfunction
 
 silent! function QFixHowmUserAutocmd(ext)
   if a:ext == 'wiki'
@@ -1895,193 +1898,193 @@ endfunction
 
 "アクションロック実行
 "TODO:strを取得しない形に修正する
-function! QFixHowmActionLock()
-  let RegisterBackup = [@0, @1, @2, @3, @4, @5, @6, @7, @8, @9, @/, @", @"]
-  if has('gui_running')
-    silent! let RegisterBackup[12] = @*
-  endif
-  let s:QFixHowmMA = 0
-  let str = QFixHowmActionLockStr()
-  if s:QFixHowmMA
-    exe 'normal '. str
-  elseif str == "\<CR>"
-    silent! exe "normal! \<CR>"
-  elseif str == "\<ESC>"
-  else
-    let str = substitute(str, "\<CR>", "|", "g")
-    let str = substitute(str, "|$", "", "")
-    silent! exe str
-  endif
-  for n in range(10)
-    silent! exe 'let @'.n.'=RegisterBackup['.n.']'
-  endfor
-  let @/ = RegisterBackup[10]
-  let @" = RegisterBackup[11]
-  if has('gui_running')
-    silent! let @* = RegisterBackup[12]
-  endif
-  return
-endfunction
+" function! QFixHowmActionLock()
+"   let RegisterBackup = [@0, @1, @2, @3, @4, @5, @6, @7, @8, @9, @/, @", @"]
+"   if has('gui_running')
+"     silent! let RegisterBackup[12] = @*
+"   endif
+"   let s:QFixHowmMA = 0
+"   let str = QFixHowmActionLockStr()
+"   if s:QFixHowmMA
+"     exe 'normal '. str
+"   elseif str == "\<CR>"
+"     silent! exe "normal! \<CR>"
+"   elseif str == "\<ESC>"
+"   else
+"     let str = substitute(str, "\<CR>", "|", "g")
+"     let str = substitute(str, "|$", "", "")
+"     silent! exe str
+"   endif
+"   for n in range(10)
+"     silent! exe 'let @'.n.'=RegisterBackup['.n.']'
+"   endfor
+"   let @/ = RegisterBackup[10]
+"   let @" = RegisterBackup[11]
+"   if has('gui_running')
+"     silent! let @* = RegisterBackup[12]
+"   endif
+"   return
+" endfunction
 
-function! QFixHowmActionLockStr()
-  let save_cursor = getpos('.')
-  call setpos('.', save_cursor)
-  let ret = QFixHowmMacroAction()
-  if ret != "\<CR>"
-    let s:QFixHowmMA = 1
-    return ret
-  endif
-  if ret != "\<CR>"
-    let s:QFixHowmMA = 1
-    return ret
-  endif
-  call setpos('.', save_cursor)
-  let ret = QFixHowmOpenCursorline()
-  if ret == 1
-    return "\<ESC>"
-  endif
-  call setpos('.', save_cursor)
-  let text = getline('.')
-  let stridx = match(text, g:QFixHowm_Link)
-  if stridx > -1 && col('.') > stridx
-    let pattern = matchstr(text, g:QFixHowm_Link.'\s*.*$')
-    let pattern = substitute(pattern, '^'.g:QFixHowm_Link.'\s*', '', '')
-    let s:QFixHowmALSPat = pattern
-    call QFixHowmActionLockSearch(0)
-    return "\<ESC>"
-  endif
-  call setpos('.', save_cursor)
-  let ret = QFixHowmDateActionLock()
-  if ret != "\<CR>"
-    return ret
-  endif
-  call setpos('.', save_cursor)
-  let ret = QFixHowmTimeActionLock()
-  if ret != "\<CR>"
-    return ret
-  endif
-  call setpos('.', save_cursor)
-  if col('.') < 36 && getline('.') =~ '^'.s:sch_dateT.s:sch_Ext
-    let ret = QFixHowmSwitchActionLock(g:QFixHowm_ScheduleSwActionLock, 1)
-    if ret != "\<CR>"
-      return ret
-    endif
-  endif
-  call setpos('.', save_cursor)
-  let ret = QFixHowmRepeatDateActionLock()
-  if ret != "\<CR>"
-    return ret
-  endif
-  call setpos('.', save_cursor)
-  let ret = QFixHowmKeywordLinkSearch()
-  if ret != "\<CR>"
-    return ret
-  endif
-  call setpos('.', save_cursor)
-  let ret = QFixHowmSwitchActionLock(g:QFixHowm_SwitchListActionLock)
-  if ret != "\<CR>"
-    return ret
-  endif
-  call setpos('.', save_cursor)
-  let ret = QFixHowmSwitchActionLock(['{_}'])
-  if ret != "\<CR>"
-    return ret
-  endif
-  call setpos('.', save_cursor)
-  if exists('g:QFixHowm_UserSwActionLock')
-    let ret = QFixHowmSwitchActionLock(g:QFixHowm_UserSwActionLock)
-    if ret != "\<CR>"
-      return ret
-    endif
-  endif
-  call setpos('.', save_cursor)
-
-  for i in range(1, g:QFixHowm_UserSwActionLockMax)
-    if !exists('g:QFixHowm_UserSwActionLock'.i)
-      continue
-    endif
-    call setpos('.', save_cursor)
-    exe 'let action = '.'g:QFixHowm_UserSwActionLock'.i
-    if action != []
-      let ret = QFixHowmSwitchActionLock(action)
-      if ret != "\<CR>"
-        return ret
-      endif
-    endif
-  endfor
-  call setpos('.', save_cursor)
-  if getline('.') =~ '^'.s:sch_dateT.s:sch_Ext
-    call cursor('.', 1)
-    let ret = QFixHowmRepeatDateActionLock()
-    if ret != "\<CR>"
-      return ret
-    endif
-  endif
-  call setpos('.', save_cursor)
-  return "\<CR>"
-endfunction
+" function! QFixHowmActionLockStr()
+"    let save_cursor = getpos('.')
+"    call setpos('.', save_cursor)
+"    let ret = QFixHowmMacroAction()
+"    if ret != "\<CR>"
+"      let s:QFixHowmMA = 1
+"      return ret
+"    endif
+"    if ret != "\<CR>"
+"      let s:QFixHowmMA = 1
+"      return ret
+"    endif
+"    call setpos('.', save_cursor)
+"    let ret = QFixHowmOpenCursorline()
+"    if ret == 1
+"      return "\<ESC>"
+"    endif
+"    call setpos('.', save_cursor)
+"    let text = getline('.')
+"    let stridx = match(text, g:QFixHowm_Link)
+"    if stridx > -1 && col('.') > stridx
+"      let pattern = matchstr(text, g:QFixHowm_Link.'\s*.*$')
+"      let pattern = substitute(pattern, '^'.g:QFixHowm_Link.'\s*', '', '')
+"      let s:QFixHowmALSPat = pattern
+"      call QFixHowmActionLockSearch(0)
+"      return "\<ESC>"
+"    endif
+"    call setpos('.', save_cursor)
+"    let ret = QFixHowmDateActionLock()
+"    if ret != "\<CR>"
+"      return ret
+"    endif
+"    call setpos('.', save_cursor)
+"    let ret = QFixHowmTimeActionLock()
+"    if ret != "\<CR>"
+"      return ret
+"    endif
+"    call setpos('.', save_cursor)
+"    if col('.') < 36 && getline('.') =~ '^'.s:sch_dateT.s:sch_Ext
+"      let ret = QFixHowmSwitchActionLock(g:QFixHowm_ScheduleSwActionLock, 1)
+"      if ret != "\<CR>"
+"        return ret
+"      endif
+"    endif
+"    call setpos('.', save_cursor)
+"    let ret = QFixHowmRepeatDateActionLock()
+"    if ret != "\<CR>"
+"      return ret
+"    endif
+"    call setpos('.', save_cursor)
+"    let ret = QFixHowmKeywordLinkSearch()
+"    if ret != "\<CR>"
+"      return ret
+"    endif
+"    call setpos('.', save_cursor)
+"    let ret = QFixHowmSwitchActionLock(g:QFixHowm_SwitchListActionLock)
+"    if ret != "\<CR>"
+"      return ret
+"    endif
+"    call setpos('.', save_cursor)
+"    let ret = QFixHowmSwitchActionLock(['{_}'])
+"    if ret != "\<CR>"
+"      return ret
+"    endif
+"    call setpos('.', save_cursor)
+"    if exists('g:QFixHowm_UserSwActionLock')
+"      let ret = QFixHowmSwitchActionLock(g:QFixHowm_UserSwActionLock)
+"      if ret != "\<CR>"
+"        return ret
+"      endif
+"    endif
+"    call setpos('.', save_cursor)
+"
+"    for i in range(1, g:QFixHowm_UserSwActionLockMax)
+"      if !exists('g:QFixHowm_UserSwActionLock'.i)
+"        continue
+"      endif
+"      call setpos('.', save_cursor)
+"      exe 'let action = '.'g:QFixHowm_UserSwActionLock'.i
+"      if action != []
+"        let ret = QFixHowmSwitchActionLock(action)
+"        if ret != "\<CR>"
+"          return ret
+"        endif
+"      endif
+"    endfor
+"    call setpos('.', save_cursor)
+"    if getline('.') =~ '^'.s:sch_dateT.s:sch_Ext
+"      call cursor('.', 1)
+"      let ret = QFixHowmRepeatDateActionLock()
+"      if ret != "\<CR>"
+"        return ret
+"      endif
+"    endif
+"    call setpos('.', save_cursor)
+"    return "\<CR>"
+" endfunction
 
 let g:QFixHowm_KeywordList = []
 
 "キーワードリンク検索
-function! QFixHowmKeywordLinkSearch()
-  let save_cursor = getpos('.')
-  let l:QFixHowm_keyword = g:QFixHowm_keyword
-  let col = col('.')
-  let lstr = getline('.')
-
-  for word in g:QFixHowm_KeywordList
-    let len = strlen(word)
-    let pos = stridx(lstr, word)
-    if pos == -1 || col < pos+1
-      continue
-    endif
-    let str = strpart(lstr, col-len, 2*len)
-    if stridx(str, word) > -1
-      let s:QFixHowmALSPat = word
-
-      let l:QFixHowm_Wiki = 0
-      if exists('g:QFixHowm_Wiki')
-        let l:QFixHowm_Wiki = g:QFixHowm_Wiki
-      elseif exists('g:qfixmemo_keyword_mode')
-        let l:QFixHowm_Wiki = g:qfixmemo_keyword_mode
-      endif
-      if l:QFixHowm_Wiki > 0
-        let link = word
-        if l:QFixHowm_Wiki == 1
-          let file = g:howm_dir
-          if exists('g:QFixHowm_WikiDir')
-            let file = g:howm_dir . '/'.g:QFixHowm_WikiDir
-          endif
-          let file = file .'/'.link.'.'.g:QFixHowm_FileExt
-          call QFixEditFile(file)
-        elseif l:QFixHowm_Wiki == 2
-          let cmd = ':e '
-          let subdir = vimwiki#current_subdir()
-          call vimwiki#open_link(cmd, subdir.link)
-        endif
-        return "\<ESC>"
-      endif
-      call QFixHowmActionLockSearch(0)
-      return "\<ESC>"
-    endif
-  endfor
-  return "\<CR>"
-endfunction
+" function! QFixHowmKeywordLinkSearch()
+"   let save_cursor = getpos('.')
+"   let l:QFixHowm_keyword = g:QFixHowm_keyword
+"   let col = col('.')
+"   let lstr = getline('.')
+"
+"   for word in g:QFixHowm_KeywordList
+"     let len = strlen(word)
+"     let pos = stridx(lstr, word)
+"     if pos == -1 || col < pos+1
+"       continue
+"     endif
+"     let str = strpart(lstr, col-len, 2*len)
+"     if stridx(str, word) > -1
+"       let s:QFixHowmALSPat = word
+"
+"       let l:QFixHowm_Wiki = 0
+"       if exists('g:QFixHowm_Wiki')
+"         let l:QFixHowm_Wiki = g:QFixHowm_Wiki
+"       elseif exists('g:qfixmemo_keyword_mode')
+"         let l:QFixHowm_Wiki = g:qfixmemo_keyword_mode
+"       endif
+"       if l:QFixHowm_Wiki > 0
+"         let link = word
+"         if l:QFixHowm_Wiki == 1
+"           let file = g:howm_dir
+"           if exists('g:QFixHowm_WikiDir')
+"             let file = g:howm_dir . '/'.g:QFixHowm_WikiDir
+"           endif
+"           let file = file .'/'.link.'.'.g:QFixHowm_FileExt
+"           call QFixEditFile(file)
+"         elseif l:QFixHowm_Wiki == 2
+"           let cmd = ':e '
+"           let subdir = vimwiki#current_subdir()
+"           call vimwiki#open_link(cmd, subdir.link)
+"         endif
+"         return "\<ESC>"
+"       endif
+"       call QFixHowmActionLockSearch(0)
+"       return "\<ESC>"
+"     endif
+"   endfor
+"   return "\<CR>"
+" endfunction
 
 "アクションロック用サーチ
-function! QFixHowmActionLockSearch(regmode, ...)
-  let g:MyGrep_Regexp = a:regmode
-  let pattern = s:QFixHowmALSPat
-  if a:0 > 0
-    let pattern = input(a:1, pattern)
-  endif
-  if pattern == ''
-    return "\<CR>"
-  endif
-  call histadd('@', pattern)
-  call QFixHowmListAll(pattern, 0)
-endfunction
+" function! QFixHowmActionLockSearch(regmode, ...)
+"   let g:MyGrep_Regexp = a:regmode
+"   let pattern = s:QFixHowmALSPat
+"   if a:0 > 0
+"     let pattern = input(a:1, pattern)
+"   endif
+"   if pattern == ''
+"     return "\<CR>"
+"   endif
+"   call histadd('@', pattern)
+"   call QFixHowmListAll(pattern, 0)
+" endfunction
 
 "ユーザーマクロのアクションロック
 let s:QFixHowm_MacroActionCmd = ''
@@ -2224,26 +2227,27 @@ function! QFixHowmDateActionLock()
   let dpattern = matchstr(str, pattern)
   let pattern = input(' 01-031,32-999 ([+-]day), yymmdd/mmdd/1-31 (set), . (today) : ', '')
   if pattern == ''
-    let pattern = dpattern
-    if g:QFixHowm_DateActionLockDefault == 0
-      return "\<ESC>"
-    endif
-    if g:QFixHowm_DateActionLockDefault == 1
-      "TODO:vimgrepだったら/をエスケープ
-      let patten = escape(pattern, '/')
-      let s:QFixHowmALSPat = pattern
-      call QFixHowmActionLockSearch(1, 'QFixHowm Grep : ')
-      return "\<ESC>"
-    endif
-    if g:QFixHowm_DateActionLockDefault == 2
-      call QFixHowmListReminder('schedule')
-      return "\<ESC>"
-    endif
-    if g:QFixHowm_DateActionLockDefault == 3
-      call QFixHowmListReminder('todo')
-      return "\<ESC>"
-    endif
-    return "\<CR>"
+    return "\<ESC>"
+    " let pattern = dpattern
+    " if g:QFixHowm_DateActionLockDefault == 0
+    "   return "\<ESC>"
+    " endif
+    " if g:QFixHowm_DateActionLockDefault == 1
+    "   "TODO:vimgrepだったら/をエスケープ
+    "   let patten = escape(pattern, '/')
+    "   let s:QFixHowmALSPat = pattern
+    "   call QFixHowmActionLockSearch(1, 'QFixHowm Grep : ')
+    "   return "\<ESC>"
+    " endif
+    " if g:QFixHowm_DateActionLockDefault == 2
+    "   call QFixHowmListReminder('schedule')
+    "   return "\<ESC>"
+    " endif
+    " if g:QFixHowm_DateActionLockDefault == 3
+    "   call QFixHowmListReminder('todo')
+    "   return "\<ESC>"
+    " endif
+    " return "\<CR>"
   elseif pattern == '.'
     let cpattern = strftime(s:hts_date)
   elseif pattern =~ '^[-+]\d\+$'

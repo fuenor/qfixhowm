@@ -767,12 +767,15 @@ function! s:WriteMru(mru, mrufile)
   let mline = g:QFixMRU_BaseDir
   call add(mlist, mline)
   silent! exe 'lchdir ' . escape(expand(g:QFixMRU_BaseDir), ' ')
+  let head = QFixNormalizePath(expand(g:QFixMRU_BaseDir)).'/'
   for d in mrudic
     let file = d['filename']
     if !g:QFixMRU_FullPathMode
-      let file = fnamemodify(file, ':.')
+      " let file = fnamemodify(file, ':.')
+      if stridx(file, head) == 0
+        let file = strpart(file , strlen(head))
+      endif
     endif
-    let file = substitute(file, '\\', '/', 'g')
     let mline = file.'|'.d['lnum'].'|'.d['text']
     let mline = iconv(mline, from, to)
     call add(mlist, mline)

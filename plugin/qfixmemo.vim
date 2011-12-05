@@ -236,10 +236,6 @@ if !exists('g:qfixmemo_escape')
   let g:qfixmemo_escape = '[]~*.\#'
 endif
 
-" QFixMruをQFixMemo専用にして使用する
-if !exists('g:QFixMRU_VimLeaveWrite')
-  let g:QFixMRU_VimLeaveWrite = 0
-endif
 " タイトル検索用正規表現設定
 if !exists('*QFixMemoTitleRegxp')
 function QFixMemoTitleRegxp()

@@ -399,7 +399,7 @@ augroup QFixMemo
 augroup END
 
 function! s:BufRead()
-  if !IsQFixMemo(expand('%'))
+  if !IsQFixMemo(expand('%:p'))
     return
   endif
   call qfixmemo#BufRead()
@@ -557,21 +557,21 @@ function! s:syntaxHighlight()
 endfunction
 
 function! s:BufEnter()
-  if !IsQFixMemo(expand('%'))
+  if !IsQFixMemo(expand('%:p'))
     return
   endif
   call QFixMemoBufEnter()
 endfunction
 
 function! s:BufWinEnter()
-  if !IsQFixMemo(expand('%'))
+  if !IsQFixMemo(expand('%:p'))
     return
   endif
   call QFixMemoBufWinEnter()
 endfunction
 
 function! s:BufLeave()
-  if !IsQFixMemo(expand('%'))
+  if !IsQFixMemo(expand('%:p'))
     return
   endif
   call QFixMemoBufLeave()
@@ -722,7 +722,7 @@ function! s:BufWritePre()
     call qfixmemo#AddKeyword()
     return
   endif
-  if !IsQFixMemo(expand('%'))
+  if !IsQFixMemo(expand('%:p'))
     return
   endif
   if s:ForceWrite
@@ -736,7 +736,7 @@ function! s:BufWritePre()
 endfunction
 
 function! s:BufWritePost()
-  if !IsQFixMemo(expand('%'))
+  if !IsQFixMemo(expand('%:p'))
     return
   endif
   if search('^.\+$', 'ncw') == 0
@@ -823,14 +823,12 @@ function! qfixmemo#EditFile(file)
   if file !~ '^'.pathhead
     let file = expand(g:qfixmemo_dir).'/'.file
   endif
+  let opt = ''
   if IsQFixMemo(file)
     let opt = '++enc=' . g:qfixmemo_fileencoding . ' ++ff=' . g:qfixmemo_fileformat . ' '
-    let mode = g:qfixmemo_splitmode ? 'split' : ''
-    call s:edit(file, mode, opt)
-  else
-    let mode = g:qfixmemo_splitmode ? 'split' : ''
-    call QFixEditFile(file, mode)
   endif
+  let mode = g:qfixmemo_splitmode ? 'split' : ''
+  call s:edit(file, mode, opt)
   exe 'lchdir ' . prevPath
 endfunction
 
@@ -943,7 +941,7 @@ function! qfixmemo#PairFile(file)
 endfunction
 
 function! s:edit(file, ...)
-  let file = fnamemodify(a:file, ':p')
+  let file = expand(a:file)
   let file = substitute(file, '\\', '/', 'g')
 
   let winnr = bufwinnr(file)
@@ -976,7 +974,7 @@ function! s:edit(file, ...)
   endif
   let editcmd = g:qfixmemo_editcmd != '' ? g:qfixmemo_editcmd : 'edit '
   exe editcmd . ' ' . opt .' ' . escape(file, ' #%')
-  if !filereadable(file)
+  if !filereadable(file) && IsQFixMemo(file)
     call qfixmemo#Template('New')
   endif
 endfunction
@@ -1969,7 +1967,7 @@ function! s:OpenQFixSubWin(file, id)
   if bufnum == -1
     let wcmd = expand(file)
       augroup QFixMemoSubMenu
-        if keepsize && winsize > 0
+        if !keepsize && winsize > 0
           if windir =~ 'vert'
             exe 'au BufEnter '.fnamemodify(file, ':t').' call <SID>QFixMemoSubMenuResize('.winsize.', "vertical")'
           else
@@ -2016,15 +2014,21 @@ function! s:OpenQFixSubWin(file, id)
     exe 'vertical resize '.b:submenu_width
   elseif windir =~ 'vert'
     let b:submenu_width = winsize
-    exe 'vertical resize '.b:submenu_width
+    exe 'vertical resize '.winsize
   endif
   let wincmd = s:GetOptionWithID('g:qfixmemo_submenu_calendar_wincmd', swid)
   if wincmd != ''
     let wincmd = wincmd . (windir =~ 'vert' ? '' : ' vertical')
     let saved_ei = &eventignore
     set eventignore=BufLeave
-    call QFixMemoCalendar(wincmd, '__Cal__', 1, 'parent'. (keepsize ? 'resize' : ''))
+    call QFixMemoCalendar(wincmd, '__Cal__', 1, 'parent'. (keepsize ? '' : 'resize'))
     let &eventignore = saved_ei
+  endif
+  if windir =~ 'vert'
+    if keepsize
+      let b:submenu_width = s:GetOptionWithID('g:qfixmemo_submenu_size', swid)
+    endif
+    exe 'vertical resize '.b:submenu_width
   endif
   if exists('*QFixMemoSubMenuBufWinEnter')
     call QFixMemoSubMenuBufWinEnter()
@@ -2368,7 +2372,7 @@ function! qfixmemo#LoadKeyword(...)
   endfor
   silent! syn clear qfixmemoKeyword
   let s:KeywordHighlight = substitute(s:KeywordHighlight, '\\|\s*$', '', '')
-  if s:KeywordHighlight != '' && IsQFixMemo(expand('%'))
+  if s:KeywordHighlight != '' && IsQFixMemo(expand('%:p'))
     exe 'syn match qfixmemoKeyword display "\V'.escape(s:KeywordHighlight, '"').'"'
   endif
 endfunction

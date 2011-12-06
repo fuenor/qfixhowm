@@ -1648,10 +1648,16 @@ augroup QFixHowm
   au BufWinEnter quickfix call <SID>QFixHowmBufWinEnter()
 augroup END
 
+" デフォルトシンタックスファイル
+if !exists('g:howm_schedule_syntax_file')
+  let g:howm_schedule_syntax_file = 'howm_schedule.vim'
+  if exists('g:qfixmemo_syntax_file')
+    let g:howm_schedule_syntax_file = g:qfixmemo_syntax_file
+  endif
+endif
+
 function! s:QFixHowmBufWinEnter()
-  "後で再定義される
-  let name='howm_schedule'
-  exe "runtime! syntax/" . name . ".vim syntax/" . name . "/*.vim"
+  exe 'runtime! syntax/'.g:howm_schedule_syntax_file
   setlocal ft=qf
   call QFixHowmQFsyntax()
 endfunction
@@ -2023,7 +2029,7 @@ endfunction
 "    return "\<CR>"
 " endfunction
 
-let g:QFixHowm_KeywordList = []
+" let g:QFixHowm_KeywordList = []
 
 "キーワードリンク検索
 " function! QFixHowmKeywordLinkSearch()

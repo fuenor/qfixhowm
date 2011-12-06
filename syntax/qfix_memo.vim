@@ -2,7 +2,7 @@
 "
 " Language:    qfixmemo
 " Maintainer:  fuenor@gmail.com
-" Last Change: 2011-10-08 20:01
+" Last Change: 2011-12-06 20:01
 scriptencoding utf-8
 
 " URLとファイル
@@ -20,7 +20,7 @@ syn match txtQuote '^\s*>\(\s.*\|$\)'
 hi def link txtQuote Comment
 
 " リスト (行頭の '-' '+')
-syn region txtList start='^[-+]\+\s*' end='\s:' end='$' contains=txtListBullet,txtListDefinition,txtUrl,txtFile keepend
+syn region txtList start='^\s*[-+]\+\s*' end='\s:' end='$' contains=txtListBullet,txtListDefinition,txtUrl,txtFile keepend
 syn match txtListBullet contained '^\s*[-+*]\+\s*'
 syn match txtListColon  contained '\s:'
 syn match txtListDefinition contained '\s:' contains=txtListColon
@@ -29,8 +29,8 @@ hi def link txtList       Constant
 hi def link txtListBullet Statement
 hi def link txtListColon  Label
 
-" |*テーブル | 項目 |  (セル内で'*'を使うとタイトル)
-syn match txtTable +^|\(.\{-}|\)\++ contains=txtTableHeader,txtTableSeparator,txtUrl,txtFile
+" | *テーブル | 項目 |  (セル内で'*'を使うとタイトル)
+syn match txtTable +^\s*|\(.\{-}|\)\++ contains=txtTableHeader,txtTableSeparator,txtUrl,txtFile
 syn match txtTableHeader    contained +\s\+\*[^|]\++
 syn match txtTableSeparator contained +|+
 
@@ -38,8 +38,8 @@ hi def link txtTableHeader    Title
 hi def link txtTableSeparator Statement
 
 " 定義リスト （行頭の':'と' :')
-syn match txtDefinition '^:.\{-}\s:' contains=txtDefColon
-syn match txtDefColon  contained '^:\|\s:'
+syn match txtDefinition '^\s*:.\{-}\s:' contains=txtDefColon
+syn match txtDefColon  contained '^\s*:\|\s:'
 
 hi def link txtDefinition Identifier
 hi def link txtDefColon Label
@@ -68,7 +68,7 @@ hi def link hatenaBlockDelimiter Delimiter
 " ワイルドカードチャプター
 "----------
 syn region memoTitle start='^[=]\+' end='$' contains=titleBullet,titleCategory keepend
-syn region chapterTitle start='^[*]' end='$' contains=titleBullet,titleCategory keepend
+syn region chapterTitle start='^\s*[*]' end='$' contains=chapterBullet,titleCategory keepend
 syn region chapterNumber start='^\s*\(*\|\d\+\)\.\(\(*\|\d\+\)\.\)*\(*\|\d\+\)\(\s\|$\)' end='$' contains=chapterBullet,titleCategory keepend
 syn region chapterNumber start='^\s*\(*\|\d\+\)\.\(\s\|$\)' end='$' contains=chapterBullet,titleCategory keepend
 syn region chapterNumber start='^[.]\+\s' end='$' contains=chapterBullet,titleCategory keepend

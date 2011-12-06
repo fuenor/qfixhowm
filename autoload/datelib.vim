@@ -101,7 +101,7 @@ function! datelib#StrftimeCnvDoWShift(year, month, day, cnvdow, sft)
     endwhile
   elseif sft =~ '[-+]'.s:DoWregxp
     let fday = time / (24*60*60)
-    let fdow = DatelibDoWIdxStrftime(fday)
+    let fdow = datelib#DoWIdxStrftime(fday)
     if sft =~ g:DoWStrftime[fdow]
       let time += (sft =~ '+' ? 1 : -1) * 24*60*60
     endif

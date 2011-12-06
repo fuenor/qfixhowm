@@ -19,18 +19,15 @@ scriptencoding utf-8
 "    QFixHowm以外でhowmスタイルの予定・TODOを使用したい場合は
 "    /doc/howm_schedule.jaxを参照してください。
 "
-"     autoloadで読み込む場合は howm_schedule#Init()が必要です。
-"        :call howm_schedule#Init()
-"
 "     予定・TODO表示 (type : 'schedule' or 'todo')
-"        :call QFixHowmSchedule('schedule', 'c:/temp', 'utf-8')
+"        :call howm_schedule#QFixHowmSchedule('schedule', 'c:/temp', 'utf-8')
 "
 "     QuickFixウィンドウを表示せずにQuickFixリスト取得も可能です。
 "        " c:/temp以下を検索して予定・TODOのQuickFixリストを取得
-"        let qflist = QFixHowmScheduleQFList('schedule', 'c:/temp', 'utf-8')
+"        let qflist = howm_schedule#QFixHowmScheduleQFList('schedule', 'c:/temp', 'utf-8')
 "
 "        " キャッシュされたQuickFixリスト取得
-"        let [qflist, time] = QFixHowmScheduleCachedQFList('schedule')
+"        let [qflist, time] = howm_schedule#QFixHowmScheduleCachedQFList('schedule')
 "
 "        *qflistは getqflist()、timeは localtime() 参照
 "
@@ -80,6 +77,28 @@ function! QFixHowmScheduleQFList(type, dir, fenc)
 endfunction
 
 function! QFixHowmScheduleCachedQFList(mode)
+  exe 'let time = s:LT_'.a:mode
+  exe 'let sq = s:sq_'.a:mode
+  return [sq, time]
+endfunction
+
+function! howm_schedule#QFixHowmSchedule(type, dir, fenc, ...)
+  let l:howm_dir          = g:howm_dir
+  let l:howm_fileencoding = g:howm_fileencoding
+  let g:howm_dir          = a:dir
+  let g:howm_fileencoding = a:fenc
+  let mode = a:0 ? a:1 : ''
+  let sq = s:QFixHowmListReminder_(a:type, mode)
+  let g:howm_dir          = l:howm_dir
+  let g:howm_fileencoding = l:howm_fileencoding
+  return sq
+endfunction
+
+function! howm_schedule#QFixHowmScheduleQFList(type, dir, fenc)
+  return QFixHowmSchedule(a:type, a:dir, a:fenc, 'qflist')
+endfunction
+
+function! howm_schedule#QFixHowmScheduleCachedQFList(mode)
   exe 'let time = s:LT_'.a:mode
   exe 'let sq = s:sq_'.a:mode
   return [sq, time]
@@ -355,7 +374,7 @@ function! s:makeRegxp(dpattern)
 
   let s:sch_dateT    = '\['.s:sch_date.'\( '.s:sch_time.'\)\?\]'
   let s:sch_dateTime = '\['.s:sch_date.' '.s:sch_time.'\]'
-  let s:sch_dow      = '\c\(\(Sun\|Mon\|Tue\|Wed\|Thu\|Fri\|Sat\|Hdy\)\)'
+  let s:sch_dow      = '\c\(\(Sun\|Mon\|Tue\|Wed\|Thu\|Fri\|Sat\|Hol\|Hdy\)\)'
   let s:sch_ext      = '-@!+~.'
   let s:sch_Ext      = '['.s:sch_ext.']'
   let s:sch_notExt   = '[^'.s:sch_ext.']'
@@ -965,6 +984,9 @@ function! s:CnvRepeatDate(cmd, opt, str, ...)
     let sft = substitute(matchstr(cmd, '[-+]\d\+)'), '[^-0-9]', '', 'g')
     let cmd = substitute(cmd, '([-+]\d\+)$', '', '')
   endif
+  if cmd =~ '('.s:sch_dow
+    let cmd = substitute(cmd, '(\('.s:sch_dow.'\)', '(1*\1', '')
+  endif
 
   if opt == ''
     let opt = 0
@@ -1431,7 +1453,7 @@ function! s:DayOfWeekShift(cmd, str)
   let dow = substitute(dow, '[-+]', '', 'g')
 
   "休日シフト
-  if dow == 'Hdy' && exists('s:HolidayList') && s:HolidayList != []
+  if dow =~ '\c\(Hol\|Hdy\)' && exists('s:HolidayList') && s:HolidayList != []
     while 1
       if count(s:HolidayList, actday) == 0  && '\c'.g:DoWStrftime[actday%7] !~ 'Sun'
         break
@@ -2136,7 +2158,7 @@ endfunction
 
 "曜日のアクションロック
 if !exists('g:QFixHowm_ScheduleSwActionLock')
-  let g:QFixHowm_ScheduleSwActionLock= ['Sun)', 'Mon)', 'Tue)', 'Wed)', 'Thu)', 'Fri)', 'Sat)', 'Hdy)']
+  let g:QFixHowm_ScheduleSwActionLock= ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Hol']
 endif
 
 " 時間のアクションロック

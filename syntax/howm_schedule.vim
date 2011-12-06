@@ -40,7 +40,7 @@ let s:pattern = '\[\d\{4}-\d\{2}-\d\{2}\( \d\{2}:\d\{2}\)\?]'
 if exists('g:QFixHowm_Date')
   let s:pattern = '\['.g:QFixHowm_Date.'\( \d\{2}:\d\{2}\)\?]'
 endif
-let s:epat = '\{1,3}\((\([0-9]\+\)\?\([-+*]\?\c\(\(Sun\|Mon\|Tue\|Wed\|Thu\|Fri\|Sat\|Hdy\)\?\([-+]\d\+\)\?\)\?\))\)\?\d*'
+let s:epat = '\{1,3}\((\([0-9]\+\)\?\([-+*]\?\c\(\(Sun\|Mon\|Tue\|Wed\|Thu\|Fri\|Sat\|Hol\|Hdy\)\?\([-+]\d\+\)\?\)\?\))\)\?\d*'
 exe 'syn match howmNormal   "^'   .s:pattern.'"               contains=actionlockDate,actionlockTime'
 exe 'syn match howmSchedule "^\s*'.s:pattern.'@' . s:epat .'" contains=actionlockDate,actionlockTime'
 exe 'syn match howmDeadline "^\s*'.s:pattern.'!' . s:epat .'" contains=actionlockDate,actionlockTime'

@@ -56,7 +56,7 @@ endfunction
 " 曜日変換、シフトを行ったstrfime時間
 " strftime()で使用可能
 " cnvdow : 2*Mon, 3*Tue, etc.
-" sft    : -1, +2, -Sun, +Wed, etc.
+" sft    : -1, +2, -Sun, +Wed, -Hol, etc.
 function! datelib#StrftimeCnvDoWShift(year, month, day, cnvdow, sft)
   let year  = a:year
   let month = a:month
@@ -66,15 +66,16 @@ function! datelib#StrftimeCnvDoWShift(year, month, day, cnvdow, sft)
   endif
   let sft   = a:sft
 
-  let cnvdow = substitute(a:cnvdow, '[^0-9]', '', 'g')
+  let cnvdow = matchstr(a:cnvdow, '\(\d\s*\*\)\?\s*'.s:DoWregxp)
   if cnvdow == ''
     let dday = datelib#Date2IntStrftime(year, month, day)
     let time = dday * 24 * 60 *60
   else
+    let dow = substitute(cnvdow, '[*0-9]', '', 'g')
+    let cnvdow = substitute(cnvdow, '[^0-9]', '', 'g')
     if cnvdow == 0 || cnvdow == ''
       let cnvdow = 1
     endif
-    let dow = substitute(a:cnvdow, '[*0-9]', '', 'g')
     let fday = datelib#Date2IntStrftime(year, month, 1)
     let fdow = datelib#DoWIdxStrftime(fday)
     let dday = fday - fdow
@@ -85,10 +86,10 @@ function! datelib#StrftimeCnvDoWShift(year, month, day, cnvdow, sft)
       let time += 7*24*60*60
     endif
   endif
-  if sft =~ '[-+]\?\d\+'
+  if sft =~ '[-+]\?\s*\d\+'
     let time += str2nr(sft)*24*60*60
-  elseif sft =~ '[-+]Hdy'
-    let t = str2nr(substitute(sft, 'Hdy', '1', '')) * 24*60*60
+  elseif sft =~ '[-+]\s*\c\(Hol\|Hdy\)'
+    let t = str2nr(substitute(sft, '\c\(Hol\|Hdy\)', '1', '')) * 24*60*60
     while 1
       let y = strftime('%Y', time)
       let m = strftime('%m', time)
@@ -99,7 +100,7 @@ function! datelib#StrftimeCnvDoWShift(year, month, day, cnvdow, sft)
       endif
       let time += t
     endwhile
-  elseif sft =~ '[-+]'.s:DoWregxp
+  elseif sft =~ '[-+]\s*'.s:DoWregxp
     let fday = time / (24*60*60)
     let fdow = datelib#DoWIdxStrftime(fday)
     if sft =~ g:DoWStrftime[fdow]
@@ -184,27 +185,27 @@ let s:holidaydict = []
 let s:usertbl  = {}
 let s:userdict = []
 function! datelib#MakeHolidayTable(year, ...)
-  let hdy = a:0
+  let hol = a:0
   for year in range(a:year-1, a:year+1)
-    let yearid = year. (hdy ? 'Hdy' : '')
+    let yearid = year. (hol ? 'Hol' : '')
     if !exists('s:holidaytbl[yearid]')
       let s:holidaytbl[yearid] = '|exists|'
       if len(s:holidaydict) == 0
         let s:holidaydict = s:ReadScheduleFile(s:setholidayfile(), s:holidaytbl)
       endif
-      call s:SetScheduleTable(year, s:holidaydict, s:holidaytbl, hdy)
+      call s:SetScheduleTable(year, s:holidaydict, s:holidaytbl, hol)
       if exists('g:calendar_userfile')
         if len(s:userdict) == 0
           let s:userdict = s:ReadScheduleFile(g:calendar_userfile, s:usertbl)
         endif
-        call s:SetScheduleTable(year, s:userdict, s:usertbl, hdy)
+        call s:SetScheduleTable(year, s:userdict, s:usertbl, hol)
       endif
     endif
   endfor
 endfunction
 
 " 休日定義ファイルを読み込み
-let s:DoWregxp = '\c\(Sun\|Mon\|Tue\|Wed\|Thu\|Fri\|Sat\|Hdy\)'
+let s:DoWregxp = '\c\(Sun\|Mon\|Tue\|Wed\|Thu\|Fri\|Sat\|Hol\|Hdy\)'
 function! s:ReadScheduleFile(files, table)
   let dict = []
   for file in a:files
@@ -241,7 +242,7 @@ function! s:ReadScheduleFile(files, table)
       let repeat = substitute(repeat, '(', '', '')
       let text = substitute(str, '^'.sch_cmd, '', '')
       if cmd == '@'
-        if repeat == '' && sft !~ 'Hdy'
+        if repeat == '' && sft !~ '\c\(Hol\|Hdy\)'
           let opt = (opt == '' || opt == 0) ? 1 : opt
           for i in range(opt)
             let time = datelib#StrftimeCnvDoWShift(year, month, day+i, cnvdow, sft)
@@ -292,15 +293,15 @@ function! s:setholidayfile()
   return split(file, "\<NL>")
 endfunction
 
-function! s:SetScheduleTable(year, dict, table, hdy)
+function! s:SetScheduleTable(year, dict, table, hol)
   if len(a:dict)
     for d in a:dict
       if a:year < d['year']
         continue
       endif
-      if !a:hdy && d['sft'] =~ 'Hdy'
+      if !a:hol && d['sft'] =~ '\c\(Hol\|Hdy\)'
         continue
-      elseif a:hdy && d['sft'] !~ 'Hdy'
+      elseif a:hol && d['sft'] !~ '\c\(Hol\|Hdy\)'
         continue
       endif
       if d['cmd'] == '@@@'

@@ -230,6 +230,7 @@ function! qfixlist#open(...)
   setlocal nobuflisted
   setlocal nowrap
   setlocal cursorline
+  setlocal nofoldenable
 
   silent! exe 'lchdir ' . escape(s:QFixList_dir, ' ')
 

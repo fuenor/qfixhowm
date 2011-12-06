@@ -225,6 +225,7 @@ function! QFixMemoCalendar(dircmd, file, cnt, ...)
     exe winnr.'wincmd w'
     return
   endif
+  let init = 0
   let windir = a:dircmd
   let win = windir =~ 'vert'
   let winsize = 0 "winwidth(0)
@@ -240,11 +241,16 @@ function! QFixMemoCalendar(dircmd, file, cnt, ...)
     let l:calendar_width = winwidth(0)
     let winsize = winwidth(0)
   endif
-  let pbufnr = bufnr('%')
+  let pbufnr = parent ? bufnr('%') : 0
+  let b:calendar_pbuf = parent ? bufnr('%') : 0
+  let saved_ei = &eventignore
+  set eventignore=BufEnter,BufLeave
   exe 'silent! ' . windir . ' ' . (winsize == 0 ? '' : string(winsize)) . 'split '.escape(file, ' ')
+  let &eventignore = saved_ei
   if !exists('b:calendar_width')
     let b:calendar_width = winsize
     let b:submenu_calendar_lmargin = g:submenu_calendar_lmargin
+    let init = 1
   endif
   setlocal buftype=nofile
   setlocal bufhidden=hide
@@ -258,24 +264,31 @@ function! QFixMemoCalendar(dircmd, file, cnt, ...)
   let &winfixwidth  = g:submenu_calendar_winfixwidth
   setlocal foldcolumn=0
   let cbufnr = bufnr('%')
+  if exists('g:QFix_PreviewUpdatetime')
+    let b:qfixwin_updatetime = 1
+    exe 'setlocal updatetime='.g:QFix_PreviewUpdatetime
+  endif
   if a:0 && a:1 =~ 'parent'
-    " parentに合わせてマージン設定
+    let calid = 1
+    augroup CalMsgP
+      au!
+      exe 'au CursorHold '.a:file.' call <SID>Msg(1)'
+    augroup END
+    setlocal statusline=\ %{g:calendar_statusline1}
   else
+    let calid = 0
     augroup CalMsg
       au!
-      exe 'au CursorHold '.a:file.' call <SID>Msg()'
+      exe 'au CursorHold '.a:file.' call <SID>Msg(0)'
     augroup END
-    if exists('g:QFix_PreviewUpdatetime')
-      let b:qfixwin_updatetime = 1
-      exe 'setlocal updatetime='.g:QFix_PreviewUpdatetime
-    endif
+    setlocal statusline=\ %{g:calendar_statusline0}
   endif
   call s:build(a:cnt)
   let winheight = line('$')
   let b:dircmd = windir
   let b:calendar_winfixheight = a:0
   let b:calendar_resize = 0
-  if a:0
+  if parent
     let b:calendar_resize = parent + (a:1 =~ 'resize' ? 1 :0)
     call s:winfixheight(winheight)
     " サブメニューと同時にウィンドウクローズするためのフック
@@ -293,13 +306,16 @@ function! QFixMemoCalendar(dircmd, file, cnt, ...)
   exe 'augroup SubmenuCalendar'.cbufnr
     exe 'au BufEnter    * call <SID>SCBufEnter('.pbufnr.','.cbufnr.')'
   augroup END
-  call search('\.')
-  call search('\*')
+  if init
+    call search('\.')
+    call search('\*')
+  endif
   call <SID>syntax()
   call CalendarPost()
-  if !a:0 || a:1 =~ 'parent'
-    call <SID>Msg()
+  if a:0 && a:1 =~ 'parent'
+    call search('\*')
   endif
+  call <SID>Msg(calid)
 
   nnoremap <silent> <buffer> q    :close<CR>
   nnoremap <silent> <buffer> >    :<C-u>call <SID>CR('>>')<CR>
@@ -393,41 +409,42 @@ function! s:CR(...)
 endfunction
 
 function! s:build(...)
+  let save_cursor = getpos('.')
   let num = exists('b:calendar_count') ? b:calendar_count : 3
   let num = a:0 ? a:1 : num
   let b:calendar_count = num
   setlocal modifiable
   let glist = s:CalendarStr(num)
   if num > 1
-    call extend(glist, ['_'])
+    call extend(glist, g:calendar_footer)
   endif
   let b:calendar_height = len(glist)
   silent! %delete _
-  let save_cursor = getpos('.')
   call setline(1, glist)
-  call cursor(1, 1)
-  exe 'normal! z-'
-  call setpos('.', save_cursor)
+  if num > 1
+    call cursor(1, 1)
+    exe 'normal! z-'
+    call setpos('.', save_cursor)
+  endif
   setlocal nomodifiable
 endfunction
 
-function! s:Msg()
-  let msg = ['']
-  call extend(msg, CalendarInfo())
+let g:calendar_statusline0 = ''
+let g:calendar_statusline1 = ''
+function! s:Msg(id)
+  let msg = CalendarInfo()
+  exe "let g:calendar_statusline".a:id." = len(msg) == 0 ? '' : msg[0]"
   call map(msg, "substitute(v:val, '^', '_', '')")
-  if len(msg) > 1
-    call add(msg, '')
+
+  let save_cursor = getpos('.')
+  setlocal modifiable
+  let lnum = search('^\s*_', 'ncW')
+  silent! exe '%s/^_.*/_/g'
+  if lnum && len(msg) > 0
+    call setline(lnum, msg[0])
   endif
-  call extend(msg, g:calendar_footer)
-  let lnum = search('^\s*_', 'ncw')
-  if lnum
-    let save_cursor = getpos('.')
-    setlocal modifiable
-    silent! exe lnum.',$delete _'
-    call setline(line('$')+1, msg)
-    setlocal nomodifiable
-    call setpos('.', save_cursor)
-  endif
+  setlocal nomodifiable
+  call setpos('.', save_cursor)
 endfunction
 
 if !exists('*CalendarInfo')
@@ -533,8 +550,8 @@ function! s:CalendarStr(...)
     call insert(list, mruler)
     call map(list, 'substitute(v:val, "^", b:submenu_calendar_lmargin, "")')
     let month += 1
-    if loop > 1 && cnt < loop-1
-      call extend(list, [''])
+    if loop > 1
+      call extend(list, ['_'])
     endif
     call extend(glist, list)
   endfor
@@ -568,7 +585,10 @@ function! s:SCBufEnter(pbuf, cbuf)
   endif
   if expand('<abuf>') == a:cbuf
     if b:calendar_resize
-      if winwidth(0) < b:calendar_width || b:calendar_resize == 1
+      if exists('g:calendar_width_'.a:pbuf)
+        exe "let b:calendar_width = g:calendar_width_".a:pbuf
+      endif
+      if winwidth(0) < b:calendar_width || b:calendar_resize " == 1
         exe 'vertical resize '.b:calendar_width
       endif
       call s:winfixheight(b:calendar_height)

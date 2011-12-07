@@ -1881,17 +1881,16 @@ if !exists('g:qfixmemo_submenu_single_mode')
 endif
 
 let s:qfixmemo_submenu_title = g:qfixmemo_submenu_title
-let s:submenu_basedir = g:qfixmemo_dir
-if exists('g:qfixmemo_root')
-  let s:submenu_basedir = g:qfixmemo_root
-endif
 let s:sb_id = 0
 function! qfixmemo#SubMenu(...)
   if qfixmemo#Init('mkdir')
     return
   endif
+  let basedir = g:qfixmemo_dir
+  if exists('g:qfixmemo_submenu_dir')
+    let basedir = g:qfixmemo_submenu_dir
+  endif
   let l:count = a:0 && a:1 ? a:1 : count
-  let basedir = s:submenu_basedir
   let file = s:submenu_mkdir(basedir)
   let bufnum = bufnr(file)
   let winnum = bufwinnr(file)
@@ -1977,7 +1976,12 @@ function! s:OpenQFixSubWin(file, id)
   else
     let wcmd = '+buffer' . bufnum
   endif
-  exe 'silent! ' . windir . ' ' . (winsize == 0 ? '' : string(winsize)) . 'split ' . wcmd
+  let opt = ''
+  " let opt = ' ++enc='.g:qfixmemo_fileencoding .' ++ff='.g:qfixmemo_fileformat
+  exe 'silent! ' . windir . ' ' . (winsize == 0 ? '' : string(winsize)) ' split ' .opt. ' ' . wcmd
+  exe 'set fenc='.g:qfixmemo_fileencoding
+  exe 'set ff='.g:qfixmemo_fileformat
+
   if g:qfixmemo_submenu_autowrite
     setlocal buftype=nowrite
   endif
@@ -2483,8 +2487,12 @@ function! qfixmemo#RebuildKeyword()
     let pattern = '\('.g:howm_clink_pattern.'\|'.pattern.'\)'
   endif
 
+  let basedir = g:qfixmemo_dir
+  if exists('g:qfixmemo_submenu_dir')
+    let basedir = g:qfixmemo_submenu_dir
+  endif
   let prevPath = escape(getcwd(), ' ')
-  exe 'lchdir ' . escape(expand(s:submenu_basedir), ' ')
+  exe 'lchdir ' . escape(expand(basedir), ' ')
   let file = fnamemodify(g:qfixmemo_submenu_title, ':p')
   let saved_sq = getloclist(0)
   silent! exe 'lvimgrep /'.pattern.'/j '. escape(file, ' ')

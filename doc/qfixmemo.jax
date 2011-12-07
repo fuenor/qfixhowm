@@ -673,16 +673,15 @@ QFixMemoではサブメニューを開くことができます。
   " サブメニューのタイトル指定
   let qfixmemo_submenu_title = '__submenu__'
 
-基準ディレクトリは qfixmemo_dirですが、qfixmemo_rootがあれば、
-qfixmemo_rootが優先されます。
+基準ディレクトリは qfixmemo_dirですが、qfixmemo_submenu_dirがあれば、
+qfixmemo_submenu_dirが優先されます。
 
-  1 : qfixmemo_root
+  1 : qfixmemo_submenu_dir
   2 : qfixmemo_dir
 
 またタイトルではなくパス付きでファイル名指定も可能です。
-パスは絶対パスだけでなく相対パスも使用可能です。
 >
-  let qfixmemo_submenu_title = '../path/to/__submenu__'
+  let qfixmemo_submenu_title = '~/path/to/__submenu__'
 
 その他のオプションは以下のとおりです。 >
 

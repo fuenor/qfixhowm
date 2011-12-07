@@ -69,7 +69,7 @@ function! datelib#StrftimeCnvDoWShift(year, month, day, cnvdow, sft)
   let cnvdow = matchstr(a:cnvdow, '\(\d\s*\*\)\?\s*'.s:DoWregxp)
   if cnvdow == ''
     let dday = datelib#Date2IntStrftime(year, month, day)
-    let time = dday * 24 * 60 *60
+    let time = dday * 24*60*60
   else
     let dow = substitute(cnvdow, '[*0-9]', '', 'g')
     let cnvdow = substitute(cnvdow, '[^0-9]', '', 'g')
@@ -80,7 +80,7 @@ function! datelib#StrftimeCnvDoWShift(year, month, day, cnvdow, sft)
     let fdow = datelib#DoWIdxStrftime(fday)
     let dday = fday - fdow
     let dday += (cnvdow-1) * 7 + index(g:DoWStrftime, dow)
-    let time = dday * 24 * 60 *60
+    let time = dday * 24*60*60
     let month = strftime('%m', time)
     if fdow > index(g:DoWStrftime, dow)
       let time += 7*24*60*60

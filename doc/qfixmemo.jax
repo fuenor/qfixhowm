@@ -11,7 +11,6 @@
 CONTENTS                                                *qfixmemo-contents*
 1. Intro                                                |qfixmemo-intro|
   1.2 QFixHowmとの違い                                  |qfixmemo-qfixhowm|
-  1.3 qfix_memoファイルタイプ                           |qfixmemo-qfix_memo|
 2. インストール                                         |qfixmemo-settings|
 3. メモファイルを開く                                   |qfixmemo-file|
   3.1 クイックメモ                                      |qfixmemo-quickmemo|
@@ -22,6 +21,8 @@ CONTENTS                                                *qfixmemo-contents*
 4. エントリ一覧                                         |qfixmemo-entry-list|
   4.1 エントリ一覧のオプション                          |qfixmemo-entry-list-option|
   4.2 MRUリスト                                         |qfixmemo-entry-list-mru|
+    4.2.1 タイトル行の正規表現                          |qfixmemo-title-regxp|
+    4.2.2 QFixMRU                                       |qfixmemo-qfixmru|
 5. 検索                                                 |qfixmemo-grep|
   5.1 Quickfixウィンドウの編集                          |qfixmemo-quickfix-edit|
   5.2 エントリフィルタと連結表示                        |qfixmemo-entry-filter|
@@ -38,7 +39,6 @@ CONTENTS                                                *qfixmemo-contents*
 12. カスタマイズ                                        |qfixmemo-customize|
   12.1 新規メモのテンプレート                           |qfixmemo-template|
     12.1.2 タイトルマーカーとタイトル検索の正規表現     |qfixmemo-title|
-    12.1.3 タイトル検索の正規表現                       |qfixmemo-title-regxp|
   12.2 キーマップ                                       |qfixmemo-user-keymap|
   12.3 保存前処理                                       |qfixmemo-pre-save|
   12.4 ファイルタイプ指定                               |qfixmemo-filetype|
@@ -87,24 +87,6 @@ QFixMemoとしてのネイティブな状態で使用したい場合は.vimrcで
   " QFixHowmとのオプションコンバートを行わない
   let QFixHowm_Convert = 0
 
-1.3 qfix_memoファイルタイプ															*qfixmemo-qfix_memo*
-
-ファイルタイプに qfix_memo を設定すると以下とほぼ同等のシンタックスハ
-イライトが有効になります。
-http://sites.google.com/site/fudist/Home/qfixhowm/option/outline-mode#user-syntaxfile
-または|qfixmemo-syntax|を参照してください。
-
-ファイルタイプに qfix_memoを指定する例 >
-  " QFixHowmとして使用する場合
-  let QFixHowm_FileType = 'qfix_memo'
-
-  " QFixMemoとして使用する場合
-  let qfixmemo_filetype = 'qfix_memo'
-
-NOTE:
-予定・TODO等のシンタックスハイライトはビルトインになったため、howm_memo.vimは
-qfixapp内のsyntaxディレクトリにコピーすることも出来ます
-
 ==============================================================================
 2. インストール																					*qfixmemo-settings*
 
@@ -143,6 +125,16 @@ NOTE:
 Windowsでファイルエンコーディングを utf-8 に設定したい場合は別途grepを用意して
 設定を行う必要があります。
 http://sites.google.com/site/fudist/Home/grep/install
+
+cygwinがインストールされているならcygwinのgrepを利用可能です。
+(cygwin上のVimで使用する場合は設定不要です)
+>
+  " Windows上のVimでcygwin grepを使用する
+  let mygrepprg='c:/cygwin/bin/grep'
+  " パスが通っているならgrepのみでかまいません。
+  let mygrepprg='grep'
+
+NOTE:
 ファイルフォーマット(改行コード)についてはWindowsでも 'unix' に設定可能です。
 
 ------------------------------------------------------------------------------
@@ -157,6 +149,22 @@ Markdownを使用する例 >
   let qfixmemo_filetype  = ''
 
 詳しくは|qfixmemo-filetype|を参照してください。
+
+ファイルタイプに qfix_memo を設定すると以下とほぼ同等のシンタックスハ
+イライトが有効になります。
+http://sites.google.com/site/fudist/Home/qfixhowm/option/outline-mode#user-syntaxfile
+または|qfixmemo-syntax|を参照してください。
+
+ファイルタイプに qfix_memoを指定する例 >
+  " QFixHowmとして使用する場合
+  let QFixHowm_FileType = 'qfix_memo'
+
+  " QFixMemoとして使用する場合
+  let qfixmemo_filetype = 'qfix_memo'
+
+NOTE:
+予定・TODO等のシンタックスハイライトはビルトインになったため、howm_memo.vimは
+qfixapp内のsyntaxディレクトリにコピーすることも出来ます
 
 ==============================================================================
 3. メモファイルを開く																		*qfixmemo-file*
@@ -201,7 +209,7 @@ NOTE:
 詳しくは 11.1章の「新規メモのテンプレート」|qfixmemo-template|を参照して下さい。
 
 NOTE:
-<Leader>cではカウント指定で qfixmemo_filename, qfixmemo_filename1, ...を使用さ
+<Leader>cではカウント指定で qfixmemo_filename, qfixmemo_filename1, ...が使用さ
 れます。特定のファイルだけ特定のファイル名フォーマットでメモを取りたい場合に使
 用します。
 
@@ -284,7 +292,10 @@ NOTE:
 - フルパスで指定すると qfixmemo_dir外のファイルを開くことができます
 - 指定ファイル名に拡張子が存在しない場合はqfixmemo_extを拡張子として付加します。
   ただしパスや拡張子まで含めて指定されている場合は、指定のファイルを開きます。
-  したがってクイックメモに限りQFixMemo以外のファイルでも開くことが可能です
+  したがってクイックメモに限りQFixMemo以外のファイルでも開くことが可能です。
+>
+ " 2<Leader>u で c:/temp/hoge.jaxを開く設定
+ let qfixmemo_quickmemo2 = 'c:/temp/hoge.jax'
 
 ------------------------------------------------------------------------------
 3.2 ペアファイル																				*qfixmemo-pairfile*
@@ -399,9 +410,9 @@ l ra A は外部grepを使用するのでMRUリストより速度的には遅く
 最新の状態を取得したい場合は <Leader>ra等で再検索します。
 
 本来はQuickFixウィンドウに表示すれば良いのですが、QuickFixは大量のエントリを登
-録するのに向いていないため独自ウィンドウに表示しています。
-なお<Leader>aのエントリ一覧はQuickFixと違い、編集してずれた行番号を追尾するこ
-とはできません。そのような場合は<Leader>raで再検索する必要があります。
+録するのに向いていないため<Leader>m以外は独自ウィンドウに表示しています。
+なお独自ウィンドウのエントリ一覧はQuickFixと違い、編集してずれた行番号を追尾す
+ることはできません。そのような場合は<Leader>raで再検索する必要があります。
 
 なおキャッシュの存在しない <Leader>aの初回実行時には <Leader>raが実行されます。
 <Leader>a でキャッシュ表示を使用したくない場合は次のように設定してください。
@@ -434,11 +445,6 @@ QFixMemo専用ではないので qfixmemo_dir以下ならどんなファイル�
 この単位でMRUに登録します。したがって一ファイル内に複数のエントリがあっても個
 別にアクセスした順番を管理できることになります。
 
-またソースファイルなどを関数単位でMRUに登録することも可能です。
-qfixmemo_dir内に ソースをおいておくと全文検索も可能で最近アクセスした関数リス
-トを使用するような使い方も出来ます。
-タイトル行については|qfixmemo-title-regxp|を参照してください。
-
 ------------------------------------------------------------------------------
 NOTE:
 複数のPCでメモを共有する場合、MRUリストをqfixmemo_dirを基準とした相対パスで保存
@@ -449,21 +455,96 @@ NOTE:
   " MRUの基準ディレクトリ
   let QFixMRU_RootDir   = qfixmemo_dir
 <
-たとえばWindowsでは c:/howm Linuxでは ~/howm 以下にメモファイルが存在していて、
+たとえばWindowsでは c:/qfixmemo Linuxでは ~/qfixmemo 以下にメモファイルが存在していて、
 何らかの形でファイル共有しているとします。この場合は次のように設定を行います。
 >
   " MRUの基準ディレクトリ(Windows)
-  let QFixMRU_RootDir = 'c:/howm'
+  let QFixMRU_RootDir = 'c:/qfixmemo'
   " MRU保存ファイル名
-  let QFixMRU_Filename  = 'c:/howm/.qfixmru'
+  let QFixMRU_Filename  = 'c:/qfixmemo/.qfixmru'
 
   " MRUの基準ディレクトリ(Linux)
-  let QFixMRU_RootDir = '~/hnowm'
+  let QFixMRU_RootDir = '~/qfixmemo'
   " MRU保存ファイル名
-  let QFixMRU_Filename  = '~/howm/.qfixmru'
+  let QFixMRU_Filename  = '~/qfixmemo/.qfixmru'
 こうすると同じ内容の .qfixmruを共有するとこが出来、どちらの環境でも同じMRUリス
 トが表示されることになります。
 なおqfixmemo_fileencodingは合わせておく必要があります。
+
+------------------------------------------------------------------------------
+4.2.1 タイトル行の正規表現															*qfixmemo-title-regxp*
+
+(通常は自動設定されるので、この項を読む必要はありません)
+
+MRUに登録したり外部grepを利用してエントリ一覧表示を行う際の正規表現は、使用す
+るgrepの正規表現に依存するため、環境に合わせた設定が必要になることがあります。
+正規表現は QFixMRU_Title[]に「拡張子+_regxp」で設定します。
+
+必要ならQFixMemoのタイトル検索用正規表現は QFixMemoTitleRegxp()で独自設定して
+ください。
+
+タイトルから自動設定されるデフォルトの外部grep検索用正規表現は、正規表現が貧弱
+なfindstrでも共通に使えるように「行頭のタイトルマーカー」の後に「タイトルマー
+カーの一文字目以外の文字」がある行をタイトル行として検索するよう設定されていま
+す。
+>
+  " タイトル行検索の正規表現を初期化
+  let QFixMRU_Title = {}
+
+  " MRU登録用の正規表現(Vim)を指定
+  let QFixMRU_Title['mkd'] = '^###[^#]'
+
+外部grepと内部で使うVimの正規表現が異なる場合は、更にgrep専用の正規表現を設定
+可能です。
+>
+  " タイトル行検索の正規表現(grep)を指定
+  let QFixMRU_Title['mkd_regxp'] = '^###[^#]'
+<
+------------------------------------------------------------------------------
+4.2.2 QFixMRU																						*qfixmemo-qfixmru*
+MRUはQFixMRUという独立した汎用プラグインなので、:QFixMRUでコマンド実行も可能で
+す。
+無指定の場合はカレントディレクトリ以下のMRUリストを表示します。
+>
+  :QFixMRU
+
+パス指定すると指定ディレクトリ以下のMRUリストを表示します。
+空白は \ でエスケープしてください。
+>
+  :QFixMRU D:/usr/My\ Dropbox/howm
+
+ソースファイルなどを関数単位でMRUに登録することも可能です。
+たとえば以下を .vimrcへ追加します。
+>
+  nnoremap <silent> g,hl :QFixMRU<CR>
+
+  " カレントディレクトリをファイルと同じ場所へ移動
+  if exists('+autochdir')
+    set autochdir
+  else
+    au BufEnter * execute ":silent! lcd " . escape(expand("%:p:h"), ' ')
+  endif
+
+  " QFixMemoを起動しない場合でも終了時にMRUを保存する
+  let QFixMRU_VimLeaveWrite = 1
+
+  " タイトル行検索正規表現初期化
+  let QFixMRU_Title = {}
+
+  " タイトル行検索正規表現(Vim)
+  let QFixMRU_Title['vim'] = '^\s*\(silent!\?\)\?\s*func'
+  let QFixMRU_Title['java'] = '^\s*public.*(.*).*{'
+  let QFixMRU_Title['js']   = '^\s*function'
+  let QFixMRU_Title['py']   = '^def'
+  let QFixMRU_Title['rb']   = '^\s*def'
+
+上記の設定を.vimrcに追加してから、Vimスクリプト(たとえばqfixmemo.vim等)の
+ファイルを開き「いろんな場所へ移動してバッファ切替」を繰り返してみてください。
+こうしておいてVimスクリプトを開き g,hl を実行すると行頭が function で始まる行
+をタイトルとしたMRU(関数)リストが表示されます。
+
+タイトル行とみなす正規表現については|qfixmemo-title-regxp|を参照して好みのもの
+に変更してください。
 
 ==============================================================================
 5. 検索																									*qfixmemo-grep*
@@ -592,16 +673,15 @@ QFixMemoではサブメニューを開くことができます。
   " サブメニューのタイトル指定
   let qfixmemo_submenu_title = '__submenu__'
 
-基準ディレクトリは qfixmemo_dirですが、qfixmemo_rootがあれば、
-qfixmemo_rootが優先されます。
+基準ディレクトリは qfixmemo_dirですが、qfixmemo_submenu_dirがあれば、
+qfixmemo_submenu_dirが優先されます。
 
-  1 : qfixmemo_root
+  1 : qfixmemo_submenu_dir
   2 : qfixmemo_dir
 
 またタイトルではなくパス付きでファイル名指定も可能です。
-パスは絶対パスだけでなく相対パスも使用可能です。
 >
-  let qfixmemo_submenu_title = '../path/to/__submenu__'
+  let qfixmemo_submenu_title = '~/path/to/__submenu__'
 
 その他のオプションは以下のとおりです。 >
 
@@ -665,7 +745,7 @@ https://sites.google.com/site/fudist/Home/qfixhowm#downloads
 イルのパスを指定してください。
 >
   " 休日定義ファイル(パス等は環境に合わせてください)
-  let calendar_holidayfile = '~/howm/Sche-Hd-0000-00-00-000000.howm'
+  let calendar_holidayfile = '~/qfixmemo/Sche-Hd-0000-00-00-000000.txt'
 
 NOTE:
 実際には予定・TODO(|qfixmemo-schedule|)で休日定義ファイル設定を行なっていると
@@ -945,33 +1025,6 @@ QFixMemoではタイトル行を利用したコマンドがあります。
 この2種類のコマンドそれぞれに使用する正規表現を設定が必要になることがあります。
 
 ------------------------------------------------------------------------------
-12.1.3 タイトル行の正規表現															*qfixmemo-title-regxp*
-
-MRUに登録したり外部grepを利用してエントリ一覧表示を行う際の正規表現は、使用す
-るgrepの正規表現に依存するため、環境に合わせた設定が必要になることがあります。
-正規表現は QFixMRU_Title[]に「拡張子+_regxp」で設定します。
-
-必要ならQFixMemoのタイトル検索用正規表現は QFixMemoTitleRegxp()で独自設定して
-ください。
-
-タイトルから自動設定されるデフォルトの外部grep検索用正規表現は、正規表現が貧弱
-なfindstrでも共通に使えるように「行頭のタイトルマーカー」の後に「タイトルマー
-カーの一文字目以外の文字」がある行をタイトル行として検索するよう設定されていま
-す。
->
-  " タイトル行検索の正規表現を初期化
-  let QFixMRU_Title = {}
-
-  " MRU登録用の正規表現(Vim)を指定
-  let QFixMRU_Title['mkd'] = '^###[^#]'
-
-外部grepと内部で使うVimの正規表現が異なる場合は、更にgrep専用の正規表現を設定
-可能です。
->
-  " タイトル行検索の正規表現(grep)を指定
-  let QFixMRU_Title['mkd_regxp'] = '^###[^#]'
-<
-------------------------------------------------------------------------------
 12.2 キーマップ																					*qfixmemo-user-keymap*
 
 独自キーマップは .vimrc等に QFixMemoKeymapPost() を作成する事で変更可能です。
@@ -1100,7 +1153,7 @@ qfixmemo/misc/qfixmemo-chenv.vim をpluginディレクトリにコピーして�
     nnoremap <silent> <leader>hh :echo qfixmemo_dir<CR>
     nnoremap <silent> <leader>ha :call QFixMemoChEnv("",         "time", "=")<CR>
     nnoremap <silent> <leader>hm :call QFixMemoChEnv("main",     "time", "=")<CR>
-    nnoremap <silent> <leader>hd :call QFixMemoChEnv("howm-mkd", "time", "#")<CR>
+    nnoremap <silent> <leader>hd :call QFixMemoChEnv("memo-mkd", "time", "#")<CR>
     nnoremap <silent> <leader>hc :call QFixMemoChEnv("pc",       "time", "= [:pc]")<CR>
     nnoremap <silent> <leader>hv :call QFixMemoChEnv("vimwiki",  "time", "=")<CR>
     nnoremap <silent> <leader>hw :call QFixMemoChEnv("work",     "day",  "=")<CR>
@@ -1142,7 +1195,13 @@ Vimで作業中にmakeなどでQuickFixウィンドウを使用していると�
 makeの結果を見ながらソースをgrepして表示したい場合などです。
 そのような場合はQFixMemo/QFixGrep側をロケーションリストを使用して結果を表示す
 るように変更するという方法があります。
+ >
+  " QFixWinでロケーションリストを使用する
+  let QFix_UseLocationList = 1
+
 キーマップからも切替可能なので必要に応じて変更してみてください。
+
+<C-w>/        使用するウィンドウをQuickFix/ロケーションリストで切替
 
 QuickFixウィンドウとロケーションリストはどちらも機能的には同じものですが Vimと
 対応しているのが QuickFixウィンドウで、ウィンドウと対応しているのがロケーショ
@@ -1150,9 +1209,6 @@ QuickFixウィンドウとロケーションリストはどちらも機能的に
 このためロケーションリストは対応したウィンドウと同時に破棄される一時的なウィン
 ドウ(バッファ)といえます。
 詳しくは|quickfix|や|location-list| を参照してください。
- >
-  " QFixWinで使用するロケーションリストを使用する
-  let QFix_UseLocationList = 1
 
 なおロケーションリストで使用する場合、QuickFixウィンドウとは挙動がウィンドウ周
 りで若干異なることがあります。

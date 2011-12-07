@@ -1,5 +1,9 @@
 "=============================================================================
 "    Description: QFixMemo
+"                 本プラグインはキーマップ等の起動時処理のみ設定している
+"                 本体は autoload/qfixmemo.vim
+"                 デフォルトでは qfixmemo_autoload = 0 が設定されているので、
+"                 起動時に autoload/qfixmemo.vimも読み込まれる
 "         Author: fuenor <fuenor@gmail.com>
 "                 http://sites.google.com/site/fudist/Home  (Japanese)
 "=============================================================================
@@ -115,7 +119,6 @@ silent! function QFixMemoMenubar(menu, leader)
   call s:addMenu(menucmd, 'QuickMemo(&U)'      , 'u', ':<C-u>call qfixmemo#Quickmemo()<CR>')
   call s:addMenu(menucmd, 'Diary(&D)'    , '<Space>', ':<C-u>call qfixmemo#EditDiary(g:qfixmemo_diary)<CR>')
   call s:addMenu(menucmd, 'PairFile(&J)'       , 'j', ':<C-u>call qfixmemo#PairFile("%")<CR>')
-  call s:addMenu(menucmd, 'SubMenu(&I)'        , 'i', ':<C-u>call qfixmemo#SubMenu()<CR>')
   exe printf(sepcmd, 1)
   let sepcmd  = 'amenu <silent> 41.334 '.a:menu.'.-sep%d-			<Nop>'
   let menucmd = 'amenu <silent> 41.334 '.a:menu.'.%s<Tab>'.leader.'%s %s'
@@ -133,6 +136,7 @@ silent! function QFixMemoMenubar(menu, leader)
   call s:addMenu(menucmd, 'FileList(&F)',      'rA', ':<C-u>call qfixmemo#Glob(g:qfixmemo_dir, "**/*", "open")<CR>')
   exe printf(sepcmd, 2)
   call s:addMenu(menucmd, 'Calendar(&Q)', 'q', ':<C-u>call qfixmemo#Calendar()<CR>')
+  call s:addMenu(menucmd, 'SubMenu(&I)'        , 'i', ':<C-u>call qfixmemo#SubMenu()<CR>')
   exe printf(sepcmd, 3)
   call s:addMenu(menucmd, 'FGrep(&S)', 's', ':<C-u>call qfixmemo#FGrep()<CR>')
   call s:addMenu(menucmd, 'Grep(&G)' , 'g', ':<C-u>call qfixmemo#Grep()<CR>')
@@ -232,10 +236,6 @@ if !exists('g:qfixmemo_escape')
   let g:qfixmemo_escape = '[]~*.\#'
 endif
 
-" QFixMruをQFixMemo専用にして使用する
-if !exists('g:QFixMRU_VimLeaveWrite')
-  let g:QFixMRU_VimLeaveWrite = 0
-endif
 " タイトル検索用正規表現設定
 if !exists('*QFixMemoTitleRegxp')
 function QFixMemoTitleRegxp()
@@ -369,7 +369,7 @@ function! IsQFixMemo(file)
 endfunction
 
 function! s:BufEnter()
-  if !IsQFixMemo(expand('%'))
+  if !IsQFixMemo(expand('%:p'))
     return
   endif
   call qfixmemo#load()
@@ -377,7 +377,7 @@ function! s:BufEnter()
 endfunction
 
 function! s:BufRead()
-  if !IsQFixMemo(expand('%'))
+  if !IsQFixMemo(expand('%:p'))
     return
   endif
   call qfixmemo#BufRead()

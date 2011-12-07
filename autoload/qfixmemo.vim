@@ -355,7 +355,7 @@ if g:qfixmemo_use_howm_schedule
   function! qfixmemo#OpenMenu(...)
     call <SID>howmScheduleEnv('save')
     call howm_menu#Init()
-    let g:QFixHowm_KeywordList = deepcopy(s:KeywordDic)
+    " let g:QFixHowm_KeywordList = deepcopy(s:KeywordDic)
     if a:0
       call QFixHowmOpenMenu(a:1)
     else
@@ -1878,17 +1878,16 @@ if !exists('g:qfixmemo_submenu_single_mode')
 endif
 
 let s:qfixmemo_submenu_title = g:qfixmemo_submenu_title
-let s:submenu_basedir = g:qfixmemo_dir
-if exists('g:qfixmemo_root')
-  let s:submenu_basedir = g:qfixmemo_root
-endif
 let s:sb_id = 0
 function! qfixmemo#SubMenu(...)
   if qfixmemo#Init('mkdir')
     return
   endif
+  let basedir = g:qfixmemo_dir
+  if exists('g:qfixmemo_submenu_dir')
+    let basedir = g:qfixmemo_submenu_dir
+  endif
   let l:count = a:0 && a:1 ? a:1 : count
-  let basedir = s:submenu_basedir
   let file = s:submenu_mkdir(basedir)
   let bufnum = bufnr(file)
   let winnum = bufwinnr(file)
@@ -1961,12 +1960,10 @@ function! s:OpenQFixSubWin(file, id)
   if bufnum == -1
     let wcmd = expand(file)
       augroup QFixMemoSubMenu
-        if !keepsize && winsize > 0
-          if windir =~ 'vert'
-            exe 'au BufEnter '.fnamemodify(file, ':t').' call <SID>QFixMemoSubMenuResize('.winsize.', "vertical")'
-          else
-            exe 'au BufEnter '.fnamemodify(file, ':t').' call <SID>QFixMemoSubMenuResize('.winsize.')'
-          endif
+        if windir =~ 'vert'
+          exe 'au BufEnter '.fnamemodify(file, ':t').' call <SID>QFixMemoSubMenuResize('.winsize.', "vertical")'
+        else
+          exe 'au BufEnter '.fnamemodify(file, ':t').' call <SID>QFixMemoSubMenuResize('.winsize.')'
         endif
         exe 'au BufLeave '.fnamemodify(file, ':t').' call <SID>QFixMemoSubMenuBufLeave()'
         if g:qfixmemo_submenu_autowrite
@@ -1976,7 +1973,12 @@ function! s:OpenQFixSubWin(file, id)
   else
     let wcmd = '+buffer' . bufnum
   endif
-  exe 'silent! ' . windir . ' ' . (winsize == 0 ? '' : string(winsize)) . 'split ' . wcmd
+  let opt = ''
+  " let opt = ' ++enc='.g:qfixmemo_fileencoding .' ++ff='.g:qfixmemo_fileformat
+  exe 'silent! ' . windir . ' ' . (winsize == 0 ? '' : string(winsize)) ' split ' .opt. ' ' . wcmd
+  exe 'set fenc='.g:qfixmemo_fileencoding
+  exe 'set ff='.g:qfixmemo_fileformat
+
   if g:qfixmemo_submenu_autowrite
     setlocal buftype=nowrite
   endif
@@ -2007,22 +2009,21 @@ function! s:OpenQFixSubWin(file, id)
   if exists('b:submenu_width')
     exe 'vertical resize '.b:submenu_width
   elseif windir =~ 'vert'
-    let b:submenu_width = winsize
+    if !exists('b:submenu_width')
+      let b:submenu_width = winsize
+    endif
     exe 'vertical resize '.winsize
+  endif
+  if !exists('b:submenu_height')
+    let b:submenu_height = winheight(0)
+  endif
+  if !exists('b:submenu_keepsize')
+    let b:submenu_keepsize = keepsize
   endif
   let wincmd = s:GetOptionWithID('g:qfixmemo_submenu_calendar_wincmd', swid)
   if wincmd != ''
     let wincmd = wincmd . (windir =~ 'vert' ? '' : ' vertical')
-    let saved_ei = &eventignore
-    set eventignore=BufLeave
     call QFixMemoCalendar(wincmd, '__Cal__', 1, 'parent'. (keepsize ? '' : 'resize'))
-    let &eventignore = saved_ei
-  endif
-  if windir =~ 'vert'
-    if keepsize
-      let b:submenu_width = s:GetOptionWithID('g:qfixmemo_submenu_size', swid)
-    endif
-    exe 'vertical resize '.b:submenu_width
   endif
   if exists('*QFixMemoSubMenuBufWinEnter')
     call QFixMemoSubMenuBufWinEnter()
@@ -2031,21 +2032,25 @@ function! s:OpenQFixSubWin(file, id)
 endfunction
 
 function s:QFixMemoSubMenuBufLeave()
+  if b:submenu_keepsize
+    return
+  endif
   let b:submenu_height = winheight(0)
   let b:submenu_width  = winwidth(0)
+  exe "let g:calendar_width_".bufnr('%')."=winwidth(0)"
 endfunction
 
 function s:QFixMemoSubMenuResize(winsize, ...)
+  let winsize = a:winsize
   if a:0
-    let b:submenu_width = b:submenu_width < a:winsize ? a:winsize : b:submenu_width
-    if winwidth(0) < b:submenu_width || &winwidth > b:submenu_width
-      exe 'vertical resize '.b:submenu_width
-    endif
+    let winsize = b:submenu_width < a:winsize ? a:winsize : b:submenu_width
+    exe 'vertical resize '.winsize
   else
+    let winsize = b:submenu_height < a:winsize ? a:winsize : b:submenu_height
     let w = &lines - winheight(0) - &cmdheight - (&laststatus > 0 ? 1 : 0)
     if w > 0
-      if winheight(0) < a:winsize
-        exe 'resize '.a:winsize
+      if winheight(0) < winsize
+        exe 'resize '.winsize
       endif
     endif
   endif
@@ -2479,8 +2484,12 @@ function! qfixmemo#RebuildKeyword()
     let pattern = '\('.g:howm_clink_pattern.'\|'.pattern.'\)'
   endif
 
+  let basedir = g:qfixmemo_dir
+  if exists('g:qfixmemo_submenu_dir')
+    let basedir = g:qfixmemo_submenu_dir
+  endif
   let prevPath = escape(getcwd(), ' ')
-  exe 'lchdir ' . escape(expand(s:submenu_basedir), ' ')
+  exe 'lchdir ' . escape(expand(basedir), ' ')
   let file = fnamemodify(g:qfixmemo_submenu_title, ':p')
   let saved_sq = getloclist(0)
   silent! exe 'lvimgrep /'.pattern.'/j '. escape(file, ' ')
@@ -2569,6 +2578,8 @@ function! qfixmemo#OpenKeywordLink()
       endif
       if len(qflist)
         call qfixlist#copen(qflist, g:qfixmemo_dir)
+      else
+        redraw|echo 'QFixMemo : keyword not found. (use "'.escape(g:qfixmemo_mapleader, '\\').'rk" : Rebuild keyword)'
       endif
       return 1
     endif
@@ -2591,6 +2602,8 @@ function! qfixmemo#OpenKeywordLink()
         endif
         if len(qflist)
           call qfixlist#copen(qflist, g:qfixmemo_dir)
+        else
+          redraw|echo 'QFixMemo : keyword not found. (use "'.escape(g:qfixmemo_mapleader, '\\').'rk" : Rebuild keyword)'
         endif
         return 1
       elseif g:qfixmemo_keyword_mode == 1

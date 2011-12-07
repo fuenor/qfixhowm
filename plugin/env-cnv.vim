@@ -210,10 +210,11 @@ if !exists('g:qfixmemo_random_file')
 endif
 
 " QFixMemoとQFixHownのオプションを同期
-let g:qfixmemo_dir      = g:howm_dir
-let g:qfixmemo_filename = g:howm_filename
-let g:qfixmemo_ext      = g:QFixHowm_FileExt
-let g:qfixmemo_filetype = g:QFixHowm_FileType
+let g:qfixmemo_dir          = g:howm_dir
+let g:qfixmemo_fileencoding = g:howm_fileencoding
+let g:qfixmemo_filename     = g:howm_filename
+let g:qfixmemo_ext          = g:QFixHowm_FileExt
+let g:qfixmemo_filetype     = g:QFixHowm_FileType
 if exists('g:QFixHowm_DiaryFile')
   let g:qfixmemo_diary = g:QFixHowm_DiaryFile
 endif
@@ -358,6 +359,7 @@ let s:cnvopt = [
   \ ['let g:qfixmemo_submenu_wrap            = %s', 'g:SubWindow_Wrap'],
   \ ['let g:qfixmemo_submenu_calendar_wincmd = %s', 'g:SubWindow_CalendarWinCmd'],
   \ ['let g:qfixmemo_submenu_single_mode     = %s', 'g:SubWindow_SingleMode'],
+  \ ['let g:qfixmemo_submenu_dir             = %s', 'g:SubWindow_Dir'],
   \ ['let g:qfixmemo_calendar_count          = %s', 'g:QFixHowm_CalendarCount'],
   \ ['let g:qfixmemo_random_columns          = %s', 'g:QFixHowm_RandomWalkColumns'],
   \ ['let g:qfixmemo_random_exclude          = %s', 'g:QFixHowm_RandomWalkExclude'],

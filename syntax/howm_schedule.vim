@@ -24,10 +24,10 @@ endif
 hi howmDeadline ctermfg=Red     guifg=Red
 hi howmHoliday  ctermfg=Magenta guifg=Magenta
 hi howmSpecial  ctermfg=Red     guifg=Red
-hi link howmNormal Normal
+hi def link howmNormal Normal
 
-hi link actionlockDate Underlined
-hi link actionlockTime Constant
+hi def link actionlockDate Underlined
+hi def link actionlockTime Constant
 
 if exists('g:QFixHowm_Date')
   exec 'syn match actionlockDate contained "'.g:QFixHowm_Date.'" '
@@ -40,7 +40,7 @@ let s:pattern = '\[\d\{4}-\d\{2}-\d\{2}\( \d\{2}:\d\{2}\)\?]'
 if exists('g:QFixHowm_Date')
   let s:pattern = '\['.g:QFixHowm_Date.'\( \d\{2}:\d\{2}\)\?]'
 endif
-let s:epat = '\{1,3}\((\([0-9]\+\)\?\([-+*]\?\c\(\(Sun\|Mon\|Tue\|Wed\|Thu\|Fri\|Sat\|Hdy\)\?\([-+]\d\+\)\?\)\?\))\)\?\d*'
+let s:epat = '\{1,3}\((\([0-9]\+\)\?\([-+*]\?\c\(\(Sun\|Mon\|Tue\|Wed\|Thu\|Fri\|Sat\|Hol\|Hdy\)\?\([-+]\d\+\)\?\)\?\))\)\?\d*'
 exe 'syn match howmNormal   "^'   .s:pattern.'"               contains=actionlockDate,actionlockTime'
 exe 'syn match howmSchedule "^\s*'.s:pattern.'@' . s:epat .'" contains=actionlockDate,actionlockTime'
 exe 'syn match howmDeadline "^\s*'.s:pattern.'!' . s:epat .'" contains=actionlockDate,actionlockTime'
@@ -60,8 +60,8 @@ syn match txtFile '\([A-Za-z]:[/\\]\|\~[/\\]\)[-0-9a-zA-Z;/?:@&=+$,_.!~*'()%{}[\
 syn match txtFile '\[:\?&\?\zs\(memo\|rel\|howm\|https\|http\|file\|ftp\)://[^:]\+\ze:[^\]]*]'
 syn match txtFile '\[:\?&\?\zs\([A-Za-z]:[/\\]\|\~[/\\]\|\.\.\?[/\\]\|[/\\]\)[^:]\+\ze:[^\]]*]'
 
-hi link txtFile Underlined
-hi link txtUrl  Underlined
+hi def link txtFile Underlined
+hi def link txtUrl  Underlined
 
 if exists('g:howm_glink_pattern') && g:howm_glink_pattern != ''
   exe "syn match howmLink '" . g:howm_glink_pattern . ".*'" . '"'
@@ -70,7 +70,7 @@ if exists('g:howm_clink_pattern') && g:howm_clink_pattern != ''
   exe "syn match howmLink '" . g:howm_clink_pattern . ".*'" . '"'
 endif
 
-hi link howmLink  Underlined
+hi def link howmLink  Underlined
 
 " macro action
 if exists('g:QFixHowm_MacroActionKey') && exists('g:QFixHowm_MacroActionPattern')
@@ -79,11 +79,11 @@ if exists('g:QFixHowm_MacroActionKey') && exists('g:QFixHowm_MacroActionPattern'
     exe 'syn match actionlockMacroActionDefine "'.g:QFixHowm_MacroActionPattern.'.*$"'
   endif
 endif
-hi link actionlockMacroActionDefine howmFinished
-hi link actionlockMacroAction       Underlined
+hi def link actionlockMacroActionDefine howmFinished
+hi def link actionlockMacroAction       Underlined
 
 syn match actionlockList "\s*{[- *_]}"
-hi link actionlockList Type
+hi def link actionlockList Type
 
 " for changelog
 if exists('b:current_syntax') && b:current_syntax == "changelog"

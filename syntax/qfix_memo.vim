@@ -2,7 +2,7 @@
 "
 " Language:    qfixmemo
 " Maintainer:  fuenor@gmail.com
-" Last Change: 2011-09-04 22:11
+" Last Change: 2011-12-06 20:01
 scriptencoding utf-8
 
 " URLとファイル
@@ -12,46 +12,46 @@ syn match txtFile '\([A-Za-z]:[/\\]\|\~[/\\]\)[-0-9a-zA-Z;/?:@&=+$,_.!~*'()%{}[\
 syn match txtFile '\[:\?&\?\zs\(memo\|rel\|howm\|https\|http\|file\|ftp\)://[^:]\+\ze:[^\]]*]'
 syn match txtFile '\[:\?&\?\zs\([A-Za-z]:[/\\]\|\~[/\\]\|\.\.\?[/\\]\|[/\\]\)[^:]\+\ze:[^\]]*]'
 
-hi link txtUrl  Underlined
-hi link txtFile Underlined
+hi def link txtUrl  Underlined
+hi def link txtFile Underlined
 
 " 引用文 (行頭の'> ')
 syn match txtQuote '^\s*>\(\s.*\|$\)'
-hi link txtQuote Comment
+hi def link txtQuote Comment
 
 " リスト (行頭の '-' '+')
-syn region txtList start='^[-+]\+\s*' end='\s:' end='$' contains=txtListBullet,txtListDefinition,txtUrl,txtFile keepend
+syn region txtList start='^\s*[-+]\+\s*' end='\s:' end='$' contains=txtListBullet,txtListDefinition,txtUrl,txtFile keepend
 syn match txtListBullet contained '^\s*[-+*]\+\s*'
 syn match txtListColon  contained '\s:'
 syn match txtListDefinition contained '\s:' contains=txtListColon
 
-hi link txtList       Constant
-hi link txtListBullet Statement
-hi link txtListColon  Label
+hi def link txtList       Constant
+hi def link txtListBullet Statement
+hi def link txtListColon  Label
 
-" |*テーブル | 項目 |  (セル内で'*'を使うとタイトル)
-syn match txtTable +^|\(.\{-}|\)\++ contains=txtTableHeader,txtTableSeparator,txtUrl,txtFile
+" | *テーブル | 項目 |  (セル内で'*'を使うとタイトル)
+syn match txtTable +^\s*|\(.\{-}|\)\++ contains=txtTableHeader,txtTableSeparator,txtUrl,txtFile
 syn match txtTableHeader    contained +\s\+\*[^|]\++
 syn match txtTableSeparator contained +|+
 
-hi link txtTableHeader    Title
-hi link txtTableSeparator Statement
+hi def link txtTableHeader    Title
+hi def link txtTableSeparator Statement
 
 " 定義リスト （行頭の':'と' :')
-syn match txtDefinition '^:.\{-}\s:' contains=txtDefColon
-syn match txtDefColon  contained '^:\|\s:'
+syn match txtDefinition '^\s*:.\{-}\s:' contains=txtDefColon
+syn match txtDefColon  contained '^\s*:\|\s:'
 
-hi link txtDefinition Identifier
-hi link txtDefColon Label
+hi def link txtDefinition Identifier
+hi def link txtDefColon Label
 
 " TODO: FIXME: (行頭の'TODO:' 'FIXME:')
 syn match txtWarning '^\s*\(TODO\|FIXME\):'
-hi link txtWarning TODO
+hi def link txtWarning TODO
 
 " 区切り線
 syn match txtHLine '-\{20,}'
 syn match txtHLine '=\{20,}'
-hi link txtHLine Label
+hi def link txtHLine Label
 
 " キーワード ( ' か " で囲まれた文字列)
 " syn region txtKeyword start=+"+ skip=+\\"+ end=+"+ end=+$+
@@ -61,50 +61,43 @@ hi link txtHLine Label
 " hatena (superpreと引用)
 syn region hatenaSuperPre   matchgroup=hatenaBlockDelimiter start=+^>|[^|]*|$+ end=+^||<$+
 syn region hatenaBlockQuote matchgroup=hatenaBlockDelimiter start=+^>>$+  end=+^<<$+ contains=ALL
-hi link hatenaSuperPre       Comment
-hi link hatenaBlockDelimiter Delimiter
+hi def link hatenaSuperPre       Comment
+hi def link hatenaBlockDelimiter Delimiter
 
 "----------
 " ワイルドカードチャプター
 "----------
-syn region foldTitle start='^[*]' end='$' contains=foldBullet,chapterColon,chapterCategory keepend
-syn match  foldBullet contained '^[*]\+\s*'
-hi link foldTitle  Define
-hi link foldBullet Type
+syn region memoTitle start='^[=]\+' end='$' contains=titleBullet,titleCategory keepend
+syn region chapterTitle start='^\s*[*]' end='$' contains=chapterBullet,titleCategory keepend
+syn region chapterNumber start='^\s*\(*\|\d\+\)\.\(\(*\|\d\+\)\.\)*\(*\|\d\+\)\(\s\|$\)' end='$' contains=chapterBullet,titleCategory keepend
+syn region chapterNumber start='^\s*\(*\|\d\+\)\.\(\s\|$\)' end='$' contains=chapterBullet,titleCategory keepend
+syn region chapterNumber start='^[.]\+\s' end='$' contains=chapterBullet,titleCategory keepend
 
-syn region chapterTitle start='^\s*\(\d\+\.\)\+[0-9]*\s' end='$' contains=chapterBullet,chapterColon,chapterCategory keepend
-syn region chapterTitle start='^[=]\+'   end='$' contains=chapterBullet,chapterColon keepend
-syn region chapterTitle start='^[.]\+\s' end='$' contains=chapterBullet,chapterColon keepend
+syn match titleBullet   contained '^\s*[.*=]\+'
+syn match titleCategory contained '\[.\{-}\]'
+syn match chapterBullet contained '^\s*\(\*\.\)\+\*\?$'
+syn match chapterBullet contained '^\s*[0-9][0-9.]* $'
+syn match chapterBullet contained '^\s*\([0-9.*]\+\|[.*=]\+\)'
 
-syn match chapterBullet   contained '^\s*\(\*\.\)\+\*\?$'
-syn match chapterBullet   contained '^\s*[0-9][0-9.]* $'
-syn match chapterBullet   contained '^\s*[*=]\+$'
-syn match chapterBullet   contained '^\s*\([0-9.]\+\|[.*=]\+\)'
-syn match chapterColon    contained ':'
-syn match chapterCategory contained '\[.\{-}\]'
-
-hi link chapterTitle    Statement
-hi link chapterBullet   Type
-hi link chapterColon    Label
-hi link chapterCategory Label
+hi def link memoTitle       Title
+hi def link titleBullet     Special
+hi def link titleCategory   Label
+hi def link chapterTitle    Define
+hi def link chapterNumber   Identifier
+hi def link chapterBullet   Type
 
 "----------
 " howm2html.vim
 "----------
 syn match escapeTAG '^&&.*$'
 syn match escapeTAG '&<[^>]\+>'
-hi link escapeTAG Folded
+hi def link escapeTAG Folded
 
 "「」強調
-syn region MyJpKagi start=+「\zs+ end=+\ze」+
+syn region MyJpKagi display start=+「\zs+ end=+\ze」+
 
 " howmの予定・TODO
 " runtime! syntax/howm_schedule.vim
-
-" for QFixHowm Ver.2
-if exists('g:loaded_MyHowm')
-  runtime! syntax/howm_memo.vim
-endif
 
 finish
 
@@ -163,20 +156,20 @@ hi WikiItalic term=italic cterm=italic gui=italic
 hi WikiBoldItalic term=bold cterm=bold gui=bold,italic
 hi WikiItalicBold term=bold cterm=bold gui=bold,italic
 
-hi link WikiDel   Folded
-hi link WikiSuper SpellRare
-hi link WikiSub   SpellLocal
-hi link WikiPre   PreProc
-hi link WikiCode  PreProc
+hi def link WikiDel   Folded
+hi def link WikiSuper SpellRare
+hi def link WikiSub   SpellLocal
+hi def link WikiPre   PreProc
+hi def link WikiCode  PreProc
 
-hi link WikiBoldConceal   WikiIgnore
-hi link WikiItalicConceal WikiIgnore
-hi link WikiItalicBoldConceal WikiIgnore
-hi link WikiBoldItalicConceal WikiIgnore
+hi def link WikiBoldConceal   WikiIgnore
+hi def link WikiItalicConceal WikiIgnore
+hi def link WikiItalicBoldConceal WikiIgnore
+hi def link WikiBoldItalicConceal WikiIgnore
 
-hi link WikiDelConceal    WikiIgnore
-hi link WikiSuperConceal  WikiIgnore
-hi link WikiSubConceal    WikiIgnore
+hi def link WikiDelConceal    WikiIgnore
+hi def link WikiSuperConceal  WikiIgnore
+hi def link WikiSubConceal    WikiIgnore
 
 " runtime! syntax/howm_memo.vim
 

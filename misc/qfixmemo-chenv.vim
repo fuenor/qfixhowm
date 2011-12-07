@@ -34,8 +34,8 @@ endif
 " nnoremap <silent> g,hm :call QFixMemoChEnv('main',     'time', '=')<CR>
 " nnoremap <silent> g,hw :call QFixMemoChEnv('work',     'day',  '=')<CR>
 " nnoremap <silent> g,hc :call QFixMemoChEnv('pc',       'time', '= [:pc]')<CR>
-" nnoremap <silent> g,hd :call QFixMemoChEnv('howm-mkd', 'time', '#')<CR>
-" nnoremap <silent> g,hd :call QFixMemoChEnv('howm-org', 'time', '.')<CR>
+" nnoremap <silent> g,hd :call QFixMemoChEnv('memo-mkd', 'time', '#')<CR>
+" nnoremap <silent> g,hd :call QFixMemoChEnv('memo-org', 'time', '.')<CR>
 " nnoremap <silent> g,hv :call QFixMemoChEnv('vimwiki',  'time', '=')<CR>
 "
 " (オプション解説)
@@ -55,9 +55,9 @@ endif
 " MRUリスト
 " 通常MRUリストは qfixmemo_dirを基準とする相対パスで保持するがqfixmemo_dirを切
 " り替える場合には基準ディレクトリが異なるためパスを維持できなくなる。
-" 対処として本プラグインではQFixMRU_RootDirにqfixmemo_chenv_dirを設定するが、
-" 独自にQFixMRU_RootDirを指定する場合はqfixmemo_chenv_dirより上位のディレクト
-" リを指定する必要がある。
+" 対処として本プラグインではMRUの基準ディレクトリQFixMRU_RootDirに
+" qfixmemo_chenv_dirを設定するが、独自にQFixMRU_RootDirを指定する場合は
+" QFixMemoの基準ディレクトリより上位のディレクトリを指定する必要がある。
 "
 " format
 " 生成するファイル名指定
@@ -131,6 +131,7 @@ function! QFixMemoChEnv(dir, fname, title)
   let g:qfixmemo_dir = g:qfixmemo_chenv_dir . '/' . a:dir
   let g:qfixmemo_dir = substitute(g:qfixmemo_dir, '[/\\]$', '', '')
 
+  " ファイル拡張子とファイルタイプの指定
   if a:dir =~ '-mkd$'
     let g:qfixmemo_ext       = 'mkd'
     let g:qfixmemo_filetype  = 'markdown'
@@ -153,14 +154,13 @@ function! QFixMemoChEnv(dir, fname, title)
   let title = substitute(title, '^\s*\|\s*$', '', 'g')
   let g:qfixmemo_template_tag = title
 
+  " ファイル名設定
   if a:fname     == 'month'
     let g:qfixmemo_filename = '%Y/%Y-%m'
   elseif a:fname == 'day'
     let g:qfixmemo_filename = '%Y/%m/%Y-%m-%d'
   elseif a:fname == 'time'
     let g:qfixmemo_filename = '%Y/%m/%Y-%m-%d-%H%M%S'
-  else
-    " do nothing
   endif
 
   echo "qfixmemo_dir = ".g:qfixmemo_dir

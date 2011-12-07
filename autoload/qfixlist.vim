@@ -19,7 +19,7 @@ scriptencoding utf-8
 "   Windows : if you have grep.exe, set mygrepprg.
 "             findstr(default) can not search utf-8 fileencoding.
 "             > .vimrc
-"             let mygrepprg='path/to/grep'
+"             let mygrepprg='c:/cygwin/bin/grep'
 "             let mygrepprg='grep'
 "
 "  Usage:
@@ -50,12 +50,13 @@ scriptencoding utf-8
 "      :call qfixlist#open()
 "
 "    addtinal options
-"    | function     | option                      | default                  |
-"    | Grep         | let g:MyGrep_Regexp     = 1 | 1                        |
-"    | FGrep        | let g:MyGrep_Regexp     = 0 |                          |
-"    | Ignorecase   | let g:MyGrep_Ignorecase = 1 | MyGrep_DefaultIgnorecase |
-"    | Recursive    | let g:MyGrep_Recursive  = 0 | 0                        |
-"    * these options reset to default after qfixlist#grep()
+"    | function     | option                      | default                      |
+"    | grep         | let g:MyGrep_Regexp     = 1 | 1                        (*) |
+"    | fgrep        | let g:MyGrep_Regexp     = 0 |                              |
+"    | recursive    | let g:MyGrep_Recursive  = 0 | 0                        (*) |
+"    | ignorecase   | let g:MyGrep_Ignorecase = 1 | MyGrep_DefaultIgnorecase (*) |
+"    | smartcase    | let g:MyGrep_Smartcase  = 1 | 1                            |
+"      (*) reset to default after qfixlist#grep()
 
 if exists('g:disable_QFixList') && g:disable_QFixList == 1
   finish
@@ -229,6 +230,7 @@ function! qfixlist#open(...)
   setlocal nobuflisted
   setlocal nowrap
   setlocal cursorline
+  setlocal nofoldenable
 
   silent! exe 'lchdir ' . escape(s:QFixList_dir, ' ')
 
@@ -293,8 +295,6 @@ function! qfixlist#open(...)
   nnoremap <buffer> <silent> u :<C-u>call <SID>Exec('undo')<CR>
   nnoremap <buffer> <silent> <C-r> :<C-u>call <SID>Exec("redo")<CR>
 
-  " nnoremap <buffer> <silent> <C-g> :<C-u>call <SID>Cmd_Copy2QF()<CR>
-  nnoremap <buffer> <silent> & :<C-u>call <SID>Cmd_Copy2QF()<CR>
   nnoremap <buffer> <silent> A :MyGrepWriteResult<CR>
   silent! nnoremap <buffer> <unique> <silent> o :MyGrepWriteResult<CR>
   nnoremap <buffer> <silent> O :MyGrepReadResult<CR>
@@ -341,8 +341,8 @@ function! qfixlist#search(pattern, dir, cmd, days, fenc, file)
     let g:MyGrep_FileListWipeTime = localtime() - a:days*24*60*60
   endif
   let prevPath = escape(getcwd(), ' ')
-  let g:MyGrep_Return = 1
-  let list = qfixlist#MyGrep(a:pattern, dir, a:file, fenc, 0)
+  " let g:MyGrep_Return = 1
+  let list = s:MyGrep(a:pattern, dir, a:file, fenc, 0)
 
   redraw | echo 'QFixList : Formatting...'
   silent! exe 'lchdir ' . escape(expand(dir), ' ')
@@ -566,7 +566,12 @@ function! s:CR()
     silent! close
     exe 'edit '.escape(file, ' %#')
   else
-    call QFixEditFile(file)
+    if exists('*QFixEditFile')
+      call QFixEditFile(file)
+    else
+      silent! wincmd w
+      exe 'edit '.escape(file, ' %#')
+    endif
   endif
   call cursor(lnum, 1)
   exe 'normal! zz'
@@ -698,13 +703,11 @@ function! s:Exec(cmd, ...) range
   exe 'setlocal '.mod.'modifiable'
 endfunction
 
-function! s:Cmd_Copy2QF()
+function! qfixlist#copy2qfwin()
   redraw|echo 'QFixList : Copying...'
-  let s:QFixList_qfdir = s:QFixList_dir
-  let s:QFixList_qfCache = s:QFixList_Cache
-  call qfixlist#copen()
+  call qfixlist#open(QFixGetqflist(), getcwd())
   call cursor(1, 1)
-  echo ''
+  redraw|echo ''
 endfunction
 
 if !exists('g:qfixmemo_dir')
@@ -797,6 +800,7 @@ endif
 if !exists('g:MyGrep_DefaultIgnorecase')
   let g:MyGrep_DefaultIgnorecase = 1
 endif
+let g:MyGrep_Ignorecase = g:MyGrep_DefaultIgnorecase
 " ダメ文字対策
 if !exists('g:MyGrep_Damemoji')
   let g:MyGrep_Damemoji = 2
@@ -865,9 +869,6 @@ endif
 if !exists('g:MyGrepcmd_recursive')
   let g:MyGrepcmd_recursive = '-R'
 endif
-if !exists('g:MyGrep_Ignorecase')
-  let g:MyGrep_Ignorecase = 1
-endif
 if !exists('g:MyGrep_Regexp')
   let g:MyGrep_Regexp = 1
 endif
@@ -891,15 +892,15 @@ if !exists('g:MyGrep_cmdopt')
 endif
 " 一時的にvimgrepを使用したいときに非0。使用後リセットされる。
 let g:MyGrep_UseVimgrep = 0
-" QuickFixに登録しない
-let g:MyGrep_Return = 0
+" " QuickFixに登録しない
+" let g:MyGrep_Return = 0
 
 """"""""""""""""""""""""""""""
 " 汎用Grep関数
 " vimgrepならfencは無視される。
 " addflag : grep検索結果追加
 """"""""""""""""""""""""""""""
-function! qfixlist#MyGrep(pattern, searchPath, filepattern, fenc, addflag, ...)
+function! s:MyGrep(pattern, searchPath, filepattern, fenc, addflag, ...)
   let addflag = a:addflag
   let searchPath = a:searchPath
   let pattern = a:pattern
@@ -963,12 +964,12 @@ function! qfixlist#MyGrep(pattern, searchPath, filepattern, fenc, addflag, ...)
       redraw | echo g:MyGrep_ErrorMes
       echohl None
     endif
-    if g:MyGrep_Return
-      let g:MyGrep_Return = 0
+    " if g:MyGrep_Return
+    "   let g:MyGrep_Return = 0
       return save_qflist
-    endif
-    let g:QFix_SearchPath = searchPath
-    return []
+    " endif
+    " let g:QFix_SearchPath = searchPath
+    " return []
   endif
 
   let ccmd = g:QFix_UseLocationList ? 'lexpr ""' : 'cexpr ""'
@@ -1037,32 +1038,32 @@ function! qfixlist#MyGrep(pattern, searchPath, filepattern, fenc, addflag, ...)
   redraw|echo 'QFixGrep : Parsing...'
   let g:MyGrep_qflist = s:ParseSearchResult(searchPath, retval, pattern, g:MyGrep_ShellEncoding, a:fenc)
   call s:SetGrepEnv('restore')
-  if g:MyGrep_Return
-    let g:MyGrep_Return = 0
+  " if g:MyGrep_Return
+  "   let g:MyGrep_Return = 0
     if g:MyGrep_StayGrepDir == 0
       silent! exe 'lchdir ' . prevPath
     endif
     redraw|echo ''
     return g:MyGrep_qflist
-  endif
-  if a:0
-    redraw|echo ''
-  else
-    redraw|echo 'QFixGrep : Set quickfix list...'
-    let flag = addflag ? 'a' : ' '
-    call QFixSetqflist(g:MyGrep_qflist, flag)
-  endif
-  if g:MyGrep_StayGrepDir == 0
-    silent! exe 'lchdir ' . prevPath
-  endif
-  let g:QFix_SearchPath = searchPath
-  redraw | echo ''
-  if g:MyGrep_ErrorMes != ''
-    echohl ErrorMsg
-    redraw | echo g:MyGrep_ErrorMes
-    echohl None
-  endif
-  return []
+  " endif
+  " if a:0
+  "   redraw|echo ''
+  " else
+  "   redraw|echo 'QFixGrep : Set quickfix list...'
+  "   let flag = addflag ? 'a' : ' '
+  "   call QFixSetqflist(g:MyGrep_qflist, flag)
+  " endif
+  " if g:MyGrep_StayGrepDir == 0
+  "   silent! exe 'lchdir ' . prevPath
+  " endif
+  " let g:QFix_SearchPath = searchPath
+  " redraw | echo ''
+  " if g:MyGrep_ErrorMes != ''
+  "   echohl ErrorMsg
+  "   redraw | echo g:MyGrep_ErrorMes
+  "   echohl None
+  " endif
+  " return []
 endfunction
 
 let g:MyGrep_ErrorMes = ''

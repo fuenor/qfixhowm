@@ -1,12 +1,37 @@
 "================================================================================
-"    Description: 日本語Grepヘルパー
-"                 本体はqfixlist.vimで本プラグインはキーマップ等のフロントエン
-"                 ドのみ設定している
+"    Description: QFixGrep (日本語Grepヘルパー)
+"                 本プラグインはキーマップ等のフロントエンドのみ設定している
+"                 grep     : qfixlist.vim
+"                 QuickFix : myqfix.vim
 "         Author: fuenor <fuenor@gmail.com>
 "                 http://sites.google.com/site/fudist/Home/grep
 "================================================================================
-let s:Version = 2.85
+let s:Version = 3.00
 scriptencoding utf-8
+
+"  Install:
+"    このファイルとqfixlist.vimをランタイムパスの通った場所へコピーしてくださ
+"    い。
+"    qfixlist.vimはautoload対応なのでautoloadディレクトリでもかまいません。
+"    プレビュー表示や絞り込み検索等にはmyqfix.vimも必要です。
+"
+"    * Windowsのgrep
+"      grep.exeがある場合は mygrepprgを設定してください。
+"        let mygrepprg='c:/cygwin/bin/grep'
+"        let mygrepprg='grep'
+"
+"        デフォルトではfindstrが使用されますが、utf-8等のファイルは検索できま
+"        せんし正規表現は貧弱です。
+"        詳しくは以下を参照してください。
+"        http://sites.google.com/site/fudist/Home/grep
+"  Note:
+"    このプラグインはQFixGrepフロントエンドのみ設定しているので無効化しても
+"    QFixMemoの動作に支障はありません。
+"      let disable_MyGrep = 1
+"
+"    好みのgrepコマンドを作成したい場合はこのファイルをコピーして改変してくだ
+"    さい。
+
 if exists('g:disable_MyGrep') && g:disable_MyGrep == 1
   finish
 endif
@@ -309,6 +334,7 @@ function! s:setenv(cmd)
   let cmd = a:cmd
   let g:MyGrep_Regexp     = 1
   let g:MyGrep_Recursive  = g:MyGrep_RecursiveMode
+  " let g:MyGrep_Ignorecase = 1
   let g:MyGrep_UseVimgrep = 0
   if cmd =~ '\c^r'
     let g:MyGrep_Recursive = 1
@@ -380,6 +406,10 @@ endfunction
 if !exists('g:QFix_UseLocationList')
   let g:QFix_UseLocationList = 0
 endif
+
+function! QFixCmdCopy2QF()
+  call qfixlist#copy2qfwin()
+endfunction
 
 """"""""""""""""""""""""""""""
 " Help

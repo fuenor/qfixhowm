@@ -20,6 +20,7 @@ let s:Version = 2.90
 " Commands:
 "   | <C-w>, | Open/Close (quickfix window)
 "   | <C-w>. | Move to the quickfix window
+"   | <C-w>/ | Toggle QuickFix/Location list
 "
 "   On the quickfix window:
 "   | q | Close
@@ -121,6 +122,12 @@ endif
 if !exists('g:QFix_PreviewExclude')
   let g:QFix_PreviewExclude = '\.pdf$\|\.mp3$\|\.jpg$\|\.bmp$\|\.png$\|\.zip$\|\.rar$\|\.exe$\|\.dll$\|\.lnk$'
 endif
+" 正規表現で一行目を判定してプレビュー非表示
+" ファイルエンコーディングを判定しないのでマルチバイト文字は使用不可
+if !exists('g:QFix_PreviewExcludeLineRegxp')
+  let g:QFix_PreviewExcludeLineRegxp = ''
+  let g:QFix_PreviewExcludeLineRegxp = '^VimCrypt\~\d\{2}!'
+endif
 
 " プレビューする間隔
 " (この値でプレビューが有効か判定しているのでユニーク値を推奨)
@@ -170,8 +177,8 @@ endif
 """"""""""""""""""""""""""""""
 silent! nnoremap <unique> <silent> <C-w>, :<C-u>ToggleQFixWin<CR>
 silent! nnoremap <unique> <silent> <C-w>. :<C-u>MoveToQFixWin<CR>
-" silent! nnoremap <unique> <silent> <C-w>/ :<C-u>call QFixLocationMode()<CR>
 silent! nnoremap <unique> <silent> <C-w>0 :<C-u>ToggleLocationListMode<CR>
+silent! nnoremap <unique> <silent> <C-w>/ :<C-u>ToggleLocationListMode<CR>
 
 """"""""""""""""""""""""""""""
 " コマンド
@@ -340,6 +347,9 @@ function! s:QFBufWinEnter(...)
   nnoremap <buffer> <silent> I      :<C-u>call <SID>QFixToggleHighlight()<CR>
   nnoremap <buffer> <silent> &      :<C-u>call <SID>QFixCmd_LocListCopy('normal')<CR>
   vnoremap <buffer> <silent> &      :<C-u>call <SID>QFixCmd_LocListCopy('visual')<CR>
+  if exists('*QFixCmdCopy2QF')
+    nnoremap <buffer> <silent> <C-g>  :<C-u>call QFixCmdCopy2QF()<CR>
+  endif
   nnoremap <buffer> <silent> J      :<C-u>call <SID>QFixCmd_J()<CR>
   nnoremap <buffer> <silent> A      :MyGrepWriteResult<CR>
   nnoremap <buffer> <silent> O      :MyGrepReadResult<CR>
@@ -554,7 +564,6 @@ function! s:QFixSplit()
       else
         exe winnr.'wincmd w'
       endif
-      split
       exe 'split ' . escape(file, ' #%')
     else
       exe winnum.'wincmd w'
@@ -562,8 +571,6 @@ function! s:QFixSplit()
     endif
   endif
   call cursor(lnum, col)
-  let g:QFix_Height = h
-  return
 endfunction
 
 """"""""""""""""""""""""""""""
@@ -1396,7 +1403,7 @@ function! QFixPreviewOpen(file, line, ...)
   syntax clear
   if g:QFix_PreviewFtypeHighlight != 0
     call s:QFixFtype_(file)
-    "BufReadの副作用への安全策
+    " BufReadの副作用への安全策
     silent! %delete _
     setlocal nofoldenable
   else
@@ -1410,6 +1417,15 @@ function! QFixPreviewOpen(file, line, ...)
     let file = substitute(file, '\\', '/', 'g')
     let cmd = cmd . QFixPreviewReadOpt(file)
     if filereadable(file)
+      if g:QFix_PreviewExcludeLineRegxp != ''
+        let glist = readfile(file, '', 1)
+        if glist[0] =~ g:QFix_PreviewExcludeLineRegxp
+          call setline(1, glist)
+          setlocal nomodifiable
+          silent! wincmd p
+          return
+        endif
+      endif
       silent! exe cmd.' '.escape(file, ' %#')
       silent! $delete _
     endif
@@ -1520,7 +1536,7 @@ endfunction
 " 追加パラメータが'split'ならスプリットで開く
 """"""""""""""""""""""""""""""
 function! QFixEditFile(file, ...)
-  let file = fnamemodify(a:file, ':p')
+  let file = expand(a:file)
   let file = substitute(file, '\\', '/', 'g')
   let mode = a:0 > 0 ? a:1 : ''
   let opt  = a:0 > 1 ? a:2 : ''
@@ -1551,11 +1567,6 @@ endfunction
 " 通常バッファを返す
 " 通常バッファがない場合は-1を返す
 """"""""""""""""""""""""""""""
-" ファイルを開く時、編集されているバッファを使用してhiddenにする。
-if !exists('g:QFix_HiddenModifiedBuffer')
-  let g:QFix_HiddenModifiedBuffer = 1
-endif
-
 function! QFixWinnr()
   let g:QFix_PreviewEnableLock = 1
   let pwin = winnr()
@@ -1569,7 +1580,7 @@ function! QFixWinnr()
         let w = i
         break
       endif
-      if g:QFix_UseModifiedWindow
+      if g:QFix_UseModifiedWindow && hidden
         let w = i
       endif
     endif

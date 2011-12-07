@@ -899,10 +899,7 @@ function! qfixmemo#EditDiary(file)
   if qfixmemo#Init()
     return
   endif
-  let file = a:file
-  if fnamemodify(file, ':e') == ''
-    let file = file.'.'.g:qfixmemo_ext
-  endif
+  let file = fnamemodify(a:file, ':r') .'.'.g:qfixmemo_ext
   call qfixmemo#EditFile(file)
 endfunction
 

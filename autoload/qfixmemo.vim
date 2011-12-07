@@ -578,13 +578,19 @@ function! s:BufLeave()
 endfunction
 
 " 強制書込
-function! qfixmemo#ForceWrite()
+function! qfixmemo#ForceWrite(...)
   let saved_bt = &buftype
+  let saved_ei = &eventignore
   if &buftype != ''
     setlocal buftype=
   endif
   let s:ForceWrite = 1
+  if a:0
+    let s:ForceWrite = 0
+    set eventignore=ALL
+  endif
   write!
+  let &eventignore = saved_ei
   let &buftype = saved_bt
 endfunction
 
@@ -1996,10 +2002,10 @@ function! s:OpenQFixSubWin(file, id)
   nnoremap <silent> <buffer> <CR> :call QFixMemoUserModeCR()<CR>
   if exists('g:qfixmemo_submenu_writekey')
     let cmd = g:qfixmemo_submenu_writekey
-    exe 'nnoremap <silent> <buffer> ' . cmd . ' :<C-u>call qfixmemo#ForceWrite()<CR>'
+    exe 'nnoremap <silent> <buffer> ' . cmd . ' :<C-u>call qfixmemo#ForceWrite("ignore")<CR>'
   endif
   let cmd = g:qfixmemo_mapleader . 'w'
-  exe 'nnoremap <silent> <buffer> ' . cmd . ' :<C-u>call qfixmemo#ForceWrite()<CR>'
+  exe 'nnoremap <silent> <buffer> ' . cmd . ' :<C-u>call qfixmemo#ForceWrite("ignore")<CR>'
   let b:qfixmemo_bufwrite_pre = 0
   call s:syntaxHighlight()
   if bufnum == -1 && !filereadable(expand(file))

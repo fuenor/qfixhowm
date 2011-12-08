@@ -689,6 +689,10 @@ function! qfixmemo#UpdateTime(...)
   call cursor(fline, 1)
   let fline = search(g:qfixmemo_timestamp_regxp, 'cW')
   let str = strftime(g:qfixmemo_timeformat)
+  if stridx(getline(fline), str) == 0
+    call setpos('.', save_cursor)
+    return
+  endif
   if fline == 0 || fline > lline
     let fline = fline == 0 ? 1 : fline
     exe fline . 'put=str'

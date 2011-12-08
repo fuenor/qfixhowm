@@ -244,10 +244,11 @@ function! s:ReadScheduleFile(files, table)
       if cmd == '@'
         if repeat == '' && sft !~ '\c\(Hol\|Hdy\)'
           let opt = (opt == '' || opt == 0) ? 1 : opt
+          let time = datelib#StrftimeCnvDoWShift(year, month, day, cnvdow, sft)
           for i in range(opt)
-            let time = datelib#StrftimeCnvDoWShift(year, month, day+i, cnvdow, sft)
-            let date = strftime('%Y%m%d', time+24*60*60*i)
+            let date = strftime('%Y%m%d', time)
             let a:table[date] = text
+            let time += 24*60*60
           endfor
           continue
         endif
@@ -311,8 +312,9 @@ function! s:SetScheduleTable(year, dict, table, hol)
         let opt = d['opt']
         let opt = (opt == '' || opt == 0) ? 1 : opt
         for i in range(opt)
-          let date = strftime('%Y%m%d', time+24*60*60*i)
+          let date = strftime('%Y%m%d', time)
           let a:table[date] = d['text']
+          let time += 24*60*60
         endfor
       elseif d['cmd'] == '@@'
         let opt = d['opt']
@@ -320,10 +322,10 @@ function! s:SetScheduleTable(year, dict, table, hol)
         let start = a:year == d['year'] ? d['month'] : 1
         for month in range(start, 12)
           let time = datelib#StrftimeCnvDoWShift(a:year, month, d['day'], d['cnvdow'], d['sft'])
-          let date = strftime('%Y%m%d', time)
           for i in range(opt)
-            let date = strftime('%Y%m%d', time+24*60*60*i)
+            let date = strftime('%Y%m%d', time)
             let a:table[date] = d['text']
+            let time += 24*60*60
           endfor
         endfor
       elseif d['cmd'] == '@'
@@ -342,13 +344,14 @@ function! s:SetScheduleTable(year, dict, table, hol)
         let month = strftime('%m', time)
         let day   = strftime('%d', time)
         for rday in range(day, day+366, repeat)
+          let time = datelib#StrftimeCnvDoWShift(year, month, rday, d['cnvdow'], d['sft'])
           for i in range(opt)
-            let time = datelib#StrftimeCnvDoWShift(year, month, rday+i, d['cnvdow'], d['sft'])
-            let date = strftime('%Y%m%d', time+24*60*60*i)
+            let date = strftime('%Y%m%d', time)
             if stridx(date, a:year) != 0
               continue
             endif
             let a:table[date] = d['text']
+            let time += 24*60*60
           endfor
         endfor
       else

@@ -209,19 +209,6 @@ if !exists('g:qfixmemo_random_file')
   let g:qfixmemo_random_file = '~/.howm-random'
 endif
 
-" QFixMemoとQFixHownのオプションを同期
-let g:qfixmemo_dir          = g:howm_dir
-let g:qfixmemo_fileencoding = g:howm_fileencoding
-let g:qfixmemo_filename     = g:howm_filename
-let g:qfixmemo_ext          = g:QFixHowm_FileExt
-let g:qfixmemo_filetype     = g:QFixHowm_FileType
-if exists('g:QFixHowm_DiaryFile')
-  let g:qfixmemo_diary = g:QFixHowm_DiaryFile
-endif
-if exists('g:QFixHowm_QuickMemoFile')
-  let g:qfixmemo_quickmemo = g:QFixHowm_QuickMemoFile
-endif
-
 " タイムスタンプ(strftime)
 if !exists('g:qfixmemo_timeformat')
   let g:qfixmemo_timeformat = '[%Y-%m-%d %H:%M]'
@@ -241,11 +228,19 @@ if !exists('g:qfixmemo_timeformat_regxp')
   let g:qfixmemo_timeformat_regxp = substitute(g:qfixmemo_timeformat_regxp, '\C%S', '[0-5]\\d', 'g')
   let g:qfixmemo_timeformat_regxp = substitute(g:qfixmemo_timeformat_regxp, '\C%a', '\\(Sun\\|Mon\\|Tue\\|Wed\\|Thu\\|Fri\\|Sat\\|日\\|月\\|火\\|水\\|木\\|金\\|土\\)', 'g')
 endif
-" タイムスタンプ行とみなす正規表現(Vim)
+" qfixmemo#UpdateTime()でタイムスタンプ行とみなす正規表現(Vim)
+" 通常はqfixmemo_timeformat_regxpと同じ正規表現を指定
+" 行内にタイムスタンプが含まれているが、タイムスタンプ行でない行を排除するため
+" にある
+"   (例)
+"   [2011-01-23 12:34]  タイムスタンプ行
+"   [2011-01-23 12:34]@ 非タイムスタンプ行
 if !exists('g:qfixmemo_timestamp_regxp')
   let g:qfixmemo_timestamp_regxp = g:qfixmemo_timeformat_regxp.'\([^-@!+~.]\|$\)'
 endif
 " qfixmemo#AddTitle()で擬似タイトル行とみなす正規表現(Vim)
+" ファイルの一行目が特定の文字列で始まっていたらタイトル行やタイムスタンプの付
+" 加を行いたくない場合に使用する
 if !exists('g:qfixmemo_alt_title_regxp')
   let g:qfixmemo_alt_title_regxp = '^\s*\[\d\{4}[-/]\d\{2}[-/]\d\{2}\( \d\{2}:\d\{2}\)\?\][-@!+~.]'
 endif
@@ -548,4 +543,7 @@ function! QFixMemoSetFolding()
     setlocal foldexpr=getline(v:lnum)=~g:QFixHowm_FoldingPattern?'>1':'1'
   endif
 endfunction
+
+" QFixMemoとQFixHowmのオプションを同期
+call QFixHowmSetup()
 

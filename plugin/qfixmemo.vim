@@ -13,14 +13,14 @@ scriptencoding utf-8
 if exists('g:disable_qfixmemo') && g:disable_qfixmemo == 1
   finish
 endif
-if exists('g:qfixmemo_version') && g:qfixmemo_version < s:Version
-  let g:loaded_qfixmemo = 0
+if exists('g:qfixmemo_init_version') && g:qfixmemo_init_version < s:Version
+  let g:loaded_qfixmemo_init = 0
 endif
-if exists('g:loaded_qfixmemo') && g:loaded_qfixmemo && !exists('g:fudist')
+if exists('g:loaded_qfixmemo_init') && g:loaded_qfixmemo_init && !exists('g:fudist')
   finish
 endif
-let g:qfixmemo_version = s:Version
-let g:loaded_qfixmemo = 1
+let g:qfixmemo_init_version = s:Version
+let g:loaded_qfixmemo_init = 1
 if v:version < 700 || &cp
   finish
 endif
@@ -38,7 +38,7 @@ endif
 
 " キーマップリーダー
 if !exists('g:qfixmemo_mapleader')
-  let g:qfixmemo_mapleader     = 'g,'
+  let g:qfixmemo_mapleader = 'g,'
 endif
 " デフォルトキーマップを有効
 if !exists('g:qfixmemo_default_keymap')
@@ -61,7 +61,7 @@ if !exists('g:qfixmemo_qfixlist_cache')
 endif
 
 " デフォルトキーマップ
-function s:QFixMemoKeymap()
+function! s:QFixMemoKeymap()
   if exists('*QFixMemoKeymap')
     call QFixMemoKeymap()
     return
@@ -136,7 +136,7 @@ silent! function QFixMemoMenubar(menu, leader)
   call s:addMenu(menucmd, 'FileList(&F)',      'rA', ':<C-u>call qfixmemo#Glob(g:qfixmemo_dir, "**/*", "open")<CR>')
   exe printf(sepcmd, 2)
   call s:addMenu(menucmd, 'Calendar(&Q)', 'q', ':<C-u>call qfixmemo#Calendar()<CR>')
-  call s:addMenu(menucmd, 'SubMenu(&I)'        , 'i', ':<C-u>call qfixmemo#SubMenu()<CR>')
+  call s:addMenu(menucmd, 'SubMenu(&I)' , 'i', ':<C-u>call qfixmemo#SubMenu()<CR>')
   exe printf(sepcmd, 3)
   call s:addMenu(menucmd, 'FGrep(&S)', 's', ':<C-u>call qfixmemo#FGrep()<CR>')
   call s:addMenu(menucmd, 'Grep(&G)' , 'g', ':<C-u>call qfixmemo#Grep()<CR>')
@@ -383,11 +383,9 @@ function! s:BufRead()
   call qfixmemo#BufRead()
 endfunction
 
+" autoload読み込み
 if g:qfixmemo_autoload
-  let g:qfixmemo_version = 0
-  let g:loaded_qfixmemo = 0
   finish
 endif
-let g:loaded_qfixmemo = 0
 call qfixmemo#load()
 

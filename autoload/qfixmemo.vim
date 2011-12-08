@@ -104,7 +104,7 @@ endif
 
 function! s:QFixMemoSetTimeFormatRegxp(fmt)
   let regxp = a:fmt
-  let regxp = '^'.escape(regxp, '[]~*.#')
+  let regxp = escape(regxp, '[]~*.#')
   let regxp = substitute(regxp, '\C%Y', '\\d\\{4}', 'g')
   let regxp = substitute(regxp, '\C%m', '[0-1]\\d', 'g')
   let regxp = substitute(regxp, '\C%d', '[0-3]\\d', 'g')
@@ -121,13 +121,18 @@ if !exists('g:qfixmemo_timeformat')
 endif
 " qfixmemo#UpdateTime()でタイムスタンプの置換に使用する正規表現(Vim)
 if !exists('g:qfixmemo_timeformat_regxp')
-  let g:qfixmemo_timeformat_regxp = s:QFixMemoSetTimeFormatRegxp(g:qfixmemo_timeformat)
+  let g:qfixmemo_timeformat_regxp = '^'.s:QFixMemoSetTimeFormatRegxp(g:qfixmemo_timeformat)
 endif
-" タイムスタンプ行とみなす正規表現(Vim)
+" qfixmemo#UpdateTime()でタイムスタンプ行とみなす正規表現(Vim)
+" 通常はqfixmemo_timeformat_regxpと同じ正規表現を指定
+" 行内にタイムスタンプが含まれているが、タイムスタンプ行でない行を排除するため
+" にある
 if !exists('g:qfixmemo_timestamp_regxp')
   let g:qfixmemo_timestamp_regxp = g:qfixmemo_timeformat_regxp
 endif
 " qfixmemo#AddTitle()で擬似タイトル行とみなす正規表現(Vim)
+" ファイルの一行目が特定の文字列で始まっていたらタイトル行やタイムスタンプの付
+" 加を行いたくない場合に使用する
 if !exists('g:qfixmemo_alt_title_regxp')
   let g:qfixmemo_alt_title_regxp = ''
 endif

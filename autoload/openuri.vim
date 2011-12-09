@@ -46,9 +46,6 @@ endfunction
 
 " default
 let s:howmsuffix = 'howm'
-if !exists('g:howm_dir')
-  let g:howm_dir = '~/howm'
-endif
 
 function! openuri#AddScheme(key, path)
   call openuri#init()
@@ -57,15 +54,22 @@ function! openuri#AddScheme(key, path)
 endfunction
 
 function! openuri#init()
-  let l:howm_dir = g:howm_dir
-  if exists('g:qfixmemo_dir')
+  let l:howm_dir = '~/howm'
+  if exists('g:howm_dir')
+    let l:howm_dir = g:howm_dir
+  elseif exists('g:qfixmemo_dir')
     let l:howm_dir = g:qfixmemo_dir
   endif
   let l:memo_path = l:howm_dir
+  if exists('g:qfixmemo_dir')
+    let l:memo_path = g:qfixmemo_dir
+  elseif exists('g:howm_dir')
+    let l:memo_path = g:howm_dir
+  endif
   if exists('g:openuri_memopath')
     let l:memo_path = g:openuri_memopath
   endif
-  let l:rel_dir = l:howm_dir
+  let l:rel_dir = l:memo_path
   if exists('g:openuri_relpath')
     let l:rel_dir = g:openuri_relpath
   elseif exists('g:QFixHowm_RelPath')
@@ -101,15 +105,15 @@ endif
 
 " カーソル位置のファイルを開くコマンド
 if !exists('g:openuri_cmd')
+  if has('unix')
+    let g:openuri_cmd = "call system('firefox %s &')"
+  else
+    " Internet Explorer
+    let g:openuri_cmd = '!start "C:/Program Files/Internet Explorer/iexplore.exe" %s'
+    " let g:openuri_cmd = '!start "rundll32.exe" url.dll,FileProtocolHandler %s'
+  endif
   " netrw を使用する場合(:help gx)
-  let g:openuri_cmd = 'netrw'
-  " if has('unix')
-  "   " let g:openuri_cmd = "call system('firefox %s &')"
-  " else
-  "   " Internet Explorer
-  "   " let g:openuri_cmd = '!start "C:/Program Files/Internet Explorer/iexplore.exe" %s'
-  "   let g:openuri_cmd = '!start "rundll32.exe" url.dll,FileProtocolHandler %s'
-  " endif
+  " let g:openuri_cmd = 'netrw'
 endif
 " netrw でリモートを使用
 if !exists('g:openuri_netrw_remote')
@@ -262,6 +266,7 @@ function! s:openstr(str)
             let str = iconv(str, &enc, 'cp932')
           endif
         endif
+        " let str = 'file://'.str
         call netrw#NetrwBrowseX(str, g:openuri_netrw_remote)
         return 1
       endif
@@ -343,6 +348,10 @@ function! s:openuri(uri)
   if g:openuri_cmd =~ '\c^'.'netrw$'
     if bat
       let str = iconv(uri, &enc, 'cp932')
+    endif
+    let pathhead = '\([A-Za-z]:[/\\]\|\~[/\\]\|\.\.\?[/\\]\|\\\{2}\|[/\\]\)'
+    if str =~ '^'.pathhead
+      " let str = 'file://'.str
     endif
     call netrw#NetrwBrowseX(uri, g:openuri_netrw_remote)
     return 1

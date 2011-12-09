@@ -420,7 +420,7 @@ function! qfixmemo#BufRead()
       exe 'edit! ++enc='.g:qfixmemo_fileencoding.' ++ff='.g:qfixmemo_fileformat
       if &readonly
         edit!
-        let mes= "Invalid qfixmemo_fileencording (".&fenc.")\nConvert to ".g:qfixmemo_fileencoding."?"
+        let mes= "Invalid qfixmemo_fileencoding (".&fenc.")\nConvert to ".g:qfixmemo_fileencoding."?"
         let choice = g:qfixmemo_forceencoding == 2 ? 1 : confirm(mes, "&Yes\n&Cancel", 1, "W")
         if choice == 1
           exe 'set fenc='.g:qfixmemo_fileencoding

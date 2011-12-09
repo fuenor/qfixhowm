@@ -55,10 +55,20 @@ endif
 if !exists('g:qfixmemo_use_howm_schedule')
   let g:qfixmemo_use_howm_schedule = 1
 endif
+
+if !exists('g:qfixmemo_use_howm2html')
+  let g:qfixmemo_use_howm2html = 1
+endif
 " エントリ一覧表示にキャッシュを使用する
 if !exists('g:qfixmemo_qfixlist_cache')
   let g:qfixmemo_qfixlist_cache = 1
 endif
+
+" howm2htmlユーザーコマンド
+command! -bang -nargs=* -range=% Howm2html call howm2html#Howm2html(<bang>0, <f-args>)
+command! -bang -nargs=* Jump2html          call howm2html#Jump2html(<bang>0, <f-args>)
+command! -nargs=* HowmHtmlConvFiles        call howm2html#HowmHtmlConvFiles('%', <q-args>)
+command! -nargs=* -bang HowmHtmlUpdate     call howm2html#HowmHtmlConvFiles('%', <q-args>, '<bang>')
 
 " デフォルトキーマップ
 function! s:QFixMemoKeymap()
@@ -108,6 +118,16 @@ function! s:QFixMemoKeymap()
     silent! nnoremap <silent> <unique> <Leader>,     :<C-u>call qfixmemo#OpenMenu("cache")<CR>
     silent! nnoremap <silent> <unique> <Leader>r,    :<C-u>call qfixmemo#OpenMenu()<CR>
   endif
+
+  if g:qfixmemo_use_howm2html
+    silent! nnoremap <silent> <unique> <leader>hi    :Howm2html!<CR>
+    silent! nnoremap <silent> <unique> <leader>hr    :Howm2html<CR>
+    silent! nnoremap <silent> <unique> <leader>hI    :Howm2html! %<CR>
+    silent! nnoremap <silent> <unique> <leader>hR    :Howm2html %<CR>
+    silent! nnoremap <silent> <unique> <leader>hj    :Jump2html!<CR>
+    silent! nnoremap <silent> <unique> <leader>hJ    :Jump2html!<CR>
+  endif
+
 endfunction
 
 silent! function QFixMemoMenubar(menu, leader)
@@ -149,19 +169,24 @@ silent! function QFixMemoMenubar(menu, leader)
     call s:addMenu(menucmd, 'Rebuild-Schedule(&V)', 'ry', ':<C-u>call qfixmemo#ListReminderCache("schedule")<CR>')
     call s:addMenu(menucmd, 'Rebuild-Todo(&W)'    , 'rt', ':<C-u>call qfixmemo#ListReminderCache("todo")<CR>')
   endif
+  if g:qfixmemo_use_howm2html
   exe printf(sepcmd, 5)
+    call s:addMenu(menucmd, 'HTML(temp)(&P)'      , 'hi', ':Howm2html!<CR>')
+    call s:addMenu(menucmd, 'HTML(static)(&P)'    , 'hI', ':Howm2html % <CR>')
+  endif
+  exe printf(sepcmd, 6)
   call s:addMenu(menucmd, 'RandomWalk(&R)'        , 'rr', ':<C-u>call qfixmemo#RandomWalk(g:qfixmemo_random_file)<CR>')
   call s:addMenu(menucmd, 'Rebuild-RandomWalk(&X)', 'rR', ':<C-u>call qfixmemo#RebuildRandomCache(g:qfixmemo_random_file)<CR>')
-  exe printf(sepcmd, 6)
-  call s:addMenu(menucmd, 'Rebuild-Keyword(&K)', 'rk', ':<C-u>call qfixmemo#RebuildKeyword()<CR>')
   exe printf(sepcmd, 7)
+  call s:addMenu(menucmd, 'Rebuild-Keyword(&K)', 'rk', ':<C-u>call qfixmemo#RebuildKeyword()<CR>')
+  exe printf(sepcmd, 8)
   call s:addMenu(menucmd, 'Rename(&Z)',       'rn', ':<C-u>call qfixmemo#Rename()<CR>')
   call s:addMenu(menucmd, 'Rename-files(&Z)', 'rN', ':<C-u>call qfixmemo#ListRenameFile(g:qfixmemo_filename)<CR>')
   if g:qfixmemo_use_howm_schedule
-    exe printf(sepcmd, 8)
+    exe printf(sepcmd, 9)
     call s:addMenu(menucmd, 'Help(&H)', 'H', ':call feedkeys("'.a:leader.'H")<CR>')
   endif
-  exe printf(sepcmd, 9)
+  exe printf(sepcmd, 10)
   let submenu = '.Buffer[Local]\ (&B)'
   let sepcmd  = 'amenu <silent> 41.335 '.a:menu.submenu.'.-sep%d-			<Nop>'
   let menucmd = 'amenu <silent> 41.335 '.a:menu.submenu.'.%s<Tab>'.leader.'%s %s'

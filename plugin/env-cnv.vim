@@ -473,6 +473,10 @@ endif
 if !exists('g:QFixHowm_Menufile') || g:QFixHowm_Menufile == ''
   let g:QFixHowm_Menufile = 'Menu-00-00-000000.'.s:howmsuffix
 endif
+" goto link
+if !exists('howm_glink_pattern')
+  let howm_glink_pattern = '>>>'
+endif
 " come-fromリンク
 if !exists('g:howm_clink_pattern')
   let g:howm_clink_pattern = '<<<'

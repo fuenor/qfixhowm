@@ -1865,23 +1865,23 @@ function! QFixHowmScheduleActionStr()
   return "\<CR>"
 endfunction
 
-" come-from/goto link
-if !exists('howm_glink_pattern')
-  let howm_glink_pattern = '>>>'
-endif
-if !exists('howm_clink_pattern')
-  let howm_clink_pattern = '<<<'
-endif
-"howmリンクパターン
-if !exists('g:QFixHowm_Link')
-  let g:QFixHowm_Link = '\('.g:howm_clink_pattern.'\|'.g:howm_glink_pattern.'\)'
-endif
-
 if !exists('*QFixHowmOpenKeywordLink')
 function QFixHowmOpenKeywordLink()
   return "\<CR>"
 endfunction
 endif
+
+" " come-from/goto link
+" if !exists('howm_glink_pattern')
+"   let howm_glink_pattern = '>>>'
+" endif
+" if !exists('howm_clink_pattern')
+"   let howm_clink_pattern = '<<<'
+" endif
+" "howmリンクパターン
+" if !exists('g:QFixHowm_Link')
+"   let g:QFixHowm_Link = '\('.g:howm_clink_pattern.'\|'.g:howm_glink_pattern.'\)'
+" endif
 
 "=============================================================================
 " アクションロック

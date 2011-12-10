@@ -2679,6 +2679,7 @@ function! QFixMemoSwitchAction(list, ...)
       " let cpattern = strftime('['.g:qfixmemo_timeformat.'].')
     endif
     let prevcol = (a:0 == 0 ? start : col('.'))
+    let nr = strlen(substitute(pattern, '.', '.', 'g'))
     call cursor(prevline, start)
     exe 'normal! c'.nr.'l'.cpattern
     call cursor(prevline, prevcol)

@@ -235,6 +235,7 @@ function! QFixMemoCalendar(dircmd, file, cnt, ...)
     let winsize = winwidth(0)
   endif
   let l:calendar_width = 3*7+strlen(g:submenu_calendar_lmargin)+1
+  let l:calendar_width += g:calendar_mark =~ 'right'
   if parent == 0
     let winsize = l:calendar_width
   else
@@ -250,6 +251,7 @@ function! QFixMemoCalendar(dircmd, file, cnt, ...)
   if !exists('b:calendar_width')
     let b:calendar_width = winsize
     let b:submenu_calendar_lmargin = g:submenu_calendar_lmargin
+    let b:submenu_calendar_lmargin .= g:calendar_mark =~ 'right' ? ' ' : ''
     let init = 1
   endif
   setlocal buftype=nofile
@@ -321,7 +323,9 @@ function! QFixMemoCalendar(dircmd, file, cnt, ...)
   nnoremap <silent> <buffer> >    :<C-u>call <SID>CR('>>')<CR>
   nnoremap <silent> <buffer> <    :<C-u>call <SID>CR('<<')<CR>
   nnoremap <silent> <buffer> i    :<C-u>call <SID>CR('<<')<CR>
+  nnoremap <silent> <buffer> I    :<C-u>call <SID>CR('>>')<CR>
   nnoremap <silent> <buffer> o    :<C-u>call <SID>CR('>>')<CR>
+  nnoremap <silent> <buffer> O    :<C-u>call <SID>CR('<<')<CR>
   nnoremap <silent> <buffer> r    :<C-u>call <SID>CR('r')<CR>
   nnoremap <silent> <buffer> t    :<C-u>call <SID>CR('today')<CR>
   nnoremap <silent> <buffer> .    :<C-u>call <SID>CR('.')<CR>
@@ -518,6 +522,9 @@ function! s:CalendarStr(...)
     let str = s:cal
     let eom = datelib#EndOfMonth(year, month, 0)
     let str = substitute(str, printf('\s%2.2d', eom+1).'.*$', '', '')
+    if g:calendar_mark =~ 'right'
+      let str = substitute(str, '^ ', '', '').' '
+    endif
     let fdow = datelib#DoWIdxStrftime(fday)
     " 日曜から始める(0000/01/01は月曜)
     let fdow = fdow == 6 ? 0 : (fdow+1)

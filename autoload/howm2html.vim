@@ -210,11 +210,13 @@ endif
 " タイトル行識別子
 if !exists('g:HowmHtml_Title')
   let g:HowmHtml_Title = '='
+  let g:HowmHtml_Title = exists('g:QFixHowm_Title') ? g:QFixHowm_Title : g:HowmHtml_Title
+  let g:HowmHtml_Title = exists('g:qfixmemo_title') ? g:qfixmemo_title : g:HowmHtml_Title
 endif
 
-if !exists('g:howm_fileencoding')
-  let g:howm_fileencoding = &enc
-endif
+" if !exists('g:howm_fileencoding')
+"   let g:howm_fileencoding = &enc
+" endif
 " タイトル検索のエスケープパターン
 if !exists('g:QFixHowm_EscapeTitle')
   let g:QFixHowm_EscapeTitle = '~*.\'
@@ -227,10 +229,10 @@ endif
 if !exists('g:QFixHowm_MergeEntrySeparator')
   let g:QFixHowm_MergeEntrySeparator = "=========================="
 endif
-" オートタイトル文字数
-if !exists('g:QFixHowm_Replace_Title_Len')
-  let g:QFixHowm_Replace_Title_Len = 64
-endif
+" " オートタイトル文字数
+" if !exists('g:QFixHowm_Replace_Title_Len')
+"   let g:QFixHowm_Replace_Title_Len = 64
+" endif
 
 " ブラウザ指定
 if !exists('g:HowmHtml_OpenURIcmd')
@@ -642,6 +644,9 @@ function! HowmHtmlConvert(list, htmlname)
     let fname = d['filename']
     let anchor = d['index']+1
 
+    let g:HowmHtml_Title = '='
+    let g:HowmHtml_Title = exists('g:QFixHowm_Title') ? g:QFixHowm_Title : g:HowmHtml_Title
+    let g:HowmHtml_Title = exists('g:qfixmemo_title') ? g:qfixmemo_title : g:HowmHtml_Title
     let l:HowmHtml_Title = escape(g:HowmHtml_Title, g:QFixHowm_EscapeTitle)
     if l:HowmHtml_Title == ''
       let l:HowmHtml_Title = s:HowmHtml_Title
@@ -923,7 +928,9 @@ function! howm2html#Howm2html(output, ...)
           if filereadable(ifile)
             let alttext = readfile(ifile)
             if len(alttext)
-              let from = exists('g:qfixmemo_fileencoding') ? g:qfixmemo_fileencoding : g:howm_fileencoding
+              let from = &enc
+              let from = exists('g:howm_fileencoding') ? g:howm_fileencoding : from
+              let from = exists('g:qfixmemo_fileencoding') ? g:qfixmemo_fileencoding : from
               call map(alttext, 'iconv(v:val, from, &enc)')
               call extend(glist, alttext)
             endif
@@ -938,6 +945,9 @@ function! howm2html#Howm2html(output, ...)
     endif
   " endif
 
+  let g:HowmHtml_Title = '='
+  let g:HowmHtml_Title = exists('g:QFixHowm_Title') ? g:QFixHowm_Title : g:HowmHtml_Title
+  let g:HowmHtml_Title = exists('g:qfixmemo_title') ? g:qfixmemo_title : g:HowmHtml_Title
   let l:HowmHtml_Title = escape(g:HowmHtml_Title, g:QFixHowm_EscapeTitle)
   if l:HowmHtml_Title == ''
     let l:HowmHtml_Title = s:HowmHtml_Title
@@ -996,10 +1006,13 @@ function! howm2html#Howm2html(output, ...)
   if list == []
     let title = ''
     let text = getline(1, '$')
+    let trlen = 64
+    let trlen = exists('g:QFixHowm_Replace_Title_Len') ? g:QFixHowm_Replace_Title_Len : trlen
+    let trlen = exists('g:qfixmemo_title_length') ? g:qfixmemo_title_length : trlen
     for d in text
       if d !~ '^\s*$'
-        let title = substitute(text[0], '\%>'.g:QFixHowm_Replace_Title_Len.'v.*','','')
-        if strlen(text[0]) > g:QFixHowm_Replace_Title_Len
+        let title = substitute(text[0], '\%>'.trlen.'v.*','','')
+        if strlen(text[0]) > trlen
           let title = title . '...'
         endif
         break
@@ -1161,6 +1174,9 @@ function! howm2html#Jump2html(mode, ...)
   let file = substitute(file, '\\', '/', 'g')
   let uri = 'file://'.file
   let save_cursor = getpos('.')
+  let g:HowmHtml_Title = '='
+  let g:HowmHtml_Title = exists('g:QFixHowm_Title') ? g:QFixHowm_Title : g:HowmHtml_Title
+  let g:HowmHtml_Title = exists('g:qfixmemo_title') ? g:qfixmemo_title : g:HowmHtml_Title
   let l:HowmHtml_Title = escape(g:HowmHtml_Title, g:QFixHowm_EscapeTitle)
   if l:HowmHtml_Title == ''
     let l:HowmHtml_Title = s:HowmHtml_Title
@@ -1185,6 +1201,9 @@ endfunction
 function! s:getanchor()
   let save_cursor = getpos('.')
   let prevline = line('.')
+  let g:HowmHtml_Title = '='
+  let g:HowmHtml_Title = exists('g:QFixHowm_Title') ? g:QFixHowm_Title : g:HowmHtml_Title
+  let g:HowmHtml_Title = exists('g:qfixmemo_title') ? g:qfixmemo_title : g:HowmHtml_Title
   let l:HowmHtml_Title = escape(g:HowmHtml_Title, g:QFixHowm_EscapeTitle)
   if l:HowmHtml_Title == ''
     let l:HowmHtml_Title = s:HowmHtml_Title
@@ -1503,6 +1522,9 @@ function! s:howmOutline(str, htmlname, anchor, header, jump)
   endif
   let bullet = matchstr(bullet, '^[.*=]\+')
   let l = len(bullet) + 2 + s:Blogger
+  let g:HowmHtml_Title = '='
+  let g:HowmHtml_Title = exists('g:QFixHowm_Title') ? g:QFixHowm_Title : g:HowmHtml_Title
+  let g:HowmHtml_Title = exists('g:qfixmemo_title') ? g:qfixmemo_title : g:HowmHtml_Title
   if g:HowmHtml_Title == bullet[0]
     let l -= 1
   endif
@@ -1599,7 +1621,9 @@ function! s:uri2tag(str, pathchr)
         if filereadable(file)
           let alttext = readfile(file, '', 1)[0]
           let alttext = substitute(alttext, '^.\s*', '', '')
-          let from = exists('g:qfixmemo_fileencoding') ? g:qfixmemo_fileencoding : g:howm_fileencoding
+          let from = &enc
+          let from = exists('g:howm_fileencoding') ? g:howm_fileencoding : from
+          let from = exists('g:qfixmemo_fileencoding') ? g:qfixmemo_fileencoding : from
           let alttext = iconv(alttext, from, &enc)
         endif
         let relpath = g:HowmHtml_htmldir
@@ -1902,7 +1926,9 @@ function! howm2html#HowmHtmlConvFiles(file, param, ...)
   if a:0
     " let file = fnamemodify(expand(file), ':p')
   endif
-  let from = exists('g:qfixmemo_fileencoding') ? g:qfixmemo_fileencoding : g:howm_fileencoding
+  let from = &enc
+  let from = exists('g:howm_fileencoding') ? g:howm_fileencoding : from
+  let from = exists('g:qfixmemo_fileencoding') ? g:qfixmemo_fileencoding : from
   let to   = &enc
   let glist = readfile(file)
   call map(glist, 'iconv(v:val, from, to)')

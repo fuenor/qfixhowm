@@ -276,6 +276,22 @@ if !exists('g:qfixmemo_isqfixmemo_regxp')
   let g:qfixmemo_isqfixmemo_regxp = '\c\.'.s:howm_ext.'$'
 endif
 
+" howmlinkを使用する
+if !exists('g:qfixmemo_use_howmlink')
+  let g:qfixmemo_use_howmlink = 1
+endif
+
+if g:qfixmemo_use_howmlink
+  " howm goto link
+  if !exists('g:howm_glink_pattern')
+    let g:howm_glink_pattern = '>>>'
+  endif
+  " howm come-fromリンク
+  if !exists('g:howm_clink_pattern')
+    let g:howm_clink_pattern = '<<<'
+  endif
+endif
+
 " QFixWinでの<CR>を独自処理する
 if !exists('g:QFix_UseAltCR')
   let g:QFix_UseAltCR = 2
@@ -374,20 +390,11 @@ if g:qfixmemo_use_howm_schedule
     endif
   endfunction
 
-  function! s:howmScheduleEnv(mode)
+  function! s:howmScheduleEnv(...)
     if qfixmemo#Init()
       return
     endif
     call howm_schedule#Init()
-    if a:mode == 'save'
-      let s:howm_dir           = g:howm_dir
-      let s:howm_fileencoding  = g:howm_fileencoding
-      let g:howm_dir           = g:qfixmemo_dir
-      let g:howm_fileencoding  = g:qfixmemo_fileencoding
-    elseif a:mode == 'restore'
-      let g:howm_dir           = s:howm_dir
-      let g:howm_fileencoding  = s:howm_fileencoding
-    endif
   endfunction
 endif
 
@@ -2430,7 +2437,7 @@ function! qfixmemo#AddKeyword(...)
     endwhile
   endfor
 
-  if exists('g:howm_clink_pattern')
+  if exists('g:howm_clink_pattern') && g:howm_clink_pattern != ''
     if a:0
       let list = a:1
       call filter(list, "v:val =~ '" . g:howm_clink_pattern .".\\+'")
@@ -2486,7 +2493,7 @@ function! qfixmemo#RebuildKeyword()
   let pattern = g:qfixmemo_keyword_pre . '.*' .g:qfixmemo_keyword_post
   let kfile = '*.'.s:howm_ext.' *.'.g:qfixmemo_ext
   let qflist = qfixlist#search(pattern, g:qfixmemo_dir, '', 0, g:qfixmemo_fileencoding, '**/'.kfile)
-  if exists('g:howm_clink_pattern')
+  if exists('g:howm_clink_pattern') && g:howm_clink_pattern != ''
     let pattern = g:howm_clink_pattern
     let extlist = qfixlist#search(pattern, g:qfixmemo_dir, '', 0, g:qfixmemo_fileencoding, '**/'.kfile)
     call extend(qflist, extlist)
@@ -2495,7 +2502,7 @@ function! qfixmemo#RebuildKeyword()
   let extlist = QFixMemoRebuildKeyword(g:qfixmemo_dir, g:qfixmemo_fileencoding)
   let pattern = g:qfixmemo_keyword_pre.'.*'.g:qfixmemo_keyword_post
 
-  if exists('g:howm_clink_pattern')
+  if exists('g:howm_clink_pattern') && g:howm_clink_pattern != ''
     let pattern = '\('.g:howm_clink_pattern.'\|'.pattern.'\)'
   endif
 
@@ -2581,14 +2588,14 @@ function! qfixmemo#OpenKeywordLink()
   let col = col('.')
   let lstr = getline('.')
 
-  if exists('g:howm_glink_pattern')
+  if exists('g:howm_glink_pattern') && g:howm_glink_pattern != ''
     let idx = match(lstr, g:howm_glink_pattern)
     if idx > -1 && idx <= col
       let word = matchstr(lstr, g:howm_glink_pattern . '.*')
       let word = substitute(word, g:howm_glink_pattern . '\s*', '', '')
       let g:MyGrep_Regexp = 0
       let qflist = qfixlist#search(word, g:qfixmemo_dir, '', 0, g:qfixmemo_fileencoding, '**/*')
-      if exists('g:howm_clink_pattern')
+      if exists('g:howm_clink_pattern') && g:howm_clink_pattern != ''
         let qflist = sort(qflist, "<SID>qfixmemoSortHowmClink")
       endif
       if len(qflist)
@@ -2612,7 +2619,7 @@ function! qfixmemo#OpenKeywordLink()
       if g:qfixmemo_keyword_mode == 0
         let g:MyGrep_Regexp = 0
         let qflist = qfixlist#search(word, g:qfixmemo_dir, '', 0, g:qfixmemo_fileencoding, '**/*')
-        if exists('g:howm_clink_pattern')
+        if exists('g:howm_clink_pattern') && g:howm_clink_pattern != ''
           let qflist = sort(qflist, "<SID>qfixmemoSortHowmClink")
         endif
         if len(qflist)

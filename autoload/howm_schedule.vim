@@ -4,7 +4,7 @@
 "         Author: fuenor <fuenor@gmail.com>
 "                 http://sites.google.com/site/fudist/Home/qfixhowm
 "=============================================================================
-let s:Version = 2.56
+let s:Version = 2.57
 scriptencoding utf-8
 
 "=============================================================================
@@ -60,15 +60,15 @@ let s:debug = exists('g:fudist') ? g:fudist : 0
 " Do you like spagehtti?
 " OK, go ahead. You have been warned!
 
+let s:howm_dir = ''
+let s:howm_fileencoding = ''
 function! QFixHowmSchedule(type, dir, fenc, ...)
-  let l:howm_dir          = g:howm_dir
-  let l:howm_fileencoding = g:howm_fileencoding
-  let g:howm_dir          = a:dir
-  let g:howm_fileencoding = a:fenc
+  let s:howm_dir          = a:dir
+  let s:howm_fileencoding = a:fenc
   let mode = a:0 ? a:1 : ''
   let sq = s:QFixHowmListReminder_(a:type, mode)
-  let g:howm_dir          = l:howm_dir
-  let g:howm_fileencoding = l:howm_fileencoding
+  let s:howm_dir = ''
+  let s:howm_fileencoding = ''
   return sq
 endfunction
 
@@ -83,14 +83,12 @@ function! QFixHowmScheduleCachedQFList(mode)
 endfunction
 
 function! howm_schedule#QFixHowmSchedule(type, dir, fenc, ...)
-  let l:howm_dir          = g:howm_dir
-  let l:howm_fileencoding = g:howm_fileencoding
-  let g:howm_dir          = a:dir
-  let g:howm_fileencoding = a:fenc
+  let s:howm_dir          = a:dir
+  let s:howm_fileencoding = a:fenc
   let mode = a:0 ? a:1 : ''
   let sq = s:QFixHowmListReminder_(a:type, mode)
-  let g:howm_dir          = l:howm_dir
-  let g:howm_fileencoding = l:howm_fileencoding
+  let s:howm_dir = ''
+  let s:howm_fileencoding = ''
   return sq
 endfunction
 
@@ -106,30 +104,30 @@ endfunction
 
 """"""""""""""""""""""""""""""
 let s:howmsuffix = 'howm'
-if !exists('howm_dir')
-  let howm_dir = '~/howm'
-  if exists('g:qfixmemo_dir')
-    let howm_dir = g:qfixmemo_dir
-  endif
-endif
-if !exists('QFixHowm_FileExt')
-  let QFixHowm_FileExt = ''
-  if exists('g:qfixmemo_filename')
-    let QFixHowm_FileExt = fnamemodify(g:qfixmemo_filename,':e')
-  endif
-  if g:QFixHowm_FileExt == '' && exists('g:howm_filename')
-    let g:QFixHowm_FileExt  = fnamemodify(g:howm_filename,':e')
-  endif
-  if g:QFixHowm_FileExt == ''
-    let g:QFixHowm_FileExt = 'txt'
-  endif
-endif
-if !exists('howm_fileencoding')
-  let howm_fileencoding = &enc
-  if exists('g:qfixmemo_fileencoding')
-    let howm_fileencoding = g:qfixmemo_fileencoding
-  endif
-endif
+" if !exists('howm_dir')
+"   let howm_dir = '~/howm'
+"   if exists('g:qfixmemo_dir')
+"     let howm_dir = g:qfixmemo_dir
+"   endif
+" endif
+" if !exists('QFixHowm_FileExt')
+"   let QFixHowm_FileExt = ''
+"   if exists('g:qfixmemo_filename')
+"     let QFixHowm_FileExt = fnamemodify(g:qfixmemo_filename,':e')
+"   endif
+"   if g:QFixHowm_FileExt == '' && exists('g:howm_filename')
+"     let g:QFixHowm_FileExt  = fnamemodify(g:howm_filename,':e')
+"   endif
+"   if g:QFixHowm_FileExt == ''
+"     let g:QFixHowm_FileExt = 'txt'
+"   endif
+" endif
+" if !exists('howm_fileencoding')
+"   let howm_fileencoding = &enc
+"   if exists('g:qfixmemo_fileencoding')
+"     let howm_fileencoding = g:qfixmemo_fileencoding
+"   endif
+" endif
 
 "キーマップリーダー
 if !exists('g:QFixHowm_Key')
@@ -301,10 +299,10 @@ if !exists('g:QFixHowm_TitleFilterReg')
   let g:QFixHowm_TitleFilterReg = ''
 endif
 
-"タブで編集('tab'を設定)
-if !exists('QFixHowm_Edit')
-  let QFixHowm_Edit = ''
-endif
+" "タブで編集('tab'を設定)
+" if !exists('QFixHowm_Edit')
+"   let QFixHowm_Edit = ''
+" endif
 
 if !exists('g:howm_schedule_key')
   let g:howm_schedule_key = 0
@@ -318,8 +316,8 @@ if g:QFixHowm_Default_Key > 0 && g:howm_schedule_key
   exe 'silent! nnoremap <unique> <silent> '.s:QFixHowm_Key.'<Tab> :<C-u>call QFixHowmListReminderCache("schedule")<CR>'
   exe 'silent! nnoremap <unique> <silent> '.s:QFixHowm_Key.'ry    :<C-u>call QFixHowmListReminder("schedule")<CR>'
   exe 'silent! nnoremap <unique> <silent> '.s:QFixHowm_Key.'rd    :<C-u>call QFixHowmGenerateRepeatDate()<CR>'
-  exe "silent! nnoremap <unique> <silent> ".s:QFixHowm_Key."d :call QFixHowmInsertDate('Date')<CR>"
-  exe "silent! nnoremap <unique> <silent> ".s:QFixHowm_Key."T :call QFixHowmInsertDate('Time')<CR>"
+  exe "silent! nnoremap <unique> <silent> ".s:QFixHowm_Key."d     :call QFixHowmInsertDate('Date')<CR>"
+  exe "silent! nnoremap <unique> <silent> ".s:QFixHowm_Key."T     :call QFixHowmInsertDate('Time')<CR>"
 endif
 
 """"""""""""""""""""""""""""""
@@ -464,7 +462,10 @@ function! s:QFixHowmListReminder_(mode,...)
     return []
   endif
   let addflag = 0
-  let l:howm_dir = g:howm_dir
+  let l:howm_dir = '~/howm'
+  let l:howm_dir = exists('g:howm_dir') ? g:howm_dir : l:howm_dir
+  let l:howm_dir = exists('g:qfixmemo_dir') ? g:qfixmemo_dir : l:howm_dir
+  let l:howm_dir = s:howm_dir != '' ? s:howm_dir : l:howm_dir
   if g:QFixHowm_ScheduleSearchDir != ''
     let l:howm_dir = g:QFixHowm_ScheduleSearchDir
   endif
@@ -520,14 +521,18 @@ function! s:QFixHowmListReminder_(mode,...)
   let searchPath = l:howm_dir
   if s:reminder_cache == 0
     redraw | echo 'QFixHowm : execute grep...'
+    let l:howm_fileencoding = &enc
+    let l:howm_fileencoding = exists('g:howm_fileencoding') ? g:howm_fileencoding : l:howm_fileencoding
+    let l:howm_fileencoding = exists('g:qfixmemo_fileencoding') ? g:qfixmemo_fileencoding : l:howm_fileencoding
+    let l:howm_fileencoding = s:howm_fileencoding != '' ? s:howm_fileencoding : l:howm_fileencoding
     if exists('*MultiHowmDirGrep')
       if g:QFixHowm_ScheduleSearchDir == ''
-        let addflag = MultiHowmDirGrep(searchWord, searchPath, l:SearchFile, g:howm_fileencoding, addflag)
+        let addflag = MultiHowmDirGrep(searchWord, searchPath, l:SearchFile, l:howm_fileencoding, addflag)
       else
-        let addflag = MultiHowmDirGrep(searchWord, searchPath, l:SearchFile, g:howm_fileencoding, addflag, 'g:QFixHowm_ScheduleSearchDir')
+        let addflag = MultiHowmDirGrep(searchWord, searchPath, l:SearchFile, l:howm_fileencoding, addflag, 'g:QFixHowm_ScheduleSearchDir')
       endif
     endif
-    let sq = qfixlist#grep(searchWord, searchPath, l:SearchFile, g:howm_fileencoding)
+    let sq = qfixlist#grep(searchWord, searchPath, l:SearchFile, l:howm_fileencoding)
     call extend(sq, holiday_sq)
     let s:UseTitleFilter = 1
     call QFixHowmTitleFilter(sq)
@@ -847,7 +852,10 @@ function! s:AddTodayLine(qflist)
   if exists('g:QFixHowmToday')
     let today = QFixHowmDate2Int(g:QFixHowmToday)
   endif
-  let l:howm_dir = expand(g:howm_dir)
+  let l:howm_dir = '~/howm'
+  let l:howm_dir = exists('g:howm_dir') ? g:howm_dir : l:howm_dir
+  let l:howm_dir = exists('g:qfixmemo_dir') ? g:qfixmemo_dir : l:howm_dir
+  let l:howm_dir = s:howm_dir != '' ? s:howm_dir : l:howm_dir
   if g:QFixHowm_ScheduleSearchDir != ''
     let l:howm_dir = expand(g:QFixHowm_ScheduleSearchDir)
   endif
@@ -2652,9 +2660,13 @@ function QFixHowmInit()
   if s:QFixHowm_Init
     return 0
   endif
-  let dir = expand(g:howm_dir)
+  let l:howm_dir = '~/howm'
+  let l:howm_dir = exists('g:howm_dir') ? g:howm_dir : l:howm_dir
+  let l:howm_dir = exists('g:qfixmemo_dir') ? g:qfixmemo_dir : l:howm_dir
+  let l:howm_dir = s:howm_dir != '' ? s:howm_dir : l:howm_dir
+  let dir = expand(l:howm_dir)
   if isdirectory(dir) == 0
-    let mes = printf('"%s" is not directory!', g:howm_dir)
+    let mes = printf('"%s" is not directory!', l:howm_dir)
     let choice = confirm(mes, "&OK", 1, "W")
     return 1
   endif

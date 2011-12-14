@@ -880,6 +880,7 @@ NOTE:
 予定・TODOはQFixHowmと互換でオプションも同一です。
 
 予定・TODOの使い方:
+doc/html/reminder.html
 https://sites.google.com/site/fudist/Home/qfixhowm/howm-reminder
 
 <Leader>y                 予定

@@ -46,6 +46,9 @@ endif
 " ファイル名を指定している場合はそちらが優先されます。
 if !exists('g:HowmHtml_DefaultName')
   let g:HowmHtml_DefaultName = 'howm2html.html'
+  if exists('g:fudist')
+    let g:HowmHtml_DefaultName = 'temp.html'
+  endif
 endif
 if !exists('g:HowmHtml_HomePage')
   let g:HowmHtml_HomePage = 'index.html'
@@ -135,6 +138,10 @@ endif
 if !exists('HowmHtml_Vicuna')
   let g:HowmHtml_Vicuna = ''
 endif
+" BODYCLASSを使用する
+if !exists('HowmHtml_BodyClass')
+  let g:HowmHtml_BodyClass = 'double-l'
+endif
 " Vicunaのサイドバーにチャプターも表示する
 if !exists('HowmHtml_VicunaChapter')
   let g:HowmHtml_VicunaChapter = 0
@@ -182,6 +189,9 @@ endif
 
 if !exists('g:HowmHtml_DatePattern')
   let g:HowmHtml_DatePattern = '%Y-%m-%d %H:%M'
+endif
+if !exists('g:HowmHtml_JpJoinStr')
+  let g:HowmHtml_JpJoinStr = 0
 endif
 
 " pdf変換用コマンド
@@ -277,7 +287,7 @@ function! HowmHtmlTagConvert(list, htmlname, anchor)
   let brtag = s:Blogger ? '' : '<br />'
 
   " JpFormatの折り返しを元に戻す
-  if exists('g:JpFormatMarker') && g:JpFormatMarker != ''
+  if g:HowmHtml_JpJoinStr && exists('g:JpFormatMarker') && g:JpFormatMarker != ''
     let strlist = s:JpJoinStr(strlist, g:JpFormatMarker)
   endif
 
@@ -585,7 +595,7 @@ function! HowmHTML(type, ...)
   endif
 
   let sightname = g:HowmHtml_SightName
-  let description = file
+  let description = substitute(file, '\\', '/', 'g')
   if g:HowmHtml_Description != ''
     let description = g:HowmHtml_Description
   endif
@@ -610,6 +620,8 @@ function! HowmHTML(type, ...)
   call map(header, 'substitute(v:val, "%ENCODING%", fenc, "g")')
   call map(header, 'substitute(v:val, "%TITLE%", title, "g")')
   call map(header, 'substitute(v:val, "%VICUNA%", g:HowmHtml_Vicuna, "g")')
+  let bodyclass = g:HowmHtml_Vicuna == '' ? g:HowmHtml_BodyClass : g:HowmHtml_Vicuna
+  call map(header, 'substitute(v:val, "%BODYCLASS%", bodyclass, "g")')
   call map(header, 'substitute(v:val, "%CSSNAME%", cssname, "g")')
   call map(header, 'substitute(v:val, "%SIGHTNAME%", sightname, "g")')
   call map(header, 'substitute(v:val, "%DESCRIPTION%", description, "g")')
@@ -653,7 +665,7 @@ function! HowmHtmlConvert(list, htmlname)
     endif
     let title = substitute(d['title'], '^'.l:HowmHtml_Title, '', '')
     let pattern = '<a href="#t%s" title="t%s" name="t%s" id="t%s">%s</a>%s'
-    if g:HowmHtml_Vicuna != '' || bullet == ''
+    if g:HowmHtml_BodyClass != '' || g:HowmHtml_Vicuna != '' || bullet == ''
       let pattern = '<a href="#t%s" title="t%s" name="t%s" id="t%s">%s%s</a>'
       call add(s:entries, '<li><a href="#t'.anchor.'" title="t'.anchor.'">'.title.'</a></li>')
     endif
@@ -682,7 +694,7 @@ function! HowmHtmlConvert(list, htmlname)
     return html
   endif
 
-  if g:HowmHtml_Vicuna != ''
+  if g:HowmHtml_Vicuna != '' || g:HowmHtml_BodyClass != ''
     let topicPath = g:HowmHtml_TopicPath
     call map(topicPath, 'substitute(v:val, "%ROOT%", s:root, "")')
     call map(topicPath, 'substitute(v:val, "%BASEDIR%/\\?", s:basedir, "g")')
@@ -690,7 +702,7 @@ function! HowmHtmlConvert(list, htmlname)
     call extend(html, topicPath)
   endif
 
-  if g:HowmHtml_Vicuna != '' && g:HowmHtml_Vicuna !~ 'single'
+  if (g:HowmHtml_Vicuna != '' && g:HowmHtml_Vicuna !~ 'single') || (g:HowmHtml_BodyClass != '' && g:HowmHtml_BodyClass !~ 'single')
     call extend(html, s:VicunaUtil('multi'))
   endif
 
@@ -722,7 +734,7 @@ function! howm2html#Howm2html(output, ...)
   let htmldir  = g:HowmHtml_htmldir
   let htmlname = g:HowmHtml_DefaultName
   let glist = ['']
-  let file = fnamemodify(expand('%'), ':p')
+  let file = substitute(fnamemodify(expand('%'), ':p'), '\\', '/', 'g')
   let publish = ''
   let s:publish = publish
   let currentmode = 0
@@ -1380,14 +1392,15 @@ function! s:howmListtag(str, list)
   let str = a:str
   let idx = a:list
   let etag = {'-' : 'ul', '+' : "ol"}
+  " let lreg= '^\s*[-+]'
   let lreg= '^[-+]'
   let close = ''
 
   let h = matchstr(str, lreg)
-  let hstr = matchstr(str, '^'.h.'\+')
-  let i = len(hstr)
+  let h = matchstr(h, '[^[:space:]]\+')
+  let i = h == '' ? 0 : len(matchstr(str, h.'\+'))
   if h != ''
-    let str = substitute(str, '^'.h.'\+', '', '')
+    let str = substitute(str, lreg.'\+', '', '')
   endif
 
   let listtop = 1
@@ -1440,25 +1453,26 @@ function! s:howmTabletag(str, table)
   let str = a:str
   let table = a:table
   let close = ''
-  if str !~ '^|.*|$'
+  if (table == 0 && str !~ '^|[^|]') || (table && str !~ '^|[^|]\|^\t')
     if table == 1
       let table = 0
       let close = '</table>'
     endif
     return [close, str, table]
   endif
-  if str =~ '^|'
-    let str = substitute(str, '|', '||', 'g')
-    let str = substitute(str, '^|\||$', '', 'g')
-    let str = substitute(str, '|\*\([^|]*\)|', '<th>\1</th>', 'g')
-    let str = substitute(str, '|\([^|]*\)|', '<td>\1</td>', 'g')
-    if table == 0
-      let str = '<table><tr>' . str . '</tr>'
-      let table = 1
-    else
-      let str = '<tr>' . str . '</tr>'
-    endif
+  let str = substitute(str, '^\t', '<br />', 'g')
+  let str = substitute(str, '|', '||', 'g')
+  let str = substitute(str, '^|\||$', '', 'g')
+  let str = substitute(str, '^|', '<tr>|', 'g')
+  let str = substitute(str, '|$', '|</tr>', 'g')
+  let str = substitute(str, '|\s\+\*\([^|]*\)|', '<th>\1</th>', 'g')
+  let str = substitute(str, '|\([^|]*\)|', '<td>\1</td>', 'g')
+  let str = substitute(str, '</td>|', '</td><td>', '')
+  let str = substitute(str, '|</tr>', '</td></tr>', '')
+  if table == 0
+    let str = '<table>' . str
   endif
+  let table = 1
   return [close, str, table]
 endfunction
 
@@ -1634,12 +1648,12 @@ function! s:uri2tag(str, pathchr)
         let hfile = substitute(uri, 'howm://', relpath, '')
         let huri = fnamemodify(hfile, g:HowmHtml_suffix_mode).'.'.g:HowmHtml_suffix
         let huri = fnamemodify(hfile, ':h').'/'. huri
-        if filereadable(huri) || s:publish != ''
+        " if filereadable(huri) || s:publish != ''
           let uri = substitute(uri, 'howm:///\?', s:basedir, '')
           let uri = fnamemodify(uri, ':h').'/'. fnamemodify(huri, ':t')
-        else
-          let uri = suri
-        endif
+        " else
+        "   let uri = suri
+        " endif
       else
         let uri = suri
       endif
@@ -1842,7 +1856,7 @@ endif
 if !exists('HowmHtml_HttpBody')
   let HowmHtml_HttpBody = [
     \ '</head>',
-    \ '<body class="mainIndex %VICUNA%">',
+    \ '<body class="mainIndex %BODYCLASS%">',
     \ '<div id="header"><p class="siteName"><a href="%BASEDIR%" title="Toplink">%SIGHTNAME%</a></p><p class="description">%DESCRIPTION%</p></div>',
     \ '<div id="content"><div id="main">',
     \ '<h1>%TITLE%</h1>'

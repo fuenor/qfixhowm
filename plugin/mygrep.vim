@@ -136,12 +136,14 @@ if g:MyGrep_MenuBar
     let s:menu = 'QFixApp(&Q).QFixGrep(&G)'
   endif
   let s:MyGrep_Key = g:MyGrep_Key . g:MyGrep_KeyB
+  let s:MyGrep_Key = exists('g:qfixmemo_mapleader') ? g:qfixmemo_mapleader : s:MyGrep_Key
   let s:MyGrep_Key = escape(s:MyGrep_Key, '\\')
   call QFixGrepMenubar(s:menu, s:MyGrep_Key)
 endif
 
 if g:MyGrep_Keymap
   let s:MyGrep_Key = g:MyGrep_Key . g:MyGrep_KeyB
+  let s:MyGrep_Key = exists('g:qfixmemo_mapleader') ? g:qfixmemo_mapleader : s:MyGrep_Key
   exe 'silent! nnoremap <unique> <silent> '.s:MyGrep_Key.'b  :<C-u>call <SID>BGrep("", 0, 0)<CR>'
   exe 'silent! vnoremap <unique> <silent> '.s:MyGrep_Key.'b  :<C-u>call <SID>BGrep("", -1, 0)<CR>'
   exe 'silent! nnoremap <unique> <silent> '.s:MyGrep_Key.'e  :<C-u>call <SID>QFGrep("Grep")<CR>'

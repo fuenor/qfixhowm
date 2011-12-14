@@ -95,6 +95,9 @@ div#utilities a:hover {
 	color: #2091da;
 	text-decoration: underline;
 }
+div#footer {
+	max-width: none;
+}
 div#footer address {
 	color: #888;
 }

@@ -17,6 +17,7 @@ CONTENTS						*openuri-contents*
 5. オプション                                           |openuri-option|
   5.1 独自ブラウザ起動オプション                        |openuri-alt-option|
   5.2 QFixHowmブラウザ起動オプション                    |openuri-qfixhowm|
+  5.3 netrwブラウザ起動オプション                       |openuri-netrw|
 
 ==============================================================================
 1. Intro						*openuri-intro*
@@ -122,12 +123,12 @@ c:/temp/rel だとすると c:/temp/rel/puyo.txt として扱われます。
 | memo://   | openuri_memopath  |
 | rel://    | openuri_relpath   |
 
-NOTE: openuri_memopathを設定しないと memo://の変換にhowm_dir(qfixmemo_dir)が
-      デフォルトとして使用されます。
+NOTE: openuri_memopathを設定しない場合は memo://の変換にhowm_dir(qfixmemo_dir)
+がデフォルトとして使用されます。
 
-NOTE: ユーザー独自スキームも追加可能です。
-      たとえば user:// を追加したい場合は openuri#AddSchemeで追加してください。
-      :call openuri#AddScheme('user', "c:/temp/user")
+NOTE: ユーザー独自スキームも追加可能です。たとえば user:// を追加したい場合は
+openuri#AddSchemeで追加してください。
+  :call openuri#AddScheme('user', "c:/temp/user")
 
 ------------------------------------------------------------------------------
 5. オプション						*openuri-option*
@@ -138,15 +139,7 @@ Vimで開くファイルの拡張子とopenuriで開くブラウザをオプシ�
   " Vimで開く拡張子の正規表現
   let openuri_vimextreg = '\.\(txt\|mkd\|wiki\|rd\|vim\|js\|java\|py\|rb\|h\|c\|cpp\|ini\|conf\)$'
 
-デフォルトでは netrwを利用して openuri_vimextreg 以外のファイルを開きます。
->
-  " テキストリンクを開くブラウザ指定
-  let openuri_cmd = 'netrw'
-
-|netrw|はVimに標準添付されているブラウジングプラグインで|gx|コマンドの実体です。
-ブラウザや拡張子ごとの起動プログラム指定は|gx|を参照してください。
-
-5.1 独自ブラウザ起動オプション				*openuri-alt-option*
+5.1 ブラウザ起動オプション				*openuri-alt-option*
 
 テキストリンクをを開くブラウザ指定を独自に行うことも可能です。
 このオプションはnetrwが使えない場合と互換性保持のためにあるので基本的には
@@ -156,9 +149,9 @@ netrwを使用してください。
   if has('unix')
     let openuri_cmd = "call system('firefox %s &')"
   else
-    let openuri_cmd = '!start "rundll32.exe" url.dll,FileProtocolHandler %s'
+    " let openuri_cmd = '!start "rundll32.exe" url.dll,FileProtocolHandler %s'
     " Internet explorer
-    " let openuri_cmd = '!start "C:/Program Files/Internet Explorer/iexplore.exe" %s'
+    let openuri_cmd = '!start "C:/Program Files/Internet Explorer/iexplore.exe" %s'
     " firefox
     " let openuri_cmd = '!start "C:/Program Files/Mozilla Firefox/firefox.exe" %s'
   endif
@@ -188,13 +181,17 @@ netrwを使用してください。
 | openuri_cmd        | QFixHowm_OpenURIcmd    |
 | openuri_           | QFixHowm_Opencmd_      |
 
-このオプションは基本的に QFixHowm Ver.2 のためのものなので使用しないでください。
+5.3 netrwブラウザ起動オプション			*openuri-netrw*
 
-実際問題としてオプションは openuri_vimextreg 以外設定せずに使うのが一番便利かと
-思います。(netrwが処理してくれるはずなので)
+netrwを利用して openuri_vimextreg 以外のファイルを開きます。
 >
-  " Vimで開く拡張子の正規表現
-  let openuri_vimextreg = '\.\(txt\|mkd\|wiki\|rd\|vim\|js\|java\|py\|rb\|h\|c\|cpp\|ini\|conf\)$'
+  " テキストリンクを開くブラウザ指定
+  let openuri_cmd = 'netrw'
+
+|netrw|はVimに標準添付されているブラウジングプラグインで|gx|コマンドの実体です。
+ブラウザや拡張子ごとの起動プログラム指定は|gx|を参照してください。
+
+OSやnetrwのバージョンによって挙動が異なることがあります。
 
   vim:tw=78:ts=8:ft=qfix_memo.help:norl
 

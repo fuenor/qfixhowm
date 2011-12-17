@@ -1,7 +1,7 @@
 @charset "utf-8";
 
 body{
-	font:13px/1.231 meiryo,arial,helvetica,clean,sans-serif;
+	font:100% meiryo,arial,helvetica,clean,sans-serif;
 	color: #000000;
 	background-color: #d0d0d0;
 	background-image: url(images/bg_body.png);
@@ -20,8 +20,6 @@ div#header {
 	-webkit-border-radius: 10px;
 	background-image: url(images/header.png);
 }
-/*
-*/
 div#header p.description {
 	color: #a0a0a0;
 }
@@ -108,6 +106,7 @@ a.folding {
 p.topicPath {
 	text-align: center;
 }
+
 /* double */
 div#utilities dl {
 	padding-right:1em;
@@ -126,34 +125,6 @@ div#utilities dl.others dd, div#utilities dl.navi dd {
 	-webkit-border-radius: 6px;
 }
 
-/* multi */
-/*
-div#utilities dl.navi {
-	padding-top:1em;
-}
-div#utilities dl.navi dt {
-	margin-left: 1em;
-}
-div#utilities dl.navi dd {
-	margin-left: 1em;
-}
-div#utilities dl.others dt {
-	margin-top: 1em;
-}
-div#utilities dl.others dt {
-	margin-right: 1em;
-}
-div#utilities dl.others dd {
-	margin-right: 1em;
-}
-div#utilities dl.others dd, div#utilities dl.navi dd {
-	border-radius: 6px;
-	-moz-border-radius: 6px;
-	-webkit-border-radius: 6px;
-}
-*/
-
-/* イタリック体 */
 span.italic {
    font-style: italic;
 }

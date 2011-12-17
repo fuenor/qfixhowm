@@ -1,119 +1,72 @@
-@charset "utf-8";
+@charset "UTF-8";
 /*
- @import url(peachpuff.css);
- */
+@import url(peachpuff.css);
+*/
 
-body{
+body {
 	font:100% meiryo,arial,helvetica,clean,sans-serif;*font-size:small;*font:x-small;
 	line-height: 1.4em
-	background-color: #d0d0d0;
+	color: #222;
 	/*
 	 * background-image: url(images/bg_body.png);
 	 * background-repeat: repeat;
 	 */
 }
 
-div#main {
-	background-color: #fff;
-}
-div.entry {
-	background-color: #fff;
-}
-div.textBody {
-	background-color: #fff;
-}
-div#utilities {
-	background-color: #fff;
+/*========================================
+  Elements
+========================================*/
+
+/* Text
+---------------*/
+h1 {
+	margin: 0;
+	padding: 15px 30px;
+	border-top: 1px solid #eee;
+	border-bottom: 1px solid #eee;
+	line-height: 1.5;
+	font-size: 167%;
+	color: #333;
+	background-color: #f5f5f5;
 }
 
-p.siteName {
-	display: none !important;
-}
-p.description {
-	display: none !important;
+body.mainIndex h1 {
+	display: none;
 }
 
-div.section {
-	margin: 1em 2em;
-	padding-left:1.5em;
-	padding-right:1.5em;
-	border-style: solid;
-	border-width: thin;
-	border-color: #c0c0c0;
-	border-radius: 10px;
-	-moz-border-radius: 10px;
-	-webkit-border-radius: 10px;
-}
-
-select,input,button,textarea{
-	font:99% meiryo,arial,helvetica,clean,sans-serif;
-}
-table{
-	font-size:inherit;font:100%;
-}
-pre,code,kbd,samp,tt
-{
-	font-family:monospace; *font-size:108%; line-height:100%;
-}
-
-span.italic {
-   font-style: italic;
-}
-
-H1 {
-	display: none !important;
-}
-H2 {
+h2 {
 	margin: 1em 0;
 	font-size: 116%;
 }
-H3 {
+
+h3 {
 	margin-top: 2em;
 	padding-bottom: 0.4em;
 	border-bottom: 4px solid #eee;
 	font-size: 116%;
 }
-H4 {
-	border-width: thin;
-}
-H5 {
-	border-width: thin;
-}
-H6 {
+
+p {
+	margin: 1em 0;
 }
 
-table{
-	border:1px solid #000000;
-	border-collapse:collapse;
-	border-spacing:0;
-	empty-cells:show;
-}
-td{
-	border:1px solid #000000;
-	padding:0.3em 1em;
-}
-th{
-	border:1px solid #000000;
-	padding:0.3em 1em;
-	background-color: #f0f0f0;
-}
-
-dl {
-	padding: 0.5em 20px;
+blockquote {
+	margin: 1em 0 1em 20px;
+	padding: 8px 10px 5px 40px;
 	border: 1px solid #eee;
+	color: #95561b;
+	background-image: url(images/icon/quote.gif);
+	background-repeat: no-repeat;
+	background-position: 5px 5px;
+
 	border-radius: 6px;
 	-webkit-border-radius: 6px;
 	-moz-border-radius: 6px;
 }
-dt {
-	margin: 0.7em 0;
-	padding-bottom: 0.3em;
-	border-bottom: 1px dotted #ccc;
-	font-weight: bold;
-	color: #0066CC;
-}
-dd {
-	margin: 0.5em 0;
+
+blockquote  p {
+	margin-top: 0.5em;
+	margin-bottom: 0.5em;
 }
 
 pre {
@@ -125,31 +78,153 @@ pre {
 	overflow: auto;
 	width: 90%;
 	_width: 95%; /* for IE6 */
-	border-radius: 5px;
-	-webkit-border-radius: 5px;
-	-moz-border-radius: 5px;
 
+	border-radius: 6px;
+	-webkit-border-radius: 6px;
+	-moz-border-radius: 6px;
 }
 
-blockquote {
-	margin: 1em 0 1em 2em;
-	padding: 0 1em;
-	border: 1px solid #eee;
-	color: #95561b;
-	border-radius: 5px;
-	-webkit-border-radius: 5px;
-	-moz-border-radius: 5px;
+em {
+	font-weight: bold;
+	font-style: normal;
 }
 
-/* folding
+strong {
+	color: #FF3200;
+}
+
+/* List
 ---------------*/
-a.folding {
-	color: #2091da;
-	text-decoration: underline;
+
+ul,
+ol {
+	margin: 1em 30px;
+	padding: 0;
+	list-style-position: outside;
+}
+
+ul ul,ul ol,ul ol,ol ol {
+	margin: 0.3em 0 0.3em 15px;
+}
+
+/* Table
+---------------*/
+
+table {
+	margin: 1em 0;
+	border-width: 1px;
+	border-style: solid;
+	border-color: #ddd #ccc #ccc #ddd;
+	background-color: #fff;
+}
+
+caption {
+	padding-bottom: 0.3em;
+}
+
+th,
+td {
+	padding: 0.3em 10px;
+	border-collapse: separate;
+	border-spacing: 1px;
+}
+
+th {
+	border-right: 1px solid #ddd;
+	color: #333;
+	background-color: #f5f5f5;
+}
+
+td {
+	border-right: 1px solid #eee;
+	border-top: 1px solid #eee;
+}
+
+/* Others
+---------------*/
+
+hr {
+	margin: 1.5em 0;
+	border: none;
+	border-top: 1px dotted #ccc;
+}
+
+/*========================================
+
+  div#header
+
+========================================*/
+
+div#header {
+	padding: 1px 0;
+	background-color: #fff;
+}
+
+/* Website Title
+---------------*/
+
+div#header p.siteName {
+	margin: 25px 30px 10px;
+	line-height: 1;
+	font-size: 144%;
+	font-weight: bold;
+}
+
+div#header p.siteName a {
+	text-decoration: none;
+	color: #417698;
+}
+
+div#header p.siteName a:hover {
+	color: #000;
+}
+
+div#header p.description {
+	margin: 0 30px 25px;
+	font-size: 92%;
+}
+
+/*========================================
+
+  div#content
+
+========================================*/
+
+div#content {
+	padding-bottom: 1px;
+	border-top: 1px solid #eee;
+	background-color: #fff;
+}
+
+p.topicPath {
+	margin: 0 30px 10px;
+	padding-top: 8px;
+	line-height: 1.6;
+}
+
+/*=========================
+ > div#main
+=========================*/
+
+/* > div.entry
+---------------*/
+
+div.entry {
+	margin: 1em 30px;
+	padding: 1px 0;
+	_height: 1px; /* for IE6 */
+	*min-height: 1px; /* for IE7 */
+}
+
+/* body.archives */
+
+body.archives div.entry {
+	margin-top: 0;
 }
 
 /* Entry Title
 ---------------*/
+
 div.entry h2 {
 	margin-bottom: 0;
 	padding: 0.2em 13px 0.4em;
@@ -179,16 +254,16 @@ div.entry h2 a:hover {
 
 div.entry ul.info {
 	margin: 0 0 1em 0;
-	padding: 0 0;
+	padding: 0.3em 0;
 	border-left: 5px solid #ccc;
-	border-bottom: 1px solid #ddd;
+	border-bottom: 1px solid #eee;
 	list-style-type: none;
 	background-color: #f5f5f5;
 }
 
 div.entry ul.info li {
 	margin: 0.3em 0;
-	padding: 0 1em;
+	padding: 0 15px;
 	border-right: 1px solid #ddd;
 	color: #444;
 	float: left;
@@ -199,7 +274,184 @@ div.entry ul.info li a {
 	text-decoration: none;
 }
 
-div.entry ul.info:after {
+/* Text Style
+---------------*/
+
+div.textBody p {
+	line-height: 1.7;
+}
+
+div.textBody h2 {
+	margin-top: 2em;
+}
+
+div.textBody dl {
+	padding: 0.5em 20px;
+	border: 1px solid #eee;
+
+	border-radius: 6px;
+	-webkit-border-radius: 6px;
+	-moz-border-radius: 6px;
+}
+
+div.textBody dt {
+	margin: 0.7em 0;
+	padding-bottom: 0.3em;
+	border-bottom: 1px dotted #ccc;
+	font-weight: bold;
+	color: #0066CC;
+}
+
+div.textBody dd {
+	margin: 0.5em 0;
+}
+
+/*=========================
+  div#utilities
+=========================*/
+
+div#utilities p {
+	margin: 0.2em 10px;
+}
+
+div#utilities dl {
+	margin: 5px 0;
+	padding-bottom: 5px;
+}
+
+div#utilities dl dt {
+	margin: 5px 5px;
+	padding: 0.4em 13px;
+	color: #fff;
+	background-color: #777;
+	letter-spacing: 1px;
+}
+
+div#utilities dl.others dt {
+	background-color: #aaa;
+}
+
+div#utilities dl dd {
+	margin: 0 5px;
+	padding: 1px 0;
+	background-color: #f5f5f5;
+}
+
+div#utilities dl dd ul {
+	margin: 5px 10px 5px 25px;
+}
+
+div#utilities dl dd ul li {
+	margin: 0.5em 0;
+}
+
+div#utilities dl dd ul li a {
+	text-decoration: none;
+}
+
+/*========================================
+
+  div#footer
+
+========================================*/
+
+div#footer {
+	padding: 1px 0 1em;
+}
+
+div#footer a {
+	color: #aaa;
+	text-decoration: none;
+}
+
+div#footer a:hover {
+	color: #fff;
+}
+
+div#footer ul {
+	margin: 0.7em 0;
+	text-align: right;
+	color: #ddd;
+	font-size: 85%;
+}
+
+div#footer ul li {
+	margin-left: 5px;
+	display: inline;
+}
+
+div#footer address {
+	text-align: right;
+	font-style: normal;
+	color: #eee;
+}
+
+/*========================================
+
+  Class
+
+========================================*/
+
+/* Headline
+---------------*/
+
+dl.headline {
+	margin: 0.5em 0;
+}
+
+dl.headline dt span.date {
+	font-size: 85%;
+}
+
+dl.headline dd {
+	margin: 0.5em 0 1.2em;
+	padding-bottom: 1.2em;
+	border-bottom: 3px solid #eee;
+}
+
+dl.headline dd ul {
+	margin: 0;
+	list-style-type: none;
+}
+
+dl.headline dd ul li {
+	margin: 0.3em 5px 0.3em 0;
+	display: inline;
+	font-size: 92%;
+}
+
+dl.headline dd ul li.textBody {
+	display: block;
+	font-size: 100%;
+}
+
+/* Option
+---------------*/
+
+.option {
+	margin: 1em 30px;
+	padding: 1px 10px;
+	border: 1px solid #eee;
+}
+
+/* Clearfix
+---------------*/
+
+div#content,
+div.entry ul.info,
+div.entry div.textBody {
+	_height: 1px;
+	min-height: 1px;
+	/*\*//*/
+	height: 1px;
+	overflow: hidden;
+	/**/
+}
+
+div#content:after,
+div.entry ul.info:after,
+div.entry div.textBody:after,
+div.entry ul.reaction:after {
 	height: 0;
 	visibility: hidden;
 	content: ".";
@@ -207,74 +459,86 @@ div.entry ul.info:after {
 	clear: both;
 }
 
-/* footer
+.clear {
+	display: block;
+	clear: both;
+}
+
+/* IE6 - ãªã«ãŒã‚ã£ã¦ã‚‚ã‚«ãƒ©ãƒ è½ã¡ã‚’é˜²ã
 ---------------*/
-div#footer {
-	/* clear: both; */
-	width: 95%;
-	margin: 0 auto;
-	position: relative;
-	text-align: right;
-}
-div#footer address {
-	color: #888;
+
+div#main,
+div#utilities dl.navi,
+div#utilities dl.others {
+	_overflow: hidden;
 }
 
-p.topicPath {
-	position: relative;
-	text-align: center;
-}
 
 /*========================================
-
-	Double Column Layout - Sidebar on right
-
-	<body class="double">
-
-	„¬„ª„ª„ª„­„¬„­
-	„«„ª„ª„ª„«„«„«
-	„¯„ª„ª„ª„®„¯„®
-
-========================================*/
-body.double div#main {
-	width: 75%;
-	float: left;
-	margin-right: -1px;
-	border-right: 1px solid #eee;
-	border-bottom: 1px solid #eee;
+ * radius
+ */
+div.textBody p, div.textBody li {
+	line-height: 1.5;
+	letter-spacing: 1px;
 }
-
-body.double div#utilities {
-	width: 25%;
+div#header {
+	margin-bottom: 1em;
+	background-color: #f0f0f0;
+	border-radius: 10px;
+	-moz-border-radius: 10px;
+	-webkit-border-radius: 10px;
 }
-
-/*========================================
-
-	Double Column Layout - Sidebar on left
-
-	<body class="double-l">
-
-	„¬„­„¬„ª„ª„ª„­
-	„«„«„«„ª„ª„ª„«
-	„¯„®„¯„ª„ª„ª„®
-
-========================================*/
-body.double-l div#main {
-	width: 75%;
-	float: right;
-	margin-left: -1px;
-	border-left: 1px solid #eee;
-	border-bottom: 1px solid #eee;
+div#header {
+	border-radius: 10px;
+	-moz-border-radius: 10px;
+	-webkit-border-radius: 10px;
 }
-
-body.double-l div#utilities {
-	width: 25%;
+div#header p.description {
+	color: #a0a0a0;
 }
-
-/*=========================
-  div#utilities
-=========================*/
-
+div#header p.siteName a {
+	text-decoration: none;
+	color: #000;
+}
+div#header p.siteName a:hover {
+	color: #417698;
+}
+div#content {
+	border-radius: 10px;
+	-moz-border-radius: 10px;
+	-webkit-border-radius: 10px;
+}
+div.section {
+	border-style: solid;
+	border-width: thin;
+	border-color: #c0c0c0;
+	border-radius: 10px;
+	-moz-border-radius: 10px;
+	-webkit-border-radius: 10px;
+}
+div.entry h2 {
+	background-color: #f5f5f5;
+}
+div.entry ul.info {
+	background-color: #ffffff;
+	padding: 0 0;
+}
+H3 {
+	border-color: #606060;
+	border-bottom-style: dotted;
+	border-width: thin;
+}
+H4 {
+	border-color: #606060;
+}
+H5 {
+	border-color: #606060;
+}
+H6 {
+}
+th, td {
+	text-align: left;
+}
 div#utilities ul {
 	text-decoration: none;
 }
@@ -299,6 +563,21 @@ div#utilities a:hover {
 	color: #2091da;
 	text-decoration: underline;
 }
+div#footer {
+	max-width: none;
+}
+div#footer address {
+	color: #888;
+}
+a.folding {
+	color: #e040c0;
+	text-decoration: underline;
+}
+p.topicPath {
+	text-align: center;
+}
+
+/* double */
 div#utilities dl {
 	padding-right:1em;
 	padding-left:1em;
@@ -316,22 +595,72 @@ div#utilities dl.others dd, div#utilities dl.navi dd {
 	-webkit-border-radius: 6px;
 }
 
-div#utilities dl dt {
-	padding: 0.4em 13px;
-	color: #fff;
-	background-color: #777;
-	letter-spacing: 1px;
+span.italic {
+   font-style: italic;
+}
+/*========================================
+ * section
+ */
+div.section {
+	margin: 1em;
+	padding-left:1.5em;
+	padding-right:1.5em;
 }
 
-div#utilities dl.others dt {
-	background-color: #aaa;
+p.siteName {
+	display: none !important;
+}
+p.description {
+	display: none !important;
 }
 
-div#utilities dl dd {
-	background-color: #f5f5f5;
+/*========================================
+	Double Column Layout - Sidebar on right
+	<body class="double">
+	â”â”â”â”â”“â”â”“
+	â”ƒâ”â”â”â”ƒâ”ƒâ”ƒ
+	â”—â”â”â”â”›â”—â”›
+========================================*/
+
+body.double div#main {
+	width: 75%;
+	float: left;
+	margin-right: -1px;
+	border-right: 1px solid #eee;
+	border-bottom: 1px solid #eee;
 }
 
-div#utilities dl dt dd ul li a {
-	text-decoration: none;
+/* Utilities
+---------------*/
+
+body.double div#utilities {
+	width: 25%;
+	float: left;
+	clear: right;
+}
+
+/*========================================
+	Double Column Layout - Sidebar on left
+	<body class="double-l">
+	â”â”“â”â”â”â”â”“
+	â”ƒâ”ƒâ”ƒâ”â”â”â”ƒ
+	â”—â”›â”—â”â”â”â”›
+========================================*/
+
+body.double-l div#main {
+	width: 75%;
+	float: right;
+	margin-left: -1px;
+	border-left: 1px solid #eee;
+	border-bottom: 1px solid #eee;
+}
+
+/* Utilities
+---------------*/
+
+body.double-l div#utilities {
+	width: 25%;
+	float: right;
+	clear: left;
 }
 

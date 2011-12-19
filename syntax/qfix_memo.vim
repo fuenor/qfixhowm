@@ -29,10 +29,10 @@ hi def link txtList       Constant
 hi def link txtListBullet Statement
 hi def link txtListColon  Label
 
-" | *テーブル | 項目 |  (セル内で'*'を使うとタイトル)
-syn match txtTable +^\s*|\(.\{-}|\)\++ contains=txtTableHeader,txtTableSeparator,txtUrl,txtFile
-syn match txtTableHeader    contained +\s\+\*[^|]\++
+" |*テーブル | 項目 |  (セル内で'*'を使うとタイトル)
+syn match txtTable +^\s*|.*|$+ contains=txtTableSeparator,txtTableHeader,txtUrl,txtFile
 syn match txtTableSeparator contained +|+
+syn match txtTableHeader contained '|\s*\*' contains=txtTableSeparator
 
 hi def link txtTableHeader    Title
 hi def link txtTableSeparator Statement

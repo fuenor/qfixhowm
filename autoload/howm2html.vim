@@ -4,7 +4,7 @@
 "     Maintainer: fuenor@gmail.com
 "                 http://dl.dropbox.com/u/1736409/howm/howm2html.html
 "=============================================================================
-let s:version  = '1.28'
+let s:version  = '1.29'
 scriptencoding utf-8
 
 if exists('g:disable_Howm2html') && g:disable_Howm2html == 1
@@ -1465,7 +1465,7 @@ function! s:howmTabletag(str, table)
   let str = substitute(str, '^|\||$', '', 'g')
   let str = substitute(str, '^|', '<tr>|', 'g')
   let str = substitute(str, '|$', '|</tr>', 'g')
-  let str = substitute(str, '|\s\+\*\([^|]*\)|', '<th>\1</th>', 'g')
+  let str = substitute(str, '|\s*\*\([^|]*\)|', '<th>\1</th>', 'g')
   let str = substitute(str, '|\([^|]*\)|', '<td>\1</td>', 'g')
   let str = substitute(str, '</td>|', '</td><td>', '')
   let str = substitute(str, '|</tr>', '</td></tr>', '')

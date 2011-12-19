@@ -2047,6 +2047,7 @@ function! s:OpenQFixSubWin(file, id)
     let wincmd = wincmd . (windir =~ 'vert' ? '' : ' vertical')
     call QFixMemoCalendar(wincmd, '__Cal__', 1, 'parent'. (keepsize ? '' : 'resize'))
   endif
+  exe 'setlocal statusline=\ '.fnamemodify(file, ':t')
   if exists('*QFixMemoSubMenuBufWinEnter')
     call QFixMemoSubMenuBufWinEnter()
   endif

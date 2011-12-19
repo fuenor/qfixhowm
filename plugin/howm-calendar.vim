@@ -366,9 +366,12 @@ function! s:CR(...)
     let b:month += key =~ '>' ? 1 : -1
     call s:build()
     call s:winfixheight(b:calendar_height)
-    call search(key, 'c')
-    if key =~ '<<\|>>'
-      call setpos('.', save_cursor)
+    let pl = line('.') - search(key, 'cnb')
+    let nl = line('.') - search(key, 'cn')
+    if abs(pl) <= abs(nl)
+      call search(key, 'cb')
+    else
+      call search(key, 'c')
     endif
   elseif key =~ '^\d\+$'
     " 特殊バッファしかない
@@ -393,8 +396,7 @@ function! s:CR(...)
     if expand('<cWORD>') =~ '\.'
       " call s:CR('today')
     else
-      call cursor(1, 1)
-      call search('\.', 'c')
+      call search('\.', 'cb')
     endif
   elseif key =~ '[./]\|\(^[A-Z][a-z]\{2}$\)\|\ctoday'
     let str = expand('<cWORD>') =~ '\*' ? '\.' : '\*'
@@ -453,10 +455,21 @@ endfunction
 
 if !exists('*CalendarInfo')
 function CalendarInfo()
+  if getline('.') =~ '< \. >'
+    if expand('<cWORD>') == '<'
+      return [' Prev Month']
+    elseif expand('<cWORD>') == '.'
+      return [' Today']
+    elseif expand('<cWORD>') == '>'
+      return [' Next Month']
+    endif
+    return []
+  endif
   let save_cursor = getpos('.')
   call cursor(line('.'), col('$'))
   let [lnum, col] = searchpos('\d\{4}/\d\{2}', 'ncbW')
   call setpos('.', save_cursor)
+
   let lnum = lnum == 0 ? 1 : lnum
   let str = getline(lnum)
   let year  = matchstr(str, '\d\{4}')

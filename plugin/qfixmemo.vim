@@ -169,11 +169,17 @@ silent! function QFixMemoMenubar(menu, leader)
     call s:addMenu(menucmd, 'Rebuild-Schedule(&V)', 'ry', ':<C-u>call qfixmemo#ListReminderCache("schedule")<CR>')
     call s:addMenu(menucmd, 'Rebuild-Todo(&W)'    , 'rt', ':<C-u>call qfixmemo#ListReminderCache("todo")<CR>')
   endif
+  let submenu = '.HTML\ (&P)'
+  let menucmd = 'amenu <silent> 41.335 '.a:menu.submenu.'.%s<Tab>'.leader.'%s %s'
   if g:qfixmemo_use_howm2html
-  exe printf(sepcmd, 5)
-    call s:addMenu(menucmd, 'HTML(temp)(&P)'      , 'hi', ':Howm2html!<CR>')
-    call s:addMenu(menucmd, 'HTML(static)(&P)'    , 'hI', ':Howm2html % <CR>')
+    exe printf(sepcmd, 5)
+    call s:addMenu(menucmd, 'HTML(&I)'                 , 'hi', ':Howm2html!<CR>')
+    call s:addMenu(menucmd, 'Rebuild-HTML(&R)'         , 'hr', ':Howm2html % <CR>')
+    call s:addMenu(menucmd, 'HTML(static)(&I)'         , 'hI', ':Howm2html! % <CR>')
+    call s:addMenu(menucmd, 'Rebuild-HTML(static)(&R)' , 'hR', ':Howm2html % <CR>')
   endif
+  let sepcmd  = 'amenu <silent> 41.336 '.a:menu.'.-sep%d-			<Nop>'
+  let menucmd = 'amenu <silent> 41.336 '.a:menu.'.%s<Tab>'.leader.'%s %s'
   exe printf(sepcmd, 6)
   call s:addMenu(menucmd, 'RandomWalk(&R)'        , 'rr', ':<C-u>call qfixmemo#RandomWalk(g:qfixmemo_random_file)<CR>')
   call s:addMenu(menucmd, 'Rebuild-RandomWalk(&X)', 'rR', ':<C-u>call qfixmemo#RebuildRandomCache(g:qfixmemo_random_file)<CR>')
@@ -188,8 +194,8 @@ silent! function QFixMemoMenubar(menu, leader)
   endif
   exe printf(sepcmd, 10)
   let submenu = '.Buffer[Local]\ (&B)'
-  let sepcmd  = 'amenu <silent> 41.335 '.a:menu.submenu.'.-sep%d-			<Nop>'
-  let menucmd = 'amenu <silent> 41.335 '.a:menu.submenu.'.%s<Tab>'.leader.'%s %s'
+  let sepcmd  = 'amenu <silent> 41.337 '.a:menu.submenu.'.-sep%d-			<Nop>'
+  let menucmd = 'amenu <silent> 41.337 '.a:menu.submenu.'.%s<Tab>'.leader.'%s %s'
   exe printf(sepcmd, 1)
   call s:addMenu(menucmd, 'Outline(&O)', 'o',  ':<C-u>call QFixMemoOutline()<CR>')
   exe printf(sepcmd, 2)

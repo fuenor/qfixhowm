@@ -3,14 +3,73 @@
 @import url(peachpuff.css);
 */
 
+/*
+ * let HowmHtml_cssname = '%BASEDIR%/howm2html.css'
+ */
+
 body {
 	font:100% meiryo,arial,helvetica,clean,sans-serif;*font-size:small;*font:x-small;
 	line-height: 1.4em
 	color: #222;
 	/*
-	 * background-image: url(images/bg_body.png);
-	 * background-repeat: repeat;
-	 */
+	background-image: url(images/bg_body.png);
+	background-repeat: repeat;
+	*/
+}
+
+p.siteName {
+	display: none !important;
+}
+p.description {
+	display: none !important;
+}
+
+/*========================================
+	let HowmHtml_BodyClass = 'double'
+	┏━━━┓┏┓
+	┃━━━┃┃┃
+	┗━━━┛┗┛
+========================================*/
+
+body.double div#main {
+	width: 75%;
+	float: left;
+	margin-right: -1px;
+	border-right: 1px solid #eee;
+	border-bottom: 1px solid #eee;
+}
+
+/* Utilities
+---------------*/
+
+body.double div#utilities {
+	width: 25%;
+	float: left;
+	clear: right;
+}
+
+/*========================================
+	let HowmHtml_BodyClass = 'double-l'
+	┏┓┏━━━┓
+	┃┃┃━━━┃
+	┗┛┗━━━┛
+========================================*/
+
+body.double-l div#main {
+	width: 75%;
+	float: right;
+	margin-left: -1px;
+	border-left: 1px solid #eee;
+	border-bottom: 1px solid #eee;
+}
+
+/* Utilities
+---------------*/
+
+body.double-l div#utilities {
+	width: 25%;
+	float: right;
+	clear: left;
 }
 
 /*========================================
@@ -55,13 +114,6 @@ blockquote {
 	padding: 8px 10px 5px 40px;
 	border: 1px solid #eee;
 	color: #95561b;
-	background-image: url(images/icon/quote.gif);
-	background-repeat: no-repeat;
-	background-position: 5px 5px;
-
-	border-radius: 6px;
-	-webkit-border-radius: 6px;
-	-moz-border-radius: 6px;
 }
 
 blockquote  p {
@@ -78,19 +130,6 @@ pre {
 	overflow: auto;
 	width: 90%;
 	_width: 95%; /* for IE6 */
-
-	border-radius: 6px;
-	-webkit-border-radius: 6px;
-	-moz-border-radius: 6px;
-}
-
-em {
-	font-weight: bold;
-	font-style: normal;
-}
-
-strong {
-	color: #FF3200;
 }
 
 /* List
@@ -150,9 +189,7 @@ hr {
 }
 
 /*========================================
-
   div#header
-
 ========================================*/
 
 div#header {
@@ -185,9 +222,7 @@ div#header p.description {
 }
 
 /*========================================
-
   div#content
-
 ========================================*/
 
 div#content {
@@ -200,10 +235,11 @@ p.topicPath {
 	margin: 0 30px 10px;
 	padding-top: 8px;
 	line-height: 1.6;
+	text-align: center;
 }
 
 /*=========================
- > div#main
+   div#main
 =========================*/
 
 /* > div.entry
@@ -288,10 +324,6 @@ div.textBody h2 {
 div.textBody dl {
 	padding: 0.5em 20px;
 	border: 1px solid #eee;
-
-	border-radius: 6px;
-	-webkit-border-radius: 6px;
-	-moz-border-radius: 6px;
 }
 
 div.textBody dt {
@@ -304,6 +336,11 @@ div.textBody dt {
 
 div.textBody dd {
 	margin: 0.5em 0;
+}
+
+a.folding {
+	color: #e040c0;
+	text-decoration: underline;
 }
 
 /*=========================
@@ -350,9 +387,7 @@ div#utilities dl dd ul li a {
 }
 
 /*========================================
-
   div#footer
-
 ========================================*/
 
 div#footer {
@@ -387,9 +422,7 @@ div#footer address {
 }
 
 /*========================================
-
   Class
-
 ========================================*/
 
 /* Headline
@@ -473,14 +506,10 @@ div#utilities dl.others {
 	_overflow: hidden;
 }
 
-
 /*========================================
- * radius
+ * Decoration
  */
-div.textBody p, div.textBody li {
-	line-height: 1.5;
-	letter-spacing: 1px;
-}
+
 div#header {
 	margin-bottom: 1em;
 	background-color: #f0f0f0;
@@ -508,6 +537,13 @@ div#content {
 	-moz-border-radius: 10px;
 	-webkit-border-radius: 10px;
 }
+
+div.section {
+	margin: 1em;
+	padding-left:1.5em;
+	padding-right:1.5em;
+}
+
 div.section {
 	border-style: solid;
 	border-width: thin;
@@ -516,9 +552,11 @@ div.section {
 	-moz-border-radius: 10px;
 	-webkit-border-radius: 10px;
 }
+
 div.entry h2 {
 	background-color: #f5f5f5;
 }
+
 div.entry ul.info {
 	background-color: #ffffff;
 	padding: 0 0;
@@ -536,9 +574,33 @@ H5 {
 }
 H6 {
 }
+
+div.textBody p, div.textBody li {
+	line-height: 1.5;
+	letter-spacing: 1px;
+}
+
+blockquote {
+	/*
+	background-image: url(images/icon/quote.gif);
+	background-repeat: no-repeat;
+	background-position: 5px 5px;
+	 */
+	border-radius: 6px;
+	-webkit-border-radius: 6px;
+	-moz-border-radius: 6px;
+}
+
+pre {
+	border-radius: 6px;
+	-webkit-border-radius: 6px;
+	-moz-border-radius: 6px;
+}
+
 th, td {
 	text-align: left;
 }
+
 div#utilities ul {
 	text-decoration: none;
 }
@@ -569,15 +631,6 @@ div#footer {
 div#footer address {
 	color: #888;
 }
-a.folding {
-	color: #e040c0;
-	text-decoration: underline;
-}
-p.topicPath {
-	text-align: center;
-}
-
-/* double */
 div#utilities dl {
 	padding-right:1em;
 	padding-left:1em;
@@ -597,70 +650,5 @@ div#utilities dl.others dd, div#utilities dl.navi dd {
 
 span.italic {
    font-style: italic;
-}
-/*========================================
- * section
- */
-div.section {
-	margin: 1em;
-	padding-left:1.5em;
-	padding-right:1.5em;
-}
-
-p.siteName {
-	display: none !important;
-}
-p.description {
-	display: none !important;
-}
-
-/*========================================
-	Double Column Layout - Sidebar on right
-	<body class="double">
-	┏━━━┓┏┓
-	┃━━━┃┃┃
-	┗━━━┛┗┛
-========================================*/
-
-body.double div#main {
-	width: 75%;
-	float: left;
-	margin-right: -1px;
-	border-right: 1px solid #eee;
-	border-bottom: 1px solid #eee;
-}
-
-/* Utilities
----------------*/
-
-body.double div#utilities {
-	width: 25%;
-	float: left;
-	clear: right;
-}
-
-/*========================================
-	Double Column Layout - Sidebar on left
-	<body class="double-l">
-	┏┓┏━━━┓
-	┃┃┃━━━┃
-	┗┛┗━━━┛
-========================================*/
-
-body.double-l div#main {
-	width: 75%;
-	float: right;
-	margin-left: -1px;
-	border-left: 1px solid #eee;
-	border-bottom: 1px solid #eee;
-}
-
-/* Utilities
----------------*/
-
-body.double-l div#utilities {
-	width: 25%;
-	float: right;
-	clear: left;
 }
 

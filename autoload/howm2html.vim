@@ -325,27 +325,29 @@ function! HowmHtmlTagConvert(list, htmlname, anchor)
 
     let prevstr = str
     if g:HowmHtml_ConvertLevel > 1
-      " <ul><ol> リスト (行頭の-+)
-      let [close, str, list]  = s:howmListtag(str, list)
-      if close != ''
-        call add(html, close)
-      endif
-      " <table> テーブル (|で区切る)
-      let [close, str, table] = s:howmTabletag(str, table)
-      if close != ''
-        call add(html, close)
-      endif
-      " <dl> 定義リスト (:で区切る)
-      let [close, str, define] = s:howmDeftag(str, define)
-      if close != ''
-        call add(html, close)
-      endif
-      if str =~ '^===='
-        " 続きを読む
-        let [str, folding] = s:howmFolding(str, folding, a:anchor)
-      elseif str =~ '^[.*=]'
-        " <h3>～<h6> .*= のアウトライン
-        let [str, header, jump] = s:howmOutline(str, a:htmlname, a:anchor, header, jump)
+      if prequote == 0
+        " <ul><ol> リスト (行頭の-+)
+        let [close, str, list]  = s:howmListtag(str, list)
+        if close != ''
+          call add(html, close)
+        endif
+        " <table> テーブル (|で区切る)
+        let [close, str, table] = s:howmTabletag(str, table)
+        if close != ''
+          call add(html, close)
+        endif
+        " <dl> 定義リスト (:で区切る)
+        let [close, str, define] = s:howmDeftag(str, define)
+        if close != ''
+          call add(html, close)
+        endif
+        if str =~ '^===='
+          " 続きを読む
+          let [str, folding] = s:howmFolding(str, folding, a:anchor)
+        elseif str =~ '^[.*=]'
+          " <h3>～<h6> .*= のアウトライン
+          let [str, header, jump] = s:howmOutline(str, a:htmlname, a:anchor, header, jump)
+        endif
       endif
     endif
 
@@ -1453,15 +1455,18 @@ function! s:howmTabletag(str, table)
   let str = a:str
   let table = a:table
   let close = ''
-  if (table == 0 && str !~ '^|[^|]') || (table && str !~ '^|[^|]\|^\t')
+  if (table == 0 && str !~ '^|') || (table && (str !~ '^|\|^\t'))
     if table == 1
       let table = 0
       let close = '</table>'
     endif
     return [close, str, table]
   endif
-  let str = substitute(str, '^\t', '<br />', 'g')
   let str = substitute(str, '|', '||', 'g')
+  if str =~ '^\t'
+    let str = substitute(str, '|', '</td>', '')
+    let str = substitute(str, '^\t', '<br />', '')
+  endif
   let str = substitute(str, '^|\||$', '', 'g')
   let str = substitute(str, '^|', '<tr>|', 'g')
   let str = substitute(str, '|$', '|</tr>', 'g')
@@ -1469,6 +1474,7 @@ function! s:howmTabletag(str, table)
   let str = substitute(str, '|\([^|]*\)|', '<td>\1</td>', 'g')
   let str = substitute(str, '</td>|', '</td><td>', '')
   let str = substitute(str, '|</tr>', '</td></tr>', '')
+  let str = substitute(str, '|', '<td>', '')
   if table == 0
     let str = '<table>' . str
   endif

@@ -73,7 +73,8 @@ body.double-l div#utilities {
 }
 
 /*========================================
-  Elements
+  #Elements#
+  ここから #Decoration#までは基本的な装飾
 ========================================*/
 
 /* Text
@@ -507,7 +508,8 @@ div#utilities dl.others {
 }
 
 /*========================================
- * Decoration
+ #Decoration#
+ ここからは単なる装飾
  */
 
 div#header {

@@ -179,6 +179,11 @@ function! s:cursorline()
     endif
     if str != '' && col < (colf + len(str))
       if str =~ '^\[:\?'
+        if str =~ '^\[:\?.*:vim\]$'
+          let str = substitute(str, '^\[:\?\|:vim\]$', '', 'g')
+          exe g:openuri_edit.'edit '. escape(str, '%#')
+          return 1
+        endif
         if g:openuri_remove_hatenatag
           let str = substitute(str, ':\(title=\|image[:=]\)\([^\]]*\)\?]$', ':]', '')
         endif

@@ -10,6 +10,7 @@
 .Identifier { color: #008080; }
 .Ignore { color: #ffdab9; }
 .LineNr { color: #cd0000; }
+.lnr { color: #cd0000; }
 .NonText { color: #0000ff; font-weight: bold; }
 .Normal { color: #000000; }
 .PreProc { color: #cd00cd; }

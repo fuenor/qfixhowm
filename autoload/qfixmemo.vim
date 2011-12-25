@@ -1786,10 +1786,13 @@ endfunction
 if !exists('g:qfixmemo_grep_title')
   let g:qfixmemo_grep_title = 'QFixMemo %MODE%Grep : '
 endif
+if !exists('g:qfixmemo_grep_sort')
+  let g:qfixmemo_grep_sort = 'mtime'
+endif
 
 function! s:grep(pattern, file, fixmode)
   let g:MyGrep_Regexp = !a:fixmode
-  let qflist = qfixlist#grep(a:pattern, g:qfixmemo_dir, '**/'.a:file, g:qfixmemo_fileencoding)
+  let qflist = qfixlist#search(a:pattern, g:qfixmemo_dir, g:qfixmemo_grep_sort, 0, g:qfixmemo_fileencoding, '**/'.a:file)
   call qfixlist#copen(qflist, g:qfixmemo_dir)
 endfunction
 
@@ -2589,23 +2592,33 @@ function! qfixmemo#OpenKeywordLink()
   let col = col('.')
   let lstr = getline('.')
 
+  let word = ''
+  if exists('g:howm_clink_pattern') && g:howm_clink_pattern != ''
+    let idx = match(lstr, g:howm_clink_pattern)
+    if idx > -1 && idx <= col
+      let word = matchstr(lstr, g:howm_clink_pattern . '.*')
+      let word = substitute(word, g:howm_clink_pattern . '\s*\|\s*$', '', 'g')
+    endif
+  endif
   if exists('g:howm_glink_pattern') && g:howm_glink_pattern != ''
     let idx = match(lstr, g:howm_glink_pattern)
     if idx > -1 && idx <= col
       let word = matchstr(lstr, g:howm_glink_pattern . '.*')
-      let word = substitute(word, g:howm_glink_pattern . '\s*', '', '')
-      let g:MyGrep_Regexp = 0
-      let qflist = qfixlist#search(word, g:qfixmemo_dir, '', 0, g:qfixmemo_fileencoding, '**/*')
-      if exists('g:howm_clink_pattern') && g:howm_clink_pattern != ''
-        let qflist = sort(qflist, "<SID>qfixmemoSortHowmClink")
-      endif
-      if len(qflist)
-        call qfixlist#copen(qflist, g:qfixmemo_dir)
-      else
-        redraw|echo 'QFixMemo : keyword not found. (use "'.escape(g:qfixmemo_mapleader, '\\').'rk" : Rebuild keyword)'
-      endif
-      return 1
+      let word = substitute(word, g:howm_glink_pattern . '\s*\|\s*$', '', 'g')
     endif
+  endif
+  if word != ''
+    let g:MyGrep_Regexp = 0
+    let qflist = qfixlist#search(word, g:qfixmemo_dir, '', 0, g:qfixmemo_fileencoding, '**/*')
+    if exists('g:howm_clink_pattern') && g:howm_clink_pattern != ''
+      let qflist = sort(qflist, "<SID>qfixmemoSortHowmClink")
+    endif
+    if len(qflist)
+      call qfixlist#copen(qflist, g:qfixmemo_dir)
+    else
+      redraw|echo 'QFixMemo : keyword not found. (use "'.escape(g:qfixmemo_mapleader, '\\').'rk" : Rebuild keyword)'
+    endif
+    return 1
   endif
 
   for word in s:KeywordDic

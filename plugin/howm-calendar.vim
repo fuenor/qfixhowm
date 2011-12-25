@@ -218,6 +218,7 @@ endif
 if !exists('g:qfixtempname')
   let g:qfixtempname = tempname()
 endif
+
 function! QFixMemoCalendar(dircmd, file, cnt, ...)
   let file = fnamemodify(g:qfixtempname, ':p:h') .'/'. a:file
   let winnr = bufwinnr(file)
@@ -251,7 +252,6 @@ function! QFixMemoCalendar(dircmd, file, cnt, ...)
   if !exists('b:calendar_width')
     let b:calendar_width = winsize
     let b:submenu_calendar_lmargin = g:submenu_calendar_lmargin
-    let b:submenu_calendar_lmargin .= g:calendar_mark =~ 'right' ? ' ' : ''
     let init = 1
   endif
   setlocal buftype=nofile
@@ -336,6 +336,8 @@ function! QFixMemoCalendar(dircmd, file, cnt, ...)
   nnoremap <silent> <buffer> <S-Down>  :<C-u>call <SID>CR('>>')<CR>
   nnoremap <silent> <buffer> <S-Right> :<C-u>call <SID>CR('>>')<CR>
   nnoremap <silent> <buffer> <S-Left>  :<C-u>call <SID>CR('<<')<CR>
+  nnoremap <silent> <buffer> w  :<C-u> call <SID>calmovecmd('')<CR>
+  nnoremap <silent> <buffer> b  :<C-u> call <SID>calmovecmd('b')<CR>
   if a:0
     silent! wincmd p
   endif
@@ -398,20 +400,56 @@ function! s:CR(...)
     else
       call search('\.', 'cb')
     endif
-  elseif key =~ '[./]\|\(^[A-Z][a-z]\{2}$\)\|\ctoday'
-    let str = expand('<cWORD>') =~ '\*' ? '\.' : '\*'
+  elseif key =~ '[.]\|\ctoday'
     let b:year  = strftime('%Y')
     let b:month = strftime('%m')
     let b:day   = strftime('%d')
     call s:build()
     call s:winfixheight(b:calendar_height)
-    call search(str, 'c')
+    call cursor(1, 1)
+    call search('\('.b:day.'\)\?\*\s*\('.b:day.'\)\?', 'c')
   elseif key =~ 'r'
     let save_cursor = getpos('.')
     call s:build()
     call s:winfixheight(b:calendar_height)
     call setpos('.', save_cursor)
+  elseif expand('<cWORD>') =~ '\d\{4}/\d\{2}'
+    call inputsave()
+    let ystr = substitute(input("YYYY/MM : "), '[^0-9.]', '', 'g')
+    call inputrestore()
+    redraw | echo ''
+    if ystr == ''
+      return
+    endif
+    if ystr == '.'
+      let b:year  = strftime('%Y')
+      let b:month = strftime('%m')
+    elseif strlen(ystr) >= 4
+      let b:year  = str2nr(strpart(ystr, 0, 4))
+      let b:month = str2nr(strpart(ystr, 4))
+    else
+      let b:month = str2nr(strpart(ystr, 0, 2))
+    endif
+    if b:month < 1 || b:month > 12
+      let b:month = 1
+    endif
+    let b:day = 1
+    call s:build()
+    call s:winfixheight(b:calendar_height)
+    call cursor(1, 1)
+    call search(b:year.'/'.b:month)
+    return
   endif
+endfunction
+
+function! s:calmovecmd(cmd)
+  let c = count > 0 ? count : 1
+  for n in range(c)
+    call search('\([*] \?\)\?[0-9<.>]\+[*]\?', a:cmd)
+    while expand('<cWORD>') =~ '\d\{4}/\d\{2}' && expand('<cword>') =~ '^\d\{2}$'
+      call search('\([*] \?\)\?[0-9<.>]\+[*]\?', a:cmd)
+    endwhile
+  endfor
 endfunction
 
 function! s:build(...)
@@ -456,7 +494,9 @@ endfunction
 if !exists('*CalendarInfo')
 function CalendarInfo()
   if getline('.') =~ '< \. >'
-    if expand('<cWORD>') == '<'
+    if expand('<cWORD>') =~ '\d\{4}/\d\{2}'
+      return [' YYYY/MM']
+    elseif expand('<cWORD>') == '<'
       return [' Prev Month']
     elseif expand('<cWORD>') == '.'
       return [' Today']
@@ -565,6 +605,9 @@ function! s:CalendarStr(...)
     let str = substitute(str, '\(.\{21}\)', '\1|', 'g')
     let list = split(str, '|')
     exe 'let list[-1] .= printf("%'.(strlen(list[0])-strlen(list[-1])).'s", "")'
+    if g:calendar_mark =~ 'right'
+      call map(list, 'substitute(v:val, "^", " ", "")')
+    endif
     call insert(list, g:calendar_dow)
     let mruler = printf(' < . > %4.4d/%2.2d %s', year, month, g:calendar_month[month-1])
     call insert(list, mruler)
@@ -580,20 +623,21 @@ endfunction
 
 function! s:SCBufWinLeave(pbuf, cbuf)
   if expand('<abuf>') == a:pbuf
+    exe 'augroup SubmenuCalendar'.a:cbuf
+      au!
+    augroup END
     let winnr = bufwinnr(a:cbuf)
     if winnr != -1
       exe winnr.'wincmd w'
       silent! close
-      silent! wincmd p
     endif
-    exe 'augroup SubmenuCalendar'.a:cbuf
-      au!
-    augroup END
   elseif expand('<abuf>') == a:cbuf
     exe 'augroup SubmenuCalendar'.a:cbuf
       au!
     augroup END
-    if bufname('%') == bufname(expand('<abuf>')+0)
+    let winnr = bufwinnr(a:pbuf)
+    if winnr != -1
+      exe winnr.'wincmd w'
       silent! close
     endif
   endif

@@ -189,7 +189,7 @@ endif
 if !exists('g:calendar_footer')
   let g:calendar_footer = [
     \ '  {num}<CR> : Diary',
-    \ '  ex. <CR> or 16<CR>',
+    \ '  ex) <CR> or 16<CR>',
     \ '  -----------------',
     \ '  <S-Left>|<S-Right>',
     \ '  -----------------',
@@ -398,7 +398,14 @@ function! s:CR(...)
     if expand('<cWORD>') =~ '\.'
       " call s:CR('today')
     else
+      if getline('.') =~ '\d\{4}/\d\{2}'
+        call cursor(line('.'), col('$'))
+      endif
       call search('\.', 'cb')
+      if getline('.') !~ '\d\{4}/\d\{2}'
+        call cursor(1, 1)
+        call search('\.', 'c')
+      endif
     endif
   elseif key =~ '[.]\|\ctoday'
     let b:year  = strftime('%Y')

@@ -1857,6 +1857,11 @@ function! QFixHowmScheduleActionStr()
     return ret
   endif
   call setpos('.', save_cursor)
+  let ret = QFixHowmSwitchActionLock(['{_}'])
+  if ret != "\<CR>"
+    return ret
+  endif
+  call setpos('.', save_cursor)
   if getline('.') =~ '^'.s:sch_dateT.s:sch_Ext
     call cursor('.', 1)
     let ret = QFixHowmRepeatDateActionLock()

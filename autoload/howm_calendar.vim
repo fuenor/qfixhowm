@@ -402,7 +402,7 @@ function! s:CR(...)
       call cursor(1, 1)
       call search('\.', 'c')
     endif
-  elseif key =~ '[.]\|\ctoday'
+  elseif key =~ '\ctoday'
     let b:year  = strftime('%Y')
     let b:month = strftime('%m')
     let b:day   = strftime('%d')
@@ -415,15 +415,15 @@ function! s:CR(...)
     call s:build()
     call s:winfixheight(b:calendar_height)
     call setpos('.', save_cursor)
-  elseif expand('<cWORD>') =~ '\d\{4}/\d\{2}'
+  elseif expand('<cWORD>') =~ '\d\{4}/\d\{2}' || key == '.'
     call inputsave()
-    let ystr = substitute(input("YYYY/MM : "), '[^0-9.]', '', 'g')
+    let ystr = substitute(input("YYYY/MM : "), '[^0-9.t]', '', 'g')
     call inputrestore()
     redraw | echo ''
     if ystr == ''
       return
     endif
-    if ystr == '.'
+    if ystr =~ '^[.t]$'
       let b:year  = strftime('%Y')
       let b:month = strftime('%m')
     elseif strlen(ystr) >= 4
@@ -440,6 +440,7 @@ function! s:CR(...)
     call s:winfixheight(b:calendar_height)
     call cursor(1, 1)
     call search(b:year.'/'.b:month)
+    call search('\.', 'cb')
     return
   endif
 endfunction
@@ -448,7 +449,7 @@ function! s:calmovecmd(cmd)
   let c = count > 0 ? count : 1
   for n in range(c)
     call search('\([*] \?\)\?[0-9<.>]\+[*]\?', a:cmd)
-    while expand('<cWORD>') =~ '\d\{4}/\d\{2}' && expand('<cword>') =~ '^\d\{2}$'
+    while expand('<cWORD>') =~ '\d\{4}/\d\{2}' " && expand('<cword>') =~ '^\d\{2}$'
       call search('\([*] \?\)\?[0-9<.>]\+[*]\?', a:cmd)
     endwhile
   endfor
@@ -497,11 +498,11 @@ if !exists('*CalendarInfo')
 function CalendarInfo()
   if getline('.') =~ '< \. >'
     if expand('<cWORD>') =~ '\d\{4}/\d\{2}'
-      return [' YYYY/MM']
+      return [' YYYY/MM (t:today)']
     elseif expand('<cWORD>') == '<'
       return [' Prev Month']
     elseif expand('<cWORD>') == '.'
-      return [' Today']
+      return [' YYYY/MM (t:today)']
     elseif expand('<cWORD>') == '>'
       return [' Next Month']
     endif

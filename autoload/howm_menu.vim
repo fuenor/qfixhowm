@@ -444,6 +444,7 @@ function! QFixHowmOpenMenu(...)
   endif
   if bufwinnr('__Calendar__') == -1 && s:calender_exists == 0
     if g:QFixHowm_MenuCalendar
+      silent! call howm_calendar#init()
       call QFixMemoCalendar(g:qfixmemo_calendar_wincmd, '__Calendar__', g:qfixmemo_calendar_count)
       let s:calender_exists = bufnr('__Calendar__')
       wincmd p

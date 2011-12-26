@@ -349,12 +349,8 @@ endfunction
 endif
 
 function! s:VimEnter()
-  if exists('*QFixMemoCalendarDiary')
-    let g:calendar_action = "QFixMemoCalendarDiary"
-  endif
-  if exists('*QFixMemoCalendarSign')
-    let g:calendar_sign   = "QFixMemoCalendarSign"
-  endif
+  let g:calendar_action = "QFixMemoCalendarDiary"
+  let g:calendar_sign   = "QFixMemoCalendarSign"
   call QFixMemoInit()
   call QFixMemoTitleRegxp()
   call QFixMemoVimEnter()

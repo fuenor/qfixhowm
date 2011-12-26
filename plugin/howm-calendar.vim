@@ -702,6 +702,7 @@ function! s:syntax()
   exe 'syn match CalSunday  display "'.'^'.b:submenu_calendar_lmargin.' \?[+!$%&?]\? \{,2}\d\+" contains=CalToday'
   syn match CalInfo display '\s*_.*$' contains=CalConceal
 
+  exe 'runtime! syntax/'.g:submenu_calendar_syntax
   hi def link CalCmd      Type
   hi def link CalNavi     Search
   hi def link CalSaturday Statement
@@ -713,6 +714,5 @@ function! s:syntax()
   hi def link CalHeader   Special
   hi def link CalMemo     PreProc
   hi def link CalInfo     Identifier
-  exe 'runtime! syntax/'.g:submenu_calendar_syntax
 endfunction
 

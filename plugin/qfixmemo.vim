@@ -33,7 +33,7 @@ endif
 
 " QFixMemoをautoloadで読み込み
 if !exists('g:qfixmemo_autoload')
-  let g:qfixmemo_autoload = 0
+  let g:qfixmemo_autoload = 1
 endif
 
 " キーマップリーダー

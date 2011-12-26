@@ -1555,6 +1555,7 @@ function! qfixmemo#Calendar(...)
     close
     return
   endif
+  silent! call howm_calendar#init()
   call QFixMemoCalendar(g:qfixmemo_calendar_wincmd, '__Calendar__', g:qfixmemo_calendar_count)
 endfunction
 
@@ -2048,6 +2049,7 @@ function! s:OpenQFixSubWin(file, id)
   let wincmd = s:GetOptionWithID('g:qfixmemo_submenu_calendar_wincmd', swid)
   if wincmd != ''
     let wincmd = wincmd . (windir =~ 'vert' ? '' : ' vertical')
+    silent! call howm_calendar#init()
     call QFixMemoCalendar(wincmd, '__Cal__', 1, 'parent'. (keepsize ? '' : 'resize'))
   endif
   exe 'setlocal statusline=\ '.fnamemodify(file, ':t')

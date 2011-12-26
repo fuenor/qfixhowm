@@ -1411,27 +1411,27 @@ function! s:CnvDoW(year, month, sft, dow, ofs)
   endif
   let dow = a:dow
   let ofs = a:ofs
-  if exists('*datelib#StrftimeCnvDoWShift') || exists('g:loaded_QFixMemoCalendar_vim')
+  " if exists('*datelib#StrftimeCnvDoWShift') || exists('g:loaded_QFixMemoCalendar_vim')
     let cnvdow = sft.'*'.dow
     let time = datelib#StrftimeCnvDoWShift(year, month, 1, cnvdow, ofs)
     return (time/(24*60*60) + g:DateStrftime)
-  endif
-  let sstr = printf(s:sch_printfDate, year, month, 1)
-  let pfsec = QFixHowmDate2Int(sstr.' 00:00')
-  let sstr = strftime(s:hts_date, pfsec)
-  let fday = QFixHowmDate2Int(sstr)
-  let fdow = fday%7
-  let day = fday - fday%7
-  let tday = day + (sft-1) * 7 + index(g:DoWStrftime, dow)
-
-  let day = tday - g:DateStrftime - (sft-1) * 7
-  let ttime = day * 24 * 60 * 60 + g:QFixHowm_ST * (60 * 60) "JST = -9
-  let month = strftime('%m', ttime)
-  if month != a:month
-    let tday = tday + 7
-  endif
-  let tday += ofs
-  return tday
+"   endif
+"   let sstr = printf(s:sch_printfDate, year, month, 1)
+"   let pfsec = QFixHowmDate2Int(sstr.' 00:00')
+"   let sstr = strftime(s:hts_date, pfsec)
+"   let fday = QFixHowmDate2Int(sstr)
+"   let fdow = fday%7
+"   let day = fday - fday%7
+"   let tday = day + (sft-1) * 7 + index(g:DoWStrftime, dow)
+"
+"   let day = tday - g:DateStrftime - (sft-1) * 7
+"   let ttime = day * 24 * 60 * 60 + g:QFixHowm_ST * (60 * 60) "JST = -9
+"   let month = strftime('%m', ttime)
+"   if month != a:month
+"     let tday = tday + 7
+"   endif
+"   let tday += ofs
+"   return tday
 endfunction
 
 "曜日シフト
@@ -1439,7 +1439,7 @@ function! s:DayOfWeekShift(cmd, str)
   let cmd = a:cmd
   let str = a:str
 
-  if exists('*datelib#StrftimeCnvDoWShift') || exists('g:loaded_QFixMemoCalendar_vim')
+  " if exists('*datelib#StrftimeCnvDoWShift') || exists('g:loaded_QFixMemoCalendar_vim')
     let str = substitute(str, '[^0-9]', '', 'g')
     let year  = strpart(str, 0, 4)
     let month = strpart(str, 4, 2)
@@ -1449,37 +1449,37 @@ function! s:DayOfWeekShift(cmd, str)
     call datelib#MakeHolidayTable(year)
     let time = datelib#StrftimeCnvDoWShift(year, month, day, cnvdow, sft)
     return strftime(s:hts_date, time)
-  endif
-
-  let actday = QFixHowmDate2Int(str)
-
-  let dow = matchstr(cmd, '[-+*]\?'.s:sch_dow)
-  let sft = matchstr(dow, '[-+*]')
-  if sft == '' || sft == '*'
-    return str
-  endif
-  let dow = substitute(dow, '[-+]', '', 'g')
-
-  "休日シフト
-  if dow =~ '\c\(Hol\|Hdy\)' && exists('s:HolidayList') && s:HolidayList != []
-    while 1
-      if count(s:HolidayList, actday) == 0  && '\c'.g:DoWStrftime[actday%7] !~ 'Sun'
-        break
-      endif
-      let sec = QFixHowmDate2Int(str.' 00:00')
-      let sec = sec + (sft == '-' ? -1: 1) * 24 *60 *60
-      let str = strftime(s:hts_date, sec)
-      let actday = QFixHowmDate2Int(str)
-    endwhile
-    return str
-  endif
-
-  if '\c'.g:DoWStrftime[actday%7] =~ dow && dow != ''
-    let sec = QFixHowmDate2Int(str.' 00:00')
-    let sec = sec + (sft == '-' ? -1: 1) * 24 *60 *60
-    let str = strftime(s:hts_date, sec)
-  endif
-  return str
+"   endif
+"
+"   let actday = QFixHowmDate2Int(str)
+"
+"   let dow = matchstr(cmd, '[-+*]\?'.s:sch_dow)
+"   let sft = matchstr(dow, '[-+*]')
+"   if sft == '' || sft == '*'
+"     return str
+"   endif
+"   let dow = substitute(dow, '[-+]', '', 'g')
+"
+"   "休日シフト
+"   if dow =~ '\c\(Hol\|Hdy\)' && exists('s:HolidayList') && s:HolidayList != []
+"     while 1
+"       if count(s:HolidayList, actday) == 0  && '\c'.g:DoWStrftime[actday%7] !~ 'Sun'
+"         break
+"       endif
+"       let sec = QFixHowmDate2Int(str.' 00:00')
+"       let sec = sec + (sft == '-' ? -1: 1) * 24 *60 *60
+"       let str = strftime(s:hts_date, sec)
+"       let actday = QFixHowmDate2Int(str)
+"     endwhile
+"     return str
+"   endif
+"
+"   if '\c'.g:DoWStrftime[actday%7] =~ dow && dow != ''
+"     let sec = QFixHowmDate2Int(str.' 00:00')
+"     let sec = sec + (sft == '-' ? -1: 1) * 24 *60 *60
+"     let str = strftime(s:hts_date, sec)
+"   endif
+"   return str
 endfunction
 
 "日付からプライオリティをセットする。

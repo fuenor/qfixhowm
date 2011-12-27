@@ -58,7 +58,7 @@ endif
 
 " メニューへの登録
 if !exists('MyGrep_MenuBar')
-  let MyGrep_MenuBar = 2
+  let MyGrep_MenuBar = 2 * has('gui_running')
 endif
 
 " キーマップを使用する

@@ -641,6 +641,9 @@ function! s:SCBufWinLeave(pbuf, cbuf)
     let winnr = bufwinnr(a:pbuf)
     if winnr != -1
       exe winnr.'wincmd w'
+      if exists('*qfixmemo#SubMenuBufAutoWrite')
+        call qfixmemo#SubMenuBufAutoWrite(fnamemodify(bufname(a:pbuf), ':p'))
+      endif
       silent! close
     endif
   endif

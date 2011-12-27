@@ -1419,7 +1419,7 @@ function! QFixPreviewOpen(file, line, ...)
     if filereadable(file)
       if g:QFix_PreviewExcludeLineRegxp != ''
         let glist = readfile(file, '', 1)
-        if glist[0] =~ g:QFix_PreviewExcludeLineRegxp
+        if len(glist) == 0 || glist[0] =~ g:QFix_PreviewExcludeLineRegxp
           call setline(1, glist)
           setlocal nomodifiable
           silent! wincmd p

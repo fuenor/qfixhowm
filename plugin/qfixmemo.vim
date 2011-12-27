@@ -46,7 +46,7 @@ if !exists('g:qfixmemo_default_keymap')
 endif
 " メニューバーへ登録
 if !exists('g:qfixmemo_menubar')
-  let g:qfixmemo_menubar = 1
+  let g:qfixmemo_menubar = has('gui_running')
 endif
 " howm_schedule.vimを使用する
 " 0 : 使用しない
@@ -409,6 +409,20 @@ function! s:BufRead()
   endif
   call qfixmemo#BufRead()
 endfunction
+
+" カレンダー
+if !exists('g:howm_calendar_wincmd')
+  let g:howm_calendar_wincmd = 'vertical topleft'
+endif
+if !exists('g:howm_calendar_count')
+  let g:howm_calendar_count = 3
+endif
+if !exists(':Calendar')
+  command! -nargs=* Calendar call Calendar(0,<f-args>) | call CalendarPost()
+  function! Calendar(...)
+    call howm_calendar#QFixMemoCalendar(g:howm_calendar_wincmd, '__Calendar__', g:howm_calendar_count)
+  endfunction
+endif
 
 " autoload読み込み
 if g:qfixmemo_autoload

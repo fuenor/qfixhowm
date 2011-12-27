@@ -2084,9 +2084,15 @@ function s:QFixMemoSubMenuResize(winsize, ...)
   endif
 endfunction
 
+function! qfixmemo#SubMenuBufAutoWrite(file)
+  call s:SubMenuBufAutoWrite(a:file)
+endfunction
 let s:qfixmemo_fileencoding = g:qfixmemo_fileencoding
 function! s:SubMenuBufAutoWrite(...)
   let file = fnamemodify(expand('<afile>'), ':p')
+  if a:0
+    let file = a:1
+  endif
   let str = getbufline(file, 1, '$')
   if str == ['']
     call delete(file)

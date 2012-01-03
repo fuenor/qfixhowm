@@ -1662,14 +1662,14 @@ function! MyGrepReadResult(readflag, ...)
     let s:resulttime = getftime(file)
   endif
   redraw|echo 'QFixGrep : Loading...'
-  let prevPath = escape(getcwd(), ' ')
-  let saved_efm = &efm
-"  set errorformat=%f\|%\\s%#%l\|%m
-  if exists('g:MyGrep_errorformat')
-    let &errorformat=g:MyGrep_errorformat
-  endif
-  cgetexpr s:result
-  let &errorformat = saved_efm
+  let qf = []
+  for str in s:result
+    let file = substitute(str, '|.*$', '','')
+    let lnum = str2nr(matchstr(str, '|\zs\d\+'))
+    let text = substitute(str, '^.\{-}|.\{-}|', '', '')
+    call add(qf, {'filename' : file, 'lnum' : lnum, 'text' : text})
+  endfor
+  call QFixSetqflist(qf)
   redraw|echo 'QFixGrep : ReadResult "'.file.'"'
   call QFixCopen()
   call MoveToQFixWin()

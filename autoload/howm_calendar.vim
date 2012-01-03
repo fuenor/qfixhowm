@@ -86,6 +86,8 @@ function! s:CalendarPost(win)
   augroup END
 endfunction
 
+if !exists('*QFixMemoCalendarSign')
+" 追加オプションがある場合はファイルネームを返す
 function! QFixMemoCalendarSign(day, month, year, ...)
   let year  = printf("%4.4d",a:year)
   let month = printf("%2.2d",a:month)
@@ -110,22 +112,21 @@ function! QFixMemoCalendarSign(day, month, year, ...)
   let id = filereadable(expand(file)) + hday*2
   return g:calendar_flag[id]
 endfunction
+endif
 
+if !exists('*QFixMemoCalendarDiary')
+" weekとdirはcalendar.vimとの互換性のためで常に空文字列
 function! QFixMemoCalendarDiary(day, month, year, week, dir)
-  let year  = printf("%4.4d",a:year)
-  let month = printf("%2.2d",a:month)
-  let day   = printf("%2.2d",a:day)
+  let year  = printf("%4.4d", a:year)
+  let month = printf("%2.2d", a:month)
+  let day   = printf("%2.2d", a:day)
   let file = g:qfixmemo_diary
   let file = substitute(file, '%Y', year, 'g')
   let file = substitute(file, '%m', month, 'g')
   let file = substitute(file, '%d', day, 'g')
   call qfixmemo#Edit(file)
-  let lwinnr = winnr('$')
-  if lwinnr == 1
-    Calendar
-    silent! wincmd p
-  endif
 endfunction
+endif
 
 "=============================================================================
 if !exists("g:calendar_diary")
@@ -724,5 +725,13 @@ endfunction
 
 function! howm_calendar#QFixMemoCalendar(dircmd, file, cnt, ...)
   call QFixMemoCalendar(a:dircmd, a:file, a:cnt)
+endfunction
+
+function! howm_calendar#CalendarDiary(day, month, year, week, dir)
+  return QFixMemoCalendarDiary(a:day, a:month, a:year, a:week, a:dir)
+endfunction
+
+function! howm_calendar#CalendarSign(day, month, year, ...)
+  return QFixMemoCalendarSign(a:day, a:month, a:year)
 endfunction
 

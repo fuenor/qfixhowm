@@ -65,7 +65,7 @@ if !exists('g:QFixMRU_FullPathMode')
 endif
 " QFixMRUコマンドが呼び出されていなくてもVim終了時に保存
 if !exists('g:QFixMRU_VimLeaveWrite')
-  let g:QFixMRU_VimLeaveWrite = 1
+  let g:QFixMRU_VimLeaveWrite = 0
 endif
 " MRU最大表示数
 if !exists('g:QFixMRU_Entries')
@@ -141,6 +141,7 @@ augroup QFixMRU
   au!
   au VimLeave                    * call <SID>VimLeave()
   au BufRead,BufNewFile,BufEnter * call <SID>BufEnter()
+  au BufWinLeave                 * call <SID>BufWinLeave()
   au BufLeave                    * call <SID>BufLeave()
   au BufWritePost                * call <SID>BufWritePost()
   au CursorMoved                 * call <SID>CursorMoved()
@@ -660,9 +661,11 @@ function! QFixMRUWrite(write, ...)
     return
   endif
   let write = a:write
+  let mfile = expand('%:p')
   let mrufile = g:QFixMRU_Filename
   for index in range (1, a:0)
     if index == 1
+      let mfile = a:{index}
       let mrufile = a:{index}
     else
       let g:QFixMRU_BaseDir = substitute(a:{index}, '\\', '/', 'g')
@@ -676,7 +679,6 @@ function! QFixMRUWrite(write, ...)
     return
   endif
   let prevPath = escape(getcwd(), ' ')
-  let mfile = expand('%:p')
   let mfile = substitute(mfile, '\\', '/', 'g')
   if g:QFixMRU_IgnoreFile != '' && mfile =~ g:QFixMRU_IgnoreFile
     return
@@ -799,15 +801,29 @@ endfunction
 function! s:BufEnter()
   " BufEnterでQFixMRUWrite(0)を行うとbuftype設定前の特殊バッファも登録される
   " buftype設定後に特殊バッファ判定してMRU登録するためCursorMovedを使用
-  let b:QFixMRU_moved = 0
+  if !exists('b:QFixMRU_moved')
+    let b:QFixMRU_moved = 0
+  endif
+  if b:QFixMRU_moved
+    call QFixMRUWrite(0)
+  endif
+endfunction
+
+function! s:BufWinLeave()
+  let mfile = fnamemodify(expand('<afile>'), ':p')
+  call QFixMRUWrite(0, mfile)
+  let b:QFixMRU_moved = 1
 endfunction
 
 function! s:BufLeave()
   call QFixMRUWrite(0)
+  let b:QFixMRU_moved = 1
 endfunction
 
 function! s:BufWritePost()
   call QFixMRUWrite(0)
+  let b:QFixMRU_moved = 1
+  call s:VimLeave()
 endfunction
 
 function! s:CursorMoved()

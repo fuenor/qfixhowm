@@ -308,8 +308,8 @@ if !exists('g:howm_schedule_key')
   let g:howm_schedule_key = 0
 endif
 
+let s:QFixHowm_Key = g:QFixHowm_Key . g:QFixHowm_KeyB
 if g:QFixHowm_Default_Key > 0 && g:howm_schedule_key
-  let s:QFixHowm_Key = g:QFixHowm_Key . g:QFixHowm_KeyB
   exe 'silent! nnoremap <unique> <silent> '.s:QFixHowm_Key.'t     :<C-u>call QFixHowmListReminderCache("todo")<CR>'
   exe 'silent! nnoremap <unique> <silent> '.s:QFixHowm_Key.'rt    :<C-u>call QFixHowmListReminder("todo")<CR>'
   exe 'silent! nnoremap <unique> <silent> '.s:QFixHowm_Key.'y     :<C-u>call QFixHowmListReminderCache("schedule")<CR>'

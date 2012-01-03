@@ -659,6 +659,7 @@ function! qfixmemo#AddTitle(...)
     endif
     let fline = lline+1
   endwhile
+  call QFixMRUWrite(0)
   call setpos('.', save_cursor)
 endfunction
 
@@ -2651,6 +2652,7 @@ function! qfixmemo#OpenKeywordLink()
         endif
         return 1
       elseif g:qfixmemo_keyword_mode == 1
+        let file = substitute(file, '[\\/:*?"|<>]', '_', 'g')
         if g:qfixmemo_keyword_dir != ''
           let file = g:qfixmemo_keyword_dir . '/' . file
         endif

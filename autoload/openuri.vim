@@ -225,7 +225,7 @@ function! s:cnvScheme(dict, str)
   let g:openuri_schemereg = ''
   for key in keys(a:dict)
     let g:openuri_schemereg = g:openuri_schemereg.'\|'.key
-    let path = fnamemodify(a:dict[key], ':p')
+    let path = substitute(fnamemodify(a:dict[key], ':p'), '\\', '/', 'g')
     let str = substitute(str, '^'.key.'://[/\\]\?', path, '')
   endfor
   return str
@@ -280,13 +280,16 @@ function! s:openstr(str)
         exe 'let g:openuri_'.ext.' = g:QFixHowm_Opencmd_'.ext
       endif
       if exists('g:openuri_'.ext)
+        let str = expand(str)
+        if has("win32") || has("win95") || has("win64") || has("win16")
+          if &enc != 'cp932' && str =~ '[^[:print:]]'
+            let str = iconv(str, &enc, 'cp932')
+          endif
+        endif
         let str = substitute(str, '\\', '/', 'g')
         exe 'let cmd = g:openuri_'.ext
-        if has('unix')
-          let str = escape(str, ' ')
-        endif
-        let cmd = substitute(cmd, '%s', escape(str, '&\'), '')
-        let cmd = escape(cmd, '%#')
+        let cmd = substitute(cmd, '["'."'".']\?%s["'."'".']\?', '', '')
+        let cmd .= shellescape(str, 1)
         silent! exe cmd
         return 1
       endif
@@ -351,6 +354,7 @@ function! s:openuri(uri)
     endif
   endif
   if g:openuri_cmd =~ '\c^'.'netrw$'
+    let str = uri
     if bat
       let str = iconv(uri, &enc, 'cp932')
     endif

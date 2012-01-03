@@ -609,6 +609,19 @@ function! QFixMRUSetBaseDir(basedir)
   let g:QFixMRU_BaseDir = substitute(a:basedir, '\\', '/', 'g')
 endfunction
 
+function! QFixCmd_MRURemove(...)
+  let qf = QFixGetqflist()
+  let cline = line('.') - 1
+  let file = QFixNormalizePath(fnamemodify(bufname(qf[cline]['bufnr']) ,':p'))
+  let lnum = qf[cline]['lnum']
+  let text = qf[cline]['text']
+  let mru = {'filename':file, 'lnum':lnum, 'text':text}
+  if s:Remove(mru)
+    call QFixMRU()
+  endif
+  redraw|echo 'QFixMRU: Remove from MRU'
+endfunction
+
 " Get mru list
 function! QFixMRUGetList(...)
   if g:QFixMRU_state == 0
@@ -788,6 +801,28 @@ function! s:WriteMru(mru, mrufile)
   if mlist != ostr
     call writefile(mlist, mrufile)
   endif
+endfunction
+
+" remove mru
+function! s:Remove(mru)
+  let mru = a:mru
+  let idx = 0
+  let removed = 0
+  for d in s:MruDic
+    if d['text'] != mru['text']
+      let idx += 1
+      continue
+    elseif d['lnum'] != mru['lnum']
+      let idx += 1
+      continue
+    elseif d['filename'] != mru['filename']
+      let idx += 1
+      continue
+    endif
+    silent! call remove(s:MruDic, idx)
+    let removed += 1
+  endfor
+  return removed
 endfunction
 
 " MRU登録時チェック

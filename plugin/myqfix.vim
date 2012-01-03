@@ -351,6 +351,7 @@ function! s:QFBufWinEnter(...)
     nnoremap <buffer> <silent> <C-g>  :<C-u>call QFixCmdCopy2QF()<CR>
   endif
   nnoremap <buffer> <silent> J      :<C-u>call <SID>QFixCmd_J()<CR>
+  nnoremap <buffer> <silent> K      :<C-u>call QFixCmd_MRURemove()<CR>
   nnoremap <buffer> <silent> A      :MyGrepWriteResult<CR>
   nnoremap <buffer> <silent> O      :MyGrepReadResult<CR>
   nnoremap <buffer> <silent> <C-l>  :<C-u>call QFixSetqfShortPath()<CR>:exe 'normal! <C-l>'<CR>
@@ -654,6 +655,14 @@ function! s:QFixCmd_J()
   let g:QFix_CloseOnJump = !g:QFix_CloseOnJump
   echo 'Close on jump : ' . (g:QFix_CloseOnJump? 'ON' : 'OFF')
 endfunction
+
+""""""""""""""""""""""""""""""
+" K コマンド
+""""""""""""""""""""""""""""""
+if !exists('*QFixCmd_MRURemove')
+function! QFixCmd_MRURemove(...)
+endfunction
+endif
 
 """"""""""""""""""""""""""""""
 " リサイズ

@@ -954,6 +954,8 @@ function! howm2html#Howm2html(output, ...)
       silent! 1,$delete _
       call setline(1, glist)
     endif
+    " call s:HatenaListExtra()
+    " call s:Markdown2HatenaDefine()
     call HowmHtmlCodeHighlight(file)
     if exists('*HowmHtmlUserProc') && exists('g:fudist')
       call HowmHtmlUserProc(file)
@@ -1131,10 +1133,6 @@ endif
 func! HowmHtmlCodeHighlight(file)
   if !g:HowmHtml_CodeHighlight
     return
-  endif
-  if !g:fudist_manual
-    call s:HatenaListExtra()
-    call s:Markdown2HatenaDefine()
   endif
   call s:Convert2HTMLSnippet()
 endfunc
@@ -1333,7 +1331,7 @@ endfunc
 
 " テスト用
 if !exists('g:fudist_manual')
-  let g:fudist_manual = 0
+  let g:fudist_manual = 1
 endif
 
 function! s:JpJoinStr(str, marker)

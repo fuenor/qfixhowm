@@ -498,14 +498,14 @@ function! s:WikiLinkAndTag(str)
     for tag in g:HowmHtml_SyntaxList
       let reg = '\(^\|\s\)'.tag[0].'\([^[:space:]]'.'.\{-}'.'[^[:space:]]\)'.tag[2].'\($\|\s\)'
       if str =~ reg
-        let str = substitute(str, reg, tag[1].'\2'.tag[3], '')
+        let str = substitute(str, reg, tag[1].'\2'.tag[3], 'g')
         continue
       endif
     endfor
     for tag in g:HowmHtml_SyntaxListNSP
       let reg = tag[0].'\([^[:space:]]'.'.\{-}'.'[^[:space:]]\)'.tag[2]
       if str =~ reg
-        let str = substitute(str, reg, tag[1].'\1'.tag[3], '')
+        let str = substitute(str, reg, tag[1].'\1'.tag[3], 'g')
         continue
       endif
     endfor

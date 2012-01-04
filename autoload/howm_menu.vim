@@ -444,8 +444,7 @@ function! QFixHowmOpenMenu(...)
   endif
   if bufwinnr('__Calendar__') == -1 && s:calender_exists == 0
     if g:QFixHowm_MenuCalendar
-      silent! call howm_calendar#init()
-      call QFixMemoCalendar(g:qfixmemo_calendar_wincmd, '__Calendar__', g:qfixmemo_calendar_count)
+      call howm_calendar#QFixMemoCalendar(g:qfixmemo_calendar_wincmd, '__Calendar__', g:qfixmemo_calendar_count)
       let s:calender_exists = bufnr('__Calendar__')
       wincmd p
     endif
@@ -693,9 +692,13 @@ function! s:BufEnterMenu()
 endfunction
 
 function! s:keepsize()
+  let size = s:howm_menu_height
+  if g:QFixHowm_MenuCalendar && s:calender_exists > 0 && g:qfixmemo_calendar_wincmd !~ 'vert'
+    let size = s:howm_menu_height-10
+  endif
   let w = &lines - winheight(0) - &cmdheight - (&laststatus > 0 ? 1 : 0)
   if w > 0
-    exe 'resize' . s:howm_menu_height
+    exe 'resize' . size
   endif
   " exe 'vertical resize' . s:howm_menu_width
 endfunction

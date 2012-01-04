@@ -144,18 +144,35 @@ function! CalendarSign_(day, month, year)
   return g:calendar_flag[id]
 endfunction
 
+" カレンダーコマンド
 if !exists('g:howm_calendar_wincmd')
   let g:howm_calendar_wincmd = 'vertical topleft'
+  " let g:howm_calendar_wincmd = 'vertical botright'
 endif
 if !exists('g:howm_calendar_count')
   let g:howm_calendar_count = 3
 endif
-if !exists('*Calendar')
-  function Calendar(...)
-    call QFixMemoCalendar(g:howm_calendar_wincmd, '__Calendar__', g:howm_calendar_count)
-    if exists('g:fudist')
-      call s:CalendarPost(a:0)
+if !exists('g:howm_calendarh_wincmd')
+  " let g:howm_calendarh_wincmd = 'leftabove'
+  let g:howm_calendarh_wincmd = 'rightbelow'
+endif
+if !exists('g:howm_calendarh_count')
+  let g:howm_calendarh_count = 4
+endif
+
+if !exists(':Calendar')
+  command! -nargs=* Calendar  call Calendar(0,<f-args>) | call CalendarPost()
+  command! -nargs=* CalendarH call Calendar(1,<f-args>) | call CalendarPost()
+  function! Calendar(...)
+    if a:0 && a:1 == 1
+      let wincmd = g:howm_calendarh_wincmd
+      let ccount = g:howm_calendarh_count
+    else
+      let wincmd = g:howm_calendar_wincmd
+      let ccount = g:howm_calendar_count
     endif
+    call QFixMemoCalendar(wincmd, '__Calendar__', ccount)
+    call s:CR('today')
   endfunction
 endif
 
@@ -190,7 +207,6 @@ endif
 if !exists('g:calendar_footer')
   let g:calendar_footer = [
     \ '  {num}<CR> : Diary',
-    \ '  ex) <CR> or 16<CR>',
     \ '  -----------------',
     \ '  <S-Left>|<S-Right>',
     \ '  -----------------',
@@ -285,9 +301,9 @@ function! QFixMemoCalendar(dircmd, file, cnt, ...)
     augroup END
     setlocal statusline=\ %{g:calendar_statusline0}
   endif
+  let b:dircmd = windir
   call s:build(a:cnt)
   let winheight = line('$')
-  let b:dircmd = windir
   let b:calendar_winfixheight = a:0
   let b:calendar_resize = 0
   if parent
@@ -302,6 +318,7 @@ function! QFixMemoCalendar(dircmd, file, cnt, ...)
     let b:calendar_resize = 1
   else
     let b:calendar_resize = 1
+    exe 'resize '.b:calendar_height
     call s:winfixheight(winheight)
   endif
   " オートリサイズ
@@ -320,24 +337,28 @@ function! QFixMemoCalendar(dircmd, file, cnt, ...)
   call <SID>Msg(calid)
 
   nnoremap <silent> <buffer> q    :close<CR>
-  nnoremap <silent> <buffer> >    :<C-u>call <SID>CR('>>')<CR>
-  nnoremap <silent> <buffer> <    :<C-u>call <SID>CR('<<')<CR>
-  nnoremap <silent> <buffer> i    :<C-u>call <SID>CR('<<')<CR>
-  nnoremap <silent> <buffer> I    :<C-u>call <SID>CR('>>')<CR>
-  nnoremap <silent> <buffer> o    :<C-u>call <SID>CR('>>')<CR>
-  nnoremap <silent> <buffer> O    :<C-u>call <SID>CR('<<')<CR>
+  nnoremap <silent> <buffer> >    :<C-u>call <SID>CR('>.')<CR>
+  nnoremap <silent> <buffer> <    :<C-u>call <SID>CR('<.')<CR>
+  nnoremap <silent> <buffer> i    :<C-u>call <SID>CR('<.')<CR>
+  nnoremap <silent> <buffer> I    :<C-u>call <SID>CR('>.')<CR>
+  nnoremap <silent> <buffer> o    :<C-u>call <SID>CR('>.')<CR>
+  nnoremap <silent> <buffer> O    :<C-u>call <SID>CR('<.')<CR>
   nnoremap <silent> <buffer> r    :<C-u>call <SID>CR('r')<CR>
   nnoremap <silent> <buffer> t    :<C-u>call <SID>CR('today')<CR>
   nnoremap <silent> <buffer> .    :<C-u>call <SID>CR('.')<CR>
   nnoremap <silent> <buffer> <CR> :<C-u>call <SID>CR()<CR>
   " nnoremap <silent> <buffer> <Up>    :<C-u>call <SID>CR('up')<CR>
   " nnoremap <silent> <buffer> <Down>  :<C-u>call <SID>CR('down')<CR>
-  nnoremap <silent> <buffer> <S-Up>    :<C-u>call <SID>CR('<<')<CR>
-  nnoremap <silent> <buffer> <S-Down>  :<C-u>call <SID>CR('>>')<CR>
-  nnoremap <silent> <buffer> <S-Right> :<C-u>call <SID>CR('>>')<CR>
-  nnoremap <silent> <buffer> <S-Left>  :<C-u>call <SID>CR('<<')<CR>
+  nnoremap <silent> <buffer> <S-Up>    :<C-u>call <SID>CR('<<.')<CR>
+  nnoremap <silent> <buffer> <S-Down>  :<C-u>call <SID>CR('>>.')<CR>
+  nnoremap <silent> <buffer> <S-Right> :<C-u>call <SID>CR('>.')<CR>
+  nnoremap <silent> <buffer> <S-Left>  :<C-u>call <SID>CR('<.')<CR>
   nnoremap <silent> <buffer> w  :<C-u> call <SID>calmovecmd('')<CR>
   nnoremap <silent> <buffer> b  :<C-u> call <SID>calmovecmd('b')<CR>
+  let save_cursor = getpos('.')
+  call cursor(1, 1)
+  exe 'normal! z-'
+  call setpos('.', save_cursor)
   if a:0
     silent! wincmd p
   endif
@@ -357,23 +378,30 @@ function! s:CR(...)
     return
   endif
   let save_cursor = getpos('.')
-  call cursor(line('.'), col('$'))
   let [lnum, col] = searchpos('\d\{4}/\d\{2}', 'ncbW')
-  call setpos('.', save_cursor)
   let lnum = lnum == 0 ? 1 : lnum
-  let str = getline(lnum)
+  let str = strpart(getline('.'), 0, col('.'))
+  let cnt = strlen(substitute(str, '[^|]', '', 'g'))
+  let str = substitute(getline(lnum), '\(.\{-}|\)\{'.cnt.'}', '', '')
   let year  = matchstr(str, '\d\{4}')
   let month = matchstr(str, '/\zs\d\{2}')
+
   if key =~ '<\+\|>\+'
-    let b:month += key =~ '>' ? 1 : -1
+    let b:month += (key =~ '>' ? 1 : -1) * (key =~ '<<\|>>' ? 12 : 1)
     call s:build()
-    call s:winfixheight(b:calendar_height)
-    let pl = line('.') - search(key, 'cnb')
-    let nl = line('.') - search(key, 'cn')
-    if abs(pl) <= abs(nl)
-      call search(key, 'cb')
+    if key =~ '\.'
+    elseif b:dircmd =~ 'vert'
+      " call s:winfixheight(b:calendar_height)
+      let pl = line('.') - search(key, 'cnb')
+      let nl = line('.') - search(key, 'cn')
+      if abs(pl) <= abs(nl)
+        call search(key, 'cb')
+      else
+        call search(key, 'c')
+      endif
     else
-      call search(key, 'c')
+      call search('\d\{4}/\d\{2}', 'cW')
+      call search(key, 'cb')
     endif
   elseif key =~ '^\d\+$'
     " 特殊バッファしかない
@@ -395,14 +423,8 @@ function! s:CR(...)
     call s:winfixheight(b:calendar_height)
     call search('\.', 'c')
   elseif a:0 && a:1 == '.'
-    if getline('.') =~ '\d\{4}/\d\{2}'
-      call cursor(line('.'), col('$'))
-    endif
+    call search(printf('%4.4d/%2.2d', year, month), 'cb')
     call search('\.', 'cb')
-    if getline('.') !~ '\d\{4}/\d\{2}'
-      call cursor(1, 1)
-      call search('\.', 'c')
-    endif
   elseif key =~ '\ctoday'
     let b:year  = strftime('%Y')
     let b:month = strftime('%m')
@@ -461,10 +483,18 @@ function! s:build(...)
   let num = exists('b:calendar_count') ? b:calendar_count : 3
   let num = a:0 ? a:1 : num
   let b:calendar_count = num
+  let dir = b:dircmd !~ 'vertical'
+  let b:calendar_dir   = dir
+  let row = dir ? 1 : num
+  let col = dir ? num : 1
   setlocal modifiable
-  let glist = s:CalendarStr(num)
-  if num > 1
+  let glist = s:CalendarStr(row, col)
+  if row > 1 && col == 1
     call extend(glist, g:calendar_footer)
+  elseif row == 1 && col > 1
+    " for idx in range(len(glist))
+    "   let glist[idx] .= g:calendar_footer[idx]
+    " endfor
   endif
   let b:calendar_height = len(glist)
   silent! %delete _
@@ -480,6 +510,8 @@ endfunction
 let g:calendar_statusline0 = ''
 let g:calendar_statusline1 = ''
 function! s:Msg(id)
+  let str = strpart(getline('.'), 0, col('.'))
+  let cnt = strlen(substitute(str, '[^|]', '', 'g'))
   let msg = CalendarInfo()
   exe "let g:calendar_statusline".a:id." = len(msg) == 0 ? '' : msg[0]"
   call map(msg, "substitute(v:val, '^', '_', '')")
@@ -489,7 +521,8 @@ function! s:Msg(id)
   let lnum = search('^\s*_', 'ncW')
   silent! exe '%s/^_.*/_/g'
   if lnum && len(msg) > 0
-    call setline(lnum, msg[0])
+    let padding = repeat('_', (21+2+(g:calendar_mark =~ 'right'))*cnt)
+    call setline(lnum, padding.msg[0])
   endif
   setlocal nomodifiable
   call setpos('.', save_cursor)
@@ -501,21 +534,20 @@ function CalendarInfo()
     if expand('<cWORD>') =~ '\d\{4}/\d\{2}'
       return [' YYYY/MM (t:today)']
     elseif expand('<cWORD>') == '<'
-      return [' Prev Month']
+      return [' Prev Month (< i)']
     elseif expand('<cWORD>') == '.'
       return [' YYYY/MM (t:today)']
     elseif expand('<cWORD>') == '>'
-      return [' Next Month']
+      return [' Next Month (> o)']
     endif
     return []
   endif
   let save_cursor = getpos('.')
-  call cursor(line('.'), col('$'))
   let [lnum, col] = searchpos('\d\{4}/\d\{2}', 'ncbW')
-  call setpos('.', save_cursor)
-
   let lnum = lnum == 0 ? 1 : lnum
-  let str = getline(lnum)
+  let str = strpart(getline('.'), 0, col('.'))
+  let cnt = strlen(substitute(str, '[^|]', '', 'g'))
+  let str = substitute(getline(lnum), '\(.\{-}|\)\{'.cnt.'}', '', '')
   let year  = matchstr(str, '\d\{4}')
   let month = matchstr(str, '/\zs\d\{2}')
   let day = expand('<cword>')
@@ -556,12 +588,17 @@ endif
 if !exists('g:calendar_month')
   let g:calendar_month = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
   if g:calendar_jp == 2
-    let g:calendar_month = ['睦月', '如月', '弥生', '卯月', '皐月', '水無月', '文月', '葉月', '長月', '神無月', '霜月', '師走']
+    let g:calendar_month = ['睦月  ', '如月  ', '弥生  ', '卯月  ', '皐月  ', '水無月', '文月  ', '葉月  ', '長月  ', '神無月', '霜月  ', '師走  ']
   endif
 endif
-function! s:CalendarStr(...)
-  let loop = a:0 ? a:1 : 1
+function! s:CalendarStr(row, col)
+  let mode = a:col != 1
+  let loop = a:row*a:col
   let glist = []
+  if mode
+    let glist = ['', '', '', '', '', '', '', '',]
+  endif
+  let tail = g:calendar_mark =~ 'right' ? ' ' : ''
   let year  = exists('b:year' ) ? b:year  : strftime('%Y')
   let month = exists('b:month') ? b:month : strftime('%m')
   let day   = exists('b:day'  ) ? b:day   : strftime('%d')
@@ -612,16 +649,29 @@ function! s:CalendarStr(...)
     if g:calendar_mark =~ 'right'
       call map(list, 'substitute(v:val, "^", " ", "")')
     endif
-    call insert(list, g:calendar_dow)
-    let mruler = printf(' < . > %4.4d/%2.2d %s', year, month, g:calendar_month[month-1])
+    call insert(list, g:calendar_dow.tail)
+    let mruler = printf(' < . > %4.4d/%2.2d ', year, month)
+    let mstr = g:calendar_month[month-1].tail
+    let mlen = g:calendar_jp == 2 ? 0 : strlen(list[2])-strlen(mruler)-strlen(mstr)
+    let mruler .= mstr . repeat(' ', mlen)
     call insert(list, mruler)
     call map(list, 'substitute(v:val, "^", b:submenu_calendar_lmargin, "")')
     let month += 1
-    if loop > 1
-      call extend(list, ['_'])
+    if mode == 0
+      if a:row > 1 || a:col > 1
+        call extend(list, ['_'.repeat(' ', strlen(list[2])-1)])
+      endif
+      call extend(glist, list)
+    else
+      for idx in range(len(glist))
+        let str = len(list) > idx ? list[idx] : ''
+        let glist[idx] .= str . repeat(' ', strlen(list[2])-strlen(str)) .' |'
+      endfor
     endif
-    call extend(glist, list)
   endfor
+  if mode
+    call extend(glist, ['_'])
+  endif
   return glist
 endfunction
 
@@ -656,13 +706,22 @@ function! s:SCBufEnter(pbuf, cbuf)
   endif
   if expand('<abuf>') == a:cbuf
     if b:calendar_resize
-      if exists('g:calendar_width_'.a:pbuf)
-        exe "let b:calendar_width = g:calendar_width_".a:pbuf
+      if b:dircmd !~ 'vert'
+        let w = &lines - winheight(0) - &cmdheight - (&laststatus > 0 ? 1 : 0)
+        if w > 0
+          if winheight(0) < b:calendar_height
+            exe 'resize '.b:calendar_height
+          endif
+        endif
+      else
+        if exists('g:calendar_width_'.a:pbuf)
+          exe "let b:calendar_width = g:calendar_width_".a:pbuf
+        endif
+
+        if winwidth(0) < b:calendar_width || b:calendar_resize " == 1
+          exe 'vertical resize '.b:calendar_width
+        endif
       endif
-      if winwidth(0) < b:calendar_width || b:calendar_resize " == 1
-        exe 'vertical resize '.b:calendar_width
-      endif
-      call s:winfixheight(b:calendar_height)
     endif
     let save_cursor = getpos('.')
     call cursor(1, 1)
@@ -680,6 +739,7 @@ endfunction
 function! s:syntax()
   syn clear
   exe 'syn match CalSaturday display /\d\+.\?$/'
+  exe 'syn match CalSaturday display /\d\+.\?\s\{,2}\ze|/'
 
   " today
   if g:calendar_mark =~ 'left-fit'
@@ -700,6 +760,7 @@ function! s:syntax()
   " ruler
   exe 'syn match CalRulerNC display  "'.substitute(g:calendar_dow, '^\s*\|\s*$', '', '').'"'
   exe 'syn match CalSunday  display "'.'^'.b:submenu_calendar_lmargin.' \?[+!$%&?]\? \{,2}\d\+" contains=CalToday'
+  exe 'syn match CalSunday  display "'.'|\zs'.b:submenu_calendar_lmargin.' \?[+!$%&?]\? \{,2}\d\+" contains=CalToday'
   syn match CalInfo display '\s*_.*$' contains=CalConceal
 
   exe 'runtime! syntax/'.g:submenu_calendar_syntax
@@ -725,6 +786,7 @@ endfunction
 
 function! howm_calendar#QFixMemoCalendar(dircmd, file, cnt, ...)
   call QFixMemoCalendar(a:dircmd, a:file, a:cnt)
+  call s:CR('today')
 endfunction
 
 function! howm_calendar#CalendarDiary(day, month, year, week, dir)

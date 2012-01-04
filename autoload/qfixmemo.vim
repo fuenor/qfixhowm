@@ -1855,6 +1855,9 @@ endif
 " カレンダー
 if !exists('g:qfixmemo_calendar_wincmd')
   let g:qfixmemo_calendar_wincmd = 'vertical topleft'
+  " let g:qfixmemo_calendar_wincmd = 'vertical botright'
+  " let g:qfixmemo_calendar_wincmd = 'leftabove'
+  " let g:qfixmemo_calendar_wincmd = 'rightbelow'
 endif
 if !exists('g:qfixmemo_calendar_count')
   let g:qfixmemo_calendar_count = 3

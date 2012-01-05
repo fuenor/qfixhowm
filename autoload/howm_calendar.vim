@@ -20,23 +20,9 @@ if !exists('g:calendar_CalHoliday')
   " let g:calendar_CalHoliday = 'CalMemo'
   let g:calendar_CalHoliday = 'CalSunday'
 endif
-" calendar.vimのコマンドをqfixmemo-calendar.vimのハイライト表示に変更
-if !exists('g:calendar_howm_syntax')
-  let g:calendar_howm_syntax = 1
-endif
 " サインの表示位置 left-fit, left, right
-if !exists("g:calendar_mark")
- \|| (g:calendar_mark != 'left'
- \&& g:calendar_mark != 'left-fit'
- \&& g:calendar_mark != 'right')
+if !exists("g:calendar_mark") || (g:calendar_mark != 'left' && g:calendar_mark != 'left-fit' && g:calendar_mark != 'right')
   let g:calendar_mark = 'left-fit'
-endif
-
-" コマンド乗っ取り
-" ハイライトを変更されたくない場合は calendar_howm_syntax = 0 を設定
-if g:calendar_howm_syntax
-  au VimEnter * command! -nargs=* Calendar  call Calendar(0,<f-args>) | call CalendarPost()
-  au VimEnter * command! -nargs=* CalendarH call Calendar(1,<f-args>) | call CalendarPost()
 endif
 
 if !exists('g:calendar_flag')
@@ -87,8 +73,16 @@ function! s:CalendarPost(win)
 endfunction
 
 if !exists('*QFixMemoCalendarSign')
-" 追加オプションがある場合はファイルネームを返す
-function! QFixMemoCalendarSign(day, month, year, ...)
+function! QFixMemoCalendarSign(day, month, year)
+  let file = QFixMemoCalendarFile(a:day, a:month, a:year)
+  let hday = datelib#HolidayCheck(a:year, a:month, a:day, 'Sun')
+  let id = filereadable(expand(file)) + hday*2
+  return g:calendar_flag[id]
+endfunction
+endif
+
+if !exists('*QFixMemoCalendarFile')
+function! QFixMemoCalendarFile(day, month, year)
   let year  = printf("%4.4d",a:year)
   let month = printf("%2.2d",a:month)
   let day   = printf("%2.2d",a:day)
@@ -105,17 +99,11 @@ function! QFixMemoCalendarSign(day, month, year, ...)
     let file = substitute(file, '%d', day, 'g')
     let file = g:qfixmemo_dir.'/'.file
   endif
-  if a:0
-    return file
-  endif
-  let hday = datelib#HolidayCheck(a:year, a:month, a:day, 'Sun')
-  let id = filereadable(expand(file)) + hday*2
-  return g:calendar_flag[id]
+  return file
 endfunction
 endif
 
 if !exists('*QFixMemoCalendarDiary')
-" weekとdirはcalendar.vimとの互換性のためで常に空文字列
 function! QFixMemoCalendarDiary(day, month, year, week, dir)
   let year  = printf("%4.4d", a:year)
   let month = printf("%2.2d", a:month)
@@ -144,37 +132,25 @@ function! CalendarSign_(day, month, year)
   return g:calendar_flag[id]
 endfunction
 
-" カレンダーコマンド
-if !exists('g:howm_calendar_wincmd')
-  let g:howm_calendar_wincmd = 'vertical topleft'
-  " let g:howm_calendar_wincmd = 'vertical botright'
+" calendar.vimのコマンドをqfixmemo-calendar.vimのハイライト表示に変更
+if !exists('g:calendar_howm_syntax')
+  let g:calendar_howm_syntax = 1
 endif
-if !exists('g:howm_calendar_count')
-  let g:howm_calendar_count = 3
-endif
-if !exists('g:howm_calendarh_wincmd')
-  " let g:howm_calendarh_wincmd = 'leftabove'
-  let g:howm_calendarh_wincmd = 'rightbelow'
-endif
-if !exists('g:howm_calendarh_count')
-  let g:howm_calendarh_count = 4
+" カレンダーコマンドをオーバーライド
+if !exists('g:howm_calendar')
+  let g:howm_calendar = 0
 endif
 
-if !exists(':Calendar')
-  command! -nargs=* Calendar  call Calendar(0,<f-args>) | call CalendarPost()
-  command! -nargs=* CalendarH call Calendar(1,<f-args>) | call CalendarPost()
-  function! Calendar(...)
-    if a:0 && a:1 == 1
-      let wincmd = g:howm_calendarh_wincmd
-      let ccount = g:howm_calendarh_count
-    else
-      let wincmd = g:howm_calendar_wincmd
-      let ccount = g:howm_calendar_count
-    endif
-    call QFixMemoCalendar(wincmd, '__Calendar__', ccount)
-    call s:CR('today')
-  endfunction
-endif
+au VimEnter * call <SID>VimEnter()
+function! s:VimEnter()
+  if g:howm_calendar
+    command! -nargs=* Calendar  call howm_calendar#Calendar(0,<f-args>)
+    command! -nargs=* CalendarH call howm_calendar#Calendar(1,<f-args>)
+  elseif g:calendar_howm_syntax
+    command! -nargs=* Calendar  call Calendar(0,<f-args>) | call CalendarPost()
+    command! -nargs=* CalendarH call Calendar(1,<f-args>) | call CalendarPost()
+  endif
+endfunction
 
 "=============================================================================
 "    Description: QFixMemo Calendar
@@ -416,7 +392,9 @@ function! s:CR(...)
         bprev
       endif
     endif
-    exe 'call '.g:calendar_action.'(key, month, year, "", "")'
+    let week = line('.') - lnum - 1
+    let dir = exists('g:qfixmemo_dir') ? g:qfixmemo_dir : g:calendar_diary
+    exe 'call '.g:calendar_action.'(key, month, year, week, dir)'
   elseif key =~ 'up\|down'
     let b:month += key =~ 'up' ? -1 : 1
     call s:build()
@@ -560,7 +538,7 @@ function CalendarInfo()
     return [' Happy New Year!']
   endif
 
-  let file = expand(QFixMemoCalendarSign(day, month, year, 'filename'))
+  let file = expand(QFixMemoCalendarFile(day, month, year))
   if filereadable(file)
     let info = readfile(file, '', 1)
     if exists('g:qfixmemo_fileencoding')
@@ -777,14 +755,53 @@ function! s:syntax()
   hi def link CalInfo     Identifier
 endfunction
 
+if !exists('g:howm_calendar_wincmd')
+  let g:howm_calendar_wincmd = 'vertical topleft'
+  " let g:howm_calendar_wincmd = 'vertical botright'
+endif
+if !exists('g:howm_calendar_count')
+  let g:howm_calendar_count = 3
+endif
+if !exists('g:howm_calendarh_wincmd')
+  " let g:howm_calendarh_wincmd = 'leftabove'
+  let g:howm_calendarh_wincmd = 'rightbelow'
+endif
+if !exists('g:howm_calendarh_count')
+  let g:howm_calendarh_count = 4
+endif
+
+" silent! function Calendar(...)
+function! howm_calendar#Calendar(...)
+  let dir = a:0 ? a:1 : 0
+  let vyear = a:0 > 1 ? str2nr(a:2) : 0
+  let vmnth = a:0 > 2 ? str2nr(a:3) : 0
+  if dir
+    let wincmd = g:howm_calendarh_wincmd
+    let ccount = g:howm_calendarh_count
+  else
+    let wincmd = g:howm_calendar_wincmd
+    let ccount = g:howm_calendar_count
+  endif
+  call QFixMemoCalendar(wincmd, '__Calendar__', ccount)
+  if vyear == 0 && vmnth == 0
+    call s:CR('today')
+  else
+    let b:year  = vyear > 0 ? vyear : str2nr(strftime('%Y'))
+    let b:month = vmnth > 0 ? vmnth : str2nr(strftime('%m'))
+    call s:build()
+  endif
+endfunction
+
 " for autoload
+let g:howm_calendar = 1
+
 function! howm_calendar#init(...)
 endfunction
 
 function! howm_calendar#Init(...)
 endfunction
 
-function! howm_calendar#QFixMemoCalendar(dircmd, file, cnt, ...)
+function! howm_calendar#QFixMemoCalendar(dircmd, file, cnt)
   call QFixMemoCalendar(a:dircmd, a:file, a:cnt)
   call s:CR('today')
 endfunction

@@ -414,46 +414,16 @@ function! s:BufRead()
   call qfixmemo#BufRead()
 endfunction
 
-" カレンダーコマンド
-if !exists('g:howm_calendar_wincmd')
-  let g:howm_calendar_wincmd = 'vertical topleft'
-  " let g:howm_calendar_wincmd = 'vertical botright'
-endif
-if !exists('g:howm_calendar_count')
-  let g:howm_calendar_count = 3
-endif
-if !exists('g:howm_calendarh_wincmd')
-  " let g:howm_calendarh_wincmd = 'leftabove'
-  let g:howm_calendarh_wincmd = 'rightbelow'
-endif
-if !exists('g:howm_calendarh_count')
-  let g:howm_calendarh_count = 4
-endif
-" calendar.vimのコマンドをqfixmemo-calendar.vimのハイライト表示に変更
-if !exists('g:calendar_howm_syntax')
-  let g:calendar_howm_syntax = 1
+" カレンダーコマンドを使用する
+if !exists('g:howm_calendar')
+  let g:howm_calendar = 1
 endif
 
-if !exists(':Calendar')
-  command! -nargs=* Calendar  call Calendar(0,<f-args>)
-  command! -nargs=* CalendarH call Calendar(1,<f-args>)
-  function! Calendar(...)
-    if a:0 && a:1 == 1
-      let wincmd = g:howm_calendarh_wincmd
-      let ccount = g:howm_calendarh_count
-    else
-      let wincmd = g:howm_calendar_wincmd
-      let ccount = g:howm_calendar_count
-    endif
-    call howm_calendar#QFixMemoCalendar(wincmd, '__Calendar__', ccount)
-  endfunction
-else
-  " コマンド乗っ取り
-  " ハイライトを変更されたくない場合は calendar_howm_syntax = 0 を設定
-  if g:calendar_howm_syntax
-    au VimEnter * command! -nargs=* Calendar  call Calendar(0,<f-args>) | call CalendarPost()
-    au VimEnter * command! -nargs=* CalendarH call Calendar(1,<f-args>) | call CalendarPost()
-  endif
+" コマンドオーバーライド
+" 変更されたくない場合は howm_calendar = 0 を設定
+if g:howm_calendar
+  au VimEnter * command! -nargs=* Calendar  call howm_calendar#Calendar(0, <f-args>)
+  au VimEnter * command! -nargs=* CalendarH call howm_calendar#Calendar(1, <f-args>)
 endif
 
 " autoload読み込み

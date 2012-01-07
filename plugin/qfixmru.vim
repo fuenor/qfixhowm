@@ -857,7 +857,9 @@ endfunction
 function! s:BufWritePost()
   call QFixMRUWrite(0)
   let b:QFixMRU_moved = 1
-  call s:VimLeave()
+  if g:QFixMRU_state == 0 && g:QFixMRU_VimLeaveWrite
+    call QFixMRURead()
+  endif
 endfunction
 
 function! s:CursorMoved()

@@ -4,7 +4,7 @@
 "     Maintainer: fuenor@gmail.com
 "                 http://dl.dropbox.com/u/1736409/howm/howm2html.html
 "=============================================================================
-let s:version  = '1.29'
+let s:version  = '1.30'
 scriptencoding utf-8
 
 if exists('g:disable_Howm2html') && g:disable_Howm2html == 1
@@ -1119,7 +1119,7 @@ endfunction
 
 " スーパーpreをコードハイライト
 if !exists('g:HowmHtml_CodeHighlight')
-  let g:HowmHtml_CodeHighlight = 0
+  let g:HowmHtml_CodeHighlight = 1
 endif
 " コードハイライトに使うカラースキーム
 if !exists('g:HowmHtml_colorscheme')

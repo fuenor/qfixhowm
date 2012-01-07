@@ -414,17 +414,25 @@ function! s:BufRead()
   call qfixmemo#BufRead()
 endfunction
 
-" カレンダーコマンドを使用する
-if !exists('g:howm_calendar')
-  let g:howm_calendar = 1
+" カレンダーコマンドをオーバーライド
+if !exists('g:qfixmemo_calendar')
+  let g:qfixmemo_calendar = 1
+endif
+" calendar.vimのコマンドをqfixmemo-calendar.vimのハイライト表示に変更
+if !exists('g:calendar_howm_syntax')
+  let g:calendar_howm_syntax = 1
 endif
 
-" コマンドオーバーライド
-" 変更されたくない場合は howm_calendar = 0 を設定
-if g:howm_calendar
-  au VimEnter * command! -nargs=* Calendar  call howm_calendar#Calendar(0, <f-args>)
-  au VimEnter * command! -nargs=* CalendarH call howm_calendar#Calendar(1, <f-args>)
-endif
+au VimEnter * call <SID>CalVimEnter()
+function! s:CalVimEnter()
+  if !exists(':Calendar') || g:qfixmemo_calendar
+    command! -nargs=* Calendar  call howm_calendar#Calendar(0,<f-args>)
+    command! -nargs=* CalendarH call howm_calendar#Calendar(1,<f-args>)
+  elseif g:calendar_howm_syntax
+    command! -nargs=* Calendar  call Calendar(0,<f-args>) | call howm_calendar#CalendarPost()
+    command! -nargs=* CalendarH call Calendar(1,<f-args>) | call howm_calendar#CalendarPost()
+  endif
+endfunction
 
 " autoload読み込み
 if g:qfixmemo_autoload

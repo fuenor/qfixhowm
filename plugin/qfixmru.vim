@@ -357,7 +357,6 @@ endfunction
 " call QFixMRURead({file}, {substitute_dir})
 " call QFixMRURead({file}, {substitute_dir}, {'/merge'})
 function! QFixMRURead(...)
-  let g:QFixMRU_state = 1
   let file = g:QFixMRU_Filename
   let basedir = ''
   let merge = 0

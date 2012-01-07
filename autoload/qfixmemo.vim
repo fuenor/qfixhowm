@@ -659,7 +659,6 @@ function! qfixmemo#AddTitle(...)
     endif
     let fline = lline+1
   endwhile
-  call QFixMRUWrite(0)
   call setpos('.', save_cursor)
 endfunction
 

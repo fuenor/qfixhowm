@@ -717,6 +717,8 @@ NOTE:
 
 <Leader>q           カレンダー
 <Leader>Q           カレンダー表示方向を変更
+:Calendar
+:CalendarH
 
 カレンダー上でのキーマップ
 |  i < <S-Left>   | 前の月へ               |
@@ -743,7 +745,7 @@ NOTE:
  t または . を入力すると今日の日付へ移動します。
 
 オプション >
-  " 単体カレンダーの分割指定(vertical topleft, vertical botright)
+  " 単体カレンダーの分割指定(vertical topleft, vertical botright, leftabove, rightbelow)
   let qfixmemo_calendar_wincmd = 'vertical topleft'
   " 単体カレンダーに表示する月数
   let qfixmemo_calendar_count  = 3

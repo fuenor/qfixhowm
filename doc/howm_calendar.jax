@@ -1,4 +1,4 @@
-*howm-calendar.jax*	For Vim バージョン 7.2	Last change: 2011 November 6
+*howm_calendar.jax*	For Vim バージョン 7.2	Last change: 2011 November 6
 ==============================================================================
        Description: howm style calendarr
             Author: fuenor <fuenor@gmail.com>
@@ -16,7 +16,7 @@ CONTENTS					*howm-calendar-contents*
 
 1. Intro						*howm-calendar-intro*
 
-howm-calendar.vimはQFixHowm/QFixMemoでカレンダーを表示するためのプラグインです。
+howm_calendar.vimはQFixHowm/QFixMemoでカレンダーを表示するためのプラグインです。
 QFixHowmの休日定義ファイルを利用してカレンダー上で休日が強調表示されます。
 
 ==============================================================================
@@ -24,36 +24,32 @@ QFixHowmの休日定義ファイルを利用してカレンダー上で休日が
 
 howm_calendar.vimをruntimepathの通った場所へコピーしてください。
 
-この状態でも :Calendar でカレンダーが表示されます。
+この状態でも :Calendar または :CalendarH でカレンダーが表示されます。
 
 ==============================================================================
 3. 設定							*howm-calendar-settings*
 
 :Calendar コマンドのオプションは次のとおりです。
 >
-  " 表示するウィンドウ
+  " 表示するウィンドウ(Calendar)
   let howm_calendar_wincmd = 'vertical topleft'
   " 表示する月数
   let howm_calendar_count = 3
 
-QFixHowm/QFixMemoの場合は次の設定が有効です。
+  " 表示するウィンドウ(CalendarH)
+  let howm_calendarh_wincmd = 'rightbelow'
+  " 表示する月数
+  let howm_calendarh_count = 4
+
+QFixHowm/QFixMemoのカレンダーでは次の設定が有効です。
 >
   " 表示するウィンドウ
   let qfixmemo_calendar_wincmd = 'vertical topleft'
   " 表示する月数
   let qfixmemo_calendar_count = 3
 
-3.1 日記の設定
-
-以下を .vimrcへ追加して日付上で<CR>を押すとQFixHowm/QFixMemoで日記を書くことが
-できます。
-QFixHowm/QFixMemoを使用している場合は自動設定されるので問題なければ設定不要で
-す。
->
-  let calendar_action = "QFixMemoCalendarDiary"
-  let calendar_sign   = "QFixMemoCalendarSign"
-
-3.2 休日定義ファイル
+------------------------------------------------------------------------------
+3.1 休日定義ファイル					*howm-calendar-holiday*
 
 カレンダーに表示する休日を定義するファイルにはQFixHowmの休日定義ファイルを使用
 します。
@@ -63,7 +59,7 @@ https://sites.google.com/site/fudist/Home/qfixhowm#downloads
 
 ファイルは内部エンコーディングに合わせるか、QFixMemo/QFixHowmと併用する場合は
 エンコーディングを合わせてください。適当なディレクトリにコピーした後、以下を
-.vimrcへ追加してます。
+.vimrcへ追加します。
 >
     " 休日定義ファイル(パス等は環境に合わせてください)
     let calendar_holidayfile = '~/howm/Sche-Hd-0000-00-00-000000.howm'
@@ -75,7 +71,8 @@ https://sites.google.com/site/fudist/Home/qfixhowm#downloads
 |  @  |  休日                 |
 |  #  |  休日で日記が存在する |
 
-3.2.1 休日定義のフォーマット
+------------------------------------------------------------------------------
+* 休日定義のフォーマット
 
 休日定義ファイルで使用可能な定義はQFixHowmの予定・TODOのサブセットです。
 基本的に@予定であれば使用可能です。
@@ -86,15 +83,78 @@ https://sites.google.com/site/fudist/Home/qfixhowm#downloads
 <
   @@@ は年単位の繰り返しで、第2水曜を指定したい場合は(2*Wed)のように曜日指
   定オプションを使用します。
-  @ は一回限りの指定です。
+  @@ は毎月、 @ は一回限りの指定です。
 
-3.3 他のプラグイン等で利用する
+------------------------------------------------------------------------------
+3.2 サインとアクション					*howm-calendar-customize*
+
+日付上で<CR>を押すと日記を書くなどのアクションが実行可能です。
+QFixHowm/QFixMemoを使用している場合は自動設定されるので設定不要です。
+
+サインは calendar_sign 、日付のアクションには calendar_actionで設定された関数
+が呼び出されるので任意の関数を実行することが可能です。
+サインとアクションのQFixHowm/QFixMemoでの設定と同じ物は以下の通りですので、好
+みに改変してください。
+
+サイン
+サインは +!#$%&@? が使用可能ですが #@ は休日としてハイライトされます。
+>
+  let calendar_sign   = "MyCalendarSign"
+
+  " カレンダーのサインを返す
+  " NOTE: @ # は休日としてハイライトされる
+  let calendar_flag=['', '+', '@', '#']
+  function! MyCalendarSign(day, month, year)
+    " holiday : 日曜以外の休日かどうか
+    let holiday = datelib#HolidayCheck(a:year, a:month, a:day, 'Sun')
+    " file    : フルパスの日記ファイル名
+    let file = QFixMemoCalendarFile(a:year, a:month, a:day)
+    let id = filereadable(expand(file)) + holiday*2
+    return g:calendar_flag[id]
+  endfunction
+
+アクション
+>
+  let calendar_action = "MyCalendarDiary"
+  " カレンダーの日付上で<CR>を押した場合に呼び出される
+  " CAUTION: weekは calendar_vimとの整合性を保つためのもので使用不可
+  " NOTE: dir には現在のqfixmemo_dir(howm_dir)がコピーされている
+  function! MyCalendarDiary(day, month, year, week, dir)
+    let year  = printf("%4.4d", a:year)
+    let month = printf("%2.2d", a:month)
+    let day   = printf("%2.2d", a:day)
+    " NOTE: QFixHowmとして使用している場合は qfixmemo_diaryに QFixHowm_DiaryFileがコピーされている
+    let file = g:qfixmemo_diary
+    let file = substitute(file, '%Y', year, 'g')
+    let file = substitute(file, '%m', month, 'g')
+    let file = substitute(file, '%d', day, 'g')
+    call qfixmemo#Edit(file)
+  endfunction
+
+改変例
+日付で日記を開く代わりに日付を検索
+>
+  function! MyCalendarDiary(day, month, year, week, dir)
+    let year  = printf("%4.4d", a:year)
+    let month = printf("%2.2d", a:month)
+    let day   = printf("%2.2d", a:day)
+    let pattern = printf('^\[%s-%s-%s ', year, month, day)
+    call qfixlist#GrepCopen(pattern, g:qfixmemo_dir, '**/*', g:qfixmemo_fileencoding)
+  endfunction
+
+------------------------------------------------------------------------------
+4. 他のプラグイン等で利用する(datelib.vim)		*howm-calendar-datelib*
+実際の日付処理はdatelib.vimでライブラリ化されています。
 >
   " 指定日が休日かチェック
-  :echo HolidayCheck(year, month, day)
+  :echo datelib#HolidayCheck(year, month, day)
+
+  " 指定日が日曜以外の休日かチェック
+  :echo datelib#HolidayCheck(year, month, day, 'Sun')
 
   " 少なくとも指定年の休日定義が含まれる辞書を取得
-  :let tbl = GetHolidayDict(2012)
+  :let tbl = datelib#GetHolidayTable(2012)
+
   :echo tbl['20121123']      " 「文化の日」と表示される
   " NOTE: calendar_holidayfileのファイルエンコーディングは考慮していないので
   "       呼び出し側が処理する必要がある。

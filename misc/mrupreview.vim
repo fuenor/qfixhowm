@@ -56,8 +56,19 @@ function! s:TogglePreview()
   call QFixPclose('force')
 endfunction
 
+" myqfix.vimが存在しない場合のエラー対策
 if !exists('*QFixPclose')
 function QFixPclose(...)
+endfunction
+endif
+
+if !exists('*QFixPreviewOpen')
+function! QFixPreviewOpen(...)
+endfunction
+endif
+
+if !exists('*QFixAltWincmdMap')
+function! QFixAltWincmdMap(...)
 endfunction
 endif
 

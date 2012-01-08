@@ -73,16 +73,21 @@ function! s:CalendarPost(win)
 endfunction
 
 if !exists('*QFixMemoCalendarSign')
+" カレンダーのサインを返す
+" @ # は休日としてハイライトされる
 function! QFixMemoCalendarSign(day, month, year)
-  let file = QFixMemoCalendarFile(a:day, a:month, a:year)
-  let hday = datelib#HolidayCheck(a:year, a:month, a:day, 'Sun')
-  let id = filereadable(expand(file)) + hday*2
+  " holiday : 日曜以外の休日かどうか
+  let holiday = datelib#HolidayCheck(a:year, a:month, a:day, 'Sun')
+  " file    : 日記ファイル名(フルパス)
+  let file = QFixMemoCalendarFile(a:year, a:month, a:day)
+  let id = filereadable(expand(file)) + holiday*2
   return g:calendar_flag[id]
 endfunction
 endif
 
 if !exists('*QFixMemoCalendarFile')
-function! QFixMemoCalendarFile(day, month, year)
+" 日記ファイル名をフルパスで返す
+function! QFixMemoCalendarFile(year, month, day)
   let year  = printf("%4.4d",a:year)
   let month = printf("%2.2d",a:month)
   let day   = printf("%2.2d",a:day)
@@ -104,6 +109,9 @@ endfunction
 endif
 
 if !exists('*QFixMemoCalendarDiary')
+" カレンダーの日付上で<CR>を押した場合に呼び出される
+" CAUTION: weekは calendar_vimとの整合性を保つためのもので使用不可
+" dir には現在のqfixmemo_dir(howm_dir)がコピーされている
 function! QFixMemoCalendarDiary(day, month, year, week, dir)
   let year  = printf("%4.4d", a:year)
   let month = printf("%2.2d", a:month)

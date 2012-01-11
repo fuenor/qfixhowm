@@ -2628,7 +2628,7 @@ function! qfixmemo#OpenKeywordLink()
   endif
   if word != ''
     let g:MyGrep_Regexp = 0
-    let qflist = qfixlist#search(word, g:qfixmemo_dir, '', 0, g:qfixmemo_fileencoding, '**/*')
+    let qflist = qfixlist#search(word, g:qfixmemo_dir, 'mtime', 0, g:qfixmemo_fileencoding, '**/*')
     if exists('g:howm_clink_pattern') && g:howm_clink_pattern != ''
       let qflist = sort(qflist, "<SID>qfixmemoSortHowmClink")
     endif
@@ -2651,7 +2651,7 @@ function! qfixmemo#OpenKeywordLink()
       let file = word
       if g:qfixmemo_keyword_mode == 0
         let g:MyGrep_Regexp = 0
-        let qflist = qfixlist#search(word, g:qfixmemo_dir, '', 0, g:qfixmemo_fileencoding, '**/*')
+        let qflist = qfixlist#search(word, g:qfixmemo_dir, 'mtime', 0, g:qfixmemo_fileencoding, '**/*')
         if exists('g:howm_clink_pattern') && g:howm_clink_pattern != ''
           let qflist = sort(qflist, "<SID>qfixmemoSortHowmClink")
         endif

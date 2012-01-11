@@ -105,6 +105,9 @@ function! s:QFixMemoKeymap()
   silent! nnoremap <silent> <unique> <Leader>Q       :<C-u>call qfixmemo#Calendar('LR')<CR>
   silent! nnoremap <silent> <unique> <Leader>o       :<C-u>call QFixMemoOutline()<CR>
 
+  silent! nnoremap <silent> <unique> <Leader>d     :<C-u>call qfixmemo#InsertDate('Date')<CR>
+  silent! nnoremap <silent> <unique> <Leader>T     :<C-u>call qfixmemo#InsertDate('Time')<CR>
+
   if g:qfixmemo_use_howm_schedule
     let g:qfixmemo_howm_schedule_key = 1
     silent! nnoremap <silent> <unique> <Leader>t     :<C-u>call qfixmemo#ListReminderCache("todo")<CR>
@@ -113,8 +116,6 @@ function! s:QFixMemoKeymap()
     silent! nnoremap <silent> <unique> <Leader><Tab> :<C-u>call qfixmemo#ListReminderCache("schedule")<CR>
     silent! nnoremap <silent> <unique> <Leader>ry    :<C-u>call qfixmemo#ListReminder("schedule")<CR>
     silent! nnoremap <silent> <unique> <Leader>rd    :<C-u>call qfixmemo#GenerateRepeatDate()<CR>
-    silent! nnoremap <silent> <unique> <Leader>d     :<C-u>call qfixmemo#InsertDate('Date')<CR>
-    silent! nnoremap <silent> <unique> <Leader>T     :<C-u>call qfixmemo#InsertDate('Time')<CR>
     silent! nnoremap <silent> <unique> <Leader>,     :<C-u>call qfixmemo#OpenMenu("cache")<CR>
     silent! nnoremap <silent> <unique> <Leader>r,    :<C-u>call qfixmemo#OpenMenu()<CR>
   endif

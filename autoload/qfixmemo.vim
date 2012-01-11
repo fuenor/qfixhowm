@@ -119,6 +119,10 @@ endfunction
 if !exists('g:qfixmemo_timeformat')
   let g:qfixmemo_timeformat = '[%Y-%m-%d %H:%M]'
 endif
+" タイムスタンプ(strftime)
+if !exists('g:qfixmemo_dateformat')
+  let g:qfixmemo_dateformat = '[%Y-%m-%d]'
+endif
 " qfixmemo#UpdateTime()でタイムスタンプの置換に使用する正規表現(Vim)
 if !exists('g:qfixmemo_timeformat_regxp')
   let g:qfixmemo_timeformat_regxp = '^'.s:QFixMemoSetTimeFormatRegxp(g:qfixmemo_timeformat)
@@ -348,6 +352,16 @@ endfunction
 endif
 
 """"""""""""""""""""""""""""""
+function! qfixmemo#InsertDate(type)
+  let fmt = g:qfixmemo_timeformat
+  if a:type == 'Date'
+    let fmt = g:qfixmemo_dateformat
+  endif
+  let str = strftime(fmt)
+  silent! put=str
+  startinsert!
+endfunction
+
 if g:qfixmemo_use_howm_schedule
   function! qfixmemo#ListReminderCache(type)
     call <SID>howmScheduleEnv('save')
@@ -364,12 +378,6 @@ if g:qfixmemo_use_howm_schedule
   function! qfixmemo#GenerateRepeatDate()
     call <SID>howmScheduleEnv('save')
     call QFixHowmGenerateRepeatDate()
-    call <SID>howmScheduleEnv('restore')
-  endfunction
-
-  function! qfixmemo#InsertDate(type)
-    call <SID>howmScheduleEnv('save')
-    call QFixHowmInsertDate(a:type)
     call <SID>howmScheduleEnv('restore')
   endfunction
 

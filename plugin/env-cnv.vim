@@ -216,6 +216,12 @@ if !exists('g:qfixmemo_timeformat')
     let g:qfixmemo_timeformat = '['.g:QFixHowm_DatePattern.' %H:%M]'
   endif
 endif
+if !exists('g:qfixmemo_dateformat')
+  let g:qfixmemo_dateformat = '[%Y-%m-%d]'
+  if exists('g:QFixHowm_DatePattern')
+    let g:qfixmemo_dateformat = '['.g:QFixHowm_DatePattern.']'
+  endif
+endif
 " qfixmemo#UpdateTime()でタイムスタンプの置換に使用する正規表現(Vim)
 if !exists('g:qfixmemo_timeformat_regxp')
   let g:qfixmemo_timeformat_regxp = g:qfixmemo_timeformat

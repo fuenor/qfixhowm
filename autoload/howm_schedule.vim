@@ -407,8 +407,7 @@ function! QFixHowmInsertDate(fmt)
   endif
   let str = strftime('['.fmt.']')
   silent! put=str
-  call cursor(line('.'), col('$'))
-  startinsert
+  startinsert!
 endfunction
 
 let s:reminder_cache = 0

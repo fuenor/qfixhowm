@@ -1293,7 +1293,7 @@ func! s:Convert2HTMLCode(line1, line2, ftype, htmltype)
   let lline = search('^</style>' , 'cW')
   let g:TOHtmlSnippetCSS = getline(fline, lline)
   let fline = search('^<body' , 'ncW')
-  let g:TOHtmlSnippet = getline(fline+1, line('$')-2)
+  let g:TOHtmlSnippet = extend(['<code>', '</code>'], getline(fline+1, line('$')-2), 1)
   close
   exe 'set ft='.orgtype
 

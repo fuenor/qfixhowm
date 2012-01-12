@@ -414,6 +414,7 @@ function! QFixMRURead(...)
   let bpath = getcwd()
   let bpath = substitute(bpath, '\\', '/', 'g').'/'
   let s:MruDic = []
+  let pathhead = '^\([A-Za-z]:[/\\]\|\~[/\\]\|[/\\]\)'
   for d in mdic
     let d = iconv(d, from, to)
     let idx = match(d, '|')
@@ -421,8 +422,8 @@ function! QFixMRURead(...)
     " CAUTION:パフォーマンス優先
     " let file = fnamemodify(file, ':p')
     if !g:QFixMRU_FullPathMode
-      if file =~ '^\*'
-        let file = bpath.file[1 :]
+      if file !~ pathhead
+        let file = bpath.file
       endif
       if !filereadable(file)
         continue
@@ -788,7 +789,7 @@ function! s:WriteMru(mru, mrufile)
     if !g:QFixMRU_FullPathMode
       " let file = fnamemodify(file, ':.')
       if stridx(file, head) == 0
-        let file = '*'.strpart(file , strlen(head))
+        let file = strpart(file , strlen(head))
       endif
     endif
     let mline = file.'|'.d['lnum'].'|'.d['text']

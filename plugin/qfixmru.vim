@@ -425,11 +425,11 @@ function! QFixMRURead(...)
       if file !~ pathhead
         let file = bpath.file
       endif
-      if !filereadable(file)
-        continue
-      endif
-    elseif !filereadable(file)
-      continue
+      " if !filereadable(file)
+      "   continue
+      " endif
+    " elseif !filereadable(file)
+      " continue
     endif
     let file = substitute(file, '\\', '/', 'g')
     let d = strpart(d, idx+1)

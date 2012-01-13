@@ -76,6 +76,8 @@ function! s:QFixMemoKeymap()
     call QFixMemoKeymap()
     return
   endif
+  silent! nnoremap <silent> <unique> <Leader> <Nop>
+
   silent! nnoremap <silent> <unique> <Leader>C       :<C-u>call qfixmemo#EditInput()<CR>
   silent! nnoremap <silent> <unique> <Leader>c       :<C-u>call qfixmemo#EditNew()<CR>
   silent! nnoremap <silent> <unique> <Leader>u       :<C-u>call qfixmemo#Quickmemo()<CR>

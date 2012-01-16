@@ -504,8 +504,10 @@ function! s:Msg(id)
 
   let save_cursor = getpos('.')
   setlocal modifiable
+  " let padding = repeat('_', (21+2+(g:calendar_mark =~ 'right'))*cnt)
   let lnum = search('^\s*_', 'ncW')
-  silent! exe '%s/^_.*/_/g'
+  let padding = '_'.repeat(' ', 21+(g:calendar_mark =~ 'right'))
+  silent! exe '%s/^_.*/'.padding.'/g'
   if lnum && len(msg) > 0
     let padding = repeat('_', (21+2+(g:calendar_mark =~ 'right'))*cnt)
     call setline(lnum, padding.msg[0])

@@ -504,7 +504,6 @@ function! s:Msg(id)
 
   let save_cursor = getpos('.')
   setlocal modifiable
-  " let padding = repeat('_', (21+2+(g:calendar_mark =~ 'right'))*cnt)
   let lnum = search('^\s*_', 'ncW')
   let padding = '_'.repeat(' ', 21+(g:calendar_mark =~ 'right'))
   silent! exe '%s/^_.*/'.padding.'/g'
@@ -548,7 +547,7 @@ function CalendarInfo()
     return [' Happy New Year!']
   endif
 
-  let file = expand(QFixMemoCalendarFile(day, month, year))
+  let file = expand(QFixMemoCalendarFile(year, month, day))
   if filereadable(file)
     let info = readfile(file, '', 1)
     if exists('g:qfixmemo_fileencoding')

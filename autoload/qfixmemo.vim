@@ -580,6 +580,9 @@ function! s:BufEnter()
   if !IsQFixMemo(expand('%:p'))
     return
   endif
+  if g:qfixmemo_default_keymap
+    nnoremap <silent> <buffer> <CR> :call QFixMemoUserModeCR()<CR>
+  endif
   call QFixMemoBufEnter()
 endfunction
 
@@ -2579,26 +2582,58 @@ function QFixMemoRebuildKeyword(dir, fenc)
 endfunction
 endif
 
-if !exists('*QFixMemoUserModeCR')
-function QFixMemoUserModeCR(...)
+if !exists('*QFixMemoCR_vimwiki')
+function! QFixMemoCR_vimwiki()
   if g:qfixmemo_use_howm_schedule
     call howm_schedule#Init()
-    return QFixHowmUserModeCR()
+    if QFixHowmScheduleAction()
+      return 1
+    endif
   endif
   call qfixmemo#Init()
   if qfixmemo#OpenCursorline()
-    return
+    return 1
   endif
   if qfixmemo#SwitchAction()
-    return
+    return 1
   endif
-  if qfixmemo#OpenKeywordLink()
-    return
-  endif
-  let cmd = a:0 ? a:1 : "normal! \<CR>"
-  exe cmd
+  call vimwiki#follow_link('nosplit')
+  return
 endfunction
 endif
+
+if !exists('*QFixMemoUserModeCR')
+function QFixMemoUserModeCR(...)
+  if exists('*QFixMemoCR_'.&filetype)
+    call eval('QFixMemoCR_'.&filetype.'()')
+    return
+  endif
+  if qfixmemo#CR()
+    return
+  endif
+  exe "normal! \<CR>"
+endfunction
+endif
+
+function! qfixmemo#CR(...)
+  if g:qfixmemo_use_howm_schedule
+    call howm_schedule#Init()
+    if QFixHowmScheduleAction()
+      return 1
+    endif
+  endif
+  call qfixmemo#Init()
+  if qfixmemo#OpenCursorline()
+    return 1
+  endif
+  if qfixmemo#SwitchAction()
+    return 1
+  endif
+  if qfixmemo#OpenKeywordLink()
+    return 1
+  endif
+  return 0
+endfunction
 
 " カーソル位置のリンクを開く
 function! qfixmemo#OpenCursorline()
@@ -2727,14 +2762,6 @@ function! QFixMemoSwitchAction(list, ...)
     return 1
   endfor
   return 0
-endfunction
-
-" howm_schedule.vim用
-function! QFixHowmOpenKeywordLink()
-  if qfixmemo#OpenKeywordLink()
-    return "\<ESC>"
-  endif
-  return "\<CR>"
 endfunction
 
 """"""""""""""""""""""""""""""

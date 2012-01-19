@@ -11,7 +11,6 @@ scriptencoding utf-8
 "    howmスタイルの予定・TODOを表示
 "    (必要 qfixlist.vim)
 "    (推奨 myqfix.vim, /syntax/howm_schedule.vim)
-"    (アクションロックを使用する場合は要openuri.vim)
 "
 "    詳しい使い方は以下のサイトを参照してください。
 "    http://sites.google.com/site/fudist/Home/qfixhowm/howm-reminder
@@ -1750,15 +1749,15 @@ endif
 "   endif
 " endfunction
 
-silent! function QFixHowmUserAutocmd(ext)
-  if a:ext == 'wiki'
-    nnoremap <silent> <buffer> <CR> :call QFixHowmUserModeCR('VimwikiFollowLink')<CR>
-  else
-    nnoremap <silent> <buffer> <CR> :call QFixHowmUserModeCR()<CR>
-  endif
-endfunction
+" silent! function QFixHowmUserAutocmd(ext)
+"   if a:ext == 'wiki'
+"     nnoremap <silent> <buffer> <CR> :call QFixHowmUserModeCR('VimwikiFollowLink')<CR>
+"   else
+"     nnoremap <silent> <buffer> <CR> :call QFixHowmUserModeCR()<CR>
+"   endif
+" endfunction
 
-function! QFixHowmUserModeCR(...)
+silent! function QFixHowmUserModeCR(...)
   if QFixHowmScheduleAction()
     return
   endif
@@ -1780,10 +1779,6 @@ function! QFixHowmScheduleAction()
   return 1
 endfunction
 
-silent! function QFixHowmOpenCursorline()
-  return openuri#open()
-endfunction
-
 function! QFixHowmScheduleActionStr()
   let save_cursor = getpos('.')
   call setpos('.', save_cursor)
@@ -1792,18 +1787,18 @@ function! QFixHowmScheduleActionStr()
   if ret != "\<CR>"
     return printf(':call feedkeys("%s", "t")', ret)
   endif
-  let save_cursor = getpos('.')
-  let uriopen = g:QFixHowm_UserURIopen
-  if exists('g:QFixHowm_UserURIopen_'.g:QFixHowm_UserFileExt)
-    exe 'let uriopen = g:QFixHowm_UserURIopen_'.g:QFixHowm_UserFileExt
-  endif
-  if uriopen == 1
-    call setpos('.', save_cursor)
-    let ret = QFixHowmOpenCursorline()
-    if ret == 1
-      return "\<ESC>"
-    endif
-  endif
+  " let save_cursor = getpos('.')
+  " let uriopen = g:QFixHowm_UserURIopen
+  " if exists('g:QFixHowm_UserURIopen_'.g:QFixHowm_UserFileExt)
+  "   exe 'let uriopen = g:QFixHowm_UserURIopen_'.g:QFixHowm_UserFileExt
+  " endif
+  " if uriopen == 1
+  "   call setpos('.', save_cursor)
+  "   let ret = QFixHowmOpenCursorline()
+  "   if ret == 1
+  "     return "\<ESC>"
+  "   endif
+  " endif
   call setpos('.', save_cursor)
   let ret = QFixHowmDateActionLock()
   if ret != "\<CR>"
@@ -1816,7 +1811,7 @@ function! QFixHowmScheduleActionStr()
   endif
   call setpos('.', save_cursor)
   let swaction = 'g:QFixHowm_UserSwActionLock'
-  let swaction = exists('g:qfixmemo_switch_action') ? 'g:qfixmemo_switch_action' : swaction
+  " let swaction = exists('g:qfixmemo_switch_action') ? 'g:qfixmemo_switch_action' : swaction
   if exists(swaction)
     exe 'let ret = QFixHowmSwitchActionLock('.swaction.')'
     if ret != "\<CR>"
@@ -1868,20 +1863,32 @@ function! QFixHowmScheduleActionStr()
       return ret
     endif
   endif
-  call setpos('.', save_cursor)
-  let ret = QFixHowmOpenKeywordLink()
-  if ret != "\<CR>"
-    return ret
-  endif
+  " call setpos('.', save_cursor)
+  " let ret = QFixHowmOpenKeywordLink()
+  " if ret != "\<CR>"
+  "   return ret
+  " endif
   call setpos('.', save_cursor)
   return "\<CR>"
 endfunction
 
-if !exists('*QFixHowmOpenKeywordLink')
-function QFixHowmOpenKeywordLink()
-  return "\<CR>"
+silent! function QFixHowmOpenCursorline()
+  return openuri#open()
 endfunction
-endif
+
+" if !exists('*QFixHowmOpenKeywordLink')
+" function QFixHowmOpenKeywordLink()
+"   return "\<CR>"
+" endfunction
+" endif
+
+" " howm_schedule.vim用
+" function! QFixHowmOpenKeywordLink()
+"   if qfixmemo#OpenKeywordLink()
+"     return "\<ESC>"
+"   endif
+"   return "\<CR>"
+" endfunction
 
 " " come-from/goto link
 " if !exists('howm_glink_pattern')

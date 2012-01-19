@@ -33,7 +33,10 @@ if !exists('g:calendar_action')
   let g:calendar_action = "<SID>CalendarDiary"
 endif
 if !exists('g:calendar_sign') || g:calendar_sign == '<SID>CalendarSign'
-  let g:calendar_sign = "CalendarSign_"
+  let g:calendar_sign = "<SID>CalendarSign_"
+endif
+if !exists('g:calendar_info')
+  let g:calendar_info = "<SID>CalendarInfo"
 endif
 
 " 独自ハイライトへの変更
@@ -133,7 +136,7 @@ function! s:CalendarDiary(day, month, year, week, dir)
   call confirm("diary plugin requiard.", 'OK')
 endfunction
 
-function! CalendarSign_(day, month, year)
+function! s:CalendarSign_(day, month, year)
   let sfile = g:calendar_diary."/".a:year."/".a:month."/".a:day.".cal"
   let hday = datelib#HolidayCheck(a:year, a:month, a:day, 'Sun')
   let id = filereadable(expand(sfile)) + hday*2
@@ -515,8 +518,7 @@ function! s:Msg(id)
   call setpos('.', save_cursor)
 endfunction
 
-if !exists('*CalendarInfo')
-function CalendarInfo()
+function! CalendarInfo()
   if getline('.') =~ '< \. >'
     if expand('<cWORD>') =~ '\d\{4}/\d\{2}'
       return [' YYYY/MM (t:today)']
@@ -539,6 +541,24 @@ function CalendarInfo()
   let month = matchstr(str, '/\zs\d\{2}')
   let day = expand('<cword>')
 
+  exe 'let info = '.g:calendar_info.'(day, month, year)'
+  if info != []
+    return info
+  endif
+
+  let tbl = datelib#GetHolidayTable(year)
+  let date = printf('%4.4d%2.2d%2.2d', year, month, day)
+  if exists('tbl[date]') && tbl[date] != ''
+    return [tbl[date]]
+  endif
+  return []
+endfunction
+
+function! s:CalendarInfo(day, month, year)
+  let day   = a:day
+  let month = a:month
+  let year  = a:year
+
   if day == 24 && month == 12
     return [' Merry Xmas!']
   elseif day == 31 && month == 10
@@ -556,14 +576,8 @@ function CalendarInfo()
     return info
   endif
 
-  let tbl = datelib#GetHolidayTable(year)
-  let date = printf('%4.4d%2.2d%2.2d', year, month, day)
-  if exists('tbl[date]') && tbl[date] != ''
-    return [tbl[date]]
-  endif
   return []
 endfunction
-endif
 
 let s:cal = '  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31'
 if !exists('g:calendar_dow')
@@ -615,12 +629,17 @@ function! s:CalendarStr(row, col)
     let ty = strftime('%Y')
     let tm = strftime('%m')
     let td = str2nr(strftime('%d'))
+    let sign_cmd = 'let id = '.g:calendar_sign.'(n, month, year)'
     for n in range(1, eom)
-      exe 'let id = '.g:calendar_sign.'(n, month, year)'
+      exe sign_cmd
       if n == td && month == tm && year == ty
         let id = '*'
       endif
       if id != ''
+        let id = id[0]
+        if id !~ "[+!#$%&@?*]"
+          let id = "+"
+        endif
         if g:calendar_mark =~ 'left-fit'
           let str = substitute(str, printf('%3d', n), printf('%3s', id.string(n)), '')
         elseif g:calendar_mark =~ 'right'
@@ -730,13 +749,13 @@ function! s:syntax()
 
   " today
   if g:calendar_mark =~ 'left-fit'
-    syn match CalToday display "\s*\*\d\+"
+    syn match CalToday display "\s*[*]\d\+"
     syn match CalMemo display "\s*[+!$%&?]\d\+"
   elseif g:calendar_mark =~ 'right'
-    syn match CalToday display "\d\+\*\s*"
+    syn match CalToday display "\d\+[*]\s*"
     syn match CalMemo display "\d\+[+!$%&?]\s*"
   else
-    syn match CalToday display "\*\s*\d\+"
+    syn match CalToday display "[*]\s*\d\+"
     syn match CalMemo display "[+!$%&?]\s*\d\+"
   endif
 

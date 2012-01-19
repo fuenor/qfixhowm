@@ -358,6 +358,14 @@ function! s:VimEnter()
   if !exists('g:calendar_sign') || g:calendar_sign == "<SID>CalendarSign"
     let g:calendar_sign   = "howm_calendar#CalendarSign"
   endif
+  if g:qfixmemo_calendar
+    if g:calendar_action == 'vimwiki_diary#calendar_action'
+      let g:calendar_action = "howm_calendar#CalendarDiary"
+    endif
+    if g:calendar_sign == 'vimwiki_diary#calendar_sign'
+      let g:calendar_sign   = "howm_calendar#CalendarSign"
+    endif
+  endif
   call QFixMemoInit()
   call QFixMemoTitleRegxp()
   call QFixMemoVimEnter()

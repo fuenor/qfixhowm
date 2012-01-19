@@ -13,7 +13,6 @@ CONTENTS					*howm-schedule-contents*
 3. コマンド                                     |howm-schedule-command|
   3.1 キーマップ                                |howm-schedule-keymap|
 4. シンタックス                                 |howm-schedule-syntax|
-5. URIとテキストリンク                          |howm-schedule-uri|
 
 ==============================================================================
 1. Intro						*howm-schedule-intro*
@@ -50,17 +49,11 @@ howm_schedule.vimをruntimepathの通った場所へコピーしてください�
   QuickFixウィンドウにプレビューや絞り込みを追加します。
   なくても動作しますが連携機能もあるため同時使用を推奨します。
 
-  openuri.vim
-  https://github.com/fuenor/openuri.vim
-  カーソル位置のURIやファイルのテキストリンクを開きます。
-  URI等のテキストリンクはopenuri.vim以外の好みのプラグインで開くように設定可能
-  ですが、デフォルトでは存在しないとエラーになります。
-
 すべてのファイルはQFixHowmに同梱されています。
   http://sites.google.com/site/fudist/Home/qfixhowm
 
 NOTE:
-howm_schedule.vim,openuri.vimはautoloadでの読み込みにも対応しています。
+howm_schedule.vimはautoloadでの読み込みにも対応しています。
 ただしautoloadディレクトリに置いていると起動直後にはコマンドやキーマップは設定
 されません。必要に応じて初期化関数を呼び出してください。
   :call howm_schedule#init()
@@ -110,8 +103,17 @@ NOTE:
 http://sites.google.com/site/fudist/Home/qfixhowm/howm-reminder
 
 <CR>にアクションロックが必要な場合はマップしてください。
+<S-CR>などで分けておくのも良いかもしれません。
 >
-  nnoremap <silent> <buffer> <CR> :call QFixHowmUserModeCR()<CR>
+  nnoremap <silent> <buffer> <CR> :call MyCR()<CR>
+
+  function! MyCR()
+    call howm_schedule#Init()
+    if QFixHowmScheduleAction()
+      return
+    endif
+    exe "normal! \<CR>"
+  endfunction
 
 ==============================================================================
 4. シンタックス						*howm-schedule-syntax*
@@ -126,19 +128,6 @@ http://sites.google.com/site/fudist/Home/qfixhowm/howm-reminder
   :runtime! syntax/howm_schedule.vim
 
 ==============================================================================
-5. URIとテキストリンク					*howm-schedule-uri*
-
-カーソル位置のURIやファイルのテキストリンクを開くためには openuri.vimが必要で
-す。
-openuri.vim以外のURI処理を使用したい場合は、テキストリンクを開いたら 1 を返す
-function! QFixHowmOpenCursorline() を .vimrc等で定義してください。
->
-  """"""""""""""""""""""""""""""
-  " カーソル位置のテキストリンクを開いたら 1 を返す
-  """"""""""""""""""""""""""""""
-  function! QFixHowmOpenCursorline()
-    return openuri#open()
-  endfunction
 
   vim:tw=78:ts=8:ft=howm_schedule.help:norl
 

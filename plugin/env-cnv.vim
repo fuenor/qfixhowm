@@ -348,8 +348,6 @@ let s:cnvopt = [
   \ ['let g:qfixmemo_qfixlist_cache          = %s', 'g:QFixHowm_TitleListCache'],
   \ ['let g:qfixlist_autoclose               = %s', 'g:QFixHowm_ListAutoClose'],
   \ ['let g:qfixlist_wincmd                  = %s', 'g:QFixHowm_ListWinCmd'],
-  \ ['let g:qfixmemo_swlist_action           = %s', 'g:QFixHowm_SwitchListActionLock'],
-  \ ['let g:qfixmemo_switch_action           = %s', 'g:QFixHowm_UserSwActionLock'],
   \ ['let g:qfixmemo_template                = %s', 'g:QFixHowm_Template'],
   \ ['let g:qfixmemo_template_keycmd         = %s', 'g:QFixHowm_Cmd_NewEntry'],
   \ ['let g:qfixmemo_template_tag            = %s', 'g:QFixHowm_DefaultTag'],
@@ -400,9 +398,6 @@ function! QFixHowmSetup()
   for i in range(1, 9)
     if exists('g:QFixHowm_QuickMemoFile'.i)
       exe printf('let g:qfixmemo_quickmemo%d=g:QFixHowm_QuickMemoFile%d', i, i)
-    endif
-    if exists('g:QFixHowm_UserSwActionLock'.i)
-      exe printf('let g:qfixmemo_switch_action%d=g:QFixHowm_UserSwActionLock%d', i, i)
     endif
     if exists('g:SubWindow_Title'.i)
       exe printf('let g:qfixmemo_submenu_title%d=g:SubWindow_Title%d', i, i)
@@ -464,12 +459,6 @@ endif
 """"""""""""""""""""""""""""""
 " misc
 """"""""""""""""""""""""""""""
-" <CR>アクション
-function! QFixMemoUserModeCR(...)
-  call howm_schedule#Init()
-  call QFixHowmUserModeCR()
-endfunction
-
 " メニュー画面のcome-fromリンクキーワードを返す
 " メニューファイルディレクトリ
 if !exists('g:QFixHowm_MenuDir')

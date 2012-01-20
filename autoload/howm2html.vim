@@ -4,7 +4,7 @@
 "     Maintainer: fuenor@gmail.com
 "                 http://dl.dropbox.com/u/1736409/howm/howm2html.html
 "=============================================================================
-let s:version  = '1.30'
+let s:version  = '1.31'
 scriptencoding utf-8
 
 if exists('g:disable_Howm2html') && g:disable_Howm2html == 1
@@ -167,9 +167,10 @@ if !exists('HowmHtml_ConvertLevel')
 endif
 " コンバートに使用する関数
 if !exists('g:HowmHtml_ConvertFunc')
-  let g:HowmHtml_ConvertFunc = "<SID>HowmStr2HTML"
+  " let g:HowmHtml_ConvertFunc = '<SID>H2HStr2HTML'
+  let g:HowmHtml_ConvertFunc = '<SID>HowmStr2HTML'
   if exists('g:qfixmemo_filetype') && g:qfixmemo_filetype == 'markdown'
-    " let g:HowmHtml_ConvertFunc = "<SID>MarkdownStr2HTML"
+    " let g:HowmHtml_ConvertFunc = '<SID>MarkdownStr2HTML'
   endif
 endif
 " コンバートに使用するコマンド
@@ -291,7 +292,8 @@ function! HowmHtmlTagConvert(list, htmlname, anchor)
     let strlist = s:JpJoinStr(strlist, g:JpFormatMarker)
   endif
 
-  let html = eval(g:HowmHtml_ConvertFunc .'(strlist)')
+  let func = g:HowmHtml_ConvertFunc
+  let html = eval(func.'(strlist)')
 
   " Vicunaサイドバー用
   if s:subheader == 1 && g:HowmHtml_VicunaChapter
@@ -303,7 +305,26 @@ endfunction
 
 let s:mkdfile = tempname()
 
-" markdown.pl を使用して変換
+" ノーマル変換
+function! s:H2HStr2HTML(list)
+  let list = a:list
+
+  let from = &enc
+  let to = 'utf-8'
+  if from != to
+    call map(list, 'iconv(v:val, from, to)')
+  endif
+  call writefile(list, s:mkdfile)
+  let cmd = g:HowmHtml_ConvertCmd.' '.s:mkdfile
+  let html = split(system(cmd), '[\n\r]')
+  if from != to
+    call map(html, 'iconv(v:val, to, from)')
+  endif
+
+  return html
+endfunction
+
+" markdownを変換
 function! s:MarkdownStr2HTML(list)
   let list = a:list
   call map(list, 'substitute(v:val, "^\\(\\[\\d\\{4}[-/]\\d\\{2}[-/]\\d\\{2}\\)\\( \\d\\{2}:\\d\\{2}\\)\\?\\(].*\\)", "<ul class=\"info\"><li class=\"date\">\\1\\2\\3</li></ul>", "")')
@@ -1183,6 +1204,9 @@ func! HowmHtmlCodeHighlight(file)
   if !g:HowmHtml_CodeHighlight
     return
   endif
+  if g:HowmHtml_ConvertFunc == '<SID>H2HStr2HTML'
+    return
+  endif
   call s:Convert2HTMLSnippet()
 endfunc
 
@@ -1272,7 +1296,7 @@ func! s:Convert2HTMLSnippet(...)
     endif
     let class = substitute(getline(firstline), '^>|\||$', '', 'g')
     let class = printf(g:HowmHtml_preFormat, class)
-    if g:HowmHtml_ConvertFunc != "<SID>HowmStr2HTML"
+    if g:HowmHtml_ConvertFunc != '<SID>HowmStr2HTML'
       call setline(firstline, class)
       call setline(lastline, '</pre></code>')
     endif
@@ -1280,7 +1304,7 @@ func! s:Convert2HTMLSnippet(...)
     let lastline -= 1
     let rstr = s:Convert2HTMLCode(firstline, lastline, type, 'xhtml')
     call map(rstr, "substitute(v:val, '<br\\( /\\)\\?>$', '', '')")
-    if g:HowmHtml_ConvertFunc == "<SID>HowmStr2HTML"
+    if g:HowmHtml_ConvertFunc == '<SID>HowmStr2HTML'
       " howm2html用に &&を埋め込み
       call map(rstr, '"&&" . v:val')
     endif

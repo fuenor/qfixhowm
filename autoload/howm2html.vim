@@ -172,6 +172,11 @@ if !exists('g:HowmHtml_ConvertFunc')
     " let g:HowmHtml_ConvertFunc = "<SID>MarkdownStr2HTML"
   endif
 endif
+" コンバートに使用するコマンド
+if !exists('g:HowmHtml_ConvertCmd')
+  let g:HowmHtml_ConvertCmd = 'markdown.pl'
+  " let g:HowmHtml_ConvertCmd = '"C:/Program Files/Pandoc/bin/pandoc" -f markdown'
+endif
 
 " HTML変換する時、対象外にするタイトルの正規表現
 if !exists('HowmHtml_IgnoreTitle')
@@ -297,23 +302,27 @@ function! HowmHtmlTagConvert(list, htmlname, anchor)
 endfunction
 
 let s:mkdfile = tempname()
-if !exists('g:HowmHtml_MarkdownCmd')
-  let g:HowmHtml_MarkdownCmd = 'markdown.pl'
-endif
 
 " markdown.pl を使用して変換
 function! s:MarkdownStr2HTML(list)
   let list = a:list
   call map(list, 'substitute(v:val, "^\\(\\[\\d\\{4}[-/]\\d\\{2}[-/]\\d\\{2}\\)\\( \\d\\{2}:\\d\\{2}\\)\\?\\(].*\\)", "<ul class=\"info\"><li class=\"date\">\\1\\2\\3</li></ul>", "")')
 
+  let from = &enc
+  let to = 'utf-8'
+  if from != to
+    call map(list, 'iconv(v:val, from, to)')
+  endif
   call writefile(list, s:mkdfile)
-  let cmd = g:HowmHtml_MarkdownCmd.' '.s:mkdfile
+  let cmd = g:HowmHtml_ConvertCmd.' '.s:mkdfile
   let html = split(system(cmd), '[\n\r]')
+  if from != to
+    call map(html, 'iconv(v:val, to, from)')
+  endif
 
   let pathhead = '\([A-Za-z]:[/\\]\|\~/\)'
   for i in range(len(html))
     let str = html[i]
-
     if str =~ '\[:\?.\{-}\.\(jpg\|jpeg\|png\|bmp\|gif\):.\{-}\]'
       let html[i] = s:howmLinktag(str)
     endif

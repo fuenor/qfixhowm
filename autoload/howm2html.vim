@@ -165,6 +165,14 @@ endif
 if !exists('HowmHtml_ConvertLevel')
   let HowmHtml_ConvertLevel = 2
 endif
+" コンバートに使用する関数
+if !exists('g:HowmHtml_ConvertFunc')
+  let g:HowmHtml_ConvertFunc = "<SID>HowmStr2HTML"
+  if exists('g:qfixmemo_filetype') && g:qfixmemo_filetype == 'markdown'
+    " let g:HowmHtml_ConvertFunc = "<SID>MarkdownStr2HTML"
+  endif
+endif
+
 " HTML変換する時、対象外にするタイトルの正規表現
 if !exists('HowmHtml_IgnoreTitle')
   let HowmHtml_IgnoreTitle = ''
@@ -264,16 +272,58 @@ if !exists('g:HowmHtml_removeHatenaTag')
 endif
 " スーパーpreのタグフォーマット
 if !exists('g:HowmHtml_preFormat')
-  let g:HowmHtml_preFormat = '<pre class="%s">'
+  let g:HowmHtml_preFormat = '<code><pre class="%s">'
 endif
 let g:QFixHowm_UserCmdline = 0
 let s:HowmHtml_Title = '__%arienai title%=='
 
-"
 " エントリの内容をタグに変換する
-" FIXME:いろいろおかしい
-"
 function! HowmHtmlTagConvert(list, htmlname, anchor)
+  let strlist = a:list
+
+  " JpFormatの折り返しを元に戻す
+  if g:HowmHtml_JpJoinStr && exists('g:JpFormatMarker') && g:JpFormatMarker != ''
+    let strlist = s:JpJoinStr(strlist, g:JpFormatMarker)
+  endif
+
+  let html = eval(g:HowmHtml_ConvertFunc .'(strlist)')
+
+  " Vicunaサイドバー用
+  if s:subheader == 1 && g:HowmHtml_VicunaChapter
+    cal add(s:entries, '</ul>')
+    let s:subheader = 0
+  endif
+  return html
+endfunction
+
+let s:mkdfile = tempname()
+if !exists('g:HowmHtml_MarkdownCmd')
+  let g:HowmHtml_MarkdownCmd = 'markdown.pl'
+endif
+
+" markdown.pl を使用して変換
+function! s:MarkdownStr2HTML(list)
+  let list = a:list
+  call map(list, 'substitute(v:val, "^\\(\\[\\d\\{4}[-/]\\d\\{2}[-/]\\d\\{2}\\)\\( \\d\\{2}:\\d\\{2}\\)\\?\\(].*\\)", "<ul class=\"info\"><li class=\"date\">\\1\\2\\3</li></ul>", "")')
+
+  call writefile(list, s:mkdfile)
+  let cmd = g:HowmHtml_MarkdownCmd.' '.s:mkdfile
+  let html = split(system(cmd), '[\n\r]')
+
+  let pathhead = '\([A-Za-z]:[/\\]\|\~/\)'
+  for i in range(len(html))
+    let str = html[i]
+
+    if str =~ '\[:\?.\{-}\.\(jpg\|jpeg\|png\|bmp\|gif\):.\{-}\]'
+      let html[i] = s:howmLinktag(str)
+    endif
+  endfor
+
+  return html
+endfunction
+
+" FIXME:いろいろおかしい
+function! s:HowmStr2HTML(list)
   let html = []
   let prehtml = []
   let pre    = 0
@@ -285,11 +335,6 @@ function! HowmHtmlTagConvert(list, htmlname, anchor)
   let define = 0
   let strlist = a:list
   let brtag = s:Blogger ? '' : '<br />'
-
-  " JpFormatの折り返しを元に戻す
-  if g:HowmHtml_JpJoinStr && exists('g:JpFormatMarker') && g:JpFormatMarker != ''
-    let strlist = s:JpJoinStr(strlist, g:JpFormatMarker)
-  endif
 
   " 処理の都合上空行を追加
   call add(strlist, '')
@@ -371,7 +416,10 @@ function! HowmHtmlTagConvert(list, htmlname, anchor)
           let str = str. brtag
           let prequote = 3
         endif
-      elseif prequote == 1 && str =~ '^|\{1,2}&lt;$'
+      elseif prequote == 1 && str =~ '^||&lt;$'
+        let str = '</pre></code>'
+        let prequote = 0
+      elseif prequote == 1 && str =~ '^|&lt;$'
         let str = '</pre>'
         let prequote = 0
       elseif prequote == 2 && str =~ '^&lt;&lt;$'
@@ -458,12 +506,6 @@ function! HowmHtmlTagConvert(list, htmlname, anchor)
       call add(html, '</div>')
     endfor
     let s:Folding = 1
-  endif
-
-  " Vicunaサイドバー用
-  if s:subheader == 1 && g:HowmHtml_VicunaChapter
-    cal add(s:entries, '</ul>')
-    let s:subheader = 0
   endif
   return html
 endfunction
@@ -954,8 +996,6 @@ function! howm2html#Howm2html(output, ...)
       silent! 1,$delete _
       call setline(1, glist)
     endif
-    " call s:HatenaListExtra()
-    " call s:Markdown2HatenaDefine()
     call HowmHtmlCodeHighlight(file)
     if exists('*HowmHtmlUserProc') && exists('g:fudist')
       call HowmHtmlUserProc(file)
@@ -1221,12 +1261,20 @@ func! s:Convert2HTMLSnippet(...)
     if type == ''
       continue
     endif
+    let class = substitute(getline(firstline), '^>|\||$', '', 'g')
+    let class = printf(g:HowmHtml_preFormat, class)
+    if g:HowmHtml_ConvertFunc != "<SID>HowmStr2HTML"
+      call setline(firstline, class)
+      call setline(lastline, '</pre></code>')
+    endif
     let firstline += 1
     let lastline -= 1
     let rstr = s:Convert2HTMLCode(firstline, lastline, type, 'xhtml')
     call map(rstr, "substitute(v:val, '<br\\( /\\)\\?>$', '', '')")
-    " howm2html用に &&を埋め込み
-    call map(rstr, '"&&" . v:val')
+    if g:HowmHtml_ConvertFunc == "<SID>HowmStr2HTML"
+      " howm2html用に &&を埋め込み
+      call map(rstr, '"&&" . v:val')
+    endif
     call setline(firstline, rstr)
   endwhile
   call setpos('.', save_cursor)
@@ -1293,7 +1341,7 @@ func! s:Convert2HTMLCode(line1, line2, ftype, htmltype)
   let lline = search('^</style>' , 'cW')
   let g:TOHtmlSnippetCSS = getline(fline, lline)
   let fline = search('^<body' , 'ncW')
-  let g:TOHtmlSnippet = extend(['<code>', '</code>'], getline(fline+1, line('$')-2), 1)
+  let g:TOHtmlSnippet = getline(fline+1, line('$')-2)
   close
   exe 'set ft='.orgtype
 
@@ -1924,6 +1972,9 @@ function! s:uri2tag(str, pathchr)
         let hlen = matchend(hstr, hreg)
         let uri = uri. strpart(hstr, 0, hlen)
         let lstr = strpart(lstr, 0, urilen) . strpart(hstr, hlen)
+      endif
+      if uri =~ ']$'
+        let addchr = ']'
       endif
       let uri = substitute(uri, ']$', '', '')
       if str =~ '\[:\(&amp;\)\?$'

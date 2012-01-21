@@ -1256,7 +1256,7 @@ howm形式だけではなく、外部コマンドを使用してMarkdown等のHT
 
 詳しい解説は
 https://sites.google.com/site/fudist/Home/qfixhowm/commands/user-command
-または howm2html.zip(doc/html/howm2html.zip)を解凍して参照してください。
+または howm2html.zip(doc/howm2html.zip)を解凍して参照してください。
 
   vim:tw=78:ts=2:syn=qfix_memo.ezotl.help:norl:foldmethod=indent:nofoldenable
 

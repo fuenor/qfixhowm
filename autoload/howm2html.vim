@@ -304,6 +304,7 @@ function! HowmHtmlTagConvert(list, htmlname, anchor)
 endfunction
 
 let s:mkdfile = tempname()
+au VimLeave * silent! call delete(s:mkdfile)
 
 " ノーマル変換
 function! s:H2HStr2HTML(list, ...)

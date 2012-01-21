@@ -46,6 +46,7 @@ CONTENTS                                                *qfixmemo-contents*
   12.6 複数のQFixMemoディレクトリ                       |qfixmemo-chenv|
   12.7 URIを開く                                        |qfixmemo-uri|
   12.8 ロケーションリスト                               |qfixmemo-window|
+13. HTML変換                                            |qfixmemo-html|
 
 ==============================================================================
 1. Intro																								*qfixmemo-intro*
@@ -1231,6 +1232,31 @@ QuickFixウィンドウとロケーションリストはどちらも機能的に
 
 なおロケーションリストで使用する場合、QuickFixウィンドウとは挙動がウィンドウ周
 りで若干異なることがあります。
+
+------------------------------------------------------------------------------
+13. HTML変換																						*qfixmemo-html*
+
+現在表示中のエントリをHTML変換して表示することが可能です。
+
+<Leader>hi          現在のバッファを(テンポラリ)HTML変換して表示
+<Leader>hI          現在のバッファをHTML変換して表示
+<Leader>hr          現在のバッファを(テンポラリ)HTML変換
+<Leader>hR          現在のバッファをHTML変換
+
+HTMLはHowmHtml_htmldirへ出力されます。
+>
+  " HTMLファイル出力先
+  let HowmHtml_htmldir = '~/path/to/html_dir'
+
+表示はcssが有効ですので howm2html.css(misc/css/howm2html.css)と
+peachpuff.css(misc/css/peachpuff.css)をHTML出力先へコピーして使用してくださ
+い。
+
+howm形式だけではなく、外部コマンドを使用してMarkdown等のHTML変換も行えます。
+
+詳しい解説は
+https://sites.google.com/site/fudist/Home/qfixhowm/commands/user-command
+または howm2html.zip(doc/html/howm2html.zip)を解凍して参照してください。
 
   vim:tw=78:ts=2:syn=qfix_memo.ezotl.help:norl:foldmethod=indent:nofoldenable
 

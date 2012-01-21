@@ -293,7 +293,7 @@ function! HowmHtmlTagConvert(list, htmlname, anchor)
   endif
 
   let func = g:HowmHtml_ConvertFunc
-  let html = eval(func.'(strlist)')
+  let html = eval(func.'(strlist, a:htmlname, a:anchor)')
 
   " Vicunaサイドバー用
   if s:subheader == 1 && g:HowmHtml_VicunaChapter
@@ -306,7 +306,7 @@ endfunction
 let s:mkdfile = tempname()
 
 " ノーマル変換
-function! s:H2HStr2HTML(list)
+function! s:H2HStr2HTML(list, ...)
   let list = a:list
 
   let from = &enc
@@ -325,7 +325,7 @@ function! s:H2HStr2HTML(list)
 endfunction
 
 " markdownを変換
-function! s:MarkdownStr2HTML(list)
+function! s:MarkdownStr2HTML(list, ...)
   let list = a:list
   call map(list, 'substitute(v:val, "^\\(\\[\\d\\{4}[-/]\\d\\{2}[-/]\\d\\{2}\\)\\( \\d\\{2}:\\d\\{2}\\)\\?\\(].*\\)", "<ul class=\"info\"><li class=\"date\">\\1\\2\\3</li></ul>", "")')
 
@@ -353,7 +353,8 @@ function! s:MarkdownStr2HTML(list)
 endfunction
 
 " FIXME:いろいろおかしい
-function! s:HowmStr2HTML(list)
+"
+function! s:HowmStr2HTML(list, htmlname, anchor)
   let html = []
   let prehtml = []
   let pre    = 0

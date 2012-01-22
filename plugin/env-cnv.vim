@@ -20,6 +20,7 @@ let g:loaded_envcnv = 1
 "-----------------------------------------------------------------------------
 " このファイルでオプションコンバートを行っているため、QFixMemoはQFixHowmとオプ
 " ション互換のプラグインとして動作しています。
+" またコマンド実行前にも毎回コンバートが行われます。
 "
 " 以下をVimの設定ファイルへ設定追加するとQFixHowmオプションのコンバートを行わ
 " なくなります。
@@ -41,8 +42,8 @@ let g:loaded_envcnv = 1
 "   https://sites.google.com/site/fudist/Home/qfixdev/ver3
 "
 " CAUTION:
-"   howm-chenv.vim, howm2html.vimを使用していてうまく動作しない場合は .vimrcで
-"   howm_dirを明示的に設定してください。
+"   howm-chenv.vim を使用していてうまく動作しない場合は .vimrcで howm_dirを明
+"   示的に設定してください。
 "
 " NOTE:
 "   ファイルの読み込み順がファイル名順である事に依存しています。
@@ -50,9 +51,6 @@ let g:loaded_envcnv = 1
 "   明示的に先読みを行うにはqfixmemo_prescriptを使用します。
 "     let g:qfixmemo_prescript = '~/qfixapp/plugin/env-cnv.vim'
 "
-"   またqfixmemo.vim本体をautoload読み込みすることでも結果的にenv-cnv.vimを先
-"   読みすることになります。
-"     let g:qfixmemo_autoload = 1
 "-----------------------------------------------------------------------------
 
 """"""""""""""""""""""""""""""
@@ -121,13 +119,17 @@ if QFixHowm_Convert > 1
     " let g:qfixmemo_filetype = 'markdown'
     let g:qfixmemo_filetype = 'qfix_memo'
   endif
-  ",y で表示する予定・TODO
+  " ,y で表示する予定・TODO
   if !exists('g:QFixHowm_ListReminder_ScheExt')
     let g:QFixHowm_ListReminder_ScheExt = '[-@!.]'
   endif
-  "予定・TODOのソート優先順
+  " 予定・TODOのソート優先順
   if !exists('g:QFixHowm_ReminderPriority')
     let g:QFixHowm_ReminderPriority = {'@' : 1, '!' : 1, '+' : 3, '-' : 4, '~' : 5, '.' : 6}
+  endif
+  " 日記は専用ディレクトリに保存
+  if !exists('g:QFixHowm_DiaryFile') && !exists('g:qfixmemo_diary')
+    " let g:QFixHowm_DiaryFile = 'diary/%Y/%m/%Y-%m-%d.'.s:defsuffix
   endif
 endif
 
@@ -247,6 +249,8 @@ endif
 " qfixmemo#AddTitle()で擬似タイトル行とみなす正規表現(Vim)
 " ファイルの一行目が特定の文字列で始まっていたらタイトル行やタイムスタンプの付
 " 加を行いたくない場合に使用する
+" 次の設定では休日定義ファイルのように予定・TODOのみ設定している場合に、設定に
+" かかわらずタイトル行が付加されないようにしている。
 if !exists('g:qfixmemo_alt_title_regxp')
   let g:qfixmemo_alt_title_regxp = '^\s*\[\d\{4}[-/]\d\{2}[-/]\d\{2}\( \d\{2}:\d\{2}\)\?\][-@!+~.]'
 endif

@@ -178,6 +178,10 @@ if !exists('g:HowmHtml_ConvertCmd')
   let g:HowmHtml_ConvertCmd = 'markdown.pl'
   " let g:HowmHtml_ConvertCmd = '"C:/Program Files/Pandoc/bin/pandoc" -f markdown'
 endif
+" コンバートで使用する一時ファイルのエンコーディング
+if !exists('g:HowmHtml_ConvertFenc')
+  let g:HowmHtml_ConvertFenc = 'utf-8'
+endif
 
 " HTML変換する時、対象外にするタイトルの正規表現
 if !exists('HowmHtml_IgnoreTitle')
@@ -311,13 +315,13 @@ function! s:H2HStr2HTML(list, ...)
   let list = a:list
 
   let from = &enc
-  let to = 'utf-8'
+  let to = g:HowmHtml_ConvertFenc
   if from != to
     call map(list, 'iconv(v:val, from, to)')
   endif
   call writefile(list, s:mkdfile)
   let cmd = g:HowmHtml_ConvertCmd.' '.s:mkdfile
-  let html = split(system(cmd), '[\n\r]')
+  let html = split(system(cmd), '[\r\n]\+')
   if from != to
     call map(html, 'iconv(v:val, to, from)')
   endif
@@ -331,7 +335,7 @@ function! s:MarkdownStr2HTML(list, ...)
   call map(list, 'substitute(v:val, "^\\(\\[\\d\\{4}[-/]\\d\\{2}[-/]\\d\\{2}\\)\\( \\d\\{2}:\\d\\{2}\\)\\?\\(].*\\)", "<ul class=\"info\"><li class=\"date\">\\1\\2\\3</li></ul>", "")')
 
   let from = &enc
-  let to = 'utf-8'
+  let to = g:HowmHtml_ConvertFenc
   if from != to
     call map(list, 'iconv(v:val, from, to)')
   endif

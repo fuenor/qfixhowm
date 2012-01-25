@@ -99,7 +99,9 @@ syn region MyJpKagi display start=+「\zs+ end=+\ze」+
 " howmの予定・TODO
 " runtime! syntax/howm_schedule.vim
 
-finish
+if !exists('g:qfixmemo_wiki_syntax') || g:qfixmemo_wiki_syntax == 0
+  finish
+endif
 
 "----------
 " Wiki style syntax

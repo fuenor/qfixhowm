@@ -2,6 +2,22 @@
 このファイルはQFixHowmの履歴ページをコピーしたものです。
 https://sites.google.com/site/fudist/Home/qfixhowm/qfixhowm-update-1
 
+ [2012-01-25]
+ * sessionoptionsにglobalsを含む場合、エラーが出るのを修正しました。
+
+ [2012-01-22]
+ * HTML変換で外部コマンドを使用してHTML変換が行えるようにしました。
+   Markdownに対応し、markdown.plとpandocで動作確認しました。
+
+ * qfix_memoファイルタイプでWikiスタイルの文字装飾を扱えるようにしました。
+   doc/howm2html.zip を解凍してできたsyntax.htmlを参照してください。
+   http://dl.dropbox.com/u/1736409/howm/syntax.html
+
+ * HTML変換のスーパーpreを修正しました。
+
+ [2012-01-16]
+ * カレンダーのプレビュー表示を修正しました。
+
  [2012-01-13]
  * MRUの起動チェックを高速化しました。
 

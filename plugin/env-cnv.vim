@@ -3,7 +3,7 @@
 "         Author: fuenor <fuenor@gmail.com>
 "                 http://sites.google.com/site/fudist/Home  (Japanese)
 "=============================================================================
-let s:Version = 1.00
+let s:version = 100
 scriptencoding utf-8
 
 if !exists('g:QFixHowm_Convert')

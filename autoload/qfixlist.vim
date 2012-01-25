@@ -5,7 +5,7 @@
 "                   http://sites.google.com/site/fudist/Home/grep
 "         Author: fuenor <fuenor@gmail.com>
 "=============================================================================
-let s:Version = 2.87
+let s:version = 287
 scriptencoding utf-8
 
 " What Is This:
@@ -61,13 +61,13 @@ scriptencoding utf-8
 if exists('g:disable_QFixList') && g:disable_QFixList == 1
   finish
 endif
-if exists('g:QFixList_version') && g:QFixList_version < s:Version
+if exists('g:QFixList_version') && g:QFixList_version < s:version
   let g:loaded_QFixList = 0
 endif
 if exists('g:loaded_QFixList') && g:loaded_QFixList && !exists('g:fudist')
   finish
 endif
-let g:QFixList_version = s:Version
+let g:QFixList_version = s:version
 let g:loaded_QFixList = 1
 if v:version < 700 || &cp
   finish
@@ -140,6 +140,7 @@ function! qfixlist#copen(...)
     endif
     return
   endif
+  " ユーザー定義の関数で表示する場合
   if exists('*QFixListAltCopen')
     return QFixListAltCopen(s:QFixList_qfCache, s:QFixList_qfdir)
   endif
@@ -183,6 +184,7 @@ function! qfixlist#open(...)
     echohl None
     return
   endif
+  " ユーザー定義の関数で表示する場合
   if exists('*QFixListAltOpen')
     return QFixListAltOpen(s:QFixList_Cache, s:QFixList_dir)
   endif

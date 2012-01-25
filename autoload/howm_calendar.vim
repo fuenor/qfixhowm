@@ -168,19 +168,19 @@ endfunction
 "         Author: fuenor <fuenor@gmail.com>
 "                 http://sites.google.com/site/fudist/Home/qfixhowm
 "=============================================================================
-let s:Version = 1.04
+let s:version = 104
 scriptencoding utf-8
 if v:version < 700 || &cp
   finish
 endif
 
-if exists('g:QFixMemoCalendar_version') && g:QFixMemoCalendar_version < s:Version
+if exists('g:QFixMemoCalendar_version') && g:QFixMemoCalendar_version < s:version
   let g:loaded_QFixMemoCalendar_vim = 0
 endif
 if exists("g:loaded_QFixMemoCalendar_vim") && g:loaded_QFixMemoCalendar_vim && !exists('fudist')
   finish
 endif
-let g:QFixMemoCalendar_version = s:Version
+let g:QFixMemoCalendar_version = s:version
 let g:loaded_QFixMemoCalendar_vim = 1
 
 " 曜日表示

@@ -3,19 +3,19 @@
 "         Author: fuenor <fuenor@gmail.com>
 "                 http://sites.google.com/site/fudist/Home  (Japanese)
 "=============================================================================
-let s:Version = 1.00
+let s:version = 100
 scriptencoding utf-8
 
 if exists('g:disable_qfixmemo') && g:disable_qfixmemo == 1
   finish
 endif
-if exists('g:qfixmemo_version') && g:qfixmemo_version < s:Version
+if exists('g:qfixmemo_version') && g:qfixmemo_version < s:version
   let g:loaded_qfixmemo = 0
 endif
 if exists('g:loaded_qfixmemo') && g:loaded_qfixmemo && !exists('g:fudist')
   finish
 endif
-let g:qfixmemo_version = s:Version
+let g:qfixmemo_version = s:version
 let g:loaded_qfixmemo = 1
 if v:version < 700 || &cp
   finish

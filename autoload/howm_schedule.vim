@@ -4,7 +4,7 @@
 "         Author: fuenor <fuenor@gmail.com>
 "                 http://sites.google.com/site/fudist/Home/qfixhowm
 "=============================================================================
-let s:Version = 2.57
+let s:version = 257
 scriptencoding utf-8
 
 "=============================================================================
@@ -43,13 +43,13 @@ scriptencoding utf-8
 if exists('g:disable_HowmSchedule') && g:disable_HowmSchedule
   finish
 endif
-if exists('g:QFixHowmSchedule_version') && g:QFixHowmSchedule_version < s:Version
+if exists('g:QFixHowmSchedule_version') && g:QFixHowmSchedule_version < s:version
   let g:loaded_HowmSchedule = 0
 endif
 if exists("g:loaded_HowmSchedule") && g:loaded_HowmSchedule && !exists('fudist')
   finish
 endif
-let g:QFixHowmSchedule_version = s:Version
+let g:QFixHowmSchedule_version = s:version
 if v:version < 700 || &cp || !has('quickfix')
   finish
 endif

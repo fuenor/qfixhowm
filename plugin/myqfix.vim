@@ -5,7 +5,7 @@
 "                 http://sites.google.com/site/fudist/Home  (Japanese)
 "=============================================================================
 scriptencoding utf-8
-let s:Version = 2.90
+let s:version = 290
 
 " What Is This:
 "   This plugin adds preview, sortings and advanced search to your quickfix window.
@@ -42,13 +42,13 @@ let s:Version = 2.90
 if exists('g:disable_QFixWin') && g:disable_QFixWin == 1
   finish
 endif
-if exists('g:QFixWin_version') && g:QFixWin_version < s:Version
+if exists('g:QFixWin_version') && g:QFixWin_version < s:version
   let g:loaded_QFixWin = 0
 endif
 if exists("g:loaded_QFixWin") && g:loaded_QFixWin && !exists('g:fudist')
   finish
 endif
-let g:QFixWin_version = s:Version
+let g:QFixWin_version = s:version
 let g:loaded_QFixWin = 1
 if v:version < 700 || &cp || !has('quickfix')
   finish

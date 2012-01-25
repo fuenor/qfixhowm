@@ -3,7 +3,7 @@
 "         Author: fuenor <fuenor@gmail.com>
 "                 http://sites.google.com/site/fudist/Home  (Japanese)
 "=============================================================================
-let s:Version = 1.11
+let s:version = 111
 scriptencoding utf-8
 
 " What Is This:
@@ -26,13 +26,13 @@ scriptencoding utf-8
 if exists('g:disable_QFixMRU') && g:disable_QFixMRU == 1
   finish
 endif
-if exists('g:QFixMRU_version') && g:QFixMRU_version < s:Version
+if exists('g:QFixMRU_version') && g:QFixMRU_version < s:version
   let g:loaded_QFixMRU = 0
 endif
 if exists("g:loaded_QFixMRU") && g:loaded_QFixMRU && !exists('g:fudist')
   finish
 endif
-let g:QFixMRU_version = s:Version
+let g:QFixMRU_version = s:version
 let g:loaded_QFixMRU = 1
 if v:version < 700 || &cp || !has('quickfix')
   finish

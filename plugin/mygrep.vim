@@ -6,7 +6,7 @@
 "         Author: fuenor <fuenor@gmail.com>
 "                 http://sites.google.com/site/fudist/Home/grep
 "================================================================================
-let s:Version = 3.00
+let s:version = 300
 scriptencoding utf-8
 
 "  Install:
@@ -35,13 +35,13 @@ scriptencoding utf-8
 if exists('g:disable_MyGrep') && g:disable_MyGrep == 1
   finish
 endif
-if exists('g:MyGrep_version') && g:MyGrep_version < s:Version
+if exists('g:MyGrep_version') && g:MyGrep_version < s:version
   let g:loaded_MyGrep = 0
 endif
 if exists("g:loaded_MyGrep") && g:loaded_MyGrep && !exists('g:fudist')
   finish
 endif
-let g:MyGrep_version = s:Version
+let g:MyGrep_version = s:version
 let g:loaded_MyGrep = 1
 if v:version < 700 || &cp
   finish

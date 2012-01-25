@@ -5,12 +5,12 @@
 "                 http://sites.google.com/site/fudist/Home  (Japanese)
 "  Last Modified: 2011-11-14 22:31
 "=============================================================================
-let s:Version = 1.01
+let s:version = 101
 scriptencoding utf-8
 if exists('g:disable_openuri') && g:disable_openuri == 1
   finish
 endif
-if exists('g:openuri_version') && g:openuri_version < s:Version
+if exists('g:openuri_version') && g:openuri_version < s:version
   let g:loaded_openuri = 0
 endif
 if exists('g:loaded_openuri') && g:loaded_openuri && !exists('fudist')
@@ -19,7 +19,7 @@ endif
 if v:version < 700 || &cp
   finish
 endif
-let g:openuri_version = s:Version
+let g:openuri_version = s:version
 let g:loaded_openuri = 1
 
 " 文字列指定された場合は文字列をURIとして開く

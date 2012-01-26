@@ -57,6 +57,8 @@ scriptencoding utf-8
 "    | ignorecase   | let g:MyGrep_Ignorecase = 1 | MyGrep_DefaultIgnorecase (*) |
 "    | smartcase    | let g:MyGrep_Smartcase  = 1 | 1                            |
 "      (*) reset to default after qfixlist#grep()
+"
+"
 
 if exists('g:disable_QFixList') && g:disable_QFixList == 1
   finish
@@ -326,11 +328,23 @@ function! qfixlist#Sort(cmd, sq)
   return sq
 endfunction
 
-function! qfixlist#GetList(cmd)
-  if a:cmd == 'copen' || a:cmd == 'quickfix'
-    return [s:QFixList_qfCache, s:QFixList_qfdir]
+function! qfixlist#GetList(...)
+  let cmd = a:0 ? a:1 : ''
+  if cmd == 'copen' || cmd == 'quickfix'
+    return [deepcopy(s:QFixList_qfCache), s:QFixList_qfdir]
   else
-    return [s:QFixList_Cache, s:QFixList_dir]
+    return [deepcopy(s:QFixList_Cache), s:QFixList_dir]
+  endif
+endfunction
+
+function! qfixlist#SetList(qflist, path, ...)
+  let cmd = a:0 ? a:1 : ''
+  if cmd == 'copen' || cmd == 'quickfix'
+    let s:QFixList_qfCache = deepcopy(a:qflist)
+    let s:QFixList_qfdir   = a:path
+  else
+    let s:QFixList_Cache = deepcopy(a:qflist)
+    let s:QFixList_dir   = a:path
   endif
 endfunction
 

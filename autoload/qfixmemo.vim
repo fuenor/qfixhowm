@@ -1660,7 +1660,7 @@ function! s:randomList(list, len, dir)
     if range <= 0 || len <= 0
       break
     endif
-    let r = s:random(range)
+    let r = exists('*QFixMemoRandom') ? QFixMemoRandom(range) : s:random(range)
     let file = list[r]['filename']
     let file = QFixNormalizePath(file)
     let readable = 1

@@ -810,7 +810,9 @@ function! qfixmemo#Init(...)
     call howm_schedule#Init()
   endif
   call qfixmemo#LoadKeyword()
-  if has('unix') && !has('win32unix')
+  if has('macunix')
+    silent! call libcallnr("libc.dylib", "srand", localtime())
+  elseif has('unix') && !has('win32unix')
     silent! call libcallnr("", "srand", localtime())
   else
     silent! call libcallnr("msvcrt.dll", "srand", localtime())
@@ -1678,7 +1680,9 @@ function! s:randomList(list, len, dir)
 endfunction
 
 function! s:random(range)
-  if has('unix') && !has('win32unix')
+  if has('macunix')
+    let r = libcallnr("libc.dylib", "rand", -1) % a:range
+  elseif has('unix') && !has('win32unix')
     let r = libcallnr("", "rand", -1) % a:range
   else
     let r = libcallnr("msvcrt.dll", "rand", -1) % a:range

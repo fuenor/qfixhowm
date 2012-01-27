@@ -1217,7 +1217,7 @@ function! qfixmemo#ListRecent()
   endif
   let title = QFixMRUGetTitleGrepRegxp(g:qfixmemo_ext)
   let qflist = qfixlist#search(title, g:qfixmemo_dir, 'mtime', g:qfixmemo_recentdays, g:qfixmemo_fileencoding, '**/*')
-  call qfixlist#copen(qflist, g:qfixmemo_dir)
+  return qfixlist#copen(qflist, g:qfixmemo_dir)
 endfunction
 
 " タイムスタンプが最近のエントリ一覧
@@ -1306,7 +1306,7 @@ function! qfixmemo#ListRecentTimeStamp(...)
     let idx += 1
   endfor
   redraw | echo ''
-  call qfixlist#copen(qflist, g:qfixmemo_dir)
+  return qfixlist#copen(qflist, g:qfixmemo_dir)
 endfunction
 
 " キーマップ用リストコマンド
@@ -1318,20 +1318,19 @@ function! qfixmemo#ListCmd(...)
   let cmd = g:qfixmemo_qfixlist_cmd
   let [qflist, path] = qfixlist#GetList(cmd)
   if g:qfixmemo_qfixlist_cache && !a:0 && qflist != []
-    if cmd =~ 'copen'
-      call qfixlist#copen()
-    else
-      call qfixlist#open()
-    endif
     redraw|echo 'QFixMemo : Cached list.'
-    return
+    if cmd =~ 'copen'
+      return qfixlist#copen()
+    else
+      return qfixlist#open()
+    endif
   endif
   let pattern = QFixMRUGetTitleGrepRegxp(g:qfixmemo_ext)
   let qflist = qfixlist#search(pattern, g:qfixmemo_dir, 'reverse', 0, g:qfixmemo_fileencoding, '**/*')
   if cmd =~ 'copen'
-    call qfixlist#copen(qflist, g:qfixmemo_dir)
+    return qfixlist#copen(qflist, g:qfixmemo_dir)
   else
-    call qfixlist#open(qflist, g:qfixmemo_dir)
+    return qfixlist#open(qflist, g:qfixmemo_dir)
   endif
 endfunction
 
@@ -1348,7 +1347,7 @@ function! qfixmemo#ListFile(file)
   let pattern = '**/'.substitute(pattern, '[\\/]', '\[\\\\/\]', 'g')
   let pattern = s:strftimeRegxp(pattern)
   let qflist = qfixlist#search(title, g:qfixmemo_dir, 'reverse', 0, g:qfixmemo_fileencoding, pattern)
-  call qfixlist#open(qflist, g:qfixmemo_dir)
+  return qfixlist#open(qflist, g:qfixmemo_dir)
 endfunction
 
 function! s:strftimeRegxp(regxp)
@@ -1403,9 +1402,9 @@ function! qfixmemo#Glob(path, file, mode)
   if mode =~ 'list'
     return qflist
   elseif mode =~ 'copen'
-    call qfixlist#copen(qflist, path)
+    return qfixlist#copen(qflist, path)
   else
-    call qfixlist#open(qflist, path)
+    return qfixlist#open(qflist, path)
   endif
 endfunction
 
@@ -1542,7 +1541,7 @@ function! qfixmemo#RenameAll()
   close!
   call qfixlist#open(glist, g:qfixmemo_dir)
   if len(glist)
-    redraw|echo 'Please, change these filename(s).'
+    redraw|echo 'Change these filename(s).'
   else
     redraw|echo 'Done.'
   endif
@@ -1619,8 +1618,8 @@ function! qfixmemo#RandomWalk(file, ...)
     echohl None
     return
   endif
-  call qfixlist#copen(qflist, dir)
   redraw | echo ''
+  return qfixlist#copen(qflist, dir)
 endfunction
 
 " ランダムキャッシュ再作成
@@ -1809,7 +1808,7 @@ endif
 function! s:grep(pattern, file, fixmode)
   let g:MyGrep_Regexp = !a:fixmode
   let qflist = qfixlist#search(a:pattern, g:qfixmemo_dir, g:qfixmemo_grep_sort, 0, g:qfixmemo_fileencoding, '**/'.a:file)
-  call qfixlist#copen(qflist, g:qfixmemo_dir)
+  return qfixlist#copen(qflist, g:qfixmemo_dir)
 endfunction
 
 """"""""""""""""""""""""""""""

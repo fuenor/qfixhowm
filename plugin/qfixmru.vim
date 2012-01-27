@@ -184,6 +184,11 @@ function! QFixMRU(...)
   call QFixMRUOpenPre(s:MruDic, entries, dir)
   let sq = QFixMRUPrecheck(s:MruDic, entries, dir)
   let &eventignore = saved_ei
+  " ユーザー定義の関数で処理する
+  if g:QFixMRUAltOpen
+    redraw | echo ''
+    return QFixMRUAltOpen(sq, basedir)
+  endif
   call QFixMRUOpen(sq, basedir)
   redraw | echo ''
   if len(sq) == 0
@@ -333,7 +338,7 @@ endfunction
 
 " MRU表示処理(Quickfixウィンドウを開く)
 let s:prevqf = []
-silent! function QFixMRUOpen(qf, basedir)
+function QFixMRUOpen(qf, basedir)
   if exists('g:loaded_QFixWin')
     let g:QFix_SearchPath = a:basedir
     let cmd = ''
@@ -352,6 +357,15 @@ silent! function QFixMRUOpen(qf, basedir)
     silent! copen
   endif
 endfunction
+
+if !exists('g:QFixMRUAltOpen')
+  let g:QFixMRUAltOpen = 0
+endif
+" MRU表示処理(ユーザー定義)
+if !exists('*QFixMRUAltOpen')
+function QFixMRUAltOpen(qf, basedir)
+endfunction
+endif
 
 " MRU read
 " call QFixMRURead({file}, {substitute_dir})

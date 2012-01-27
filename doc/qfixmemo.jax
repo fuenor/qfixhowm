@@ -628,6 +628,26 @@ qfixmemo_random_dirを設定します。
   " ランダム表示検索対象ディレクトリ
   let qfixmemo_random_dir = '~/qfixmemo/random'
 
+------------------------------------------------------------------------------
+「エントリのランダム表示」で使用する乱数はOSのシステムコールを利用しています。
+しかし環境によって乱数生成が動作しない場合はQFixMemoRandom()を定義して任意の方
+法で乱数生成を行うことができます。
+
+例えばPythonインターフェイスを利用して乱数生成を行う場合は.vimrc等で以下のよう
+に設定します。
+(rangeで指定した範囲の整数を返すようにしてください)
+>
+  " Pythonで乱数生成
+  function! QFixMemoRandom(range)
+  python << EOF
+  import vim, sys, random
+  range = int(vim.eval('a:range'))
+  random.seed()
+  vim.command('let rand = '+str(random.randint(0, range)))
+  EOF
+  return rand
+  endfunction
+
 ==============================================================================
 7. フォールディング																			*qfixmemo-folding*
 

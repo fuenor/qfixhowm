@@ -102,6 +102,23 @@ if !exists('g:qfixlist_use_fnamemodify')
   let g:qfixlist_use_fnamemodify = 0
 endif
 
+" 非0ならqfixlist#open()の代わりにQFixListAltOpen()が実行される
+if !exists('g:QFixListAltOpen')
+  let g:QFixListAltOpen = 0
+endif
+if !exists('*QFixListAltOpen')
+function QFixListAltOpen(qflist, dir)
+endfunction
+endif
+" 非0ならqfixlist#copen()の代わりにQFixListAltCopen()が実行される
+if !exists('g:QFixListAltCopen')
+  let g:QFixListAltCopen = 0
+endif
+if !exists('*QFixListAltCopen')
+function QFixListAltCopen(qflist, dir)
+endfunction
+endif
+
 function! qfixlist#GrepCopen(pattern, dir, file, ...)
   let fenc = a:0 ? a:1 : &enc
   let qflist = qfixlist#search(a:pattern, a:dir, '', 0, fenc, a:file)
@@ -131,6 +148,10 @@ function! qfixlist#copen(...)
   if a:0 > 1
     let s:QFixList_qfdir = a:2
   endif
+  " ユーザー定義の関数で処理する
+  if g:QFixListAltCopen
+    return QFixListAltCopen(deepcopy(s:QFixList_qfCache), s:QFixList_qfdir)
+  endif
   if len(s:QFixList_qfCache) == 0
     if g:MyGrep_ErrorMes != ''
       echohl ErrorMsg
@@ -141,10 +162,6 @@ function! qfixlist#copen(...)
       redraw | echo 'QFixList : Nothing in list!'
     endif
     return
-  endif
-  " ユーザー定義の関数で表示する場合
-  if exists('*QFixListAltCopen')
-    return QFixListAltCopen(s:QFixList_qfCache, s:QFixList_qfdir)
   endif
   redraw | echo 'QFixList : Set QuickFix list...'
   call QFixPclose()
@@ -164,9 +181,6 @@ function! qfixlist#copen(...)
 endfunction
 
 function! qfixlist#open(...)
-  if g:qfixlist_autoclose
-    call QFixCclose()
-  endif
   let loaded = 1
   if a:0 > 0
     let s:QFixList_Cache = deepcopy(a:1)
@@ -174,6 +188,13 @@ function! qfixlist#open(...)
   endif
   if a:0 > 1
     let s:QFixList_dir = a:2
+  endif
+  " ユーザー定義の関数で処理する
+  if g:QFixListAltOpen
+    return QFixListAltOpen(deepcopy(s:QFixList_Cache), s:QFixList_dir)
+  endif
+  if g:qfixlist_autoclose
+    call QFixCclose()
   endif
   if len(s:QFixList_Cache) == 0
     echohl ErrorMsg
@@ -185,10 +206,6 @@ function! qfixlist#open(...)
     endif
     echohl None
     return
-  endif
-  " ユーザー定義の関数で表示する場合
-  if exists('*QFixListAltOpen')
-    return QFixListAltOpen(s:QFixList_Cache, s:QFixList_dir)
   endif
   call QFixPclose(1)
   let path = s:QFixList_dir

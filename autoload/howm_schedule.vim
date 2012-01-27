@@ -1811,7 +1811,6 @@ function! QFixHowmScheduleActionStr()
   endif
   call setpos('.', save_cursor)
   let swaction = 'g:QFixHowm_UserSwActionLock'
-  " let swaction = exists('g:qfixmemo_switch_action') ? 'g:qfixmemo_switch_action' : swaction
   if exists(swaction)
     exe 'let ret = QFixHowmSwitchActionLock('.swaction.')'
     if ret != "\<CR>"
@@ -1843,12 +1842,13 @@ function! QFixHowmScheduleActionStr()
       return ret
     endif
   endif
-  call setpos('.', save_cursor)
-  let swaction = 'g:QFixHowm_SwitchListActionLock'
-  let swaction = exists('g:qfixmemo_swlist_action') ? 'g:qfixmemo_swlist_action' : swaction
-  exe 'let ret = QFixHowmSwitchActionLock('.swaction.')'
-  if ret != "\<CR>"
-    return ret
+  if exists('g:QFixHowm_SwitchListActionLock')
+    call setpos('.', save_cursor)
+    let swaction = 'g:QFixHowm_SwitchListActionLock'
+    exe 'let ret = QFixHowmSwitchActionLock('.swaction.')'
+    if ret != "\<CR>"
+      return ret
+    endif
   endif
   call setpos('.', save_cursor)
   let ret = QFixHowmSwitchActionLock(['{_}'])
@@ -1908,14 +1908,6 @@ endfunction
 "日付のデフォルトアクションロック
 if !exists('g:QFixHowm_DateActionLockDefault')
   let g:QFixHowm_DateActionLockDefault = 1
-endif
-"リストアクションロック
-if exists('g:QFixHowmSwitchListActionLock')
-  "SwitchListActionLockのドキュメントミス対応
-  let g:QFixHowm_SwitchListActionLock = g:QFixHowmSwitchListActionLock
-endif
-if !exists('g:QFixHowm_SwitchListActionLock')
-  let g:QFixHowm_SwitchListActionLock = ['{ }', '{*}', '{-}']
 endif
 "ユーザーマクロアクションロックの識別子
 if !exists('g:QFixHowm_MacroActionPattern')

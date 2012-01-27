@@ -180,8 +180,10 @@ function! qfixlist#copen(...)
   endif
 endfunction
 
+let s:qfixlistloaded = 1
 function! qfixlist#open(...)
-  let loaded = 1
+  let loaded = s:qfixlistloaded
+  let s:qfixlistloaded = 1
   if a:0 > 0
     let s:QFixList_Cache = deepcopy(a:1)
     let loaded = 0
@@ -191,6 +193,7 @@ function! qfixlist#open(...)
   endif
   " ユーザー定義の関数で処理する
   if g:QFixListAltOpen
+    let s:qfixlistloaded = 0
     return QFixListAltOpen(deepcopy(s:QFixList_Cache), s:QFixList_dir)
   endif
   if g:qfixlist_autoclose

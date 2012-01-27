@@ -82,7 +82,7 @@ endif
 hi def link actionlockMacroActionDefine howmFinished
 hi def link actionlockMacroAction       Underlined
 
-syn match actionlockList "\s*{[- *_]}"
+syn match actionlockList "\s*{[- +!$%&?*_<>=.\\]}"
 hi def link actionlockList Type
 
 " for changelog

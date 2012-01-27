@@ -47,6 +47,7 @@ CONTENTS                                                *qfixmemo-contents*
   12.7 URIを開く                                        |qfixmemo-uri|
   12.8 ロケーションリスト                               |qfixmemo-window|
 13. HTML変換                                            |qfixmemo-html|
+14. ユーザー定義処理                                    |qfixmemo-userfunc|
 
 ==============================================================================
 1. Intro																								*qfixmemo-intro*
@@ -1253,7 +1254,7 @@ QuickFixウィンドウとロケーションリストはどちらも機能的に
 なおロケーションリストで使用する場合、QuickFixウィンドウとは挙動がウィンドウ周
 りで若干異なることがあります。
 
-------------------------------------------------------------------------------
+==============================================================================
 13. HTML変換																						*qfixmemo-html*
 
 現在表示中のエントリをHTML変換して表示することが可能です。
@@ -1277,6 +1278,68 @@ howm形式だけではなく、外部コマンドを使用してMarkdown等のHT
 詳しい解説は
 https://sites.google.com/site/fudist/Home/qfixhowm/commands/user-command
 または howm2html.zip(doc/howm2html.zip)を解凍して参照してください。
+
+==============================================================================
+14. ユーザー定義処理																		*qfixmemo-userfunc*
+
+通常はコマンド結果がQuickFixかQFixListで表示されますが、これをユーザー定義の関
+数で処理して任意のウィンドウ等で表示したりすることが可能です。
+例えば<Leader>aで表示される処理をオーバーライドしたい場合は以下の関数を.vimrc
+等で定義します。
+>
+  function! QFixListAltOpen(qflist, dir)
+    echo a:qflist
+  endfunction
+
+QFixListAltOpen()を定義した後 >
+  :let QFixListAltOpen = 1
+を設定して<Leader>aを実行すると、QFixListで表示される代わりにコマンドウィンド
+ウで表示されます。
+dirは基準ディレクトリで、qflistはQuickFixリスト(|getqflist|)として扱えます。
+:let QFixListAltOpen = 0 を設定すると通常処理が行われるようになります。
+
+また外部のプラグインなどからQFixMemoの処理結果を取得することも可能です。
+>
+  function! QFixListAltOpen(qflist, dir)
+    return a:qflist
+  endfunction
+
+前例同様に :let QFixListAltOpen = 1を設定してから<Leader>aにマップされている
+qfixmemo#ListCmd()を呼び出すと、エントリ一覧のQuickFixリストを取得することが
+できます。
+>
+  let qflist = qfixmemo#ListCmd()
+
+------------------------------------------------------------------------------
+QuickFix, QFixList, MRUで処理関数が違いますので気をつけてください。
+
+QuickFix:
+>
+  let QFixListAltCopen = 1
+  function! QFixListAltCopen(qflist, dir)
+  endfunction
+
+QFixList:
+>
+  let QFixListAltOpen = 1
+  function! QFixListAltOpen(qflist, dir)
+  endfunction
+
+MRU:
+>
+  let QFixMRUAltOpen = 1
+  function! QFixMRUAltOpen(qflist, dir)
+  endfunction
+
+予定・TODO:
+  |howm-schedule-command|を参照してください。
+
+Grep:
+  GrepについてはGrepライブラリを直接呼び出したほうが良いかもしれません。
+詳しくはqfixlist.vim先頭のコメント部分を参照してください。
+>
+  let qflist = qfixlist#grep(pattern, path, filepattern, {fileencoding})
+<
 
   vim:tw=78:ts=2:syn=qfix_memo.ezotl.help:norl:foldmethod=indent:nofoldenable
 

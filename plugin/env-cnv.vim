@@ -196,6 +196,10 @@ endif
 if !exists('g:QFixHowm_QuickMemoFile') && !exists('g:qfixmemo_quickmemo')
   let g:QFixHowm_QuickMemoFile = 'Qmem-00-0000-00-00-000000.'.g:QFixHowm_FileExt
 endif
+" リストスイッチアクションロック
+if !exists('g:QFixHowm_SwitchListActionLock')
+  let g:QFixHowm_SwitchListActionLock = ['{ }', '{*}', '{-}']
+endif
 
 " QFixMemo/QFixHowmでデフォルトが異なるオプション
 if !exists('g:qfixmemo_pairfile_dir')

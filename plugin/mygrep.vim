@@ -96,6 +96,10 @@ endif
 if !exists('g:MyGrep_RecursiveMode')
   let g:MyGrep_RecursiveMode = 0
 endif
+" help
+if !exists('g:QFixGrep_Help')
+  let g:QFixGrep_Help= 'qfixgrep_help'
+endif
 
 silent! function QFixGrepMenubar(menu, leader)
   let sepcmd  = 'amenu <silent> 41.333 '.a:menu.'.-sep%d-			<Nop>'
@@ -121,7 +125,7 @@ silent! function QFixGrepMenubar(menu, leader)
   call s:addMenu(menucmd, 'Load\ Quickfix(&L)'          , 'k',  ':<C-u>MyGrepReadResult<CR>\|:call QFixCopen()<CR>')
   call s:addMenu(menucmd, 'Save\ Quickfix[Local]\ (&A)' , 'w',  ':<C-u>MyGrepWriteResult<CR>')
   exe printf(sepcmd, 4)
-  call s:addMenu(menucmd, 'Help(&H)'                    , 'H',  ':<C-u>call QFixGrepHelp_()<CR>')
+  call s:addMenu(menucmd, 'Help(&H)'                    , 'H',  ':<C-u>help '.g:QFixGrep_Help.'<CR>')
 endfunction
 
 function! s:addMenu(menu, acc, key, cmd)
@@ -175,8 +179,7 @@ if g:MyGrep_Keymap
   exe 'silent! vnoremap <unique> <silent> '.s:MyGrep_Key.'V  :<C-u>call <SID>QFGrep("VimgrepaddV")<CR>'
 
   exe 'silent! nnoremap <unique> <silent> '.s:MyGrep_Key.'k :MyGrepReadResult<CR>\|:call QFixCopen()<CR>'
-  exe 'silent! nnoremap <unique> <silent> '.s:MyGrep_Key.'H :call QFixGrepHelp()<CR>'
-
+  exe 'silent! nnoremap <unique> <silent> '.s:MyGrep_Key.'H  :<C-u>call <SID>help()<CR>'
   autocmd BufWinEnter quickfix exe 'silent! nnoremap <unique> <buffer> <silent> '.s:MyGrep_Key.'w :MyGrepWriteResult<CR>'
   let s:MyGrep_Key = g:MyGrep_Key . g:MyGrep_KeyB
 endif
@@ -230,6 +233,7 @@ function! QFixGrep(cmd, pattern, path, filepattern, fenc, ...)
   if filepattern == ''
     return
   endif
+  call histdel("input", '^\*$')
 
   let fenc = a:fenc
   if fenc == ''
@@ -413,27 +417,8 @@ function! QFixCmdCopy2QF()
   call qfixlist#copy2qfwin()
 endfunction
 
-""""""""""""""""""""""""""""""
-" Help
-""""""""""""""""""""""""""""""
-let s:QFixGrep_Helpfile = 'QFixGrepHelp'
-function! QFixGrepHelp()
-  if exists('*QFixHowmHelp')
-    return QFixHowmHelp()
-  endif
-  return QFixGrepHelp_()
-endfunction
-
-function! QFixGrepHelp_()
-  call mygrep_msg#help()
-  silent! exe 'split ' . s:QFixGrep_Helpfile
-  setlocal buftype=nofile
-  setlocal bufhidden=hide
-  setlocal noswapfile
-  " setlocal nobuflisted
-  setlocal modifiable
-  call setline(1, g:QFixGrepHelpList)
-  call cursor(1, 1)
-  setlocal nomodifiable
+function s:help()
+  let file = exists('g:qfixmemo_help') ? g:qfixmemo_help : g:QFixGrep_Help
+  exe 'help '.file
 endfunction
 

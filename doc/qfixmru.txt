@@ -1,8 +1,0 @@
-qfixmru.txt	For Vim version 7.2
-
-・qfixmru.vimの日本語ドキュメントはqfixmru.jaxをVimで参照してください。
-
-・Vimにヘルプとして登録する場合は
-  :helpt[ags] {path/to/doc}
-  を実行してください。
-

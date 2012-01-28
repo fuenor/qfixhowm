@@ -1,4 +1,4 @@
-*howm-schedule.jax*	For Vim バージョン 7.2	Last change: 2011 October 26
+*howm-schedule.jax*     For Vim バージョン 7.2  Last change: 2011 October 26
 ==============================================================================
        Description: howm style scheduler
             Author: fuenor <fuenor@gmail.com>
@@ -7,15 +7,15 @@
             http://sites.google.com/site/fudist/Home/qfixdev/ver3
 ==============================================================================
 
-CONTENTS					*howm-schedule-contents*
-1. Intro                                        |howm-schedule-intro|
-2. インストール                                 |howm-schedule-settings|
-3. コマンド                                     |howm-schedule-command|
-  3.1 キーマップ                                |howm-schedule-keymap|
-4. シンタックス                                 |howm-schedule-syntax|
+CONTENTS                                              *howm_schedule_contents*
+1. Intro                                              |howm_schedule_intro|
+2. インストール                                       |howm_schedule_settings|
+3. コマンド                                           |howm_schedule_command|
+  3.1 キーマップ                                      |howm_schedule_keymap|
+4. シンタックス                                       |howm_schedule_syntax|
 
 ==============================================================================
-1. Intro						*howm-schedule-intro*
+1. Intro                                                 *howm_schedule_intro*
 
 howm_schedule.vimはhowmスタイルの予定・TODOを表示するためのプラグインです。
 QFixHowm用の予定・TODOコマンドを独立動作するようにしたものでオプションは
@@ -28,7 +28,7 @@ http://sites.google.com/site/fudist/Home/qfixhowm/howm-reminder
 使用するための方法について記します。
 
 ==============================================================================
-2. インストール						*howm-schedule-settings*
+2. インストール                                       *howm_schedule_settings*
 howm_schedule.vimをruntimepathの通った場所へコピーしてください。
 
 動作に必要なその他のファイル
@@ -59,7 +59,7 @@ howm_schedule.vimはautoloadでの読み込みにも対応しています。
   :call howm_schedule#init()
 
 ==============================================================================
-3. コマンド						*howm-schedule-command*
+3. コマンド                                            *howm_schedule_command*
 
 コマンドラインから実行してQuickFixウィンドウに予定・TODOを表示することができま
 す。
@@ -82,17 +82,17 @@ QuicFixウィンドウを表示せずにQuicFixリスト取得も可能です。
   let [qflist, time] = QFixHowmScheduleCachedQFList('schedule')
 
 ------------------------------------------------------------------------------
-3.1 キーマップ						*howm-schedule-keymap*
+3.1 キーマップ                                          *howm_schedule_keymap*
 
 最低限 howm_dir, howm_fileencodingが設定されていれば動作します。
 
-| <Leader>,y  | 予定             |
-| <Leader>,ry | 予定(更新)       |
-| <Leader>,t  | Todo             |
-| <Leader>,rt | Todo(更新)       |
-| <Leader>,d  | 日付の挿入       |
-| <Leader>,T  | 日付と時刻の挿入 |
-| <Leader>,rd | 繰り返しの展開   |
+<Leader>,y        予定
+<Leader>,ry       予定(更新)
+<Leader>,t        Todo
+<Leader>,rt       Todo(更新)
+<Leader>,d        日付の挿入
+<Leader>,T        日付と時刻の挿入
+<Leader>,rd       繰り返しの展開
 
 NOTE:
 <Leader>は QFixHowm_Keyで定義されます。
@@ -116,7 +116,7 @@ http://sites.google.com/site/fudist/Home/qfixhowm/howm-reminder
   endfunction
 
 ==============================================================================
-4. シンタックス						*howm-schedule-syntax*
+4. シンタックス                                         *howm_schedule_syntax*
 
 予定・TODOのシンタックスはsyntax/howm_schedule.vimで定義されています。
 ファイルタイプやシンタックス指定等でhowm_schedule.vimを適用してください。
@@ -125,9 +125,9 @@ http://sites.google.com/site/fudist/Home/qfixhowm/howm-reminder
 読み込みの順番が問題になるときは /after/syntaxも良いかもしれません。
 
 コマンドモードから実行しても有効になります。
+>
   :runtime! syntax/howm_schedule.vim
+<
 
-==============================================================================
-
-  vim:tw=78:ts=8:ft=howm_schedule.help:norl
+  vim:tw=78:ts=8:ft=howm_schedule.help:norl:et:
 

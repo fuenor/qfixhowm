@@ -6,21 +6,20 @@
             http://sites.google.com/site/fudist/Home
             http://sites.google.com/site/fudist/Home/qfixdev/ver3
 ==============================================================================
-
-CONTENTS						*openuri-contents*
-1. Intro                                                |openuri-intro|
-2. インストール                                         |openuri-settings|
-3. コマンド                                             |openuri-command|
-4. URI記述のフォーマット                                |openuri-uri|
-  4.1 特殊なパスのテキストリンク                        |openuri-path|
-  4.2 基準ディレクトリ                                  |openuri-basedir|
-5. オプション                                           |openuri-option|
-  5.1 独自ブラウザ起動オプション                        |openuri-alt-option|
-  5.2 QFixHowmブラウザ起動オプション                    |openuri-qfixhowm|
-  5.3 netrwブラウザ起動オプション                       |openuri-netrw|
+  CONTENTS						*openuri_contents*
+  1. Intro                                              |openuri_intro|
+  2. インストール                                       |openuri_settings|
+  3. コマンド                                           |openuri_command|
+  4. URI記述のフォーマット                              |openuri_uri|
+    4.1 特殊なパスのテキストリンク                      |openuri_path|
+    4.2 基準ディレクトリ                                |openuri_basedir|
+  5. オプション                                         |openuri_option|
+    5.1 独自ブラウザ起動オプション                      |openuri_alt_option|
+    5.2 QFixHowmブラウザ起動オプション                  |openuri_qfixhowm|
+    5.3 netrwブラウザ起動オプション                     |openuri_netrw|
 
 ==============================================================================
-1. Intro						*openuri-intro*
+1. Intro						*openuri_intro*
 
 openuri.vimはURIや画像ファイル等のテキストリンクをVimや外部ブラウザで開くため
 のプラグインです。
@@ -28,12 +27,12 @@ openuri.vimでは直接パスや相対パスはもちろん、空白や日本語
 が可能です。
 
 ==============================================================================
-2. インストール						*openuri-settings*
+2. インストール						*openuri_settings*
 openuri.vimをruntimepathの通った場所へコピーしてください。
 autoloadでの読み込みにも対応しています。
 
 ==============================================================================
-3. コマンド						*openuri-command*
+3. コマンド						*openuri_command*
 
 コマンドモードからURIを開きたい場合は直接実行可能です。
   :Openuri
@@ -65,7 +64,7 @@ openuri.vimで開くことが可能なURIは以下のシンタックスで強調
   hi link txtFile Underlined
 
 ==============================================================================
-4. URI記述のフォーマット				*openuri-uri*
+4. URI記述のフォーマット				*openuri_uri*
 
 openuriで使用可能なスキームは以下のとおりです。
 | *スキーム | *基準ディレクトリ |
@@ -86,7 +85,7 @@ http://www.example.com:80
   c:\temp\hoge.txt
 
 ------------------------------------------------------------------------------
-4.1 特殊なパスのテキストリンク				*openuri-path*
+4.1 特殊なパスのテキストリンク				*openuri_path*
 
 パスに空白や日本語を含んでいたり、 / や \ で始まるパスは [ と :] で囲むことで
 使用可能です。
@@ -107,7 +106,7 @@ http:// や画像ファイル等はVimではなくブラウザを起動して開
 NOTE: 記述上の意味はありませんが [ と :] ではなく [: と :]で囲んでも構いません。
 
 ------------------------------------------------------------------------------
-4.2 基準ディレクトリ					*openuri-basedir*
+4.2 基準ディレクトリ					*openuri_basedir*
 
 openuri.vim独自の基準ディレクトリを指定してファイルパスを記述できます。
 基準ディレクトリを使用するとメモファイルをディレクトリごと移動しても、メモファ
@@ -133,7 +132,7 @@ openuri#AddSchemeで追加してください。
   :call openuri#AddScheme('user', "c:/temp/user")
 
 ==============================================================================
-5. オプション						*openuri-option*
+5. オプション						*openuri_option*
 
 Vimで開くファイルの拡張子とopenuriで開くブラウザをオプションで設定可能です。
 
@@ -142,7 +141,7 @@ Vimで開くファイルの拡張子とopenuriで開くブラウザをオプシ�
   let openuri_vimextreg = '\.\(txt\|mkd\|wiki\|rd\|vim\|js\|java\|py\|rb\|h\|c\|cpp\|ini\|conf\)$'
 
 ------------------------------------------------------------------------------
-5.1 ブラウザ起動オプション				*openuri-alt-option*
+5.1 ブラウザ起動オプション				*openuri_alt_option*
 
 テキストリンクをを開くブラウザ指定を独自に行うことも可能です。
 >
@@ -182,7 +181,7 @@ NOTE: Windowsの関連付けで開くようにするには rundll32を使用し�
   let openuri_cmd = '!start "rundll32.exe" url.dll,FileProtocolHandler %s'
 
 ------------------------------------------------------------------------------
-5.2 QFixHowmブラウザ起動オプション			*openuri-qfixhowm*
+5.2 QFixHowmブラウザ起動オプション			*openuri_qfixhowm*
 
 開発経緯の関係でQFixHowmのURIオプションがある場合は、QFixHowmオプションが優先
 されます。
@@ -193,7 +192,7 @@ NOTE: Windowsの関連付けで開くようにするには rundll32を使用し�
 | openuri_           | QFixHowm_Opencmd_      |
 
 ------------------------------------------------------------------------------
-5.3 netrwブラウザ起動オプション			*openuri-netrw*
+5.3 netrwブラウザ起動オプション			*openuri_netrw*
 
 netrwを利用して openuri_vimextreg 以外のファイルを開きます。
 >
@@ -205,5 +204,5 @@ netrwを利用して openuri_vimextreg 以外のファイルを開きます。
 
 OSやnetrwのバージョンによって挙動が異なることがあります。
 
-  vim:tw=78:ts=8:ft=qfix_memo.help:norl
+  vim:tw=78:ts=8:ft=help:syn=qfixmemo.help:norl
 

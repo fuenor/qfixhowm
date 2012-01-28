@@ -63,6 +63,10 @@ endif
 if !exists('g:qfixmemo_qfixlist_cache')
   let g:qfixmemo_qfixlist_cache = 1
 endif
+" help
+if !exists('g:qfixmemo_help')
+  let g:qfixmemo_help = 'qfixmemo_help'
+endif
 
 " howm2htmlユーザーコマンド
 command! -bang -nargs=* -range=% Howm2html call howm2html#Howm2html(<bang>0, <f-args>)
@@ -130,7 +134,6 @@ function! s:QFixMemoKeymap()
     silent! nnoremap <silent> <unique> <leader>hj    :Jump2html!<CR>
     silent! nnoremap <silent> <unique> <leader>hJ    :Jump2html!<CR>
   endif
-
 endfunction
 
 silent! function QFixMemoMenubar(menu, leader)
@@ -193,7 +196,7 @@ silent! function QFixMemoMenubar(menu, leader)
   call s:addMenu(menucmd, 'Rename-files(&Z)', 'rN', ':<C-u>call qfixmemo#ListRenameFile(g:qfixmemo_filename)<CR>')
   if g:qfixmemo_use_howm_schedule
     exe printf(sepcmd, 9)
-    call s:addMenu(menucmd, 'Help(&H)', 'H', ':call feedkeys("'.a:leader.'H")<CR>')
+    call s:addMenu(menucmd, 'Help(&H)', 'H', ':help '.g:qfixmemo_help.'<CR>')
   endif
   exe printf(sepcmd, 10)
   let submenu = '.Buffer[Local]\ (&B)'

@@ -1,8 +1,0 @@
-qfixmemo.txt	For Vim version 7.2
-
-・QFixMemo(QFixHowm)の日本語ドキュメントはqfixmemo.jaxをVimで参照してください。
-
-・Vimにヘルプとして登録する場合は
-  :helpt[ags] {path/to/doc}
-  を実行してください。
-

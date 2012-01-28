@@ -1,0 +1,304 @@
+*qfixmemo-keymap.jax*  For Vim バージョン 7.2  Last change: 2012 January 27
+==============================================================================
+       Description: QFixMemo keymap
+            Author: fuenor <fuenor@gmail.com>
+            Web(Japanese):
+            http://sites.google.com/site/fudist/Home/qfixdev/ver3
+==============================================================================
+  CONTENT    *qfixhowm*  *qfixmemo* *qfixmemo_help* *qfixmemo_keymap_contents*
+  1. Intro                                              |qfixmemo_key_intro|
+  2. クイックスタート                                   |qfixmemo_key_start|
+  3. エントリ作成                                       |qfixmemo_key_entry|
+  4. エントリ一覧                                       |qfixmemo_key_list|
+  5. バッファローカルコマンド                           |qfixmemo_key_local|
+  6. メモファイル検索                                   |qfixmemo_key_search|
+  7. メニュー・カレンダー                               |qfixmemo_key_menu|
+  8. その他                                             |qfixmemo_key_misc|
+  9. QuickFixウィンドウ                                 |qfixmemo_key_quickfix|
+  10. 予定・TODO                                        |qfixmemo_key_reminder|
+  11. Grep                                              |qfixgrep_key|
+
+==============================================================================
+1. Intro                                                *qfixmemo_key_intro*
+
+QFixMemoはメモを簡単に取り、アクセスするためのプラグインです。
+このヘルプではQFixMemoデフォルトキーマップについてのみ解説しているので、機能詳
+細については|qfixmemo_intro|を参照してください。
+
+NOTE:
+<Leader>と<LocalLeader>は qfixmemo_mapleaderで定義されます。
+デフォルトは g, なので <Leader>c は g,c というように、以降は<Leader>を読み替え
+てください。
+<LocalLeader>の場合はQFixMemoのバッファでのみ有効なローカルキーマップです。
+
+NOTE:
+多くのコマンドではカウント指定がサポートされています。
+例えば<Leader>mではMRUリストが20件表示されますが 30<Leader>m を実行すると最大
+30件表示され、以降は30件表示がデフォルトになります。
+
+==============================================================================
+2. クイックスタート                                     *qfixmemo_key_start*
+
+とりあえず以下のコマンドだけ覚えれば、メモ取りとして十分に使えます。
+
+<Leader>c            新規ファイル作成
+                     現在時刻から生成されたファイル名で新規ファイルを開く
+<Leader>u            クイックメモを開く
+                     クイックメモでは常に同じファイルが開かれる
+
+<Leader>m            MRUリストを表示
+                     最近"更新"、"閲覧"した「エントリ」をアクセス順に表示
+<Leader>l            最近"更新"した「ファイル内のエントリ」一覧
+                     ファイルタイムスタンプが過去5日間のファイルに含まれるエン
+                     トリをすべて表示する
+
+<Leader>a            エントリ一覧(キャッシュ表示)
+                     メモディレクトリのファイルからタイトル記号をgrep表示。
+                     一度検索すると結果がキャッシュされるので、最新の状態に更
+                     新するには<Leader>raで再検索。
+<Leader>ra           全エントリ一覧(再検索)
+
+<C-w>,               QuickFixウィンドウのオープン/クローズ
+<C-w>.               QuickFixウィンドウへ移動
+
+日記
+
+<Leader><Space>      日記を開く
+<Leader>q            カレンダー
+                     |qfixmemo_submenu_calendar|
+
+以降は機能別のキーマップと簡単な解説になります。
+
+==============================================================================
+3. エントリ作成                                         *qfixmemo_key_entry*
+
+<Leader>c            新規ファイル作成
+                     |qfixmemo_newfile|
+<Leader>C            ファイル名指定で新規ファイル作成
+                     |qfixmemo_miscmemo|
+
+<Leader>u            クイックメモ
+<Leader>U            デフォルトクイックメモを開く
+                     |qfixmemo_quickmemo|
+
+<Leader><Space>      日記
+
+<Leader>j            現バッファのファイルと対になるペアファイルを開く
+                     |qfixmemo_pairfile|
+
+==============================================================================
+4. エントリ一覧                                         *qfixmemo_key_list*
+
+|qfixmemo_entry_list_mru|
+<Leader>m            MRUリスト
+
+|qfixmemo_entry_list|
+<Leader>l            最近"更新"したエントリの検索
+                     (デフォルトでは過去5日間)
+<Leader>L            最近"作成"したエントリの検索
+                     実際にはタイムスタンプ行の日付を検索する
+                     (デフォルト検索日数は<Leader>lと共用)
+<Leader>a            エントリ一覧(キャッシュ表示)
+<Leader>ra           全エントリ一覧(再検索)
+<Leader>A            日記エントリ一覧
+<Leader>rA           メモディレクトリ内の全ファイル一覧
+                     globを使用しているのでタイトル行のないメモファイルやメモ
+                     ファイル以外も一覧表示される
+
+|qfixmemo_random|
+<Leader>rr           ランダム表示
+<Leader>rR           ランダム表示用リストファイルをリビルド
+
+==============================================================================
+5. バッファローカルコマンド                             *qfixmemo_key_local*
+
+メモバッファでのみ有効なコマンド
+
+<LocalLeader>P       現バッファの先頭に新規エントリを追加
+<LocalLeader>p       現エントリの前に新規エントリを追加
+<LocalLeader>n       現エントリの次に新規エントリを追加
+<LocalLeader>N       現バッファの最後に新規エントリを追加
+
+<LocalLeader>d       現在日付を挿入
+<LocalLeader>T       現在時刻を挿入
+<LocalLeader>S       現在位置のエントリのタイムスタンプを更新
+
+<LocalLeader>o       アウトラインモード
+                     |qfixmemo_folding|
+
+<LocalLeader>x       現在位置のエントリを削除
+<LocalLeader>X       現在位置のエントリを新規ファイルへ移動
+<LocalLeader>rs      現バッファのエントリをタイムスタンプの新しい順番でソート
+<LocalLeader>rS      現バッファのエントリをタイムスタンプの古い順番でソート
+
+<LocalLeader>w       強制保存
+                     @の連結表示のようなスクラッチバッファでも強制保存する
+                     通常バッファではタイムスタンプ付加等の特殊処理は行われない
+<LocalLeader>W       一ファイル複数エントリや連結表示バッファを分割して保存
+                     ファイルはqfixmemo_dir(howm_dir)へ作成される
+
+------------------------------------------------------------------------------
+HTML作成
+(実際にはグローバルコマンドで、メモ以外のファイルもHTML変換可能）
+
+|qfixmemo_html|
+<Leader>hi           HTMLを作成して表示
+<Leader>hr           HTMLを作成(作成のみ)
+<Leader>hI           静的HTMLを作成して表示
+<Leader>hR           静的HTMLを作成(作成のみ)
+
+==============================================================================
+6. メモファイル検索                                     *qfixmemo_key_search*
+
+メモディレクトリ内のみをgrepで検索。
+汎用grepのキーマップについては|qfixgrep_key|を参照。
+
+|qfixmemo_grep|
+<Leader>s            エントリを固定文字列(正規表現を使わない)検索
+                     fgrep
+<Leader>g            エントリをgrep
+
+メモバッファでは以下のキーマップも使用可能。
+
+<Leader>f            エントリを固定文字列(正規表現を使わない)検索
+                     fgrep
+<Leader>e            エントリをgrep
+
+==============================================================================
+7. メニュー・カレンダー                                 *qfixmemo_key_menu*
+
+<Leader>,            メニュー
+
+|qfixmemo_submenu|
+<Leader>i            サブメニュー
+<Leader>I            デフォルトサブメニュー
+
+|qfixmemo_submenu_calendar|
+<Leader>q            カレンダー
+<Leader>Q            カレンダー
+
+==============================================================================
+8. その他                                               *qfixmemo_key_misc*
+
+<Leader>rk           オートリンクを再作成
+
+<Leader>rn           現バッファのファイル名をリネーム
+<Leader>rN           メモディレクトリのすべてのファイル名をタイトル行から生成
+                     してリネーム
+                     |qfixmemo_rename|
+
+==============================================================================
+9. QuickFixウィンドウ                                   *qfixmemo_key_quickfix*
+
+<C-w>,               Quickfixウィンドウのオープン/クローズ
+<C-w>.               Quickfixウィンドウへ移動
+q                    Quickfixウィンドウのクローズ
+
+<CR>                 ファイルを開く
+                     ビジュアルモードで選択している場合は選択ファイルをすべて
+                     開く
+
+s                    指定文字列を"含む"行に絞り込み
+r                    指定文字列を"含まない"行に絞り込み
+u                    アンドゥ
+U                    全てアンドゥ
+S                    ソート
+
+#                    検索結果の同一エントリのものは一つにまとめる
+%                    検索結果のサマリーをエントリタイトルにする
+@                    表示中(選択中)のファイルを連結表示
+<F5>                 ランダム表示
+
+&                    現在のQuickFixリストをロケーションリストにコピー
+<C-g>                現在のQuickFixリストをQFixListにコピー
+A                    Quickfixウィンドウを保存
+<Leader>w            Quickfixウィンドウを保存
+O                    Quickfixウィンドウを読み込む
+<Leader>k            Quickfixウィンドウを読み込む(グローバル)
+
+R                    (選択中の)ファイルをqfixmemo_dir(howm_dir)へ移動
+D                    (選択中の)ファイルを削除
+x                    エントリを削除
+X                    エントリを新規ファイルへ移動
+
+K                    MRUリストから削除(ファイル自体は削除されない)
+
+i                    プレビュー表示ON/OFF
+I                    ファイルタイプのハイライト表示ON/OFF
+J                    ジャンプ後にQuickfixウィンドウを閉じる/閉じない
+<C-h>                ハイスピードプレビューON/OFF
+<C-l>                QuickFix上でのパスを最短表示にする
+
+QuickFixウィンドウの編集
+QuickFix上で通常のバッファのように編集可能でu Uのアンドゥも有効。
+@の連結表示で不要なエントリを削除するような場合に使用する。
+
+dd                   削除
+d                    削除(ビジュアルモード)
+p                    貼り付け
+P                    貼り付け
+
+==============================================================================
+10. 予定・TODO                                          *qfixmemo_key_reminder*
+
+予定・TODOの詳細については以下を参照。
+|howm_reminder_intro|
+http://sites.google.com/site/fudist/Home/qfixhowm/howm-reminder
+
+<Leader>y            予定
+<Leader>ry           予定(再検索)
+<Leader>t            Todo
+<Leader>rt           Todo(再検索)
+<Leader>d            日付の挿入
+<Leader>T            日付と時刻の挿入
+<Leader>rd           予定の展開
+                     予定・TODOの定義行で指定カウント分の予定・TODOに展開
+
+==============================================================================
+11. Grep                                                        *qfixgrep_key*
+
+詳細は|qfixgrep_contents|を参照
+<Leader>f            正規表現を使わない検索(fgrep)
+<Leader>e            grep
+<Leader>v            vimgrep
+<Leader>b            現在開いている全バッファのみ対象
+
+  再帰検索はファイル指定として**/*のように**/を指定することで可能。
+  検索ディレクトリの基点は「カレントディレクトリ」 >
+    " 検索ディレクトリはカレントディレクトリを基点にする
+    " 0なら現在開いているファイルの存在するディレクトリを基点
+    let MyGrep_CurrentDirMode = 1
+
+再帰検索専用コマンド
+<Leader>rf            現編集バッファと同じディレクトリで固定文字列検索
+<Leader>re            現編集バッファと同じディレクトリでgrep
+<Leader>rv            現編集バッファと同じディレクトリでvimgrep
+
+前回の結果を削除せず検索結果を追加
+<Leader>E             grep
+<Leader>rE            再帰検索grep
+<Leader>F             正規表現を使わない検索
+<Leader>rF            正規表現を使わない再帰検索
+<Leader>B             現在開いている全てのバッファのみを対象にgrep
+
+検索の基点ディレクトリとファイルエンコーディングの変更
+<Leader>rM            検索基点ディレクトリをカレントディレクトリ/ファイル基点
+                      でトグル
+<Leader>rG            検索するファイルエンコーディング指定
+<Leader>rD            常に再帰検索
+
+コマンドライン
+>
+  :Grep 検索文字列 *.txt
+
+再帰検索は **/*.txtのように **/ を使用するか、使用するgrepのオプションを指定
+(空白を含む検索文字は "空白 を含む検索"のように""を使用する)
+
+:Grep                 正規表現検索
+:FGrep                固定文字列検索
+:RGrep                再帰検索
+:RFGrep               再帰検索
+:BGrep                現在開いてる全バッファのみ対象
+
+  vim:tw=78:ts=8:ft=help:norl:et:
+

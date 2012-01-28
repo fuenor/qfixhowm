@@ -7,27 +7,26 @@
             http://sites.google.com/site/fudist/Home/qfixdev/ver3
 ==============================================================================
 
-CONTENTS					*howm-calendar-contents*
-1. Intro                                        |howm-calendar-intro|
-2. インストール                                 |howm-calendar-install|
-3. 設定                                         |howm-calendar-settings|
+CONTENTS					*howm_calendar_contents*
+1. Intro                                        |howm_calendar_intro|
+2. インストール                                 |howm_calendar_install|
+3. 設定                                         |howm_calendar_settings|
 
 ==============================================================================
-
-1. Intro						*howm-calendar-intro*
+1. Intro						*howm_calendar_intro*
 
 howm_calendar.vimはQFixHowm/QFixMemoでカレンダーを表示するためのプラグインです。
 QFixHowmの休日定義ファイルを利用してカレンダー上で休日が強調表示されます。
 
 ==============================================================================
-2. インストール						*howm-calendar-install*
+2. インストール						*howm_calendar_install*
 
 howm_calendar.vimをruntimepathの通った場所へコピーしてください。
 
 この状態でも :Calendar または :CalendarH でカレンダーが表示されます。
 
 ==============================================================================
-3. 設定							*howm-calendar-settings*
+3. 設定							*howm_calendar_settings*
 
 :Calendar コマンドのオプションは次のとおりです。
 >
@@ -49,7 +48,7 @@ QFixHowm/QFixMemoのカレンダーでは次の設定が有効です。
   let qfixmemo_calendar_count = 3
 
 ------------------------------------------------------------------------------
-3.1 休日定義ファイル					*howm-calendar-holiday*
+3.1 休日定義ファイル					*howm_calendar_holiday*
 
 カレンダーに表示する休日を定義するファイルにはQFixHowmの休日定義ファイルを使用
 します。
@@ -86,7 +85,7 @@ https://sites.google.com/site/fudist/Home/qfixhowm#downloads
   @@ は毎月、 @ は一回限りの指定です。
 
 ------------------------------------------------------------------------------
-3.2 サインとアクション					*howm-calendar-customize*
+3.2 サインとアクション					*howm_calendar_customize*
 
 日付上で<CR>を押すと日記を書くなどのアクションが実行可能です。
 QFixHowm/QFixMemoを使用している場合は自動設定されるので設定不要です。
@@ -143,7 +142,7 @@ QFixHowm/QFixMemoを使用している場合は自動設定されるので設定
   endfunction
 
 ------------------------------------------------------------------------------
-4. 他のプラグイン等で利用する(datelib.vim)		*howm-calendar-datelib*
+4. 他のプラグイン等で利用する(datelib.vim)		*howm_calendar_datelib*
 実際の日付処理はdatelib.vimでライブラリ化されています。
 >
   " 指定日が休日かチェック

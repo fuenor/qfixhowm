@@ -1,5 +1,4 @@
 *qfixmru.jax*	For Vim バージョン 7.2	Last change: 2011 August 23
- >
 ==============================================================================
        Description: QFixMRU
             Author: fuenor <fuenor@gmail.com>
@@ -7,18 +6,17 @@
             http://sites.google.com/site/fudist/Home
             http://sites.google.com/site/fudist/Home/qfixdev/ver3
 ==============================================================================
-
-CONTENTS						*qfixmru-contents*
-  1. Intro                                              |qfixmru-intro|
-  2. インストール                                       |qfixmru-install|
-  3. 設定                                               |qfixmru-settings|
-  4. MRUの表示                                          |qfixmru-command|
-  3. オプション                                         |qfixmru-option|
-    3.1 基準ディレクトリ(相対パス)                      |qfixmru-relative-path|
-    3.2 保存時の相対パス                                |qfixmru-basedir|
+  CONTENTS						*qfixmru_contents*
+  1. Intro                                              |qfixmru_intro|
+  2. インストール                                       |qfixmru_install|
+  3. 設定                                               |qfixmru_settings|
+  4. MRUの表示                                          |qfixmru_command|
+  5. オプション                                         |qfixmru_option|
+    5.1 基準ディレクトリ(相対パス)                      |qfixmru_relative_path|
+    5.2 保存時の相対パス                                |qfixmru_basedir|
 
 ==============================================================================
-1. Intro						*qfixmru-intro*
+1. Intro						*qfixmru_intro*
 
 QFixMRUはQuickfixウィンドウを使用してMRUリストを表示するプラグインです。
 通常のMRUとは違い正規表現で指定した行をタイトルとしてMRUリストを作成するため、
@@ -26,13 +24,13 @@ QFixMRUはQuickfixウィンドウを使用してMRUリストを表示するプ�
 構造化したメモファイルではエントリ単位でMRUリストを作成する事ができます。
 
 ==============================================================================
-2. インストール						*qfixmru-install*
+2. インストール						*qfixmru_install*
 
 qfixmru.vimをruntimepathの通った場所へコピーして下さい。
 QFixHowm/QFixMemoを使用している場合はインストール不要です。
 
 ==============================================================================
-3. 設定							*qfixmru-settings*
+3. 設定							*qfixmru_settings*
 
 デフォルトでは通常のMRUのようにカレント行が登録されますが、タイトル単位でMRU登
 録する際は「タイトル行の正規表現」を指定する必要があります。
@@ -61,7 +59,7 @@ Vim終了時に常にMRUを保存するには以下を設定します。 >
 ず終了前保存処理が行われます。
 
 ==============================================================================
-4. MRUの表示						*qfixmru-command*
+4. MRUの表示						*qfixmru_command*
 
 MRUを表示するにはQFixMRUを実行します。
 デフォルトではカレントディレクトリ以下のファイルが対象になりますが、表示対象ディ
@@ -75,6 +73,7 @@ MRUを表示するにはQFixMRUを実行します。
 登録されている全MRUリストを表示するにはallを指定します。
 :QFixMRU /:all
 
+------------------------------------------------------------------------------
 4.1 使用例
 
 g,hlを実行すると最近編集した関数のMRUリストを表示したいとします。
@@ -107,7 +106,7 @@ g,hlを実行すると最近編集した関数のMRUリストを表示したい�
 をタイトルとしたMRU(関数)リストが表示されます。
 
 ==============================================================================
-3. オプション						*qfixmru-option*
+5. オプション						*qfixmru_option*
 
 MRUリストのオプション >
 
@@ -127,7 +126,8 @@ MRUリストのオプション >
 ・比較するファイル名はフルパスで ~ は展開され￥記号は/に正規化されます。
 ・エントリタイトル正規表現が無指定なら一ファイルにつき一箇所登録されます。
 
-3.1 基準ディレクトリ(相対パス)				*qfixmru-relative-path*
+------------------------------------------------------------------------------
+5.1 基準ディレクトリ(相対パス)				*qfixmru_relative_path*
 
 異なる環境でMRUリストを共有可能です。
 QFixMRU_RootDir が存在すると、相対パス部分をQFixMRU_RootDirを基準とした絶対パ
@@ -147,10 +147,11 @@ QFixMRU_RootDir が存在すると、相対パス部分をQFixMRU_RootDirを基�
     let QFixMRU_RootDir = 'c:/mruroot'
   endif
 
-3.2 保存時の相対パス					*qfixmru-basedir*
+------------------------------------------------------------------------------
+5.2 保存時の相対パス					*qfixmru_basedir*
 
 QFixMRU_BaseDirをMRUファイル読込後に書き換えるとQFixMRU_BaseDirを基準とする相
 対パスで保存されます。
 
-vim:tw=78:ts=8:ft=help:norl:
+vim:tw=78:ts=8:ft=help:norl:et:
 

@@ -447,9 +447,9 @@ function! qfixmemo#BufRead()
       let &syntax=saved_syn
     endif
     if &bomb && g:qfixmemo_nobomb
-      echohl ErrorMsg
+      " echohl ErrorMsg
       redraw|echom 'QFixMemo : BOM detected. set nobomb'
-      echohl None
+      " echohl None
       set nobomb
     endif
   endif

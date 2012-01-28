@@ -154,10 +154,10 @@ function! qfixlist#copen(...)
   endif
   if len(s:QFixList_qfCache) == 0
     if g:MyGrep_ErrorMes != ''
-      echohl ErrorMsg
+      " echohl ErrorMsg
       redraw | echo g:MyGrep_ErrorMes
       let g:MyGrep_ErrorMes = ''
-      echohl None
+      " echohl None
     else
       redraw | echo 'QFixList : Nothing in list!'
     endif
@@ -173,10 +173,10 @@ function! qfixlist#copen(...)
   endif
   redraw | echo ''
   if g:MyGrep_ErrorMes != ''
-    echohl ErrorMsg
+    " echohl ErrorMsg
     redraw | echo g:MyGrep_ErrorMes
     let g:MyGrep_ErrorMes = ''
-    echohl None
+    " echohl None
   endif
 endfunction
 
@@ -200,14 +200,14 @@ function! qfixlist#open(...)
     call QFixCclose()
   endif
   if len(s:QFixList_Cache) == 0
-    echohl ErrorMsg
+    " echohl ErrorMsg
     if g:MyGrep_ErrorMes != ''
       redraw | echo g:MyGrep_ErrorMes
       let g:MyGrep_ErrorMes = ''
     else
       redraw | echo 'QFixList : Nothing in list!'
     endif
-    echohl None
+    " echohl None
     return
   endif
   call QFixPclose(1)
@@ -324,11 +324,10 @@ function! qfixlist#open(...)
   nnoremap <buffer> <silent> O :MyGrepReadResult<CR>
 
   if g:MyGrep_ErrorMes != ''
-    echohl ErrorMsg
+    " echohl ErrorMsg
     redraw | echo g:MyGrep_ErrorMes
     let g:MyGrep_ErrorMes = ''
-    echohl None
-    let g:MyGrep_ErrorMes = ''
+    " echohl None
   endif
 endfunction
 
@@ -768,9 +767,9 @@ function! s:Cmd_RD(cmd, fline, lline)
     if a:cmd == 'Delete'
       call delete(file)
     elseif a:cmd == 'Remove'
-      echohl ErrorMsg
+      " echohl ErrorMsg
       echo 'Remove' fnamemodify(file, ':t')
-      echohl None
+      " echohl None
       call rename(file, dst)
     endif
   endfor
@@ -951,18 +950,18 @@ function! s:MyGrep(pattern, searchPath, filepattern, fenc, addflag, ...)
   if vg == 0 && s:MSWindows && cmdpath =~ '^\(//\|\\\\\)'
     let host = matchstr(cmdpath, '^\(//\|\\\\\)[^/\\]\+')
     let host = substitute(host, '/', '\', 'g')
-    echohl ErrorMsg
+    " echohl ErrorMsg
     let grepprg = fnamemodify(g:mygrepprg, ':t')
     redraw|echo 'using vimgrep... ('. grepprg .' does not support UNC path "' . host . '")'
-    echohl None
+    " echohl None
     let g:MyGrep_UseVimgrep = 1
     let g:MyGrep_ErrorMes = 'QFixGrep : Vimgrep was used. (UNC path "' . host . '")'
   endif
   if vg == 0 && pattern != '' && pattern !~ '^[[:print:][:space:]]\+$'
     if a:fenc =~ 'le$' || (a:fenc !~ 'cp932\c' && g:mygrepprg == 'findstr') || a:fenc !~ g:MyGrep_Encoding
-      echohl ErrorMsg
+      " echohl ErrorMsg
       redraw|echo 'using vimgrep... (grep does not support "' . a:fenc . '")'
-      echohl None
+      " echohl None
       let g:MyGrep_ErrorMes = 'QFixGrep : Vimgrep was used. (invalid fenc = "'.a:fenc .'")'
       let g:MyGrep_UseVimgrep = 1
     endif
@@ -976,6 +975,8 @@ function! s:MyGrep(pattern, searchPath, filepattern, fenc, addflag, ...)
     else
       silent! exe ':'.vopt.'vimgrep /' . pattern . '/j ' . a:filepattern
     endif
+    " FIXME:vimgrepでエラーが出るとコマンドラインのシンタックスがおかしくなる
+    echohl None
     "ここでバッファ削除
     let idx = 0
     let save_qflist = QFixGetqflist()
@@ -995,11 +996,11 @@ function! s:MyGrep(pattern, searchPath, filepattern, fenc, addflag, ...)
     let g:MyGrep_Ignorecase = g:MyGrep_DefaultIgnorecase
     let g:MyGrep_Recursive  = 0
     let g:MyGrep_UseVimgrep = 0
-    if g:MyGrep_ErrorMes != ''
-      echohl ErrorMsg
-      redraw | echo g:MyGrep_ErrorMes
-      echohl None
-    endif
+    " if g:MyGrep_ErrorMes != ''
+    "   echohl ErrorMsg
+    "   redraw | echo g:MyGrep_ErrorMes
+    "   echohl None
+    " endif
     " if g:MyGrep_Return
     "   let g:MyGrep_Return = 0
       return save_qflist
@@ -1012,7 +1013,7 @@ function! s:MyGrep(pattern, searchPath, filepattern, fenc, addflag, ...)
   let l:mygrepprg = expand(g:mygrepprg)
   if !executable(l:mygrepprg)
     echohl ErrorMsg
-    redraw|echom '"'.l:mygrepprg.'"'." is not executable!"
+    redraw|echo '"'.l:mygrepprg.'"'." is not executable!"
     echohl None
     let mes = '"'.l:mygrepprg.'" is not executable!'
     let choice = confirm(mes, "&OK", 1, "W")

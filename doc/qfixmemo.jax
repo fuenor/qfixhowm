@@ -66,7 +66,8 @@ QFixHowm クイックスタートガイド:
 http://sites.google.com/site/fudist/Home/qfixhowm/quick-start
 
 QFixMemoは内部でQFixGrepを使用しています。
-ウィンドウ周りのオプションやgrepの詳しい設定については以下を参照してください。
+ウィンドウ周りのオプションやgrepの詳しい設定については|qfixgrep|か、以下を参照し
+てください。
 http://sites.google.com/site/fudist/Home/grep
 
 1.2 QFixHowmとの違い                                    *qfixmemo_qfixhowm*

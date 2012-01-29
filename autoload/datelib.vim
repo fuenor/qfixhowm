@@ -5,12 +5,12 @@
 "=============================================================================
 scriptencoding utf-8
 let s:version = 100
-if exists('g:datelib_version') && g:datelib_version < s:version
-  let g:loaded_datelib_vim = 0
-endif
-if exists("g:loaded_datelib_vim") && g:loaded_datelib_vim && !exists('fudist')
-  finish
-endif
+" if exists('g:datelib_version') && g:datelib_version < s:version
+"   let g:loaded_datelib_vim = 0
+" endif
+" if exists("g:loaded_datelib_vim") && g:loaded_datelib_vim && !exists('fudist')
+"   finish
+" endif
 let g:datelib_version = s:version
 let g:loaded_datelib_vim = 1
 if v:version < 700 || &cp

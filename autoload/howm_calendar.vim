@@ -32,8 +32,8 @@ endif
 if !exists('g:calendar_action')
   let g:calendar_action = "<SID>CalendarDiary"
 endif
-if !exists('g:calendar_sign') || g:calendar_sign == '<SID>CalendarSign'
-  let g:calendar_sign = "<SID>CalendarSign_"
+if !exists('g:calendar_sign')
+  let g:calendar_sign = "<SID>CalendarSign"
 endif
 if !exists('g:calendar_info')
   let g:calendar_info = "<SID>CalendarInfo"
@@ -136,7 +136,7 @@ function! s:CalendarDiary(day, month, year, week, dir)
   call confirm("diary plugin requiard.", 'OK')
 endfunction
 
-function! s:CalendarSign_(day, month, year)
+function! s:CalendarSign(day, month, year)
   let sfile = g:calendar_diary."/".a:year."/".a:month."/".a:day.".cal"
   let hday = datelib#HolidayCheck(a:year, a:month, a:day, 'Sun')
   let id = filereadable(expand(sfile)) + hday*2

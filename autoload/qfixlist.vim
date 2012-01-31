@@ -244,6 +244,8 @@ function! qfixlist#open(...)
     exe aftercmd
   endif
   if loaded
+    let b:qfixlist_lnum = exists('b:qfixlist_lnum') ? b:qfixlist_lnum : line('.')
+    call cursor(b:qfixlist_lnum, 1)
     silent! exe 'lchdir ' . escape(s:QFixList_dir, ' ')
     return
   endif
@@ -408,17 +410,7 @@ function! qfixlist#search(pattern, dir, cmd, days, fenc, file)
 
   redraw | echo 'QFixList : Sorting...'
   if cmd =~ 'mtime'
-    let bname = ''
-    let bmtime = 0
-    for d in list
-      if bname == d.filename
-        let d['mtime'] = bmtime
-      else
-        let d['mtime'] = getftime(d.filename)
-      endif
-      let bname  = d.filename
-      let bmtime = d.mtime
-    endfor
+    call qfixlist#Addmtime(list)
     let list = sort(list, "s:CompareTime")
   elseif cmd =~ 'name'
     let list = sort(list, "s:CompareName")
@@ -434,12 +426,30 @@ function! qfixlist#search(pattern, dir, cmd, days, fenc, file)
   return list
 endfunction
 
+function! qfixlist#Addmtime(qf)
+  let bname = ''
+  let bmtime = 0
+  for d in a:qf
+    if exists('d["mtime"]')
+      continue
+    endif
+    if bname == d.filename
+      let d['mtime'] = bmtime
+    else
+      let d['mtime'] = getftime(d.filename)
+    endif
+    let bname  = d.filename
+    let bmtime = d.mtime
+  endfor
+  return a:qf
+endfunction
+
 """"""""""""""""""""""""""""""
 function! s:CompareName(v1, v2)
   if a:v1.filename == a:v2.filename
-    return (a:v1.lnum > a:v2.lnum?1:-1)
+    return (a:v1.lnum+0 > a:v2.lnum+0?1:-1)
   endif
-  return ((a:v1.filename).a:v1.lnum> (a:v2.filename).a:v2.lnum?1:-1)
+  return ((a:v1.filename) > (a:v2.filename)?1:-1)
 endfunction
 
 function! s:CompareTime(v1, v2)
@@ -447,7 +457,7 @@ function! s:CompareTime(v1, v2)
     if a:v1.filename != a:v2.filename
       return (a:v1['filename'] < a:v2['filename']?1:-1)
     endif
-    return (a:v1['lnum'] > a:v2['lnum']?1:-1)
+    return (a:v1['lnum']+0 > a:v2['lnum']+0?1:-1)
   endif
   return (a:v1['mtime'] < a:v2['mtime']?1:-1)
 endfunction
@@ -461,7 +471,7 @@ endfunction
 
 function! s:CompareBufnr(v1, v2)
   if a:v1.bufnr == a:v2.bufnr
-    return (a:v1.lnum > a:v2.lnum?1:-1)
+    return (a:v1.lnum+0 > a:v2.lnum+0?1:-1)
   endif
   return a:v1.bufnr>a:v2.bufnr?1:-1
 endfunction
@@ -676,29 +686,30 @@ function! s:SortExec(...)
   else
     let pattern = input(mes, '')
   endif
-  if pattern =~ 'r\?m'
+  let pattern = matchstr(pattern, 'r\?.')
+  if pattern =~ '^r\?m'
     let g:QFix_Sort = substitute(pattern, 'm', 'mtime', '')
-  elseif pattern =~ 'r\?n'
+  elseif pattern =~ '^r\?n'
     let g:QFix_Sort = substitute(pattern, 'n', 'name', '')
-  elseif pattern =~ 'r\?t'
+  elseif pattern =~ '^r\?t'
     let g:QFix_Sort = substitute(pattern, 't', 'text', '')
-  elseif pattern == 'r'
+  elseif pattern =~ '^r'
     let g:QFix_Sort = 'reverse'
   else
     return
   endif
 
-  echo 'QFixList : Sorting...'
+  redraw|echo 'QFixList : Sorting...'
   let sq = []
   for n in range(1, line('$'))
     let [pfile, lnum] = s:Getfile(n)
     let text = substitute(getline(n), '[^|].*|[^|].*|', '', '')
-    let mtime = getftime(pfile)
-    let sepdat = {"filename":pfile, "lnum": lnum, "text":text, "mtime":mtime, "bufnr":-1}
+    let sepdat = {"filename":pfile, "lnum": lnum, "text":text, "bufnr":-1}
     call add(sq, sepdat)
   endfor
-
+  let s:QFixList_qfCache = sq
   if g:QFix_Sort =~ 'mtime'
+    call qfixlist#Addmtime(sq)
     let sq = qfixlist#Sort(g:QFix_Sort, sq)
   elseif g:QFix_Sort =~ 'name'
     let sq = qfixlist#Sort(g:QFix_Sort, sq)
@@ -708,6 +719,7 @@ function! s:SortExec(...)
     let sq = reverse(sq)
   endif
   silent! exe 'lchdir ' . escape(s:QFixList_dir, ' ')
+  let s:QFixList_qfCache = deepcopy(sq)
   let s:glist = []
   for d in sq
     let filename = fnamemodify(d['filename'], ':.')

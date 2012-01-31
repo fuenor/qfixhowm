@@ -1326,7 +1326,7 @@ function! qfixmemo#ListCmd(...)
     endif
   endif
   let pattern = QFixMRUGetTitleGrepRegxp(g:qfixmemo_ext)
-  let qflist = qfixlist#search(pattern, g:qfixmemo_dir, 'reverse', 0, g:qfixmemo_fileencoding, '**/*')
+  let qflist = qfixlist#search(pattern, g:qfixmemo_dir, g:qfixmemo_list_sort, 0, g:qfixmemo_fileencoding, '**/*')
   if cmd =~ 'copen'
     return qfixlist#copen(qflist, g:qfixmemo_dir)
   else
@@ -1346,7 +1346,7 @@ function! qfixmemo#ListFile(file)
   endif
   let pattern = '**/'.substitute(pattern, '[\\/]', '\[\\\\/\]', 'g')
   let pattern = s:strftimeRegxp(pattern)
-  let qflist = qfixlist#search(title, g:qfixmemo_dir, 'reverse', 0, g:qfixmemo_fileencoding, pattern)
+  let qflist = qfixlist#search(title, g:qfixmemo_dir, g:qfixmemo_list_sort, 0, g:qfixmemo_fileencoding, pattern)
   return qfixlist#open(qflist, g:qfixmemo_dir)
 endfunction
 
@@ -1386,6 +1386,7 @@ function! qfixmemo#Glob(path, file, mode)
   let from = g:qfixmemo_fileencoding
   let to   = &enc
   redraw | echo 'QFixMemo : Read firstline'
+  let func = printf('%s(qflist, usefile)', g:qfixmemo_list_sort == 'reverse' ? 'insert' : 'add')
   for n in files
     let n = path . n
     let n = fnamemodify(n, ':p')
@@ -1394,10 +1395,16 @@ function! qfixmemo#Glob(path, file, mode)
       let tlist = readfile(n, '', 1)
       let text = len(tlist) ? iconv(tlist[0], from, to) : ''
       let usefile = {'filename':n, 'lnum':lnum, 'text':text}
-      call insert(qflist, usefile)
+      call eval(func)
     endif
   endfor
   exe 'lchdir ' . prevPath
+  if g:qfixmemo_list_sort != '' && g:qfixmemo_list_sort != 'reverse'
+    if g:qfixmemo_list_sort =~ '^r\?m'
+      call qfixlist#Addmtime(qflist)
+    endif
+    let qflist = qfixlist#Sort(g:qfixmemo_list_sort, qflist)
+  endif
   redraw | echo ''
   if mode =~ 'list'
     return qflist
@@ -1801,13 +1808,16 @@ endfunction
 if !exists('g:qfixmemo_grep_title')
   let g:qfixmemo_grep_title = 'QFixMemo %MODE%Grep : '
 endif
-if !exists('g:qfixmemo_grep_sort')
-  let g:qfixmemo_grep_sort = 'mtime'
+if !exists('g:qfixmemo_search_sort')
+  let g:qfixmemo_search_sort = 'mtime'
+endif
+if !exists('g:qfixmemo_list_sort')
+  let g:qfixmemo_list_sort = 'reverse'
 endif
 
 function! s:grep(pattern, file, fixmode)
   let g:MyGrep_Regexp = !a:fixmode
-  let qflist = qfixlist#search(a:pattern, g:qfixmemo_dir, g:qfixmemo_grep_sort, 0, g:qfixmemo_fileencoding, '**/'.a:file)
+  let qflist = qfixlist#search(a:pattern, g:qfixmemo_dir, g:qfixmemo_search_sort, 0, g:qfixmemo_fileencoding, '**/'.a:file)
   return qfixlist#copen(qflist, g:qfixmemo_dir)
 endfunction
 
@@ -2521,10 +2531,10 @@ function! qfixmemo#RebuildKeyword()
 
   let pattern = g:qfixmemo_keyword_pre . '.*' .g:qfixmemo_keyword_post
   let kfile = '*.'.s:howm_ext.' *.'.g:qfixmemo_ext
-  let qflist = qfixlist#search(pattern, g:qfixmemo_dir, '', 0, g:qfixmemo_fileencoding, '**/'.kfile)
+  let qflist = qfixlist#search(pattern, g:qfixmemo_dir, 'nop', 0, g:qfixmemo_fileencoding, '**/'.kfile)
   if exists('g:howm_clink_pattern') && g:howm_clink_pattern != ''
     let pattern = g:howm_clink_pattern
-    let extlist = qfixlist#search(pattern, g:qfixmemo_dir, '', 0, g:qfixmemo_fileencoding, '**/'.kfile)
+    let extlist = qfixlist#search(pattern, g:qfixmemo_dir, 'nop', 0, g:qfixmemo_fileencoding, '**/'.kfile)
     call extend(qflist, extlist)
   endif
 
@@ -2835,10 +2845,18 @@ function! s:qfixmemoSortEntryMtimeR(v1, v2)
 endfunction
 
 function! s:qfixmemoSortHowmClink(v1, v2)
-  if a:v1.text =~ g:howm_clink_pattern
+  if a:v2.text =~ g:howm_clink_pattern
+    return 1
+  elseif a:v1.text =~ g:howm_clink_pattern
     return -1
   endif
-  return 1
+  if a:v1.mtime == a:v2.mtime
+    if a:v1.filename != a:v2.filename
+      return (a:v1['filename'] < a:v2['filename']?1:-1)
+    endif
+    return (a:v1['lnum'] > a:v2['lnum']?1:-1)
+  endif
+  return (a:v1['mtime'] < a:v2['mtime']?1:-1)
 endfunction
 
 """"""""""""""""""""""""""""""

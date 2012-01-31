@@ -802,22 +802,22 @@ endfunction
 """"""""""""""""""""""""""""""
 function! QFixCompareBufnr(v1, v2)
   if a:v1.bufnr == a:v2.bufnr
-    return (a:v1.lnum > a:v2.lnum?1:-1)
+    return (a:v1.lnum+0 > a:v2.lnum+0?1:-1)
   endif
   return a:v1.bufnr>a:v2.bufnr?1:-1
 endfunction
 function! QFixCompareName(v1, v2)
   if a:v1.bufnr == a:v2.bufnr
-    return (a:v1.lnum > a:v2.lnum?1:-1)
+    return (a:v1.lnum+0 > a:v2.lnum+0?1:-1)
   endif
-  return (bufname(a:v1.bufnr) . a:v1.lnum> bufname(a:v2.bufnr).a:v2.lnum?1:-1)
+  return (bufname(a:v1.bufnr)> bufname(a:v2.bufnr)?1:-1)
 endfunction
 function! QFixCompareTime(v1, v2)
   if a:v1.mtime == a:v2.mtime
     if a:v1.bufnr != a:v2.bufnr
       return (bufname(a:v1.bufnr) < bufname(a:v2.bufnr)?1:-1)
     endif
-    return (a:v1.lnum > a:v2.lnum?1:-1)
+    return (a:v1.lnum+0 > a:v2.lnum+0?1:-1)
   endif
   return (a:v1.mtime < a:v2.mtime?1:-1)
 endfunction

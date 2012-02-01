@@ -776,6 +776,9 @@ function! QFixSort(cmd)
     let bname = ''
     let bmtime = 0
     for d in save_qflist
+      if exists('d["mtime"]')
+        continue
+      endif
       if bname == bufname(d.bufnr)
         let d['mtime'] = bmtime
       else

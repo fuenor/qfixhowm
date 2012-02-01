@@ -5,7 +5,7 @@
 "                   http://sites.google.com/site/fudist/Home/grep
 "         Author: fuenor <fuenor@gmail.com>
 "=============================================================================
-let s:version = 287
+let s:version = 288
 scriptencoding utf-8
 
 " What Is This:
@@ -101,6 +101,9 @@ endif
 if !exists('g:qfixlist_use_fnamemodify')
   let g:qfixlist_use_fnamemodify = 0
 endif
+if !exists('g:qfixlist_grep_sort')
+  let g:qfixlist_grep_sort = ''
+endif
 
 " 非0ならqfixlist#open()の代わりにQFixListAltOpen()が実行される
 if !exists('g:QFixListAltOpen')
@@ -121,24 +124,46 @@ endif
 
 function! qfixlist#GrepCopen(pattern, dir, file, ...)
   let fenc = a:0 ? a:1 : &enc
-  let qflist = qfixlist#search(a:pattern, a:dir, '', 0, fenc, a:file)
+  let qflist = qfixlist#search(a:pattern, a:dir, g:qfixlist_grep_sort, 0, fenc, a:file)
   call qfixlist#copen(qflist, a:dir)
 endfunction
 
 function! qfixlist#GrepOpen(pattern, dir, file, ...)
   let fenc = a:0 ? a:1 : &enc
-  let qflist = qfixlist#search(a:pattern, a:dir, '', 0, fenc, a:file)
+  let qflist = qfixlist#search(a:pattern, a:dir, g:qfixlist_grep_sort, 0, fenc, a:file)
   call qfixlist#open(qflist, a:dir)
 endfunction
 
 function! qfixlist#grep(pattern, dir, file, ...)
   let fenc = a:0 ? a:1 : &enc
-  return qfixlist#search(a:pattern, a:dir, '', 0, fenc, a:file)
+  return qfixlist#search(a:pattern, a:dir, g:qfixlist_grep_sort, 0, fenc, a:file)
+endfunction
+
+function! qfixlist#sortgrep(pattern, dir, sort, file, ...)
+  let fenc = a:0 ? a:1 : &enc
+  return qfixlist#search(a:pattern, a:dir, a:sort, 0, fenc, a:file)
 endfunction
 
 function! qfixlist#getqflist(pattern, dir, file, ...)
   let fenc = a:0 ? a:1 : &enc
   return qfixlist#search(a:pattern, a:dir, '', 0, fenc, a:file)
+endfunction
+
+function! qfixlist#sort(cmd, sq)
+  if a:cmd =~ 'mtime'
+    call qfixlist#addmtime(a:sq)
+    let sq = sort(a:sq, "s:CompareTime")
+  elseif a:cmd =~ 'name'
+    let sq = sort(a:sq, "s:CompareName")
+  elseif a:cmd =~ 'bufnr'
+    let sq = sort(a:sq, "s:CompareBufnr")
+  elseif a:cmd =~ 'text'
+    let sq = sort(a:sq, "s:CompareText")
+  endif
+  if a:cmd =~ 'r.*'
+    let sq = reverse(a:sq)
+  endif
+  return sq
 endfunction
 
 function! qfixlist#copen(...)
@@ -333,22 +358,6 @@ function! qfixlist#open(...)
   endif
 endfunction
 
-function! qfixlist#Sort(cmd, sq)
-  if a:cmd =~ 'mtime'
-    let sq = sort(a:sq, "s:CompareTime")
-  elseif a:cmd =~ 'name'
-    let sq = sort(a:sq, "s:CompareName")
-  elseif a:cmd =~ 'bufnr'
-    let sq = sort(a:sq, "s:CompareBufnr")
-  elseif a:cmd =~ 'text'
-    let sq = sort(a:sq, "s:CompareText")
-  endif
-  if a:cmd =~ 'r.*'
-    let sq = reverse(a:sq)
-  endif
-  return sq
-endfunction
-
 function! qfixlist#GetList(...)
   let cmd = a:0 ? a:1 : ''
   if cmd == 'copen' || cmd == 'quickfix'
@@ -410,7 +419,7 @@ function! qfixlist#search(pattern, dir, cmd, days, fenc, file)
 
   redraw | echo 'QFixList : Sorting...'
   if cmd =~ 'mtime'
-    call qfixlist#Addmtime(list)
+    call qfixlist#addmtime(list)
     let list = sort(list, "s:CompareTime")
   elseif cmd =~ 'name'
     let list = sort(list, "s:CompareName")
@@ -426,7 +435,7 @@ function! qfixlist#search(pattern, dir, cmd, days, fenc, file)
   return list
 endfunction
 
-function! qfixlist#Addmtime(qf)
+function! qfixlist#addmtime(qf)
   let bname = ''
   let bmtime = 0
   for d in a:qf
@@ -700,26 +709,27 @@ function! s:SortExec(...)
   endif
 
   redraw|echo 'QFixList : Sorting...'
-  let sq = []
-  for n in range(1, line('$'))
-    let [pfile, lnum] = s:Getfile(n)
-    let text = substitute(getline(n), '[^|].*|[^|].*|', '', '')
-    let sepdat = {"filename":pfile, "lnum": lnum, "text":text, "bufnr":-1}
-    call add(sq, sepdat)
-  endfor
-  let s:QFixList_qfCache = sq
+  " let sq = []
+  " for n in range(1, line('$'))
+  "   let [pfile, lnum] = s:Getfile(n)
+  "   let text = substitute(getline(n), '[^|].*|[^|].*|', '', '')
+  "   let sepdat = {"filename":pfile, "lnum": lnum, "text":text}
+  "   call add(sq, sepdat)
+  " endfor
+  " let s:QFixList_Cache = sq
+  let sq = s:QFixList_Cache
   if g:QFix_Sort =~ 'mtime'
-    call qfixlist#Addmtime(sq)
-    let sq = qfixlist#Sort(g:QFix_Sort, sq)
+    call qfixlist#addmtime(sq)
+    let sq = qfixlist#sort(g:QFix_Sort, sq)
   elseif g:QFix_Sort =~ 'name'
-    let sq = qfixlist#Sort(g:QFix_Sort, sq)
+    let sq = qfixlist#sort(g:QFix_Sort, sq)
   elseif g:QFix_Sort =~ 'text'
-    let sq = qfixlist#Sort(g:QFix_Sort, sq)
+    let sq = qfixlist#sort(g:QFix_Sort, sq)
   elseif g:QFix_Sort == 'reverse'
     let sq = reverse(sq)
   endif
   silent! exe 'lchdir ' . escape(s:QFixList_dir, ' ')
-  let s:QFixList_qfCache = deepcopy(sq)
+  let s:QFixList_Cache = deepcopy(sq)
   let s:glist = []
   for d in sq
     let filename = fnamemodify(d['filename'], ':.')

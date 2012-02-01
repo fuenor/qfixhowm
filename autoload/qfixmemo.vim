@@ -1278,7 +1278,7 @@ function! qfixmemo#ListRecentTimeStamp(...)
     let qflist = getqflist()
     call setqflist(qf)
     let &grepprg = saved_grepprg
-    let qflist = qfixlist#Sort('rtext', qflist)
+    let qflist = qfixlist#sort('rtext', qflist)
     " FIXME: findstrで内部エンコーディングが utf-8 だと日本語ファイル名が処理できない
     for idx in range(len(qflist))
       let file = bufname(qflist[idx]['bufnr'])
@@ -1400,10 +1400,7 @@ function! qfixmemo#Glob(path, file, mode)
   endfor
   exe 'lchdir ' . prevPath
   if g:qfixmemo_list_sort != '' && g:qfixmemo_list_sort != 'reverse'
-    if g:qfixmemo_list_sort =~ '^r\?m'
-      call qfixlist#Addmtime(qflist)
-    endif
-    let qflist = qfixlist#Sort(g:qfixmemo_list_sort, qflist)
+    let qflist = qfixlist#sort(g:qfixmemo_list_sort, qflist)
   endif
   redraw | echo ''
   if mode =~ 'list'

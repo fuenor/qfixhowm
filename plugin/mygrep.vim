@@ -96,6 +96,10 @@ endif
 if !exists('g:MyGrep_RecursiveMode')
   let g:MyGrep_RecursiveMode = 0
 endif
+" デフォルトソートパターン('', 'mtime', 'text', 'reverse')
+if !exists('g:MyGrep_Sort')
+  let g:MyGrep_Sort = ''
+endif
 " help
 if !exists('g:QFixGrep_Help')
   let g:QFixGrep_Help= 'qfixgrep_help'
@@ -245,7 +249,7 @@ function! QFixGrep(cmd, pattern, path, filepattern, fenc, ...)
   if !addflag
     let s:prevResult = []
   endif
-  let qflist = qfixlist#grep(pattern, path, filepattern, fenc)
+  let qflist = qfixlist#sortgrep(pattern, path, g:MyGrep_Sort, filepattern, fenc)
   let s:prevResult = extend(s:prevResult, qflist)
   if empty(qflist)
     redraw | echo 'QFixGrep : Not found!'
@@ -326,7 +330,7 @@ function! s:QFixCmdGrep(cmd, arg)
   if !addflag
     let s:prevResult = []
   endif
-  let qflist = qfixlist#grep(pattern, path, filepattern, fenc)
+  let qflist = qfixlist#sortgrep(pattern, path, g:MyGrep_Sort, filepattern, fenc)
   let s:prevResult = extend(s:prevResult, qflist)
   if empty(qflist)
     redraw | echo 'QFixGrep : Not found!'

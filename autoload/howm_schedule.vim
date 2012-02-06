@@ -977,6 +977,10 @@ endfunction
 
 " 繰り返す予定のプライオリティをセットする。
 " FIXME: Too slow!
+" リピート基準日に今日の日付を使用する(テスト)
+if !exists('g:QFixHowm_AltRepeatAction')
+  let g:QFixHowm_AltRepeatAction = ''
+endif
 function! s:CnvRepeatDate(cmd, opt, str, ...)
   let cmd = a:cmd
   let opt = a:opt
@@ -992,6 +996,10 @@ function! s:CnvRepeatDate(cmd, opt, str, ...)
   endif
   if cmd =~ '('.s:sch_dow
     let cmd = substitute(cmd, '(\('.s:sch_dow.'\)', '(1*\1', '')
+  endif
+
+  if g:QFixHowm_AltRepeatAction != '' && cmd =~ '^'.g:QFixHowm_AltRepeatAction.'(\d\+\([-+]'.s:sch_dow.'\)\?)'
+    let str = strftime(g:QFixHowm_DatePattern)
   endif
 
   if opt == ''
@@ -1766,6 +1774,9 @@ silent! function QFixHowmUserModeCR(...)
 endfunction
 
 function! QFixHowmScheduleAction()
+  if QFixHowmUserScheduleAction()
+    return 1
+  endif
   let str = QFixHowmScheduleActionStr()
   if str == "\<ESC>"
     return 1
@@ -1778,6 +1789,14 @@ function! QFixHowmScheduleAction()
   silent! exe str
   return 1
 endfunction
+
+if !exists('*QFixHowmUserScheduleAction')
+" アクションロックのユーザー拡張用
+" 非0を返すとアクションロック終了
+function QFixHowmUserScheduleAction()
+  return 0
+endfunction
+endif
 
 function! QFixHowmScheduleActionStr()
   let save_cursor = getpos('.')

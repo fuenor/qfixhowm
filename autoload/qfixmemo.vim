@@ -2842,16 +2842,16 @@ function! s:qfixmemoSortEntryMtimeR(v1, v2)
 endfunction
 
 function! s:qfixmemoSortHowmClink(v1, v2)
-  if a:v2.text =~ g:howm_clink_pattern
+  if a:v2.text =~ g:howm_clink_pattern && a:v1.text !~ g:howm_clink_pattern
     return 1
-  elseif a:v1.text =~ g:howm_clink_pattern
+  elseif a:v1.text =~ g:howm_clink_pattern && a:v2.text !~ g:howm_clink_pattern
     return -1
   endif
   if a:v1.mtime == a:v2.mtime
     if a:v1.filename != a:v2.filename
       return (a:v1['filename'] < a:v2['filename']?1:-1)
     endif
-    return (a:v1['lnum'] > a:v2['lnum']?1:-1)
+    return (a:v1['lnum']+0 > a:v2['lnum']+0?1:-1)
   endif
   return (a:v1['mtime'] < a:v2['mtime']?1:-1)
 endfunction

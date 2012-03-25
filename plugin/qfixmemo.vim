@@ -80,60 +80,66 @@ function! s:QFixMemoKeymap()
     call QFixMemoKeymap()
     return
   endif
-  silent! nnoremap <silent> <unique> <Leader> <Nop>
+  let leader = g:qfixmemo_mapleader
 
-  silent! nnoremap <silent> <unique> <Leader>C       :<C-u>call qfixmemo#EditInput()<CR>
-  silent! nnoremap <silent> <unique> <Leader>c       :<C-u>call qfixmemo#EditNew()<CR>
-  silent! nnoremap <silent> <unique> <Leader>u       :<C-u>call qfixmemo#Quickmemo()<CR>
-  silent! nnoremap <silent> <unique> <Leader>U       :<C-u>call qfixmemo#Quickmemo(0)<CR>
-  silent! nnoremap <silent> <unique> <Leader><Space> :<C-u>call qfixmemo#EditDiary(g:qfixmemo_diary)<CR>
-  silent! nnoremap <silent> <unique> <Leader>j       :<C-u>call qfixmemo#PairFile('%')<CR>
-  silent! nnoremap <silent> <unique> <Leader>i       :<C-u>call qfixmemo#SubMenu()<CR>
-  silent! nnoremap <silent> <unique> <Leader>I       :<C-u>call qfixmemo#SubMenu(0)<CR>
+  call s:qfkeycmd(leader, '', '<Nop>')
 
-  silent! nnoremap <silent> <unique> <Leader>m       :<C-u>call qfixmemo#ListMru()<CR>
-  silent! nnoremap <silent> <unique> <Leader>l       :<C-u>call qfixmemo#ListRecent()<CR>
-  silent! nnoremap <silent> <unique> <Leader>L       :<C-u>call qfixmemo#ListRecentTimeStamp()<CR>
-  silent! nnoremap <silent> <unique> <Leader>a       :<C-u>call qfixmemo#ListCmd()<CR>
-  silent! nnoremap <silent> <unique> <Leader>ra      :<C-u>call qfixmemo#ListCmd('nocache')<CR>
-  silent! nnoremap <silent> <unique> <Leader>A       :<C-u>call qfixmemo#ListFile(g:qfixmemo_diary)<CR>
-  silent! nnoremap <silent> <unique> <Leader>rA      :<C-u>call qfixmemo#Glob(g:qfixmemo_dir, '**/*', 'open')<CR>
-  silent! nnoremap <silent> <unique> <Leader>rN      :<C-u>call qfixmemo#ListRenameFile(g:qfixmemo_filename)<CR>
+  call s:qfkeycmd(leader, 'C'       , ':<C-u>call qfixmemo#EditInput()<CR>')
+  call s:qfkeycmd(leader, 'c'       , ':<C-u>call qfixmemo#EditNew()<CR>')
+  call s:qfkeycmd(leader, 'u'       , ':<C-u>call qfixmemo#Quickmemo()<CR>')
+  call s:qfkeycmd(leader, 'U'       , ':<C-u>call qfixmemo#Quickmemo(0)<CR>')
+  call s:qfkeycmd(leader, '<Space>' , ':<C-u>call qfixmemo#EditDiary(g:qfixmemo_diary)<CR>')
+  call s:qfkeycmd(leader, 'j'       , ':<C-u>call qfixmemo#PairFile("%")<CR>')
+  call s:qfkeycmd(leader, 'i'       , ':<C-u>call qfixmemo#SubMenu()<CR>')
+  call s:qfkeycmd(leader, 'I'       , ':<C-u>call qfixmemo#SubMenu(0)<CR>')
 
-  silent! nnoremap <silent> <unique> <Leader>rr      :<C-u>call qfixmemo#RandomWalk(g:qfixmemo_random_file)<CR>
-  silent! nnoremap <silent> <unique> <Leader>rR      :<C-u>call qfixmemo#RebuildRandomCache(g:qfixmemo_random_file)<CR>
-  silent! nnoremap <silent> <unique> <Leader>rk      :<C-u>call qfixmemo#RebuildKeyword()<CR>
+  call s:qfkeycmd(leader, 'm'       , ':<C-u>call qfixmemo#ListMru()<CR>')
+  call s:qfkeycmd(leader, 'l'       , ':<C-u>call qfixmemo#ListRecent()<CR>')
+  call s:qfkeycmd(leader, 'L'       , ':<C-u>call qfixmemo#ListRecentTimeStamp()<CR>')
+  call s:qfkeycmd(leader, 'a'       , ':<C-u>call qfixmemo#ListCmd()<CR>')
+  call s:qfkeycmd(leader, 'ra'      , ':<C-u>call qfixmemo#ListCmd("nocache")<CR>')
+  call s:qfkeycmd(leader, 'A'       , ':<C-u>call qfixmemo#ListFile(g:qfixmemo_diary)<CR>')
+  call s:qfkeycmd(leader, 'rA'      , ':<C-u>call qfixmemo#Glob(g:qfixmemo_dir, "**/*", "open")<CR>')
+  call s:qfkeycmd(leader, 'rN'      , ':<C-u>call qfixmemo#ListRenameFile(g:qfixmemo_filename)<CR>')
 
-  silent! nnoremap <silent> <unique> <Leader>s       :<C-u>call qfixmemo#FGrep()<CR>
-  silent! nnoremap <silent> <unique> <Leader>g       :<C-u>call qfixmemo#Grep()<CR>
+  call s:qfkeycmd(leader, 'rr'      , ':<C-u>call qfixmemo#RandomWalk(g:qfixmemo_random_file)<CR>')
+  call s:qfkeycmd(leader, 'rR'      , ':<C-u>call qfixmemo#RebuildRandomCache(g:qfixmemo_random_file)<CR>')
+  call s:qfkeycmd(leader, 'rk'      , ':<C-u>call qfixmemo#RebuildKeyword()<CR>')
 
-  silent! nnoremap <silent> <unique> <Leader>q       :<C-u>call qfixmemo#Calendar()<CR>
-  silent! nnoremap <silent> <unique> <Leader>Q       :<C-u>call qfixmemo#Calendar('LR')<CR>
-  silent! nnoremap <silent> <unique> <Leader>o       :<C-u>call QFixMemoOutline()<CR>
+  call s:qfkeycmd(leader, 's'       , ':<C-u>call qfixmemo#FGrep()<CR>')
+  call s:qfkeycmd(leader, 'g'       , ':<C-u>call qfixmemo#Grep()<CR>')
 
-  silent! nnoremap <silent> <unique> <Leader>d     :<C-u>call qfixmemo#InsertDate('Date')<CR>
-  silent! nnoremap <silent> <unique> <Leader>T     :<C-u>call qfixmemo#InsertDate('Time')<CR>
+  call s:qfkeycmd(leader, 'q'       , ':<C-u>call qfixmemo#Calendar()<CR>')
+  call s:qfkeycmd(leader, 'Q'       , ':<C-u>call qfixmemo#Calendar("LR")<CR>')
+  call s:qfkeycmd(leader, 'o'       , ':<C-u>call QFixMemoOutline()<CR>')
+
+  call s:qfkeycmd(leader, 'd'       , ':<C-u>call qfixmemo#InsertDate("Date")<CR>')
+  call s:qfkeycmd(leader, 'T'       , ':<C-u>call qfixmemo#InsertDate("Time")<CR>')
 
   if g:qfixmemo_use_howm_schedule
     let g:qfixmemo_howm_schedule_key = 1
-    silent! nnoremap <silent> <unique> <Leader>t     :<C-u>call qfixmemo#ListReminderCache("todo")<CR>
-    silent! nnoremap <silent> <unique> <Leader>rt    :<C-u>call qfixmemo#ListReminder("todo")<CR>
-    silent! nnoremap <silent> <unique> <Leader>y     :<C-u>call qfixmemo#ListReminderCache("schedule")<CR>
-    silent! nnoremap <silent> <unique> <Leader><Tab> :<C-u>call qfixmemo#ListReminderCache("schedule")<CR>
-    silent! nnoremap <silent> <unique> <Leader>ry    :<C-u>call qfixmemo#ListReminder("schedule")<CR>
-    silent! nnoremap <silent> <unique> <Leader>rd    :<C-u>call qfixmemo#GenerateRepeatDate()<CR>
-    silent! nnoremap <silent> <unique> <Leader>,     :<C-u>call qfixmemo#OpenMenu("cache")<CR>
-    silent! nnoremap <silent> <unique> <Leader>r,    :<C-u>call qfixmemo#OpenMenu()<CR>
+    call s:qfkeycmd(leader, 't'     , ':<C-u>call qfixmemo#ListReminderCache("todo")<CR>')
+    call s:qfkeycmd(leader, 'rt'    , ':<C-u>call qfixmemo#ListReminder("todo")<CR>')
+    call s:qfkeycmd(leader, 'y'     , ':<C-u>call qfixmemo#ListReminderCache("schedule")<CR>')
+    call s:qfkeycmd(leader, '<Tab>' , ':<C-u>call qfixmemo#ListReminderCache("schedule")<CR>')
+    call s:qfkeycmd(leader, 'ry'    , ':<C-u>call qfixmemo#ListReminder("schedule")<CR>')
+    call s:qfkeycmd(leader, 'rd'    , ':<C-u>call qfixmemo#GenerateRepeatDate()<CR>')
+    call s:qfkeycmd(leader, ','     , ':<C-u>call qfixmemo#OpenMenu("cache")<CR>')
+    call s:qfkeycmd(leader, 'r,'    , ':<C-u>call qfixmemo#OpenMenu()<CR>')
   endif
 
   if g:qfixmemo_use_howm2html
-    silent! nnoremap <silent> <unique> <leader>hi    :Howm2html!<CR>
-    silent! nnoremap <silent> <unique> <leader>hr    :Howm2html<CR>
-    silent! nnoremap <silent> <unique> <leader>hI    :Howm2html! %<CR>
-    silent! nnoremap <silent> <unique> <leader>hR    :Howm2html %<CR>
-    silent! nnoremap <silent> <unique> <leader>hj    :Jump2html!<CR>
-    silent! nnoremap <silent> <unique> <leader>hJ    :Jump2html!<CR>
+    call s:qfkeycmd(leader, 'hi'    , ':Howm2html!<CR>')
+    call s:qfkeycmd(leader, 'hr'    , ':Howm2html<CR>')
+    call s:qfkeycmd(leader, 'hI'    , ':Howm2html! %<CR>')
+    call s:qfkeycmd(leader, 'hR'    , ':Howm2html %<CR>')
+    call s:qfkeycmd(leader, 'hj'    , ':Jump2html!<CR>')
+    call s:qfkeycmd(leader, 'hJ'    , ':Jump2html!<CR>')
   endif
+endfunction
+
+function! s:qfkeycmd(leader, key, cmd)
+  exe 'silent! nnoremap <silent> <unique> '.a:leader.a:key.' '.a:cmd
 endfunction
 
 silent! function QFixMemoMenubar(menu, leader)

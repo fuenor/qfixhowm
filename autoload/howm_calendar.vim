@@ -264,6 +264,7 @@ function! QFixMemoCalendar(dircmd, file, cnt, ...)
   setlocal nolist
   setlocal nowrap
   setlocal nonumber
+  setlocal norelativenumber
   setlocal nomodifiable
   let &winfixheight = g:submenu_calendar_winfixheight
   let &winfixwidth  = g:submenu_calendar_winfixwidth

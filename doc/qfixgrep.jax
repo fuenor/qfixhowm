@@ -45,21 +45,23 @@ Windowsの標準環境ではgrepが存在しないので代替として findstr 
 が使用されます。(cygwinの場合は外部grepを設定する必要はありません)
 
 cp932(Shif_JIS)しか使用しないなら問題ありませんが、UTF-8ファイルのマルチバイト
-文字(日本語)を検索したい場合は外部grepを導入してください。
+文字(日本語)を検索したい場合はGNUgrep互換の外部grepを導入してください。
 https://sites.google.com/site/fudist/Home/grep/install
-基本的にcygwinのgrepを使用するとよいでしょう。
 
-cygwinをインストールしていてコマンドプロンプトから grepが使える場合は、次のよ
-うに指定します。
-pathを通していないなら、pathは環境に合わせてフルpathで指定して下さい。
- >
+Vimの実行ファイルと同じ場所かパスの通った場所にgrep.exeをコピーした場合は、次
+のように指定します。
+>
   let mygrepprg = 'grep'
 
-QFixGrep/QFixHowmでは問題になりませんが cygwin 1.7以降では$CYGWINも設定してお
-いたほうが良いでしょう。
+pathを通していないなら、pathは環境に合わせてフルpathで指定して下さい。
  >
-  let mygrepprg = 'c:/cygwin1.7/bin/grep'
-  let $CYGWIN = 'nodosfilewarning'
+  let mygrepprg = 'c:/cygwin/bin/grep'
+
+cygwin1.7以降のgrep.exeを使用する場合はMyGrep_cygwin17も設定してください。
+設定しない場合は一部のUTF-8文字列が検索できないことがあります。
+ >
+  let mygrepprg = 'grep'
+  let MyGrep_cygwin17 = 1
 
 ==============================================================================
 3. コマンド                                             *qfixgrep_command*

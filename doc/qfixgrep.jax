@@ -233,7 +233,7 @@ O
 
 https://sites.google.com/site/fudist/Home/grep/qfixgrep-option
 
-QuicFixウィンドウ >
+QuickFixウィンドウ >
 
   " QuickFixウィンドウでプレビューを有効にする
   let QFix_PreviewEnable = 1
@@ -287,6 +287,8 @@ grepオプション >
 
   " 使用するgrep(Windows)
   let mygrepprg = 'findstr'
+  " Windowsでcygwin1.7以降のgrep.exeを使用する場合のみ 1 に設定
+  let MyGrep_cygwin17 = 1
   " 使用するgrep(Unix)
   let mygrepprg = 'grep'
   " 日本語が含まれる場合のgrep指定

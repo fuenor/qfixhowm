@@ -831,6 +831,7 @@ endif
 " Windowsから cygwin 1.7以降のgrep.exeを使用する場合に
 " UTF-8の一部文字が検索不可能な問題に対する対処
 " cygwin 1.5のgrep.exe等他のgrepを使用する場合は必ず 0
+" findstrには影響しない
 if !exists('g:MyGrep_cygwin17')
   let g:MyGrep_cygwin17 = 0
 endif
@@ -838,15 +839,19 @@ endif
 if has('win32unix')
   let g:MyGrep_cygwin17 = 0
 endif
+" UTF-8文字列はコードページを変更してgrep(Windows)
+if !exists('g:MyGrep_chcp')
+  let g:MyGrep_chcp = 0
+endif
 " grepを実行する際に$LANGも設定する
 if !exists('g:MyGrep_LANG')
   let g:MyGrep_LANG = ''
-  if s:MSWindows && !has('win32unix') && exists('$LANG') && $LANG=~ 'ja'
+  if exists('$LANG') && $LANG=~ 'ja' && s:MSWindows && !has('win32unix')
     let g:MyGrep_LANG = 'ja_JP.SJIS'
   endif
 endif
 " cygwin 1.7以降のエラーメッセージ抑制
-if !exists('$CYGWIN') && (has('win95') || has('win16') || has('win32') || has('win64'))
+if !exists('$CYGWIN') && s:MSWindows
   let $CYGWIN = 'nodosfilewarning'
 endif
 
@@ -911,7 +916,7 @@ endif
 
 " エラーメッセージ表示
 if !exists('g:MyGrep_error')
-  let g:MyGrep_error = 1
+  let g:MyGrep_error = 0
 endif
 " QFixHowm用の行儀の悪いオプション
 let g:MyGrep_FileListWipeTime = 0
@@ -933,16 +938,16 @@ if !exists('g:MyGrepcmd_useropt')
   let g:MyGrepcmd_useropt = ''
 endif
 if !exists('g:MyGrepcmd_regexp')
-  let g:MyGrepcmd_regexp = '-nHIE'
+  let g:MyGrepcmd_regexp = '-n -H -I -E'
 endif
 if !exists('g:MyGrepcmd_regexp_ignore')
-  let g:MyGrepcmd_regexp_ignore = '-nHIEi'
+  let g:MyGrepcmd_regexp_ignore = '-n -H -I -E -i'
 endif
 if !exists('g:MyGrepcmd_fix')
-  let g:MyGrepcmd_fix = '-nHIF'
+  let g:MyGrepcmd_fix = '-n -H -I -F'
 endif
 if !exists('g:MyGrepcmd_fix_ignore')
-  let g:MyGrepcmd_fix_ignore = '-nHIFi'
+  let g:MyGrepcmd_fix_ignore = '-n -H -I -F -i'
 endif
 if !exists('g:MyGrepcmd_recursive')
   let g:MyGrepcmd_recursive = '-R'
@@ -972,6 +977,8 @@ endif
 let g:MyGrep_UseVimgrep = 0
 " " QuickFixに登録しない
 " let g:MyGrep_Return = 0
+
+let g:MyGrep_retval = ''
 
 """"""""""""""""""""""""""""""
 " 汎用Grep関数
@@ -1171,12 +1178,11 @@ function! s:SetGrepEnv(mode, ...)
     endif
   endif
   if g:mygrepprg != 'findstr' && g:mygrepprg !~ 'jvgrep'
-    if !s:MSWindows || g:MyGrep_LANG == '' || g:MyGrep_cygwin17 == 0
+    if !s:MSWindows || g:MyGrep_LANG == '' || g:MyGrep_cygwin17 + g:MyGrep_chcp == 0
       return
     endif
     if a:mode == 'set'
-      " Wndowsのcygwin/GNU grepはUTF-8非対応なので検索不可文字列がある
-      " 対処としてコードページをUTF-8に変更してgrepする
+      " コードページをUTF-8に変更してgrepする
       let s:MyGrep_LANG          = g:MyGrep_LANG
       let s:MyGrep_ShellEncoding = g:MyGrep_ShellEncoding
       if a:2 == 'utf-8'

@@ -1345,8 +1345,10 @@ function! s:ExecGrep(cmd, prg, searchPath, searchWord, from_encoding, to_encodin
   if g:MyGrep_LANG != ''
     let $LANG = saved_LANG
   endif
-  let saved_CYGWIN = $CYGWIN
-  let $CYGWIN = 'nodosfilewarning'
+  if exists('$CYGWIN') && s:MSWindows
+    let saved_CYGWIN = $CYGWIN
+    let $CYGWIN = 'nodosfilewarning'
+  endif
 
   let g:MyGrep_path   = a:searchPath
   let g:MyGrep_execmd = cmd
@@ -1356,7 +1358,9 @@ function! s:ExecGrep(cmd, prg, searchPath, searchWord, from_encoding, to_encodin
     let g:fudist_word = a:searchWord
   endif
   silent! let $PATH  = saved_path
-  silent! let $CYGWIN = saved_CYGWIN
+  if exists('$CYGWIN') && s:MSWindows
+    silent! let $CYGWIN = saved_CYGWIN
+  endif
   if exists('g:qfixtempname')
     silent! call delete(g:qfixtempname)
   endif

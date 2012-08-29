@@ -314,6 +314,9 @@ grepオプション >
 
   " QFixGrepの検索時にカーソル位置の単語を拾う/拾わない
   let MyGrep_DefaultSearchWord = 1
+
+  " grep実行時にエラーメッセージが出たら表示
+  let MyGrep_error = 0
 <
   vim:tw=78:ts=8:ft=help:norl:et:
 

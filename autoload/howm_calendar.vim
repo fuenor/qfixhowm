@@ -591,6 +591,8 @@ if !exists('g:calendar_month')
   let g:calendar_month = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
   if g:calendar_jp == 2
     let g:calendar_month = ['睦月  ', '如月  ', '弥生  ', '卯月  ', '皐月  ', '水無月', '文月  ', '葉月  ', '長月  ', '神無月', '霜月  ', '師走  ']
+  elseif g:calendar_jp == 3
+    let g:calendar_month = ['睦月  ', '如月  ', '弥生  ', '卯月  ', '皐月  ', '水無月', '文月  ', '葉月  ', '長月  ', '神在月', '霜月  ', '師走  ']
   endif
 endif
 function! s:CalendarStr(row, col)

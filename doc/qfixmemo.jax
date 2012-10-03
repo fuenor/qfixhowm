@@ -135,6 +135,24 @@ cygwinがインストールされているならcygwinのgrepを利用可能で�
   " パスが通っているならgrepのみでかまいません。
   let mygrepprg='grep'
 
+Windows上から cygwin 1.7以降のgrepを使用する場合はUTF-8で日本語の特定文字列が
+検索できない問題が解消されますので MyGrep_cygwin17も設定してください。
+>
+  " cygwin 1.7以降のgrep対策
+  let MyGrep_cygwin17 = 1
+
+cygwin上のVimで使用する場合は不要です。
+
+NOTE:
+マッピングされたキーの待ち時間
+QFixHowmのコマンドは g,c など3ストロークが基本になるので、キー完了待ち時間を長
+くしたほうが良いかもしれません。
+>
+  " キーコードやマッピングされたキー列が完了するのを待つ時間(ミリ秒)
+  set timeout timeoutlen=3000 ttimeoutlen=100
+
+詳しくは :help timeoutlenを参照してください。
+
 NOTE:
 ファイルフォーマット(改行コード)についてはWindowsでも 'unix' に設定可能です。
 

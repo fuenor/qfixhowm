@@ -560,14 +560,6 @@ function! s:CalendarInfo(day, month, year)
   let month = a:month
   let year  = a:year
 
-  if day == 24 && month == 12
-    return [' Merry Xmas!']
-  elseif day == 31 && month == 10
-    return [' Trick or Treat?']
-  elseif day == 1 && month == 1
-    return [' Happy New Year!']
-  endif
-
   let file = expand(QFixMemoCalendarFile(year, month, day))
   if filereadable(file)
     let info = readfile(file, '', 1)
@@ -575,6 +567,14 @@ function! s:CalendarInfo(day, month, year)
       call map(info, "iconv(v:val, g:qfixmemo_fileencoding, &enc)")
     endif
     return info
+  endif
+
+  if day == 24 && month == 12
+    return [' Merry Xmas!']
+  elseif day == 31 && month == 10
+    return [' Trick or Treat?']
+  elseif day == 1 && month == 1
+    return [' Happy New Year!']
   endif
 
   return []

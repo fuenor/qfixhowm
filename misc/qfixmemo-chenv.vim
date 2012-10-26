@@ -128,6 +128,10 @@ let s:qfixmemo_random_file = g:qfixmemo_random_file
 
 command! -nargs=1 QFixMemoChdir let qfixmemo_dir = qfixmemo_chenv_dir.<q-args> |echo "qfixmemo_dir = ".qfixmemo_dir
 function! QFixMemoChEnv(dir, fname, title)
+  if g:QFixMRU_state == 1
+    call QFixMRUWrite(0)
+    call QFixMRUWrite(1)
+  endif
   let g:qfixmemo_dir = g:qfixmemo_chenv_dir . '/' . a:dir
   let g:qfixmemo_dir = substitute(g:qfixmemo_dir, '[/\\]$', '', '')
 

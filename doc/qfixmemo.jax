@@ -780,7 +780,6 @@ QFixMemoではサブメニューを開くことができます。
 <Leader>iで実際に表示して試してみてください。
 
 <Leader>i           サブメニュー
-<Leader>I           サブメニュー(デフォルト)
 >
 サブメニューは qfixmemo_submenu_titleで指定されるファイルに保存されます。 >
 
@@ -822,6 +821,26 @@ qfixmemo_submenu_dirが優先されます。
 
 NOTE:
 ウィンドウ表示コマンドについては|vertical|を参照してください。
+
+NOTE:
+次のように設定してから1<Leader>iや2<Leader>iのようにカウント指定して実行すると
+複数のサブメニューを切り替えて使用することも可能です。
+>
+  " サブメニューのタイトル指定
+  let qfixmemo_submenu_title1 = '__submenu1__'
+  let qfixmemo_submenu_title2 = '__submenu2__'
+
+その他のパラメータに関してもqfixmemo_submenu_size2のようにサブメニュー番号を付
+加して指定可能です。
+>
+  " サブメニュー2のサイズ指定
+  let qfixmemo_submenu_size = 30
+
+以降は<Leader>iで最後に表示されたサブメニューを表示することになります。
+
+デフォルトのサブメニューに戻すには<Leader>Iを実行します。
+
+<Leader>I           サブメニュー(デフォルト)
 
 ------------------------------------------------------------------------------
 8.1 カレンダー                                    *qfixmemo_submenu_calendar*

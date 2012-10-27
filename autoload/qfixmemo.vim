@@ -1968,6 +1968,18 @@ function! qfixmemo#SubMenu(...)
   if a:0 && l:count == 0
     let s:qfixmemo_submenu_title = g:qfixmemo_submenu_title
     let s:sb_id = 0
+  elseif a:0 && l:count == 1
+    exe 'let g:qfixmemo_submenu_direction'      .s:sb_id.'="vertical topleft"'
+    exe 'let g:qfixmemo_submenu_calendar_wincmd'.s:sb_id.'="leftabove"'
+  elseif a:0 && l:count == 2
+    exe 'let g:qfixmemo_submenu_direction'      .s:sb_id.'="vertical botright"'
+    exe 'let g:qfixmemo_submenu_calendar_wincmd'.s:sb_id.'="leftabove"'
+  elseif a:0 && l:count == 3
+    exe 'let g:qfixmemo_submenu_direction'      .s:sb_id.'="leftabove"'
+    exe 'let g:qfixmemo_submenu_calendar_wincmd'.s:sb_id.'="vertical leftabove"'
+  elseif a:0 && l:count == 4
+    exe 'let g:qfixmemo_submenu_direction'      .s:sb_id.'="rightbelow"'
+    exe 'let g:qfixmemo_submenu_calendar_wincmd'.s:sb_id.'="vertical leftabove"'
   elseif l:count
     exe 'let s:qfixmemo_submenu_title = g:qfixmemo_submenu_title'.l:count
     let s:sb_id = l:count
@@ -2083,7 +2095,7 @@ function! s:OpenQFixSubWin(file, id)
   exe 'normal! zz'
 endfunction
 
-function s:QFixMemoSubMenuBufLeave()
+function! s:QFixMemoSubMenuBufLeave()
   if b:submenu_keepsize
     return
   endif
@@ -2092,7 +2104,7 @@ function s:QFixMemoSubMenuBufLeave()
   exe "let g:calendar_width_".bufnr('%')."=winwidth(0)"
 endfunction
 
-function s:QFixMemoSubMenuResize(winsize, ...)
+function! s:QFixMemoSubMenuResize(winsize, ...)
   let winsize = a:winsize
   if a:0
     let winsize = b:submenu_width < a:winsize ? a:winsize : b:submenu_width

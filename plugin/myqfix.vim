@@ -5,7 +5,7 @@
 "                 http://sites.google.com/site/fudist/Home  (Japanese)
 "=============================================================================
 scriptencoding utf-8
-let s:version = 290
+let s:version = 291
 
 " What Is This:
 "   This plugin adds preview, sortings and advanced search to your quickfix window.
@@ -1054,6 +1054,7 @@ function! QFixCopen(...)
     echohl None
     return
   endif
+  let prevPath = escape(getcwd(), ' ')
   if a:0 && a:1 != ''
     let cmd = a:1
   else
@@ -1105,6 +1106,7 @@ function! QFixCopen(...)
   let g:QFix_PreviewEnable = saved_pe
   let &winfixheight = g:QFix_Copen_winfixheight
   let &winfixwidth  = g:QFix_Copen_winfixwidth
+  silent! exe 'lchdir ' . prevPath
 endfunction
 
 " Windowsパス正規化

@@ -1755,6 +1755,10 @@ function! s:randomWriteFile(file, dir)
     let res = file.'|'.d['lnum'].'|'.text
     call add(result, res)
   endfor
+  let dir = fnamemodify(rfile, ':h')
+  if isdirectory(dir) == 0
+    call mkdir(dir, 'p')
+  endif
   call writefile(result, rfile)
   exe 'lchdir ' . prevPath
   return sq
@@ -2509,6 +2513,10 @@ function! qfixmemo#AddKeyword(...)
     call sort(s:KeywordDic)
     call reverse(s:KeywordDic)
     let kfile = expand(g:qfixmemo_keyword_file)
+    let dir = fnamemodify(kfile, ':h')
+    if isdirectory(dir) == 0
+      call mkdir(dir, 'p')
+    endif
     call writefile(s:KeywordDic, kfile)
     call qfixmemo#LoadKeyword('highlight')
   endif

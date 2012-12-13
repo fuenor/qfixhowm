@@ -857,7 +857,11 @@ endif
 
 " 検索対象外のファイル指定
 if !exists('g:MyGrep_ExcludeReg')
-  let g:MyGrep_ExcludeReg = '[~#]$\|\.dll$\|\.exe$\|\.lnk$\|\.o$\|\.obj$\|\.pdf$\|\.xls$'
+  if exists('g:QFix_PreviewExclude')
+    let g:MyGrep_ExcludeReg = '[~#]$\|'.g:QFix_PreviewExclude
+  else
+    let g:MyGrep_ExcludeReg = '[~#]$\|\.pdf$\|\.xls$\|\.mp3$\|\.mpg$\|\.avi$\|\.wmv$\|\.jpg$\|\.bmp$\|\.png$\|\.zip$\|\.rar$\|\.exe$\|\.dll$\|\.o$\|\.obj$\|\.lnk$'
+  endif
 endif
 " 使用するgrepのエンコーディング指定
 if !exists('g:MyGrep_ShellEncoding')
@@ -1061,7 +1065,7 @@ function! s:MyGrep(pattern, searchPath, filepattern, fenc, addflag, ...)
 
   let ccmd = g:QFix_UseLocationList ? 'lexpr ""' : 'cexpr ""'
   let l:mygrepprg = expand(g:mygrepprg)
-  if !executable(l:mygrepprg)
+  if !executable(l:mygrepprg) && l:mygrepprg !~ '\.vim$'
     echohl ErrorMsg
     redraw|echo '"'.l:mygrepprg.'"'." is not executable!"
     echohl None
@@ -1341,7 +1345,12 @@ function! s:ExecGrep(cmd, prg, searchPath, searchWord, from_encoding, to_encodin
   if g:MyGrep_LANG != ''
     let $LANG = g:MyGrep_LANG
   endif
-  let g:MyGrep_retval = system(cmd)
+  if g:mygrepprg =~ '\.vim$'
+    let gprg = fnamemodify(g:mygrepprg, ':r')
+    exe 'let g:MyGrep_retval = '.gprg.'#MyGrepScript(a:searchWord, a:from_encoding, a:to_encoding, QFixNormalizePath(fnamemodify(a:searchPath, ":p:h")), opt)'
+  else
+    let g:MyGrep_retval = system(cmd)
+  endif
   if g:MyGrep_LANG != ''
     let $LANG = saved_LANG
   endif

@@ -133,25 +133,38 @@ QFixHowmのコマンドは g,c など3ストロークが基本になるので、
 詳しくは|timeoutlen|を参照してください。
 
 NOTE:
-Windowsでファイルエンコーディングを utf-8 に設定したい場合は別途grepを用意して
-設定を行う必要があります。
-http://sites.google.com/site/fudist/Home/grep/install
+・Windowsでファイルエンコーディングを utf-8 に設定したい場合
 
-cygwinがインストールされているならcygwinのgrepを利用可能です。
-(cygwin上のVimで使用する場合は設定不要です)
->
-  " Windows上のVimでcygwin grepを使用する
-  let mygrepprg='c:/cygwin/bin/grep'
-  " パスが通っているならgrepのみでかまいません。
-  let mygrepprg='grep'
+Windowsの標準環境ではgrepが存在しないので代替として findstr (Windows2000以降)
+が使用されます。
+cp932(Shif_JIS)しか使用しないなら問題ありませんが、UTF-8ファイルのマルチバイト
+文字(日本語)を検索したい場合はGNUgrep互換の外部grepを導入してください。
+なおcygwinの場合はこの項は関係ありません。
 
-Windows上から cygwin 1.7以降のgrepを使用する場合はUTF-8で日本語の特定文字列が
-検索できない問題が解消されるように MyGrep_cygwin17も設定してください。
+・Vimスクリプトによるgrep
+速度をさほど気にしない場合は、Vimスクリプトで実装されたgrepを使用することが可
+能です。
 >
-  " cygwin 1.7以降のgrep対応
+  " Vimスクリプト実装の grepを使用する
+  let mygrepprg='agrep.vim'
+agrep.vimの正規表現はVimの正規表現を使用することになります。
+
+・GNUgrep互換の外部grepを使用する場合
+grep.exeはcygwinのgrep.exeと必要なdllを抽出して使用することをおすすめします。
+Vimの実行ファイルと同じ場所かパスの通った場所にgrep.exeをコピーした場合は、次
+のように指定します。
+>
+  let mygrepprg = 'grep'
+
+pathを通していないなら、pathは環境に合わせてフルpathで指定して下さい。
+ >
+  let mygrepprg = 'c:/cygwin/bin/grep'
+
+cygwin1.7以降のgrep.exeを使用する場合はMyGrep_cygwin17も設定してください。
+設定しない場合は一部のUTF-8文字列が検索できないことがあります。
+ >
+  let mygrepprg = 'grep'
   let MyGrep_cygwin17 = 1
-
-cygwin上のVimで使用する場合は不要です。
 
 NOTE:
 マッピングされたキーの待ち時間

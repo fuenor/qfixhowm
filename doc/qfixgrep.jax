@@ -41,13 +41,25 @@ QFixGrepにruntimepathを通します。
 
 2.1 Windowsの場合                               *qfixgrep_install_windows*
 
-Windowsの標準環境ではgrepが存在しないので代替として findstr (Windows2000以降)
-が使用されます。(cygwinの場合は外部grepを設定する必要はありません)
+・Windowsでファイルエンコーディングを utf-8 に設定したい場合
 
+Windowsの標準環境ではgrepが存在しないので代替として findstr (Windows2000以降)
+が使用されます。
 cp932(Shif_JIS)しか使用しないなら問題ありませんが、UTF-8ファイルのマルチバイト
 文字(日本語)を検索したい場合はGNUgrep互換の外部grepを導入してください。
-https://sites.google.com/site/fudist/Home/grep/install
+なおcygwinの場合はこの項は関係ありません。
 
+・Vimスクリプトによるgrep
+速度をさほど気にしない場合は、Vimスクリプトで実装されたgrepを使用することが可
+能です。
+>
+  " Vimスクリプト実装の grepを使用する
+  let mygrepprg='agrep.vim'
+agrep.vimの正規表現はVimの正規表現を使用することになります。
+
+・GNUgrep互換の外部grepを使用する場合
+
+grep.exeはcygwinのgrep.exeと必要なdllを抽出して使用することをおすすめします。
 Vimの実行ファイルと同じ場所かパスの通った場所にgrep.exeをコピーした場合は、次
 のように指定します。
 >

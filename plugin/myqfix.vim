@@ -120,7 +120,7 @@ if !exists('g:QFix_UseModifiedWindow')
 endif
 " プレビューしない拡張子
 if !exists('g:QFix_PreviewExclude')
-  let g:QFix_PreviewExclude = '\.pdf$\|\.mp3$\|\.jpg$\|\.bmp$\|\.png$\|\.zip$\|\.rar$\|\.exe$\|\.dll$\|\.lnk$'
+  let g:QFix_PreviewExclude = '\.pdf$\|\.xls$\|\.mp3$\|\.mpg$\|\.avi$\|\.wmv$\|\.jpg$\|\.bmp$\|\.png$\|\.gif$\|\.zip$\|\.rar$\|\.exe$\|\.dll$\|\.o$\|\.obj$\|\.lnk$'
 endif
 " 正規表現で一行目を判定してプレビュー非表示
 " ファイルエンコーディングを判定しないのでマルチバイト文字は使用不可

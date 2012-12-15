@@ -80,19 +80,19 @@ function! agrep#MyGrepScript(searchWord, to_encoding, searchPath, options)
     let searchWord = "\\C".searchWord
   endif
   " 高速化のためテンポラリバッファを使用
+  let prevPath = escape(getcwd(), ' ')
+  silent! exe 'lchdir ' . escape(path, ' ')
   silent! exe 'silent! split '.s:tempfile
   silent! setlocal bt=nofile bh=hide noswf nobl
 
   let retval = ''
-  let prevPath = escape(getcwd(), ' ')
   let path = substitute(fnamemodify(a:searchPath, ':p'), '\\', '/', 'g')
   let path = substitute(path, '[\\/]$', '', '')
-  silent! exe 'lchdir ' . escape(path, ' ')
   for file in qflist
     if file =~ g:MyGrep_ExcludeReg
       continue
     endif
-    let filename = iconv(file, &enc, g:MyGrep_ShellEncoding)
+    let filename = iconv(substitute(file, '\\', '/', 'g'), &enc, g:MyGrep_ShellEncoding)
     let lnum = 1
     if g:MyGrep_MultiEncodingGrepScript
       let tlist = s:readfile(path.'/'.file, '')

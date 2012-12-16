@@ -131,6 +131,13 @@ Unix: >
   " メモのファイルタイプ
   let qfixmemo_filetype      = 'qfix_memo'
 <
+android/iOS >
+  " 検索にagrep.vimを使用する
+  let mygrepprg='agrep.vim'
+<
+  基本設定はUnixと同じですがandroid/iOSでは外部grepが使用できないので上記設定
+  を追加してください。
+
 NOTE:
 QFixHowmのコマンドは g,c など3ストロークが基本になるので、キー完了待ち時間を長
 くしたほうが良いかもしれません。

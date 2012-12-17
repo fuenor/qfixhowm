@@ -652,3 +652,8 @@ span.italic {
    font-style: italic;
 }
 
+/* tohtml.vim */
+div#vimCodeElement {
+	margin-top: -1em;
+	margin-bottom: -1em;
+}

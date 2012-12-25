@@ -439,8 +439,10 @@ function! s:HowmStr2HTML(list, htmlname, anchor)
           let class = substitute(str, '^&gt;|\||$', '', 'g')
           if class == ''
             let class = '<pre>'
+            let preclose = '</pre>'
           else
             let class = printf(g:HowmHtml_preFormat, class)
+            let preclose = '</pre></code>'
           endif
           let str = class
           let prequote = 1
@@ -453,7 +455,7 @@ function! s:HowmStr2HTML(list, htmlname, anchor)
           let prequote = 3
         endif
       elseif prequote == 1 && str =~ '^||&lt;$'
-        let str = '</pre></code>'
+        let str = preclose
         let prequote = 0
       elseif prequote == 1 && str =~ '^|&lt;$'
         let str = '</pre>'
@@ -1316,7 +1318,8 @@ func! s:Convert2HTMLSnippet(...)
       " howm2html用に &&を埋め込み
       call map(rstr, '"&&" . v:val')
     endif
-    call setline(firstline, rstr)
+    silent! exe firstline.','.(lastline).'delete _'
+    call append(firstline-1, rstr)
   endwhile
   call setpos('.', save_cursor)
   exe 'colorscheme '.saved_colorscheme

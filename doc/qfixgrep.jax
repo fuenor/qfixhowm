@@ -9,6 +9,7 @@
   1. Intro                                           |qfixgrep_intro|
   2. インストール                                    |qfixgrep_install|
     2.1 Windowsの場合                                |qfixgrep_install_windows|
+    2.1 異なるエンコーディングが混在する場合         |qfixgrep_agrep|
   3. コマンド                                        |qfixgrep_command|
   4. コマンドライン                                  |qfixgrep_commandline|
   5. QuickFix                                        |qfixgrep_quickfix|
@@ -38,30 +39,83 @@ QFixGrepにruntimepathを通します。
 
 この状態で現在使用しているgrepをそのまま実行してQuickfixウィンドウを開くだけで
 もプレビューや絞込みは有効になります。
+基本的にはこのままでも使用可能ですが、Windowsは2.1以降(|qfixgrep_install_windows|)
+その他のOSは2.2以降(|qfixgrep_agrep|)にも目を通しておいてください。
 
+------------------------------------------------------------------------------
 2.1 Windowsの場合                               *qfixgrep_install_windows*
 
 Windowsの標準環境ではgrepが存在しないので代替として findstr (Windows2000以降)
-が使用されます。(cygwinの場合は外部grepを設定する必要はありません)
+が使用されます。
+cp932(Shif_JIS)しか使用しないなら問題ありませんが、UTF-8ファイルの日本語文字列
+も検索したい場合はGNU grep互換の外部grepか、grepスクリプトagrep.vimを使用する
+必要があります。
+(cygwin上のVimであるかUTF-8のファイルを扱わない場合、本項は関係ありません)
 
-cp932(Shif_JIS)しか使用しないなら問題ありませんが、UTF-8ファイルのマルチバイト
-文字(日本語)を検索したい場合はGNUgrep互換の外部grepを導入してください。
-https://sites.google.com/site/fudist/Home/grep/install
+* とにかく使って見る場合
+次の設定を追加します。
+>
+  " 日本語を含む場合のみagrep.vimを使用する
+  let mygrepprg   = 'findstr'
+  let myjpgrepprg = 'agrep.vim'
 
-Vimの実行ファイルと同じ場所かパスの通った場所にgrep.exeをコピーした場合は、次
-のように指定します。
+この設定では検索文字列に日本語を含む場合だけagrep.vimを使用することになります。
+agrep.vimの正規表現はVimの正規表現を使用するため、検索文字列に日本語を含む場合
+とそうでない場合で使える正規表現が異なることになります。
+日本語と正規表現を組み合わせて検索する場合は気をつけてください。
+
+findstrの正規表現は貧弱ですし、そういう意味でもできるだけ外部grepを使用するこ
+とをおすすめします。
+
+* GNU grep互換の外部grepを使用する場合
+
+一応GNU grep互換のgrepであれば動作するはずですが、おすすめなのはcygwinをインス
+トールしてcygwinのbinへパスを通すことです。
+
+パスの通った場所にgrep.exeがある場合は、次のように指定します。
 >
   let mygrepprg = 'grep'
 
 pathを通していないなら、pathは環境に合わせてフルpathで指定して下さい。
- >
+>
   let mygrepprg = 'c:/cygwin/bin/grep'
 
 cygwin1.7以降のgrep.exeを使用する場合はMyGrep_cygwin17も設定してください。
 設定しない場合は一部のUTF-8文字列が検索できないことがあります。
- >
+>
   let mygrepprg = 'grep'
   let MyGrep_cygwin17 = 1
+
+------------------------------------------------------------------------------
+2.2 異なるエンコーディングのファイルが混在している場合      *qfixgrep_agrep*
+
+UTF-8とcp932、euc-jpなど異なるエンコーディングが混在している場合でもagrep.vim
+を使用するとエンコーディングを気にせずgrep可能です。
+agrep.vimは通常のgrepやfindstrより遅いので、検索文字列に日本語を含む場合だけ
+agrep.vimを使用するというのが良いかもしれません。
+agrep.vimの正規表現はVimの正規表現を使用することになります。
+>
+  " 日本語を含む場合のみagrep.vimを使用する設定
+
+  " Windows
+  let mygrepprg   = 'findstr'
+  let myjpgrepprg = 'agrep.vim'
+  " 異なるエンコーディングが混在していてもgrep可能にする
+  let MyGrep_MultiEncodingGrepScript = 1
+
+  " unix
+  let mygrepprg   = 'grep'
+  let myjpgrepprg = 'agrep.vim'
+  " 異なるエンコーディングが混在していてもgrep可能にする
+  let MyGrep_MultiEncodingGrepScript = 1
+
+この場合は日本語を含む場合とそうでない場合で使える正規表現が異なることになるの
+で気をつける必要があります。
+
+常にagrep.vimを使用したい場合は mygrepprgでもagrep.vimを使用するように設定しま
+す。
+>
+  let mygrepprg   = 'agrep.vim'
 
 ==============================================================================
 3. コマンド                                             *qfixgrep_command*
@@ -301,6 +355,13 @@ grepオプション >
   " 外部grep(shell)でエンコーディング変換が行われる場合のエンコーディング指定
   " (通常はMyGrep_ShellEncodingと同一のため設定しないでください)
   let MyGrep_FileEncoding = ''
+
+  " 検索ディレクトリはカレントディレクトリを基点にする
+  " 0 : 現バッファのファイルが存在するディレクトリ
+  " 1 : カレントディレクトリ
+  let g:MyGrep_CurrentDirMode = 1
+  " 検索は常に再帰検索
+  let g:MyGrep_RecursiveMode = 0
 
   " 「だめ文字」対策を有効/無効
   let MyGrep_Damemoji = 2

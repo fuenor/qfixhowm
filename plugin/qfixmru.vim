@@ -412,12 +412,9 @@ function! QFixMRURead(...)
     silent! call remove(mdic, 0)
   elseif !isdirectory(expand(g:QFixMRU_BaseDir)) && !isdirectory(expand(basedir))
     let dir = basedir != '' ? basedir : g:QFixMRU_BaseDir
-    let mes = printf("!!! QFixMRU : (%s) is not directory.\nContinue anyway?", dir)
-    let choice = confirm(mes, "&OK\n&Cancel", 2, "W")
-    if choice != 1
-      return
-    endif
-    let g:QFixMRU_BaseDir = '~'
+    let mes = printf("!!! QFixMRU : (%s) is not directory.", dir)
+    let choice = confirm(mes, "&OK", 1, "E")
+    return
   endif
   if merge
     let mergedic = deepcopy(s:MruDic)

@@ -240,6 +240,13 @@ endif
 if !exists('g:qfixmemo_random_exclude')
   let g:qfixmemo_random_exclude = ''
 endif
+" 乱数取得方法
+" 0 : 各OS用のデフォルト
+" 1 : 環境変数 $RANDOMから取得 (unix, android)
+" 2 : Vimのreltime()を使用して取得 (Vim汎用)
+if !exists('g:qfixmemo_random_mode')
+  let g:qfixmemo_random_mode = 0
+endif
 
 " リネームで使用するファイル名の長さ
 if !exists('g:qfixmemo_rename_length')
@@ -436,7 +443,7 @@ function! qfixmemo#BufRead()
       if &readonly
         edit!
         let mes= expand('%')."\nInvalid qfixmemo_fileencoding (".&fenc.")\nSet to fenc (".g:qfixmemo_fileencoding.")?"
-        let choice = g:qfixmemo_forceencoding == 2 ? 1 : confirm(mes, "&Yes\n&No", 2, "W")
+        let choice = g:qfixmemo_forceencoding == 2 ? 1 : confirm(mes, "&Yes\n&No", 1, "W")
         if choice == 1
           exe 'set fenc='.g:qfixmemo_fileencoding
           exe 'set ff='.g:qfixmemo_fileformat
@@ -794,7 +801,7 @@ function! qfixmemo#Init(...)
     if isdirectory(dir) == 0
       if a:1 !~ 'mkdir'
         let mes = printf("!!!Create qfixmemo_dir? (%s)", g:qfixmemo_dir)
-        let choice = confirm(mes, "&Yes\n&No", 2, "W")
+        let choice = confirm(mes, "&Yes\n&No", 1, "W")
         if choice != 1
           return 1
         endif
@@ -1683,14 +1690,25 @@ function! s:randomList(list, len, dir)
 endfunction
 
 function! s:random(range)
-  if has('macunix')
-    let r = libcallnr("libc.dylib", "rand", -1) % a:range
-  elseif has('unix') && !has('win32unix')
-    let r = libcallnr("", "rand", -1) % a:range
-  else
-    let r = libcallnr("msvcrt.dll", "rand", -1) % a:range
+  if g:qfixmemo_random_mode == 1
+    return system('echo $RANDOM') % a:range
+  elseif g:qfixmemo_random_mode == 2
+    return matchstr(reltimestr(reltime()), '\d\+$') % a:range
   endif
-  return r
+  try
+    if has('macunix')
+      let r = libcallnr("libc.dylib", "rand", -1) % a:range
+    elseif has('unix') && !has('win32unix')
+      let r = libcallnr("", "rand", -1) % a:range
+    elseif has('win32') || has('win64')
+      let r = libcallnr("msvcrt.dll", "rand", -1) % a:range
+    endif
+    return r
+  catch
+    if has('reltime')
+      return matchstr(reltimestr(reltime()), '\d\+$') % a:range
+    endif
+  endtry
 endfunction
 
 function! s:randomReadFile(file, dir)

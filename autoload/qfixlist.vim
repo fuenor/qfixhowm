@@ -807,7 +807,7 @@ let s:MSWindows = has('win95') || has('win16') || has('win32') || has('win64')
 
 " 使用するgrep指定
 if !exists('g:mygrepprg')
-  let g:mygrepprg = 'internal'
+  let g:mygrepprg = 'agrep.vim'
   if has('win32') + has('win64') - has('win95') > 0
     let g:mygrepprg = 'findstr'
   endif

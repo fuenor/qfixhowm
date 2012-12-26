@@ -1,6 +1,6 @@
 "=============================================================================
 "    Description: howm style scheduler
-"                 (要datelib.vim)
+"                 (要qfixlist.vim, datelib.vim)
 "         Author: fuenor <fuenor@gmail.com>
 "                 http://sites.google.com/site/fudist/Home/qfixhowm
 "=============================================================================
@@ -9,7 +9,7 @@ scriptencoding utf-8
 
 "=============================================================================
 "    howmスタイルの予定・TODOを表示
-"    (必要 qfixlist.vim)
+"    (必要 qfixlist.vim, datelib.vim)
 "    (推奨 myqfix.vim, /syntax/howm_schedule.vim)
 "
 "    詳しい使い方は以下のサイトを参照してください。
@@ -2702,3 +2702,6 @@ command QFixPclose call QFixPclose()
 function QFixPclose(...)
 endfunction
 endif
+
+call qfixlist#Init()
+

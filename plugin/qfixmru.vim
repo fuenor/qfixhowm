@@ -338,7 +338,7 @@ endfunction
 
 " MRU表示処理(Quickfixウィンドウを開く)
 let s:prevqf = []
-function QFixMRUOpen(qf, basedir)
+silent! function QFixMRUOpen(qf, basedir)
   if exists('g:loaded_QFixWin')
     let g:QFix_SearchPath = a:basedir
     let cmd = ''

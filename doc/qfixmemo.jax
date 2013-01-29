@@ -135,7 +135,7 @@ android/iOS >
   " 検索にagrep.vimを使用する
   let mygrepprg='agrep.vim'
 <
-  基本設定はUnixと同じですがandroid/iOSでは外部grepが使用できないので上記設定
+  基本設定はUnixと同じですがandroid/iOSで外部grepが使用できない場合は上記設定
   を追加してください。
 
 NOTE:
@@ -219,8 +219,32 @@ http://sites.google.com/site/fudist/Home/qfixhowm/option/outline-mode#user-synta
 ------------------------------------------------------------------------------
 異なるエンコーディングのファイルを混在させたい場合
 
-UTF-8とcp932、euc-jpなど異なるエンコーディングが混在している場合でもagrep.vim
-を使用するとエンコーディングを気にせずgrep可能です。
+UTF-8とcp932、euc-jpなど異なるエンコーディングが混在している場合はマルチエン
+コーディングgrepモードかagrep.vimを使用するとエンコーディングを気にせずgrep
+可能です。
+
+*マルチエンコーディングgrepモード
+
+異なるエンコーディングのファイルが混在している場合にgrepを複数回実行して、エン
+コーディングを気にせず日本語検索が可能です。
+マルチエンコーディングgrepモードの切替は<Leader>rmでも行えます。
+なお検索文字列に日本語を含まない場合は、一回しかgrepは実行されません。
+>
+  " マルチエンコーディングgrepモード
+  let g:MyGrep_MultiEncoding = 1
+
+マルチエンコーディングgrepで使用するエンコーディングは次のように指定します。
+>
+  " マルチエンコーディングgrep エンコーディングリスト
+  let g:MyGrep_MultiEncodingList = ['utf-8', 'cp932']
+
+findstrではcp932のみしか検索できないので次に解説するagrep.vimを使用してくださ
+い。
+
+* agrep.vim
+
+agrep.vimはVimスクリプトで実装されたgrepでマルチエンコーディングのgrepが可能で
+す。
 agrep.vimは通常のgrepやfindstrより遅いので、検索文字列に日本語を含む場合だけ
 agrep.vimを使用するというのが良いかもしれません。
 agrep.vimの正規表現はVimの正規表現を使用することになります。

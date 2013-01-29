@@ -9,7 +9,9 @@
   1. Intro                                           |qfixgrep_intro|
   2. インストール                                    |qfixgrep_install|
     2.1 Windowsの場合                                |qfixgrep_install_windows|
-    2.1 異なるエンコーディングが混在する場合         |qfixgrep_agrep|
+    2.2 異なるエンコーディングが混在する場合         |qfixgrep_multiencoding|
+      2.2.1 マルチエンコーディングgrepモード         |qfixgrep_multigrep|
+      2.2.2 agrep.vim                                |qfixgrep_agrep|
   3. コマンド                                        |qfixgrep_command|
   4. コマンドライン                                  |qfixgrep_commandline|
   5. QuickFix                                        |qfixgrep_quickfix|
@@ -39,8 +41,19 @@ QFixGrepにruntimepathを通します。
 
 この状態で現在使用しているgrepをそのまま実行してQuickfixウィンドウを開くだけで
 もプレビューや絞込みは有効になります。
-基本的にはこのままでも使用可能ですが、Windowsは2.1以降(|qfixgrep_install_windows|)
-その他のOSは2.2以降(|qfixgrep_agrep|)にも目を通しておいてください。
+
+android/iOSで使用する場合 >
+  " 検索にagrep.vimを使用する
+  let mygrepprg='agrep.vim'
+<
+  基本設定はUnixと同じですがandroid/iOSで外部grepが使用できない場合は上記設定
+  を追加してください。
+
+Windowsは2.1以降(|qfixgrep_install_windows|)へ進んでください。
+なおWindowsの場合はできるだけ外部grepを使用することを推奨します。
+
+その他のOSはコマンド解説(|qfixgrep_command|)へ進みますが、出来れば異なるエン
+コーディングが存在する場合(|qfixgrep_multiencoding|)に目を通しておいて下さい。
 
 ------------------------------------------------------------------------------
 2.1 Windowsの場合                               *qfixgrep_install_windows*
@@ -87,10 +100,34 @@ cygwin1.7以降のgrep.exeを使用する場合はMyGrep_cygwin17も設定して
   let MyGrep_cygwin17 = 1
 
 ------------------------------------------------------------------------------
-2.2 異なるエンコーディングのファイルが混在している場合      *qfixgrep_agrep*
+2.2 異なるエンコーディングのファイルが混在している場合      *qfixgrep_multiencoding*
 
-UTF-8とcp932、euc-jpなど異なるエンコーディングが混在している場合でもagrep.vim
-を使用するとエンコーディングを気にせずgrep可能です。
+UTF-8とcp932、euc-jpなど異なるエンコーディングが混在している場合はマルチエン
+コーディングgrepモードかagrep.vimを使用するとエンコーディングを気にせずgrep
+可能です。
+
+2.2.1 マルチエンコーディングgrepモード
+
+異なるエンコーディングのファイルが混在している場合にgrepを複数回実行して、エン
+コーディングを気にせず日本語検索が可能です。
+マルチエンコーディングgrepモードの切替は<Leader>rmでも行えます。
+なお検索文字列に日本語を含まない場合は、一回しかgrepは実行されません。
+>
+  " マルチエンコーディングgrepモード
+  let g:MyGrep_MultiEncoding = 1
+
+マルチエンコーディングgrepで使用するエンコーディングは次のように指定します。
+>
+  " マルチエンコーディングgrep エンコーディングリスト
+  let g:MyGrep_MultiEncodingList = ['utf-8', 'cp932']
+
+findstrではcp932のみしか検索できないので次に解説するagrep.vimを使用してくださ
+い。
+
+2.2.2 agrep.vim                                            *qfixgrep_agrep*
+
+agrep.vimはVimスクリプトで実装されたgrepでマルチエンコーディングのgrepが可能で
+す。
 agrep.vimは通常のgrepやfindstrより遅いので、検索文字列に日本語を含む場合だけ
 agrep.vimを使用するというのが良いかもしれません。
 agrep.vimの正規表現はVimの正規表現を使用することになります。
@@ -147,11 +184,16 @@ https://sites.google.com/site/fudist/Home/grep/usage
 検索の基点ディレクトリとファイルエンコーディングは以下のコマンドで変更可能で
 す。
 
-<Leader>rM     検索ディレクトリ基点をカレントディレクトリ/ファイル基点でトグル
+<Leader>rm     grepを複数回実行してマルチエンコーディングgrep
 <Leader>rG     検索するファイルエンコーディング指定
-<Leader>rD     ディレクトリを常にサブディレクトリも検索する
+<Leader>rD     検索ディレクトリ基点をカレントディレクトリ/ファイル基点でトグル
+<Leader>rM     ディレクトリを常にサブディレクトリも検索する
 
-検索ディレクトリの基点は「カレントディレクトリ」がデフォルトですが、<Leader>rM
+ディレクトリ内に異なるエンコーディングのファイルが混在している場合は<Leader>rm
+でマルチエンコーディングgrepモード(|qfixgrep_multigrep|)に切り替えることができ
+ます。
+
+検索ディレクトリの基点は「カレントディレクトリ」がデフォルトですが、<Leader>rD
 でオフにすると「ファイルの存在するディレクトリ」を基点にして検索します。
 autochdirやプラグイン等でカレントディレクトリを常にファイルの存在するディレク
 トリになるよう設定している場合はどちらでも基点はかわりません。

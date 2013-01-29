@@ -933,6 +933,41 @@ function! qfixlist#ToggleDamemoji()
 endfunction
 
 """"""""""""""""""""""""""""""
+" grepを複数回実行してマルチエンコーディングgrep
+" マルチバイト文字を含まない場合は一回のみ実行される
+" findstrではcp932のみしか検索できない
+if !exists('g:MyGrep_MultiEncoding')
+  let g:MyGrep_MultiEncoding = 0
+endif
+" マルチエンコーディングgrep エンコーディングリスト
+if !exists('g:MyGrep_MultiEncodingList')
+  let g:MyGrep_MultiEncodingList = ['utf-8', 'cp932']
+endif
+
+function! qfixlist#ToggleMultiEncodingGrep()
+  let g:MyGrep_MultiEncoding = !g:MyGrep_MultiEncoding
+  echo 'QFixList : multi encoding grep = '.(g:MyGrep_MultiEncoding ? 'ON' : 'OFF')
+endfunction
+
+function! s:ExecGrepMulti(grepcmd, mygrepprg, searchPath, pattern, enc, fenc, filepattern)
+  let g:MyGrep_retval = ''
+  let qflist = []
+  let fencs = [a:fenc]
+  if g:MyGrep_MultiEncoding && a:pattern =~ '[^[:print:]]' && a:mygrepprg !~ 'findstr'
+    let fencs = g:MyGrep_MultiEncodingList
+  endif
+  let filepattern = s:ParseFilepattern(a:filepattern)
+  for fenc in fencs
+    let retval = s:ExecGrep(a:grepcmd, a:mygrepprg, a:searchPath, a:pattern, a:enc, fenc, a:filepattern)
+    let g:MyGrep_retval .= retval
+    redraw|echo 'QFixGrep : Parsing...'
+    let qf = s:ParseSearchResult(a:searchPath, retval, filepattern, g:MyGrep_ShellEncoding, fenc)
+    call extend(qflist, qf)
+  endfor
+  return qflist
+endfunction
+
+""""""""""""""""""""""""""""""
 " grep helper
 """"""""""""""""""""""""""""""
 if !exists('g:MyGrepcmd')
@@ -1123,11 +1158,7 @@ function! s:MyGrep(pattern, searchPath, filepattern, fenc, addflag, ...)
   let grepcmd = substitute(g:MyGrepcmd, '#defopt#', {_grepcmd}, '')
   let grepcmd = substitute(grepcmd, '#useropt#', g:MyGrepcmd_useropt, '')
   silent! exe 'lchdir ' . escape(searchPath, ' ')
-  let retval = s:ExecGrep(grepcmd, g:mygrepprg, searchPath, pattern, &enc, a:fenc, a:filepattern)
-  let pattern = s:ParseFilepattern(a:filepattern)
-  let file = ''
-  redraw|echo 'QFixGrep : Parsing...'
-  let g:MyGrep_qflist = s:ParseSearchResult(searchPath, retval, pattern, g:MyGrep_ShellEncoding, a:fenc)
+  let g:MyGrep_qflist = s:ExecGrepMulti(grepcmd, g:mygrepprg, searchPath, pattern, &enc, a:fenc, a:filepattern)
   if g:MyGrep_error && g:MyGrep_qflist == [] && g:MyGrep_retval != ''
     echoe 'qfixlist : ' g:MyGrep_execmd
     let from_encoding = g:MyGrep_ShellEncoding

@@ -180,6 +180,13 @@ https://sites.google.com/site/fudist/Home/grep/usage
 再帰検索はコマンドで切り替えずに、検索ファイル指定で **/*.vimのように**/を指定
 して再帰検索grepを行うことも可能です。
 
+NOTE:
+デフォルトではカーソル位置の単語を拾ってセットします。検索語は<C-w>や<C-u>で削
+除可能ですがデフォルトで拾う/拾わないは以下の設定で変更可能です。
+>
+  " QFixGrepの検索時にカーソル位置の単語を拾う/拾わない
+  let MyGrep_DefaultSearchWord = 1
+
 ------------------------------------------------------------------------------
 検索の基点ディレクトリとファイルエンコーディングは以下のコマンドで変更可能で
 す。
@@ -401,9 +408,9 @@ grepオプション >
   " 検索ディレクトリはカレントディレクトリを基点にする
   " 0 : 現バッファのファイルが存在するディレクトリ
   " 1 : カレントディレクトリ
-  let g:MyGrep_CurrentDirMode = 1
+  let MyGrep_CurrentDirMode = 1
   " 検索は常に再帰検索
-  let g:MyGrep_RecursiveMode = 0
+  let MyGrep_RecursiveMode = 0
 
   " 「だめ文字」対策を有効/無効
   let MyGrep_Damemoji = 2

@@ -504,7 +504,7 @@ function! s:QFixMemoLocalKeymap()
   nnoremap <silent> <buffer> <LocalLeader>x :<C-u>call qfixmemo#DeleteEntry()<CR>
   nnoremap <silent> <buffer> <LocalLeader>X :<C-u>call qfixmemo#DeleteEntry('Move')<CR>
   nnoremap <silent> <buffer> <LocalLeader>W :<C-u>call qfixmemo#DivideEntry()<CR>
-  vnoremap <silent> <buffer> <LocalLeader>W :<C-u>call qfixmemo#DivideEntry()<CR>
+  vnoremap <silent> <buffer> <LocalLeader>W :call qfixmemo#DivideEntry()<CR>
 
   nnoremap <silent> <buffer> <LocalLeader>S  :<C-u>call qfixmemo#UpdateTime(1)<CR>
   nnoremap <silent> <buffer> <LocalLeader>rs :<C-u>call qfixmemo#SortEntry('Normal')<CR>
@@ -1157,13 +1157,16 @@ function! qfixmemo#DivideEntry() range
     let fline = 1
     let lline = line('$')
   endif
+  let firstline = fline
+  let lastline = lline
 
   let filename = g:qfixmemo_auto_generate_filename
   let cnt = 0
   let bufnr = bufnr('%')
   let tpattern = qfixmemo#TitleRegxp()
+  let [entry, fline, lline] = QFixMRUGet('entry', '%', fline, tpattern)
+  let dfline = fline
   while 1
-    let [entry, fline, lline] = QFixMRUGet('entry', '%', fline, tpattern)
     if fline == -1
       break
     endif
@@ -1171,20 +1174,24 @@ function! qfixmemo#DivideEntry() range
     call qfixmemo#Edit(file)
     silent! %delete _
     call setline(1, entry)
-    silent! $delete _
     call cursor(1, 1)
+    let s:qfixmemoWriteUpdateTime = 0
     silent! exe 'w! '
+    let s:qfixmemoWriteUpdateTime = 1
     exe 'b ' . bufnr
-    " silent! exe 'bd'
     let fline = lline + 1
-    if fline > a:lastline
+    if fline > lastline
+      let dlline = lline
       break
     endif
     let cnt += 1
+    let [entry, fline, lline] = QFixMRUGet('entry', '%', fline, tpattern)
   endwhile
   stopinsert
-  silent! %delete _
-  silent! exe 'w! '
+  if fline > -1
+    silent! exe dfline. ',' . dlline . 'delete _'
+    silent! exe 'w! '
+  endif
   let g:QFixMRU_Disable = 0
 endfunction
 

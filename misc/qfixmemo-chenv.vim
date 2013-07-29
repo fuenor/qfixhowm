@@ -1,9 +1,14 @@
 "=============================================================================
 "    Description: QFixMemo環境変更スクリプト
+"
+"        CAUTION: このスクリプトは "QFixMemo" 専用です。
+"                 "QFixHowm"として使用している場合は
+"                 "howm-chenv.vim"を使用してください。
+"
 "         Author: fuenor <fuenor@gmail.com>
 "                 http://sites.google.com/site/fudist/Home/qfixhowm
-"  Last Modified: 0000-00-00 00:00
-"        Version: 1.00
+"  Last Modified: 2013-07-29 18:23
+"        Version: 1.01
 "=============================================================================
 scriptencoding UTF-8
 
@@ -43,7 +48,7 @@ endif
 "
 " dir
 " 使用するディレクトリ指定
-" qfixmemo_chenv_dir を基準ディレクトリとして dir が付加される
+" 基準ディレクトリ下の dir が付加されたディレクトリを使用する
 " 基準ディレクトリは以下の順番で決定される
 "   1. qfixmemo_chenv_dir
 "   2. qfixmemo_root
@@ -51,13 +56,6 @@ endif
 "
 " なおdirの最後に -mkd がつくとファイルタイプが markdown、-org ならorg、
 " vimwikiなら vimwikiに設定される。
-"
-" MRUリスト
-" 通常MRUリストは qfixmemo_dirを基準とする相対パスで保持するがqfixmemo_dirを切
-" り替える場合には基準ディレクトリが異なるためパスを維持できなくなる。
-" 対処として本プラグインではMRUの基準ディレクトリQFixMRU_RootDirに
-" qfixmemo_chenv_dirを設定するが、独自にQFixMRU_RootDirを指定する場合は
-" QFixMemoの基準ディレクトリより上位のディレクトリを指定する必要がある。
 "
 " format
 " 生成するファイル名指定
@@ -78,6 +76,14 @@ endif
 "   nnoremap <silent> <Leader>hc :call QFixMemoChEnv('pc',       'time', '= [:pc]')<CR>
 " endfunction
 
+" NOTE:
+" 通常MRUリストは qfixmemo_dirを基準とする相対パスで保持するがqfixmemo_dirを切
+" り替える場合には基準ディレクトリが異なるためパスを維持できなくなる。
+" 対処として本プラグインではMRUの基準ディレクトリQFixMRU_RootDirに
+" 本プラグインの基準ディレクトリ qfixmemo_chenv_dirを設定する。
+" ユーザーが独自にQFixMRU_RootDirを指定する場合は QFixMemoの基準ディレクトリよ
+" り上位のディレクトリを指定する必要がある。
+"
 """"""""""""""""""""""""""""""
 " スクリプトファイル名
 if !exists('g:qfixmemo_chenv_file')
@@ -109,7 +115,7 @@ if !exists('g:qfixmemo_chenv_ext')
     let g:qfixmemo_chenv_ext = 'txt'
   endif
 endif
-" デフォルトファイルタイプ(howm-chenv.vimのみ有効)
+" デフォルトファイルタイプ(qfixmemo-chenv.vimのみ有効)
 if !exists('g:qfixmemo_chenv_filetype')
   let g:qfixmemo_chenv_filetype = ''
   if exists('g:qfixmemo_filetype')
@@ -132,6 +138,7 @@ function! QFixMemoChEnv(dir, fname, title)
     call QFixMRUWrite(0)
     call QFixMRUWrite(1)
   endif
+
   let g:qfixmemo_dir = g:qfixmemo_chenv_dir . '/' . a:dir
   let g:qfixmemo_dir = substitute(g:qfixmemo_dir, '[/\\]$', '', '')
 
@@ -165,6 +172,8 @@ function! QFixMemoChEnv(dir, fname, title)
     let g:qfixmemo_filename = '%Y/%m/%Y-%m-%d'
   elseif a:fname == 'time'
     let g:qfixmemo_filename = '%Y/%m/%Y-%m-%d-%H%M%S'
+  else
+    " do nothing
   endif
 
   echo "qfixmemo_dir = ".g:qfixmemo_dir
@@ -184,4 +193,9 @@ silent! exec 'silent! source '.g:qfixmemo_chenv_file
 if !filereadable(expand(g:qfixmemo_chenv_file))
   silent! call QFixMemoChEnv('', 'time', '=')
 endif
+
+" for keymap compatibility
+function! HowmChEnv(dir, fname, title)
+  return QFixMemoChEnv(a:dir, a:fname, a:title)
+endfunction
 

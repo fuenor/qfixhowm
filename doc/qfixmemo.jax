@@ -1,4 +1,4 @@
-*qfixmemo.jax*  For Vim バージョン 7.2  Last change: 2011 October 11
+*qfixmemo.jax*  For Vim バージョン 7.2  Last change: 2013 July 29
 ==============================================================================
        Description: QFixMemo
             Author: fuenor <fuenor@gmail.com>
@@ -43,6 +43,8 @@ CONTENTS                                                   *qfixmemo_contents*
   12.4 ファイルタイプ指定                               |qfixmemo_filetype|
   12.5 デフォルトシンタックス                           |qfixmemo_default_syntax|
   12.6 複数のQFixMemoディレクトリ                       |qfixmemo_chenv|
+    12.6.1 howm-chenv.vim                               |howm_chenv_vim|
+    12.6.2 qfixmemo-chenv.vim                           |qfixmemo_chenv_vim|
   12.7 URIを開く                                        |qfixmemo_uri|
   12.8 ロケーションリスト                               |qfixmemo_window|
 13. HTML変換                                            |qfixmemo_html|
@@ -90,6 +92,8 @@ http://sites.google.com/site/fudist/Home/qfixhowm  (QFixHowmについて)
 QFixMemoとしてのネイティブな状態で使用したい場合は.vimrcで無効化してください。 >
   " QFixHowmとのオプションコンバートを行わない
   let QFixHowm_Convert = 0
+
+作者としてはコンバートを行わないでQFixMemoとして使用することをおすすめします。
 
 ==============================================================================
 2. インストール                                         *qfixmemo_settings*
@@ -1372,9 +1376,29 @@ NOTE: howm_schedule.vimではhowmスタイルの予定・TODOとURI等のテキ�
 同様にディレクトリごとにファイルタイプを変更したい場合も単純に
 qfixmemo_filetypeを変更してください。
 
-QFixHowmの環境変更用スクリプト互換の qfixmemo-chenv.vimもあります。
-qfixmemo/misc/qfixmemo-chenv.vim をpluginディレクトリにコピーして、.vimrcにオ
-プション設定を追加してください。
+また通常MRUリストは qfixmemo_dirを基準とする相対パスで保持していますが
+qfixmemo_dirを切り替えると基準ディレクトリが異なるためパスを維持できなくなりま
+す。
+このため複数ディレクトリを切り替える場合、ユーザー側でQFixMRU_RootDirに必ず
+qfixmemo_dirより上位のディレクトリを指定する必要があります。
+
+この辺りの処理を行うためにスクリプトが用意されています。
+
+12.6.1 howm-chenv.vim                                   *howm_chenv_vim*
+
+QFixHowmとして使用している場合はQFixHowm環境変更用スクリプトとして
+howm-chenv.vimがあります。
+qfixmemo/misc/howm-chenv.vim をpluginディレクトリなどのruntimepathが通った場所
+へコピーして、.vimrcにオプション設定を追加してください。
+詳細についてはhowm-chenv.vim内のドキュメントか以下のページを参照してください。
+https://sites.google.com/site/fudist/Home/qfixhowm/option/multi-howm-dir#howm-chenv
+
+12.6.2 qfixmemo-chenv.vim                               *qfixmemo_chenv_vim*
+
+QFixMemoとして使用している場合はQFixMemo環境変更用スクリプトとして
+qfixmemo-chenv.vimがあります。
+qfixmemo/misc/qfixmemo-chenv.vim をpluginディレクトリなどのruntimepathが通った
+場所へコピーして、.vimrcにオプション設定を追加してください。
  >
   " qfixmemo-chenv.vimの基準ディレクトリ設定
   let qfixmemo_chdir = qfixmemo_dir
@@ -1401,6 +1425,7 @@ qfixmemo/misc/qfixmemo-chenv.vim をpluginディレクトリにコピーして�
 
 デフォルトではファイル名とファイルタイプ設定しか変更しないので、より細かい設定
 を行いたい場合は qfixmemo-chenv.vimを改変してください。
+オプション設定の詳細についてはqfixmemo-chenv.vimにもドキュメントがあります。
 
 また通常MRUリストは qfixmemo_dirを基準とする相対パスで保持していますが
 qfixmemo_dirを切り替える場合には基準ディレクトリが異なるためパスを維持できなく

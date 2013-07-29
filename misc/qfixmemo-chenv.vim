@@ -176,6 +176,11 @@ function! QFixMemoChEnv(dir, fname, title)
     " do nothing
   endif
 
+  " QFixHowm 互換オプションの設定
+  if exists('QFixHowm_Convert') && QFixHowm_Convert != 0
+    let g:howm_dir = g:qfixmemo_dir
+  endif
+
   echo "qfixmemo_dir = ".g:qfixmemo_dir
 
   " スクリプト作成

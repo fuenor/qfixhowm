@@ -12,9 +12,6 @@
 "=============================================================================
 scriptencoding UTF-8
 
-if exists('disable_QFixWin') && disable_QFixWin
-  finish
-endif
 if exists('disable_qfixmemo') && disable_qfixmemo
   finish
 endif

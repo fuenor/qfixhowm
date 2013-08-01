@@ -12,9 +12,6 @@
 "=============================================================================
 scriptencoding utf-8
 
-if exists('disable_QFixWin') && disable_QFixWin
-  finish
-endif
 if exists('disable_MyHowm') && disable_MyHowm
   finish
 endif

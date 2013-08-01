@@ -1363,7 +1363,7 @@ function! QFixPreviewOpen(file, line, ...)
         silent! wincmd p
         return
       endif
-      silent! exe 'normal '. a:line .'Gzz'
+      silent! exe 'normal! '. a:line .'Gzz'
       if g:QFix_PreviewCursorLine
         setlocal cursorline
       else

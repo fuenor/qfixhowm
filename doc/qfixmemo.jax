@@ -1,4 +1,4 @@
-*qfixmemo.jax*  For Vim バージョン 7.2  Last change: 2013 July 29
+*qfixmemo.jax*  For Vim バージョン 7.2  Last change: 2013 August 01
 ==============================================================================
        Description: QFixMemo
             Author: fuenor <fuenor@gmail.com>
@@ -49,6 +49,7 @@ CONTENTS                                                   *qfixmemo_contents*
   12.8 ロケーションリスト                               |qfixmemo_window|
 13. HTML変換                                            |qfixmemo_html|
 14. ユーザー定義処理                                    |qfixmemo_userfunc|
+14. Appendix                                            |qfixmemo_appendix|
 
 ==============================================================================
 1. Intro                                                *qfixmemo_intro*
@@ -72,6 +73,13 @@ QFixMemoは内部でQFixGrepを使用しています。
 ウィンドウ周りのオプションやgrepの詳しい設定については|qfixgrep|か、以下を参照し
 てください。
 http://sites.google.com/site/fudist/Home/grep
+
+NOTE:
+QuickFixウィンドウ関係処理が必要ない場合は無効化することができます >
+  " QuickFixウィンドウ関係処理を無効化
+  let disable_QFixWin = 1
+
+この場合でもQuickFixウィンドウ関係以外のコマンドは基本的に動作します。
 
 1.2 QFixHowmとの違い                                    *qfixmemo_qfixhowm*
 
@@ -282,6 +290,7 @@ qfixmemoには多くのコマンドがあります。
 各コマンドの詳しい解説は後ほど詳述しますので、まずは実際にメモ取りをしてみてく
 ださい。
 単純なメモ取りであれば覚えるのは ,c ,m ,s の3コマンドだけでも十分です。
+慣れてきたら|qfixmemo_key_intro|のキーマップ一覧も参照してみてください。
 
 ------------------------------------------------------------------------------
 メモを作成するには <Leader>c か <Leader>uを実行します。
@@ -1554,7 +1563,66 @@ Grep:
   詳しくはqfixlist.vim先頭のコメント部分を参照してください。
 >
   let qflist = qfixlist#grep(pattern, path, filepattern, {fileencoding})
-<
+
+==============================================================================
+15. Appendix                                            *qfixmemo_appendix*
+
+QFixMemoでは各機能を独立したプラグインとして実装しています。
+各プラグインのヘルプについてはdocディレクトリかソースの頭にあります。
+なお、起動時に読み込まれるのはpluginディレクトリ内のソースだけで、autoload内の
+ファイルはコマンド実行時の必要になった時に初めて読み込まれます。
+
+myqfix.vim
+QuickFixウィンドウにプレビューや絞り込み、ソートを追加するプラグインで完全に独
+立動作します。
+QuickFixウィンドウ関係処理が必要ない場合は let disable_QFixWin = 1 で無効化し
+てもQFixMemo, QFixGrepの各種コマンドは完全に動作します。
+
+qfixlist.vim
+マルチバイト文字対応のgrepプラグインです。
+簡単な使用方法は qfixlist.vim冒頭にありますが、任意のディレクトリから任意の文
+字列を検索して結果をQuickFixリストとして取得したり、独自ウィンドウやQuickFix
+ウィンドウに表示したりすることが出来ます。
+
+agrep.vim
+Windowsで外部grepが使用できないがUTF-8の日本語文字列を検索したい場合や
+Android/iOSでgrepが使用できない場合に使用する文字列検索プラグインです。
+
+mygrep.vim (要 qfixlist.vim)
+QFixGrep/QFixMemoの検索用キーマップやコマンドラインコマンド等を設定していま
+す。
+
+openuri.vim
+テキストリンクを開くためのプラグインです。
+
+howm_schedule.vim (要 qfixlist.vim, datelib.vim)
+任意のディレクトリ下のファイルを対象に howmスタイルの予定・TODOを扱うプラグイ
+ンです。
+
+howm_calendar.vim (要 datelib.vim)
+カレンダーを扱うプラグインです。
+
+datelib.vim
+日付計算と休日定義を行うライブラリで howm_calendar.vimとhowm_schedule.vimから
+参照されます。
+
+howm2html.vim
+現在のバッファをHTML変換するプラグインです。
+howm2html.vimで実際に変換したHTMLのヘルプが doc/howm2html.zipとして同梱されて
+います。
+
+qfixmru.vim
+MRUを扱うプラグインです。
+
+howm_menu.vim (全てのファイルが必要)
+howmメニュー表示のライブラリです。
+
+qfixmemo.vim (全てのファイルが必要)
+QFixMemoのキーマップ等を起動時に設定しています。
+
+env-cnv.vim (全てのファイルが必要)
+QFixHowmのオプションを QFixMemoのオプションへコンバートします。
+オプションは各コマンドの実行前に毎回コンバートされます。
 
   vim:tw=78:ft=help:syn=qfix_memo.ezotl.help:ts=2:norl:et:foldmethod=indent:nofoldenable
 

@@ -5,7 +5,7 @@
 "                 http://sites.google.com/site/fudist/Home  (Japanese)
 "  Last Modified: 2011-11-14 22:31
 "=============================================================================
-let s:version = 101
+let s:version = 102
 scriptencoding utf-8
 if exists('g:disable_openuri') && g:disable_openuri == 1
   finish
@@ -267,7 +267,7 @@ function! s:openstr(str)
     if str !~ l:vimextreg
       if g:openuri_cmd =~ '\c^'.'netrw'
         if has("win32") || has("win95") || has("win64") || has("win16")
-          if &enc != 'cp932' && str =~ '[^[:print:]]'
+          if &enc != 'cp932' && str =~ '[^\x00-\xff]'
             let str = iconv(str, &enc, 'cp932')
           endif
         endif
@@ -282,7 +282,7 @@ function! s:openstr(str)
       if exists('g:openuri_'.ext)
         let str = expand(str)
         if has("win32") || has("win95") || has("win64") || has("win16")
-          if &enc != 'cp932' && str =~ '[^[:print:]]'
+          if &enc != 'cp932' && str =~ '[^\x00-\xff]'
             let str = iconv(str, &enc, 'cp932')
           endif
         endif
@@ -349,7 +349,7 @@ function! s:openuri(uri)
     let uri = matchstr(uri, urichr.'\+')
   endif
   if has("win32") || has("win95") || has("win64") || has("win16")
-    if &enc != 'cp932' && uri =~ '^file://' && uri =~ '[^[:print:]]'
+    if &enc != 'cp932' && uri =~ '^file://' && uri =~ '[^\x00-\xff]'
       let bat = 1
     endif
   endif
@@ -404,7 +404,7 @@ function! s:EncodeURL(str, ...)
   let save_enc = &enc
   let &enc = to_enc
   " FIXME:本当は'[^-0-9a-zA-Z._~]'を変換？
-  let str = substitute(str, '[^[:print:]]', '\=s:URLByte2hex(s:URLStr2byte(submatch(0)))', 'g')
+  let str = substitute(str, '[^\x00-\xff]', '\=s:URLByte2hex(s:URLStr2byte(submatch(0)))', 'g')
   let str = substitute(str, ' ', '%20', 'g')
   let &enc = save_enc
   return str

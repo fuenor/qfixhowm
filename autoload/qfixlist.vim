@@ -5,7 +5,7 @@
 "                   http://sites.google.com/site/fudist/Home/grep
 "         Author: fuenor <fuenor@gmail.com>
 "=============================================================================
-let s:version = 289
+let s:version = 290
 scriptencoding utf-8
 
 " What Is This:
@@ -953,7 +953,7 @@ function! s:ExecGrepMulti(grepcmd, mygrepprg, searchPath, pattern, enc, fenc, fi
   let g:MyGrep_retval = ''
   let qflist = []
   let fencs = [a:fenc]
-  if g:MyGrep_MultiEncoding && a:pattern =~ '[^[:print:]]' && a:mygrepprg !~ 'findstr'
+  if g:MyGrep_MultiEncoding && a:pattern =~ '[^\x00-\xff]' && a:mygrepprg !~ 'findstr'
     let fencs = g:MyGrep_MultiEncodingList
   endif
   let filepattern = s:ParseFilepattern(a:filepattern)
@@ -1046,7 +1046,7 @@ function! s:MyGrep(pattern, searchPath, filepattern, fenc, addflag, ...)
     let g:MyGrep_UseVimgrep = 1
     let g:MyGrep_ErrorMes = 'QFixGrep : Vimgrep was used. (UNC path "' . host . '")'
   endif
-  if vg == 0 && pattern != '' && g:myjpgrepprg == '' && pattern !~ '^[[:print:][:space:]]\+$'
+  if vg == 0 && pattern != '' && g:myjpgrepprg == '' && pattern !~ '^[\x00-\xff]\+$'
     if a:fenc =~ 'le$' || (a:fenc !~ 'cp932\c' && g:mygrepprg == 'findstr') || a:fenc !~ g:MyGrep_Encoding
       " echohl ErrorMsg
       redraw|echo 'using vimgrep... (grep does not support "' . a:fenc . '")'
@@ -1207,7 +1207,7 @@ endif
 function! s:SetGrepEnv(mode, ...)
   if a:mode == 'set'
     let s:mygrepprg = ''
-    if g:myjpgrepprg != '' && a:0 && match(a:1, '[^[:print:]]') > -1
+    if g:myjpgrepprg != '' && a:0 && match(a:1, '[^\x00-\xff]') > -1
       let s:mygrepprg = g:mygrepprg
       let g:mygrepprg = g:myjpgrepprg
     endif

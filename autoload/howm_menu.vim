@@ -123,7 +123,7 @@ function! s:Getfile(lnum, ...)
     let str = substitute(str, '^'.head, '', '')
   endif
   let file = substitute(str, '|.*$', '', '')
-  silent! exe 'lchdir ' . escape(dir, ' ')
+  silent! exe 'lchdir ' . s:escape(dir, ' ')
   let file = fnamemodify(file, ':p')
   if !filereadable(file)
     return ['', 0]
@@ -198,7 +198,7 @@ function! s:SortExec(...)
   elseif g:QFix_Sort == 'reverse'
     let sq = reverse(sq)
   endif
-  silent! exe 'lchdir ' . escape(g:qfixmemo_dir, ' ')
+  silent! exe 'lchdir ' . s:escape(g:qfixmemo_dir, ' ')
   let s:glist = []
   for d in sq
     let filename = fnamemodify(d['filename'], ':.')
@@ -326,8 +326,8 @@ function! QFixHowmOpenMenu(...)
   else
     let mfile = g:QFixHowm_MenuDir  . '/' . g:QFixHowm_Menufile
   endif
-  let prevPath = escape(getcwd(), ' ')
-  silent! exe 'lchdir ' . escape(g:qfixmemo_dir, ' ')
+  let prevPath = s:escape(getcwd(), ' ')
+  silent! exe 'lchdir ' . s:escape(g:qfixmemo_dir, ' ')
   let mfile = fnamemodify(mfile, ':p')
   silent! exe 'lchdir ' . prevPath
   let mfile = substitute(mfile, '\\', '/', 'g')
@@ -410,7 +410,7 @@ function! QFixHowmOpenMenu(...)
   silent! %delete _
   silent! exe 'silent! -1put=glist'
   silent! $delete _
-  silent! exe 'lchdir ' . escape(g:qfixmemo_dir, ' ')
+  silent! exe 'lchdir ' . s:escape(g:qfixmemo_dir, ' ')
   call cursor(1, 1)
   if search('%menu%', 'cW') > 0
     let str = substitute(getline('.'), '%menu%', mfile, '')
@@ -600,12 +600,12 @@ function! s:HowmMenuCR() range
   endif
   call QFixPclose()
   if g:QFixHowm_MenuCloseOnJump
-    exe 'edit '.escape(file, ' %#')
+    exe 'edit '.s:escape(file, ' ')
   else
     if exists('*QFixEditFile')
       call QFixEditFile(file)
     else
-      exe 'split '.escape(file, ' %#')
+      exe 'split '.s:escape(file, ' ')
     endif
   endif
   call cursor(lnum, 1)
@@ -648,7 +648,7 @@ function! s:BufWinEnterMenu(preview, head)
   nnoremap <buffer> <silent> i :<C-u>call <SID>TogglePreview('menu')<CR>
   nnoremap <buffer> <silent> <CR> :<C-u>call <SID>HowmMenuCR()<CR>
   nnoremap <buffer> <silent> <2-LeftMouse> <ESC>:<C-u>call <SID>HowmMenuCR()<CR>
-  silent! exe 'lchdir ' . escape(g:qfixmemo_dir, ' ')
+  silent! exe 'lchdir ' . s:escape(g:qfixmemo_dir, ' ')
   let s:howm_menu_height = winheight(0)
   let s:howm_menu_width = winwidth(0)
 endfunction
@@ -725,5 +725,9 @@ function! s:PreviewMenu(head)
     return
   endif
   call QFixPreviewOpen(file, lnum)
+endfunction
+
+function! s:escape(str, chars)
+  return escape(a:str, a:chars.((has('win32')|| has('win64')) ? '#%&' : ''))
 endfunction
 

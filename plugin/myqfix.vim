@@ -5,7 +5,7 @@
 "                 http://sites.google.com/site/fudist/Home  (Japanese)
 "=============================================================================
 scriptencoding utf-8
-let s:version = 291
+let s:version = 292
 
 " What Is This:
 "   This plugin adds preview, sortings and advanced search to your quickfix window.
@@ -557,7 +557,7 @@ function! s:QFixSplit()
   let file = fnamemodify(bufname(bufnum), ':p')
   let winnum = bufwinnr(bufnum)
   if g:QFix_CopenCmd !~ 'vertical'
-    exe 'split ' . escape(file, ' #%')
+    exe 'split ' . s:escape(file, ' ')
   else
     if winnum == -1
       let winnr = QFixWinnr()
@@ -565,7 +565,7 @@ function! s:QFixSplit()
       else
         exe winnr.'wincmd w'
       endif
-      exe 'split ' . escape(file, ' #%')
+      exe 'split ' . s:escape(file, ' ')
     else
       exe winnum.'wincmd w'
       split
@@ -912,11 +912,11 @@ function! s:SetBufqflistOpen(qf, ...)
   endif
   if type
     let qf = setloclist(0, a:qf)
-    silent! exe 'lchdir ' . escape(dir, ' ')
+    silent! exe 'lchdir ' . s:escape(dir, ' ')
     lopen
   else
     let qf = setqflist(a:qf)
-    silent! exe 'lchdir ' . escape(dir, ' ')
+    silent! exe 'lchdir ' . s:escape(dir, ' ')
     copen
   endif
   return qf
@@ -1054,7 +1054,7 @@ function! QFixCopen(...)
     echohl None
     return
   endif
-  let prevPath = escape(getcwd(), ' ')
+  let prevPath = s:escape(getcwd(), ' ')
   if a:0 && a:1 != ''
     let cmd = a:1
   else
@@ -1087,7 +1087,7 @@ function! QFixCopen(...)
   elseif g:QFix_SearchPathMode == 2
     let spath = QFixGetqfRootPath(qf)
     if spath != ''
-      silent! exe 'lchdir ' . escape(spath, ' ')
+      silent! exe 'lchdir ' . s:escape(spath, ' ')
       silent! exe cmd . 'open ' . g:QFix_Height
     endif
   endif
@@ -1138,7 +1138,7 @@ function! QFixSetqfShortPath()
   let spath = QFixGetqfRootPath(qf)
   let cmd = b:qfixwin_buftype ? 'l' : 'c'
   if spath != ''
-    silent! exe 'lchdir ' . escape(spath, ' ')
+    silent! exe 'lchdir ' . s:escape(spath, ' ')
     silent! exe cmd . 'open '
     let w = &lines - winheight(0) - &cmdheight - (&laststatus > 0 ? 1 : 0)
     if w > 0 && &buftype == 'quickfix'
@@ -1198,8 +1198,8 @@ function! QFixGetqfRootPath(qf)
 endfunction
 
 function! s:SetSearchPath(qf, path, ...)
-  let prevPath = escape(getcwd(), ' ')
-  silent! exe 'lchdir ' . escape(expand(a:path), ' ')
+  let prevPath = s:escape(getcwd(), ' ')
+  silent! exe 'lchdir ' . s:escape(expand(a:path), ' ')
   if a:0
     let cmd = a:1
   else
@@ -1409,9 +1409,9 @@ function! QFixPreviewOpen(file, line, ...)
     return
   endif
 
-  let prevPath = escape(getcwd(), ' ')
+  let prevPath = s:escape(getcwd(), ' ')
   if g:QFix_SearchPath != ''
-    silent! exe 'lchdir ' . escape(g:QFix_SearchPath, ' ')
+    silent! exe 'lchdir ' . s:escape(g:QFix_SearchPath, ' ')
   endif
 
   syntax clear
@@ -1440,7 +1440,7 @@ function! QFixPreviewOpen(file, line, ...)
           return
         endif
       endif
-      silent! exe cmd.' '.escape(file, ' %#')
+      silent! exe cmd.' '.s:escape(file, ' ')
       silent! $delete _
     endif
   endif
@@ -1574,7 +1574,7 @@ function! QFixEditFile(file, ...)
   if isdirectory(dir) == 0
     call mkdir(dir, 'p')
   endif
-  exe g:QFix_Edit.'edit ' . opt . escape(file, ' #%')
+  exe g:QFix_Edit.'edit ' . opt . s:escape(file, ' ')
 endfunction
 
 """"""""""""""""""""""""""""""
@@ -1729,7 +1729,7 @@ function! s:GetFileList(path, file)
 endfunction
 " 登録
 function! s:ShowFileList(path, list)
-  let prevPath = escape(getcwd(), ' ')
+  let prevPath = s:escape(getcwd(), ' ')
   let g:QFix_SearchResult = []
   let g:QFix_SearchPath = a:path
   call QFixCclose()
@@ -1739,9 +1739,9 @@ function! s:ShowFileList(path, list)
 endfunction
 " サマリー
 function! s:addtitle(path, list)
-  let prevPath = escape(getcwd(), ' ')
+  let prevPath = s:escape(getcwd(), ' ')
   let h = g:QFix_Height
-  silent! exe 'silent! split ' . escape(qfixtempname, ' #%')
+  silent! exe 'silent! split ' . s:escape(qfixtempname, ' ')
   setlocal buftype=nofile
   setlocal bufhidden=hide
   setlocal noswapfile
@@ -1757,7 +1757,7 @@ function! s:addtitle(path, list)
     endif
     if prevfname != file
       silent! %delete _
-      let tmpfile = escape(file, ' #%')
+      let tmpfile = s:escape(file, ' ')
       silent! exe '0read '.tmpfile
       silent! $delete _
     endif
@@ -1772,7 +1772,7 @@ function! s:addtitle(path, list)
       endif
     endfor
   endfor
-  silent! exe 'silent! edit ' . escape(qfixtempname, ' #%')
+  silent! exe 'silent! edit ' . s:escape(qfixtempname, ' ')
   silent! bd!
   let g:QFix_Height = h
 endfunction
@@ -1841,5 +1841,9 @@ function! s:QFdoexec(cmd, fline, lline)
   endfor
   exe 'cr '.fline
   let g:QFixHowm_UseMRU = mru
+endfunction
+
+function! s:escape(str, chars)
+  return escape(a:str, a:chars.((has('win32')|| has('win64')) ? '#%&' : ''))
 endfunction
 

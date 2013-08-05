@@ -80,8 +80,8 @@ function! agrep#MyGrepScript(searchWord, to_encoding, searchPath, options)
     let searchWord = "\\C".searchWord
   endif
   " 高速化のためテンポラリバッファを使用
-  let prevPath = escape(getcwd(), ' ')
-  silent! exe 'lchdir ' . escape(path, ' ')
+  let prevPath = s:escape(getcwd(), ' ')
+  silent! exe 'lchdir ' . s:escape(path, ' ')
   silent! exe 'silent! split '.s:tempfile
   silent! setlocal bt=nofile bh=hide noswf nobl
 
@@ -120,20 +120,20 @@ function! s:readfile(mfile, ...)
   let mfile = a:mfile
   let cmd = '0read '
   let opt = ''
-  silent! exe cmd . ' ' . opt .' '. escape(mfile, ' #%')
+  silent! exe cmd . ' ' . opt .' '. s:escape(mfile, ' ')
   let tlist = getline(1, '$')
   return tlist
 endfunction
 
 function! s:glob(path, file)
-  let prevPath = escape(getcwd(), ' ')
+  let prevPath = s:escape(getcwd(), ' ')
   let path = expand(a:path)
   if !isdirectory(path)
     let mes = printf('"%s" is not directory.', a:path)
     let choice = confirm(mes, "&OK", 1, "W")
     return []
   endif
-  exe 'lchdir ' . escape(path, ' ')
+  exe 'lchdir ' . s:escape(path, ' ')
   redraw | echo 'agrep.vim : glob...'
   let files = split(glob(a:file), '\n')
   let qflist = []
@@ -144,5 +144,9 @@ function! s:glob(path, file)
   endfor
   exe 'lchdir ' . prevPath
   return qflist
+endfunction
+
+function! s:escape(str, chars)
+  return escape(a:str, a:chars.((has('win32')|| has('win64')) ? '#%&' : ''))
 endfunction
 

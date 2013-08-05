@@ -259,8 +259,8 @@ function! s:openstr(str)
   " Vimか指定のプログラムで開く
   if str =~ '^'.pathhead
     if str !~ '^\\\\'
-      let prevPath = escape(getcwd(), ' ')
-      exe 'lchdir ' . escape(fnamemodify(expand('%'), ':h'), ' ')
+      let prevPath = s:escape(getcwd(), ' ')
+      exe 'lchdir ' . s:escape(fnamemodify(expand('%'), ':h'), ' ')
       let str = fnamemodify(str, ':p')
       silent! exe 'lchdir ' . prevPath
     endif
@@ -435,5 +435,10 @@ function! s:VimLeave()
   if exists('s:uricmdfile')
     call delete(s:uricmdfile)
   endif
+endfunction
+
+""""""""""""""""""""""""""""""
+function! s:escape(str, chars)
+  return escape(a:str, a:chars.((has('win32')|| has('win64')) ? '#%&' : ''))
 endfunction
 

@@ -101,6 +101,10 @@ function! howm_schedule#QFixHowmScheduleCachedQFList(mode)
   return [sq, time]
 endfunction
 
+function! s:escape(str, chars)
+  return escape(a:str, a:chars.((has('win32')|| has('win64')) ? '#%&' : ''))
+endfunction
+
 """"""""""""""""""""""""""""""
 let s:howmsuffix = 'howm'
 " if !exists('howm_dir')
@@ -479,8 +483,8 @@ function! s:QFixHowmListReminder_(mode,...)
     let holiday_sq = s:HolidayVimgrep(l:howm_dir, g:QFixHowm_HolidayFile)
   endif
   call QFixPclose(1)
-  let prevPath = escape(getcwd(), ' ')
-  silent! exe 'lchdir ' . escape(l:howm_dir, ' ')
+  let prevPath = s:escape(getcwd(), ' ')
+  silent! exe 'lchdir ' . s:escape(l:howm_dir, ' ')
   let ext = s:sch_Ext
   if a:mode =~ 'todo'
     let ext = g:QFixHowm_ListReminder_TodoExt
@@ -655,11 +659,11 @@ function! s:HolidayVimgrep(dir, file)
   let dir = substitute(dir, '\\', '/', 'g')
   let ext = '[@]'
   let pattern = '^'.s:sch_dateT.ext
-  let prevPath = escape(getcwd(), ' ')
-  exe 'lchdir ' . escape(dir, ' ')
+  let prevPath = s:escape(getcwd(), ' ')
+  exe 'lchdir ' . s:escape(dir, ' ')
   let saved_sq = getloclist(0)
   lexpr ""
-  let cmd = 'lvimgrep /' . escape(pattern, '/') . '/j ' . escape(file, ' ')
+  let cmd = 'lvimgrep /' . escape(pattern, '/') . '/j ' . s:escape(file, ' ')
   silent! exe cmd
   silent! exe 'lchdir ' . prevPath
   let sq = getloclist(0)
@@ -2408,7 +2412,7 @@ function! QFixHowmCmd_ScheduleList(...) range
   if !exists("*QFixHowmExportSchedule")
     return
   endif
-  let prevPath = escape(getcwd(), ' ')
+  let prevPath = s:escape(getcwd(), ' ')
 
   let firstline = 1
   let cnt = line('$')

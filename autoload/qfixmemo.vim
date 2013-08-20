@@ -1009,7 +1009,7 @@ function! s:edit(file, ...)
     call mkdir(dir, 'p')
   endif
   let editcmd = g:qfixmemo_editcmd != '' ? g:qfixmemo_editcmd : 'edit '
-  exe editcmd . ' ' . opt .' ' . escape(file, ' #%')
+  exe editcmd . ' ' . opt .' ' . s:escape(file, ' ')
   if !filereadable(file) && IsQFixMemo(file)
     call qfixmemo#Template('New')
   endif
@@ -1283,9 +1283,9 @@ function! qfixmemo#ListRecentTimeStamp(...)
     set grepprg=findstr
     let tregxp = substitute(tregxp, '\^', '', 'g')
     let tregxp = substitute(tregxp, '|', ' ', 'g')
-    let prevPath = escape(getcwd(), ' ')
+    let prevPath = s:escape(getcwd(), ' ')
     let qf = getqflist()
-    exe 'lchdir ' . escape(expand(g:qfixmemo_dir), ' ')
+    exe 'lchdir ' . s:escape(expand(g:qfixmemo_dir), ' ')
     let cmd = 'grep! /n /p /r /i /s /b "' . tregxp . '" *.*'
     silent! exe cmd
     exe 'lchdir ' . prevPath
@@ -1380,7 +1380,7 @@ function! qfixmemo#Glob(path, file, mode)
   if qfixmemo#Init()
     return
   endif
-  let prevPath = escape(getcwd(), ' ')
+  let prevPath = s:escape(getcwd(), ' ')
   let path = expand(a:path)
   if !isdirectory(path)
     let mes = printf('"%s" is not directory.', a:path)
@@ -1391,7 +1391,7 @@ function! qfixmemo#Glob(path, file, mode)
     let path .= '/'
   endif
   let mode = a:mode
-  exe 'lchdir ' . escape(path, ' ')
+  exe 'lchdir ' . s:escape(path, ' ')
   redraw | echo 'QFixMemo : glob...'
   let files = split(glob(a:file), '\n')
   let qflist = []
@@ -1522,7 +1522,7 @@ function! qfixmemo#Rename()
   let to = fnamemodify(from, ':p:h') . '/' . to
   update
   call rename(from, to)
-  silent! exe 'silent! edit '.escape(to, ' %#')
+  silent! exe 'silent! edit '.s:escape(to, ' ')
   silent! exe 'silent! bwipeout '.from
 endfunction
 
@@ -1720,7 +1720,7 @@ endfunction
 
 function! s:randomReadFile(file, dir)
   redraw | echo 'QFixMemo : Read random cache...'
-  let prevPath = escape(getcwd(), ' ')
+  let prevPath = s:escape(getcwd(), ' ')
   let dir = a:dir
   let s:randomfile = a:file
   let rfile = expand(a:file)
@@ -1757,7 +1757,7 @@ endfunction
 
 function! s:randomWriteFile(file, dir)
   redraw | echo 'QFixMemo : Searching...'
-  let prevPath = escape(getcwd(), ' ')
+  let prevPath = s:escape(getcwd(), ' ')
   let dir = a:dir
   let rfile = expand(a:file)
   let title = '^'.escape(g:qfixmemo_title, g:qfixmemo_escape)
@@ -1768,7 +1768,7 @@ function! s:randomWriteFile(file, dir)
     call filter(sq, "v:val['text']     !~ '".rexclude."'")
     call filter(sq, "v:val['filename'] !~ '".rexclude."'")
   endif
-  exe 'lchdir ' . escape(expand(dir), ' ')
+  exe 'lchdir ' . s:escape(expand(dir), ' ')
   let result = []
   call add(result, dir)
   let head = QFixNormalizePath(expand(dir)) . '/'
@@ -2019,8 +2019,8 @@ endfunction
 
 function! s:submenu_mkdir(basedir)
   let pathhead = '\([A-Za-z]:[/\\]\|\~[/\\]\|\.\.\?[/\\]\|[/\\]\)'
-  let prevPath = escape(getcwd(), ' ')
-  exe 'lchdir ' . escape(expand(a:basedir), ' ')
+  let prevPath = s:escape(getcwd(), ' ')
+  exe 'lchdir ' . s:escape(expand(a:basedir), ' ')
   let file = expand(s:qfixmemo_submenu_title)
   if file !~ '^'.pathhead
     let file = expand(a:basedir).'/'.file
@@ -2315,7 +2315,7 @@ function! qfixmemo#Cmd_Replace(mode)
   if qfixmemo#Init()
     return
   endif
-  let prevPath = escape(getcwd(), ' ')
+  let prevPath = s:escape(getcwd(), ' ')
   let sq = QFixGetqflist()
   let idx = 0
   let nsq = []
@@ -2591,11 +2591,11 @@ function! qfixmemo#RebuildKeyword()
   if exists('g:qfixmemo_submenu_dir')
     let basedir = g:qfixmemo_submenu_dir
   endif
-  let prevPath = escape(getcwd(), ' ')
-  exe 'lchdir ' . escape(expand(basedir), ' ')
+  let prevPath = s:escape(getcwd(), ' ')
+  exe 'lchdir ' . s:escape(expand(basedir), ' ')
   let file = fnamemodify(g:qfixmemo_submenu_title, ':p')
   let saved_sq = getloclist(0)
-  silent! exe 'lvimgrep /'.pattern.'/j '. escape(file, ' ')
+  silent! exe 'lvimgrep /'.pattern.'/j '. s:escape(file, ' ')
   call extend(extlist, getloclist(0))
   call setloclist(0, saved_sq)
   exe 'lchdir ' . prevPath
@@ -2907,5 +2907,10 @@ function! qfixmemo#Syntax()
     exe 'setlocal filetype=' . g:qfixmemo_filetype
   endif
   call s:syntaxHighlight()
+endfunction
+
+""""""""""""""""""""""""""""""
+function! s:escape(str, chars)
+  return escape(a:str, a:chars.((has('win32')|| has('win64')) ? '#%&' : ''))
 endfunction
 

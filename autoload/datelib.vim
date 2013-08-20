@@ -285,8 +285,8 @@ function! s:setholidayfile()
   else
     let l:howm_dir = '~'
   endif
-  let prevPath = escape(getcwd(), ' ')
-  silent! exe 'lchdir ' . escape(l:howm_dir, ' ')
+  let prevPath = s:escape(getcwd(), ' ')
+  silent! exe 'lchdir ' . s:escape(l:howm_dir, ' ')
   let file = fnamemodify(file, ':p')
   exe 'lchdir ' . prevPath
   let file = substitute(expand(file), "\<NL>.*", '', '')
@@ -360,5 +360,9 @@ function! s:SetScheduleTable(year, dict, table, hol)
     endfor
   endif
   return a:table
+endfunction
+
+function! s:escape(str, chars)
+  return escape(a:str, a:chars.((has('win32')|| has('win64')) ? '#%&' : ''))
 endfunction
 

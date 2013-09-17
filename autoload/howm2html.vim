@@ -2303,7 +2303,6 @@ endfunction
 let s:MSWindows = has('win95') + has('win16') + has('win32') + has('win64')
 function! QFixNormalizePath(path, ...)
   let path = a:path
-  " let path = expand(a:path)
   if s:MSWindows
     if a:0 " 比較しかしないならキャピタライズ
       let path = toupper(path)
@@ -2314,6 +2313,7 @@ function! QFixNormalizePath(path, ...)
     endif
     let path = substitute(path, '\\', '/', 'g')
   endif
+  " let path = expand(a:path)
   return path
 endfunction
 

@@ -381,6 +381,7 @@ endfunction
 function! qfixlist#search(pattern, dir, cmd, days, fenc, file)
   let cmd = a:cmd
   let dir = a:dir == '' ? getcwd() : a:dir
+  let dir = substitute(dir, '\\', '/', 'g')
   let fenc = a:fenc == '' ? &enc : a:fenc
   redraw | echo 'QFixList : execute grep...'
   if a:days
@@ -1594,7 +1595,6 @@ endif
 
 function! QFixNormalizePath(path, ...)
   let path = a:path
-  " let path = expand(a:path)
   if s:MSWindows
     if a:0 " 比較しかしないならキャピタライズ
       let path = toupper(path)
@@ -1605,6 +1605,7 @@ function! QFixNormalizePath(path, ...)
     endif
     let path = substitute(path, '\\', '/', 'g')
   endif
+  " let path = expand(a:path)
   return path
 endfunction
 

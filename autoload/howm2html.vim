@@ -1283,6 +1283,9 @@ endfunc
 
 " はてなのスーパーpreをhtmlタグでハイライト
 func! s:Convert2HTMLSnippet(...)
+  if !exists('g:colors_name')
+    let g:colors_name = 'default'
+  endif
   let saved_colorscheme = g:colors_name
   let save_cursor = getpos('.')
   let color = g:HowmHtml_colorscheme
@@ -1322,7 +1325,7 @@ func! s:Convert2HTMLSnippet(...)
     call append(firstline-1, rstr)
   endwhile
   call setpos('.', save_cursor)
-  exe 'colorscheme '.saved_colorscheme
+  silent exe 'colorscheme '.saved_colorscheme
 endfunc
 
 func! s:Convert2HTMLCode(line1, line2, ftype, htmltype)

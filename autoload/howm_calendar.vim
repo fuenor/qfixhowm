@@ -3,7 +3,7 @@
 "                 datelib.vim requiard
 "         Author: fuenor <fuenor@gmail.com>
 "                 http://sites.google.com/site/fudist/Home/qfixhowm
-"        Version: 2.00
+"        Version: 2.01
 "=============================================================================
 scriptencoding utf-8
 if v:version < 700 || &cp
@@ -48,11 +48,11 @@ function! CalendarPost()
   exe 'syn match CalConceal /['.ch.']/ contained'
   let ch = g:calendar_flag[2] . g:calendar_flag[3]
   if g:calendar_mark =~ 'left-fit'
-    exe 'syn match CalHoliday display "\s*['.ch.']\d*" contains=CalConceal'
+    exe 'syn match CalHoliday display "\s*\zs['.ch.']\d*\ze" contains=CalConceal'
   elseif g:calendar_mark =~ 'right'
-    exe 'syn match CalHoliday display "\d*['.ch.']\s*" contains=CalConceal'
+    exe 'syn match CalHoliday display "\zs\d*['.ch.']\ze\s*" contains=CalConceal'
   else
-    exe 'syn match CalHoliday display "['.ch.']\s*\d*" contains=CalConceal'
+    exe 'syn match CalHoliday display "\zs['.ch.']\s*\d*\ze" contains=CalConceal'
   endif
   " 今日が休日
   if datelib#HolidayCheck(strftime('%Y'), strftime('%m'), strftime('%d'), 'Sun')
@@ -768,8 +768,8 @@ function! s:syntax()
 
   " ruler
   exe 'syn match CalRulerNC display  "'.substitute(g:calendar_dow, '^\s*\|\s*$', '', '').'"'
-  exe 'syn match CalSunday  display "'.'^'.b:submenu_calendar_lmargin.' \?[+!$%&?]\? \{,2}\d\+" contains=CalToday'
-  exe 'syn match CalSunday  display "'.'|\zs'.b:submenu_calendar_lmargin.' \?[+!$%&?]\? \{,2}\d\+" contains=CalToday'
+  exe 'syn match CalSunday  display "'.'^'.b:submenu_calendar_lmargin.' \?[+!$%&?]\? \{,2}\zs\d\+\ze" contains=CalToday'
+  exe 'syn match CalSunday  display "'.'|'.b:submenu_calendar_lmargin.' \?[+!$%&?]\? \{,2}\zs\d\+\ze" contains=CalToday'
   syn match CalInfo display '\s*_.*$' contains=CalConceal
 
   exe 'runtime! syntax/'.g:submenu_calendar_syntax

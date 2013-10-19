@@ -787,6 +787,7 @@ function! s:BufWritePost()
 endfunction
 
 let s:init = 0
+let s:android = executable("getprop") && system("getprop net.bt.name") =~ 'Android'
 function! qfixmemo#Init(...)
   " for qfixwin
   if &buftype == 'quickfix'
@@ -817,12 +818,19 @@ function! qfixmemo#Init(...)
     call howm_schedule#Init()
   endif
   call qfixmemo#LoadKeyword()
-  if has('macunix')
-    silent! call libcallnr("libc.dylib", "srand", localtime())
-  elseif has('unix') && !has('win32unix')
-    silent! call libcallnr("", "srand", localtime())
-  else
-    silent! call libcallnr("msvcrt.dll", "srand", localtime())
+  if g:qfixmemo_random_mode == 0
+    try
+        if s:android
+          " do nothing
+        elseif has('macunix')
+          silent! call libcallnr("libc.dylib", "srand", localtime())
+        elseif has('unix') && !has('win32unix')
+          silent! call libcallnr("", "srand", localtime())
+        else
+          silent! call libcallnr("msvcrt.dll", "srand", localtime())
+        endif
+    catch
+    endtry
   endif
   let s:init = 1
   return 0
@@ -1702,6 +1710,13 @@ function! s:random(range)
   elseif g:qfixmemo_random_mode == 2
     return matchstr(reltimestr(reltime()), '\d\+$') % a:range
   endif
+  if s:android && g:qfixmemo_random_mode == 0
+    if has('reltime')
+      return matchstr(reltimestr(reltime()), '\d\+$') % a:range
+    else
+      return 0
+    endif
+  endif
   try
     if has('macunix')
       let r = libcallnr("libc.dylib", "rand", -1) % a:range
@@ -1716,6 +1731,7 @@ function! s:random(range)
       return matchstr(reltimestr(reltime()), '\d\+$') % a:range
     endif
   endtry
+  return 0
 endfunction
 
 function! s:randomReadFile(file, dir)

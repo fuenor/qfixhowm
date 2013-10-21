@@ -780,7 +780,7 @@ function! s:syntax()
   hi def link CalRuler    StatusLine
   hi def link CalRulerNC  StatusLineNC
   hi def link CalWeeknm   Comment
-  hi def link CalToday    Directory
+  hi def link CalToday    Search
   hi def link CalHeader   Special
   hi def link CalMemo     PreProc
   hi def link CalInfo     Identifier

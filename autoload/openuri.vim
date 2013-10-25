@@ -100,7 +100,7 @@ endfunction
 """"""""""""""""""""""""""""""
 " Vimで開くファイル指定
 if !exists('g:openuri_vimextreg')
-  let g:openuri_vimextreg = '\.\(txt\|mkd\|wiki\|rd\|vim\|js\|java\|py\|rb\|h\|c\|cpp\|ini\|conf\)$'
+  let g:openuri_vimextreg = '\.\(txt\|mkd\|wiki\|rd\|vim\|js\|css\|xml\|java\|py\|rb\|h\|c\|cpp\|ini\|conf\)$'
 endif
 
 " カーソル位置のファイルを開くコマンド

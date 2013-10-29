@@ -981,11 +981,10 @@ NOTE:
 https://sites.google.com/site/fudist/Home/qfixhowm#downloads
 (misc/holidayにも同じファイルがあります)
 
-定義ファイルはqfixmemo_fileencodingと同じ物を使用します。
 定義ファイルを適当なディレクトリにコピーした後calendar_holidayfileに休日定義ファ
 イルのパスを指定してください。
 >
-  " 休日定義ファイル(パス等は環境に合わせてください)
+  " 休日定義ファイル(パスは環境に合わせてください)
   let calendar_holidayfile = '~/qfixmemo/Sche-Hd-0000-00-00-000000.txt'
 
 NOTE:

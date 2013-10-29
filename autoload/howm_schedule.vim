@@ -459,6 +459,7 @@ function! QFixHowmListReminder(mode)
   return sq
 endfunction
 
+let s:holiday_sq = []
 function! s:QFixHowmListReminder_(mode,...)
   if exists('*QFixHowmInit') && QFixHowmInit()
     return []
@@ -479,8 +480,9 @@ function! s:QFixHowmListReminder_(mode,...)
     let l:SearchFile = g:QFixHowm_ScheduleSearchFile
   endif
 
-  if s:reminder_cache == 0
-    let holiday_sq = s:HolidayVimgrep(l:howm_dir, g:QFixHowm_HolidayFile)
+  if s:reminder_cache == 0 || count
+    redraw | echo 'QFixHowm : making holiday...'
+    let s:holiday_sq = s:HolidayGrep(l:howm_dir, g:QFixHowm_HolidayFile)
   endif
   call QFixPclose(1)
   let prevPath = s:escape(getcwd(), ' ')
@@ -535,15 +537,16 @@ function! s:QFixHowmListReminder_(mode,...)
       endif
     endif
     let sq = qfixlist#grep(searchWord, searchPath, l:SearchFile, l:howm_fileencoding)
-    call extend(sq, holiday_sq)
     let s:UseTitleFilter = 1
     call QFixHowmTitleFilter(sq)
     redraw|echo 'QFixHowm : Sorting...'
     let sq = s:QFixHowmSortReminderPre(sq)
     exe 'let s:sq_' . a:mode . ' = deepcopy(sq)'
     exe 'let s:LT_' . a:mode . ' = localtime()'
+    call extend(sq, deepcopy(s:holiday_sq))
   else
     exe 'let sq = deepcopy(s:sq_' . a:mode . ')'
+    call extend(sq, deepcopy(s:holiday_sq))
   endif
   let sq = s:QFixHowmSortReminder(sq, a:mode)
   let sq = s:AddTodayLine(sq)
@@ -645,9 +648,7 @@ function! s:Overday(year, month, day)
 endfunction
 
 " 休日リスト作成
-function! s:HolidayVimgrep(dir, file)
-  " WindowsでDOSプロンプトを出さないために vimgrepを使用
-  " ファイルが一つなので、パフォーマンスには影響がない
+function! s:HolidayGrep(dir, file)
   let dir = a:dir
   let file = a:file
   let hdir = fnamemodify(file, ':h')
@@ -659,30 +660,65 @@ function! s:HolidayVimgrep(dir, file)
   let dir = substitute(dir, '\\', '/', 'g')
   let ext = '[@]'
   let pattern = '^'.s:sch_dateT.ext
-  let prevPath = s:escape(getcwd(), ' ')
-  exe 'lchdir ' . s:escape(dir, ' ')
-  let saved_sq = getloclist(0)
-  lexpr ""
-  let cmd = 'lvimgrep /' . escape(pattern, '/') . '/j ' . s:escape(file, ' ')
-  silent! exe cmd
-  silent! exe 'lchdir ' . prevPath
-  let sq = getloclist(0)
-  let sq = s:QFixHowmSortReminderPre(sq)
-  let sq = s:QFixHowmSortReminder(sq, 'holiday')
-  call filter(sq, "v:val['lnum']")
-  let s:HolidayList = []
-  for d in sq
-    let day = QFixHowmDate2Int(d['text'])
-    call add(s:HolidayList, day)
+  let sq = []
+
+  let year = strftime('%Y')
+  let dict = datelib#GetHolidayTable(year)
+  let sq = s:altHolidayVimgrep(dir, file, pattern)
+  let reg = g:DL_SundayStr
+  let yreg = printf("%d\\|%d", year, year+1)
+  call filter(dict, 'v:key =~ yreg')
+  call filter(dict, 'v:val !~ reg')
+  for [key, value] in items(dict)
+    let text = printf('[%s]@ %s', strpart(key, 0, 4).'-'.strpart(key, 4, 2).'-'.strpart(key, 6, 2), value)
+    let sepdat = {'filename':file, 'lnum': 1, 'text': text}
+    call add(sq, sepdat)
   endfor
-  let sq = getloclist(0)
+  let sq = s:QFixHowmSortReminderPre(sq)
+  " let sq = s:QFixHowmSortReminder(sq, 'holiday')
+
   for d in sq
     let d['bufnr'] = ''
     let d['col'] = ''
     let d['filename'] = file
   endfor
-  call setloclist(0, saved_sq)
-  return sq
+  return deepcopy(sq)
+endfunction
+
+function! s:altHolidayVimgrep(dir, file, pattern)
+  " 高速化のためテンポラリバッファを使用
+  let prevPath = s:escape(getcwd(), ' ')
+  silent! exe 'lchdir ' . s:escape(path, ' ')
+  silent! exe 'silent! botright split '.g:qfixtempname
+  silent! setlocal bt=nofile bh=hide noswf nobl
+
+  let path = substitute(fnamemodify(a:dir, ':p'), '\\', '/', 'g')
+  let path = substitute(path, '[\\/]$', '', '')
+  let file = a:file
+  let lnum = 1
+  let tlist = s:readfile(path.'/'.file, '')
+  let qflist = []
+  for text in tlist
+    if text =~ s:sch_dateCmd . '\s*'.g:DL_SundayStr .'\s*$'
+      let sepdat = {'filename':path.'/'.file, 'lnum': 1, 'text': text}
+      call add(qflist, sepdat)
+    endif
+    let lnum += 1
+  endfor
+  silent! close
+  exe 'lchdir ' . prevPath
+  return qflist
+endfunction
+
+function! s:readfile(mfile, ...)
+  let tlist = []
+  silent! 1,$delete _
+  let mfile = a:mfile
+  let cmd = '0read '
+  let opt = ''
+  silent! exe cmd . ' ' . opt .' '. s:escape(mfile, ' ')
+  let tlist = getline(1, '$')
+  return tlist
 endfunction
 
 "休日のみを取りだしてリストを作成する。
@@ -722,7 +758,7 @@ function! s:QFixHowmSortReminder(sq, mode)
     let d.text = '[' . str . strpart(d.text, 11)
     let desc  = escape(cmd[0], '~')
     let dow = ''
-    if g:QFixHowm_ShowScheduleDayOfWeek
+    if g:QFixHowm_ShowScheduleDayOfWeek && a:mode != 'holiday'
       let dow = ' '.g:DoWStrftime[QFixHowmDate2Int(str)%7]
     endif
     if cmd =~ '@' && opt > 1 && opt >= 2
@@ -1673,10 +1709,25 @@ endfunction
 "Quickfix(schedule mode)
 "=============================================================================
 "Quickfixウィンドウ上での曜日変換表示
-if exists('g:QFixHowm_JpDayOfWeek') && g:QFixHowm_JpDayOfWeek
-  let g:QFixHowm_DayOfWeekDic = {'Sun' : "日", 'Mon' : "月", 'Tue' : "火", 'Wed' : "水", 'Thu' : "木", 'Fri' : "金", 'Sat' : "土"}
-  let g:QFixHowm_DayOfWeekReg = '\c\(Sun\|Mon\|Tue\|Wed\|Thu\|Fri\|Sat\|日\|月\|火\|水\|木\|金\|土\)'
+if !exists('g:QFixHowm_JpDayOfWeek')
+  let g:QFixHowm_JpDayOfWeek = 0
+  if exists('$LANG')
+    let g:QFixHowm_JpDayOfWeek = ($LANG =~ 'ja_JP')
+    if has('win32') || has('win64')
+      let g:QFixHowm_JpDayOfWeek = ($LANG =~ 'ja')
+    endif
+  endif
 endif
+
+if g:QFixHowm_JpDayOfWeek
+  if !exists('g:QFixHowm_DayOfWeekDic ')
+    let g:QFixHowm_DayOfWeekDic = {'Sun' : "日", 'Mon' : "月", 'Tue' : "火", 'Wed' : "水", 'Thu' : "木", 'Fri' : "金", 'Sat' : "土"}
+  endif
+  if !exists('g:QFixHowm_DayOfWeekReg  ')
+    let g:QFixHowm_DayOfWeekReg = '\c\(Sun\|Mon\|Tue\|Wed\|Thu\|Fri\|Sat\|日\|月\|火\|水\|木\|金\|土\)'
+  endif
+endif
+
 "Quickfixウィンドウ上でハイライトする曜日
 if !exists('g:QFixHowm_DayOfWeekReg')
   let g:QFixHowm_DayOfWeekReg = '\c\(Sun\|Mon\|Tue\|Wed\|Thu\|Fri\|Sat\)'

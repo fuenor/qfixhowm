@@ -82,7 +82,7 @@ function! agrep#MyGrepScript(searchWord, to_encoding, searchPath, options)
   " 高速化のためテンポラリバッファを使用
   let prevPath = s:escape(getcwd(), ' ')
   silent! exe 'lchdir ' . s:escape(path, ' ')
-  silent! exe 'silent! split '.s:tempfile
+  silent! exe 'silent! botright split '.s:tempfile
   silent! setlocal bt=nofile bh=hide noswf nobl
 
   let retval = ''

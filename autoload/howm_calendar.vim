@@ -188,7 +188,13 @@ let g:loaded_QFixMemoCalendar_vim = 1
 " 1 : 日本語
 " 2 : 日本語+陰暦
 if !exists('g:calendar_jp')
-  let g:calendar_jp = 2 * ($LANG =~ 'ja')
+  let g:calendar_jp = 0
+  if exists('$LANG')
+    let g:calendar_jp = 2 * ($LANG =~ 'ja_JP')
+    if has('win32') || has('win64')
+      let g:calendar_jp = 2 * ($LANG =~ 'ja')
+    endif
+  endif
 endif
 " カレンダーボード
 if !exists('g:calendar_footer')

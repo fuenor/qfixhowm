@@ -4,7 +4,7 @@
 "                 http://sites.google.com/site/fudist/Home/qfixhowm
 "=============================================================================
 scriptencoding utf-8
-let s:version = 100
+let s:version = 101
 " if exists('g:datelib_version') && g:datelib_version < s:version
 "   let g:loaded_datelib_vim = 0
 " endif
@@ -15,6 +15,11 @@ let g:datelib_version = s:version
 let g:loaded_datelib_vim = 1
 if v:version < 700 || &cp
   finish
+endif
+
+" strftime()の基準年
+if !exists('g:YearStrftime')
+  let g:YearStrftime = 1970
 endif
 
 " strftime()基準の経過日数
@@ -132,15 +137,11 @@ function! datelib#EndOfMonth(year, month, day)
   return day
 endfunction
 
-" strftime()の基準年
-if !exists('g:YearStrftime')
-  let g:YearStrftime = 1970
-endif
 " strftime()の基準日数(1970-01-01)
 if !exists('g:DateStrftime')
   let g:DateStrftime = s:Date2Int(g:YearStrftime, 1, 1)
 endif
-" 初週曜日(0000-01-01)
+" 初週曜日(0001-01-01)
 if !exists('g:DoWStrftime')
   let g:DoWStrftime = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 endif
@@ -176,8 +177,29 @@ endfunction
 """"""""""""""""""""""""""""""
 function! datelib#GetHolidayTable(year)
   call datelib#MakeHolidayTable(a:year)
-  return s:holidaytbl
+  return deepcopy(s:holidaytbl)
 endfunction
+
+if !exists('g:DL_SundayStr')
+  let g:DL_SundayStr = '日曜日'
+endif
+if !exists('g:DL_SubstituteHolidayStr')
+  let g:DL_SubstituteHolidayStr = '振替休日'
+endif
+if !exists('g:DL_SubstituteHolidayReg')
+  let g:DL_SubstituteHolidayReg = g:DL_SundayStr
+endif
+if !exists('g:DL_VernalEquinoxStr')
+  let g:DL_VernalEquinoxStr = '春分の日'
+endif
+if !exists('g:DL_AutumnEquinoxStr')
+  let g:DL_AutumnEquinoxStr = '秋分の日'
+endif
+" 春分/秋分
+let g:DL_Equinox = 0
+" 振替休日
+let g:DL_SubstituteHoliday = 0
+
 
 " 指定年の予定を作成
 let s:holidaytbl  = {}
@@ -194,6 +216,8 @@ function! datelib#MakeHolidayTable(year, ...)
         let s:holidaydict = s:ReadScheduleFile(s:setholidayfile(), s:holidaytbl)
       endif
       call s:SetScheduleTable(year, s:holidaydict, s:holidaytbl, hol)
+      call s:SetEquinox(year, s:holidaytbl)
+      call s:Furikae(year, s:holidaytbl)
       if exists('g:calendar_userfile')
         if len(s:userdict) == 0
           let s:userdict = s:ReadScheduleFile(g:calendar_userfile, s:usertbl)
@@ -204,6 +228,10 @@ function! datelib#MakeHolidayTable(year, ...)
   endfor
 endfunction
 
+if !exists('g:qfixtempname')
+  let g:qfixtempname = tempname()
+endif
+
 " 休日定義ファイルを読み込み
 let s:DoWregxp = '\c\(Sun\|Mon\|Tue\|Wed\|Thu\|Fri\|Sat\|Hol\|Hdy\)'
 function! s:ReadScheduleFile(files, table)
@@ -212,10 +240,7 @@ function! s:ReadScheduleFile(files, table)
     if !filereadable(file)
       continue
     endif
-    let glist = readfile(file)
-    if exists('g:qfixmemo_fileencoding')
-      call map(glist, "iconv(v:val, g:qfixmemo_fileencoding, &enc)")
-    endif
+    let glist = s:readfile(file)
     let today = strftime('%Y%m%d')
     let sch_ext  = '-@!+~.'
     let sch_date = '^.\d\{4}.\d\{2}.\d\{2}.'
@@ -228,6 +253,19 @@ function! s:ReadScheduleFile(files, table)
       let month = strpart(date, 4,  2)+0
       let day   = strpart(date, 6,  2)+0
       let str = substitute(str, sch_date, '', '')
+      if month == 0 && day == 0
+        if str =~ '^\s*@\d*\s*Sunday='
+          let g:DL_SundayStr = substitute(str, '^.*=\s*\|\s*$', '', 'g')
+        elseif str =~ '^\s*@\d*\s*'.g:DL_VernalEquinoxStr || str =~ '^\s*@\d*\s*'.g:DL_AutumnEquinoxStr
+          let g:DL_Equinox = year > 0 ? year : 1
+        elseif str =~ '^\s*@\d*\s*'.g:DL_SubstituteHolidayStr
+          if str =~ '=\s*[^\s]\+\s*$'
+            let g:DL_SubstituteHolidayReg = substitute(str, '^.*=\s*\|\s*$', '', 'g')
+          endif
+          let g:DL_SubstituteHoliday = year > 0 ? year : 1
+        endif
+        continue
+      endif
       let cmdstr = matchstr(str, '^'.sch_cmd)
       if cmdstr == ''
         continue
@@ -262,6 +300,23 @@ function! s:ReadScheduleFile(files, table)
     endfor
   endfor
   return deepcopy(dict)
+endfunction
+
+function! s:readfile(file)
+  silent! let prevPath = s:escape(getcwd(), ' ')
+  " 高速化のためテンポラリバッファを使用
+  silent! exe 'silent! botright split '.g:qfixtempname
+  silent! setlocal bt=nofile bh=hide noswf nobl
+  let file = a:file
+  let tlist = []
+  silent! 1,$delete _
+  let cmd = '0read '
+  let opt = ''
+  silent! exe cmd . ' ' . opt .' '. s:escape(file, ' ')
+  let tlist = getline(1, '$')
+  silent! close
+  silent! exe 'lchdir ' . prevPath
+  return tlist
 endfunction
 
 function! s:setholidayfile()
@@ -308,23 +363,32 @@ function! s:SetScheduleTable(year, dict, table, hol)
       if d['cmd'] == '@@@'
         let time = datelib#StrftimeCnvDoWShift(a:year, d['month'], d['day'], d['cnvdow'], d['sft'])
         let date = strftime('%Y%m%d', time)
-        let a:table[date] = d['text']
+        let text = substitute(d['text'], '\s*&\[\d\{4}[-/]\d\{2}[-/]\d\{2}\]\.', '', 'g')
+        let etime = s:endstr2time(d['text'])
+        if (etime > 0) && (time > etime)
+          continue
+        endif
         let opt = d['opt']
         let opt = (opt == '' || opt == 0) ? 1 : opt
         for i in range(opt)
           let date = strftime('%Y%m%d', time)
-          let a:table[date] = d['text']
+          let a:table[date] = text
           let time += 24*60*60
         endfor
       elseif d['cmd'] == '@@'
         let opt = d['opt']
         let opt = (opt == '' || opt == 0) ? 1 : opt
         let start = a:year == d['year'] ? d['month'] : 1
+        let text = substitute(d['text'], '\s*&\[\d\{4}[-/]\d\{2}[-/]\d\{2}\]\.', '', 'g')
+        let etime = s:endstr2time(d['text'])
         for month in range(start, 12)
           let time = datelib#StrftimeCnvDoWShift(a:year, month, d['day'], d['cnvdow'], d['sft'])
+          if (etime > 0) && (time > etime)
+            continue
+          endif
           for i in range(opt)
             let date = strftime('%Y%m%d', time)
-            let a:table[date] = d['text']
+            let a:table[date] = text
             let time += 24*60*60
           endfor
         endfor
@@ -360,6 +424,121 @@ function! s:SetScheduleTable(year, dict, table, hol)
     endfor
   endif
   return a:table
+endfunction
+
+function! s:endstr2time(str)
+  let enddate = substitute(matchstr(a:str, '&\[\d\{4}[-/]\d\{2}[-/]\d\{2}\]\.'), '[^0-9]', '', 'g')
+  if enddate == ''
+    return -1
+  endif
+  let etime = datelib#Date2IntStrftime(strpart(enddate, 0, 4), strpart(enddate, 4, 2), strpart(enddate, 6, 2)) *24*60*60
+  return etime
+endfunction
+
+function! s:SetEquinox(year, table)
+  if g:DL_Equinox  == 0 || a:year < g:DL_Equinox || a:year < g:YearStrftime
+    return
+  endif
+
+  let year = a:year
+  let mod = year % 4
+
+  let text = g:DL_VernalEquinoxStr
+  let month = 3
+  if mod == 0
+    if year >= 1900 && year <= 1956
+      let day = 21
+    elseif year >= 1960 && year <= 2088
+      let day = 20
+    elseif year >= 2092 && year <= 2096
+      let day = 19
+    endif
+  elseif mod == 1
+    if year >= 1901 && year <= 1989
+      let day = 21
+    elseif year >= 1993 && year <= 2097
+      let day = 20
+    endif
+  elseif mod == 2
+    if year >= 1902 && year <= 2022
+      let day = 21
+    elseif year >= 2026 && year <= 2098
+      let day = 20
+    endif
+  elseif mod == 3
+    if year >= 1903 && year <= 1923
+      let day = 21
+    elseif year >= 1927 && year <= 2055
+      let day = 20
+    elseif year >= 2059 && year <= 2099
+      let day = 20
+    endif
+  endif
+  let date = printf('%4.4d%2.2d%2.2d', year, month, day)
+  let a:table[date] = text
+
+  let text = g:DL_AutumnEquinoxStr
+  let month = 9
+  if mod == 0
+    if year >= 1900 && year <= 2008
+      let day = 23
+    elseif year >= 2012 && year <= 2096
+      let day = 22
+    endif
+  elseif mod == 1
+    if year >= 1901 && year <= 1917
+      let day = 24
+    elseif year >= 1921 && year <= 2041
+      let day = 23
+    elseif year >= 2045 && year <= 2097
+      let day = 22
+    endif
+  elseif mod == 2
+    if year >= 1902 && year <= 1946
+      let day = 24
+    elseif year >= 1950 && year <= 2074
+      let day = 23
+    elseif year >= 2078 && year <= 2098
+      let day = 22
+    endif
+  elseif mod == 3
+    if year >= 1903 && year <= 1979
+      let day = 24
+    elseif year >= 1983 && year <= 2099
+      let day = 23
+    endif
+  endif
+  let date = printf('%4.4d%2.2d%2.2d', year, month, day)
+  let a:table[date] = text
+endfunction
+
+function! s:Furikae(year, table)
+  if g:DL_SubstituteHoliday < 0 || a:year < g:DL_SubstituteHoliday || a:year < g:YearStrftime
+    return
+  endif
+  let year = a:year
+  for [key, value] in items(a:table)
+    if key !~ '^'.year.'\d\{2}\d\{2}' || value =~ g:DL_SubstituteHolidayReg
+      continue
+    endif
+    let month = strpart(key, 4, 2)
+    let day = strpart(key, 6, 2)
+    if s:Date2Int(year, month, day) % 7 != 6
+      continue
+    endif
+
+    " 日曜なので振替
+    let i = 0
+    while 1
+      let time = datelib#Date2IntStrftime(year, month, day+i)*24*60*60
+      let date = strftime('%Y%m%d', time)
+      if !exists('a:table[date]')
+        break
+      endif
+      let i += 1
+    endwhile
+    let a:table[date] = g:DL_SubstituteHolidayStr
+  endfor
 endfunction
 
 function! s:escape(str, chars)

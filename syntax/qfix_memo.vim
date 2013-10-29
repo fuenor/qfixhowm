@@ -93,9 +93,6 @@ syn match escapeTAG '^&&.*$'
 syn match escapeTAG '&<[^>]\+>'
 hi def link escapeTAG Folded
 
-"「」強調
-syn region MyJpKagi display start=+「\zs+ end=+\ze」+
-
 " howmの予定・TODO
 " runtime! syntax/howm_schedule.vim
 

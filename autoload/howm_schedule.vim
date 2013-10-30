@@ -173,7 +173,7 @@ endif
 
 "休日定義ファイル
 if !exists('g:QFixHowm_HolidayFile')
-  let g:QFixHowm_HolidayFile = 'Sche-Hd-0000-00-00-000000.*'
+  let g:QFixHowm_HolidayFile = ''
 endif
 "休日名
 if !exists('g:QFixHowm_ReminderHolidayName')
@@ -482,7 +482,19 @@ function! s:QFixHowmListReminder_(mode,...)
 
   if s:reminder_cache == 0 || count
     redraw | echo 'QFixHowm : making holiday...'
-    let s:holiday_sq = s:HolidayGrep(l:howm_dir, g:QFixHowm_HolidayFile)
+    if g:QFixHowm_HolidayFile == ''
+      let files = split(glob(l:howm_dir.'/**/Sche-Hd-0000-00-00-000000.*'), '\n')
+      for n in files
+        if !isdirectory(n)
+          let g:QFixHowm_HolidayFile = n
+          break
+        endif
+      endfor
+    endif
+    let s:holiday_sq = []
+    if g:QFixHowm_HolidayFile != ''
+      let s:holiday_sq = s:HolidayGrep(l:howm_dir, g:QFixHowm_HolidayFile)
+    endif
   endif
   call QFixPclose(1)
   let prevPath = s:escape(getcwd(), ' ')

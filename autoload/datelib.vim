@@ -322,7 +322,7 @@ endfunction
 function! s:setholidayfile()
   if g:calendar_holidayfile != ''
     let file = g:calendar_holidayfile
-  elseif exists('g:QFixHowm_HolidayFile')
+  elseif exists('g:QFixHowm_HolidayFile') && g:QFixHowm_HolidayFile != ''
     let file = g:QFixHowm_HolidayFile
   else
     let file = 'Sche-Hd-0000-00-00-000000.*'

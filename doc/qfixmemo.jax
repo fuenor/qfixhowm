@@ -983,9 +983,10 @@ https://sites.google.com/site/fudist/Home/qfixhowm#downloads
 
 定義ファイルを適当なディレクトリにコピーした後calendar_holidayfileに休日定義ファ
 イルのパスを指定してください。
+使用するファイルのファイルエンコーディングはqfixmemoと同じものを使用します。
 >
-  " 休日定義ファイル(パスは環境に合わせてください)
-  let calendar_holidayfile = '~/qfixmemo/Sche-Hd-0000-00-00-000000.txt'
+  " 休日定義ファイル(パスとファイルエンコーディングは環境に合わせてください)
+  let calendar_holidayfile = '~/qfixmemo/Sche-Hd-0000-00-00-000000.utf8'
 
 NOTE:
 実際には予定・TODO(|qfixmemo_schedule|)で休日定義ファイル設定を行なっていると

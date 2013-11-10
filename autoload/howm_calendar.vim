@@ -758,7 +758,7 @@ function! s:syntax()
 
   " today
   if g:calendar_mark =~ 'left-fit'
-    syn match CalToday display "\s\zs[*]\d\+\ze"
+    syn match CalToday display "\s*\zs[*]\d\+\ze"
     syn match CalMemo display "\s*\zs[+!$%&?]\d\+\ze"
   elseif g:calendar_mark =~ 'right'
     syn match CalToday display "\zs\d\+[*]\ze\s*"

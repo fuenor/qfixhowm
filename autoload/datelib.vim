@@ -150,11 +150,15 @@ endif
 " howmスタイル休日設定
 
 " 休日定義ファイル
-" https://sites.google.com/site/fudist/Home/qfixhowm#downloads
 if !exists('g:calendar_holidayfile')
   " let g:calendar_holidayfile = '~/qfixmemo/Sche-Hd-0000-00-00-000000.howm'
   let g:calendar_holidayfile = ''
 endif
+" 休日定義ファイルのfileencoding は自動判定されるがBOMは扱えない。
+" BOM付きファイルエンコーディングを使用する場合は
+" let g:calendar_holidayfile_fileencoding = 'auto'
+" のように指定する。
+" ただしcalendar_holidayfile_fileencodingを指定すると画面が乱れる場合がある。
 
 """"""""""""""""""""""""""""""
 " 指定日が休日かチェック
@@ -254,8 +258,11 @@ function! s:ReadScheduleFile(files, table)
       let day   = strpart(date, 6,  2)+0
       let str = substitute(str, sch_date, '', '')
       if month == 0 && day == 0
-        if str =~ '^\s*@\d*\s*Sunday='
+        if str =~ '^\s*@\d*\s*Sunday\s*=\s*'
+          " 現時点では未使用
           let g:DL_SundayStr = substitute(str, '^.*=\s*\|\s*$', '', 'g')
+        elseif str =~ '^\s*@\d*\s*Substitute\s*=\s*'
+          let g:DL_SubstituteHolidayStr = substitute(str, '^.*=\s*\|\s*$', '', 'g')
         elseif str =~ '^\s*@\d*\s*'.g:DL_VernalEquinoxStr || str =~ '^\s*@\d*\s*'.g:DL_AutumnEquinoxStr
           let g:DL_Equinox = year > 0 ? year : 1
         elseif str =~ '^\s*@\d*\s*'.g:DL_SubstituteHolidayStr
@@ -303,6 +310,34 @@ function! s:ReadScheduleFile(files, table)
 endfunction
 
 function! s:readfile(file)
+  let file = a:file
+  let list = readfile(file)
+
+  " BOMに対応しないファイルエンコーディング簡易判定
+  let fromenc = split(&fencs, ',')
+  let to = "utf-8"
+  for from in fromenc
+    if from =~? to || from =~? 'ucs-bom\|default\|latin'
+      continue
+    endif
+    let tlist = deepcopy(list)
+    call map(tlist, 'iconv(v:val, from, to)')
+    let flist = deepcopy(tlist)
+    call map(flist, 'iconv(v:val, to, from)')
+    if flist == list
+      return map(list, 'iconv(v:val, from, &enc)')
+    endif
+  endfor
+
+  if exists('g:calendar_holidayfile_fileencoding') && g:calendar_holidayfile_fileencoding != ''
+    return s:readfilebuf(a:file)
+  endif
+
+  " BOM付きの場合は一行目がBOM付きのまま渡される。
+  return map(list, 'iconv(v:val, "utf-8", &enc)')
+endfunction
+
+function! s:readfilebuf(file)
   silent! let prevPath = s:escape(getcwd(), ' ')
   " 高速化のためテンポラリバッファを使用
   silent! exe 'silent! botright split '.g:qfixtempname

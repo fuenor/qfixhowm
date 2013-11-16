@@ -449,13 +449,13 @@ function! QFixHowmOpenMenu(...)
       wincmd p
     endif
   elseif bufwinnr('__Calendar__') != -1
-    " FIXME: s:HolidayVimgrep()中でlvimgrepを実行するとカレンダーが乱れる対策
-    exe bufwinnr(bufnr('__Calendar__')) .'wincmd w'
-    let save_cursor = getpos('.')
-    call cursor(1, 1)
-    exe 'normal! z-'
-    call setpos('.', save_cursor)
-    wincmd p
+    " " FIXME: s:HolidayVimgrep()中でlvimgrepを実行するとカレンダーが乱れる対策
+    " exe bufwinnr(bufnr('__Calendar__')) .'wincmd w'
+    " let save_cursor = getpos('.')
+    " call cursor(1, 1)
+    " exe 'normal! z-'
+    " call setpos('.', save_cursor)
+    " wincmd p
   endif
   let g:QFix_Disable = 0
 endfunction

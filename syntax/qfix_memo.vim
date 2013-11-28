@@ -2,8 +2,16 @@
 "
 " Language:    qfixmemo
 " Maintainer:  fuenor@gmail.com
-" Last Change: 2011-12-06 20:01
+" Last Change: 2013-11-26 23:01
 scriptencoding utf-8
+
+hi def link qfixmemoTitle       Title
+hi def link qfixmemoTitleDesc   Delimiter
+hi def link qfixmemoCategory    Label
+
+hi def link qfixmemoKeyword     Underlined
+hi def link qfixmemoDate        Underlined
+hi def link qfixmemoTime        Constant
 
 " URLとファイル
 syn match txtUrl  '\(http\|https\|file\|ftp\)://[-0-9a-zA-Z;/?:@&=+$,_.!~*'()%#]*'
@@ -79,11 +87,11 @@ syn match chapterBullet contained '^\s*\(\*\.\)\+\*\?$'
 syn match chapterBullet contained '^\s*[0-9][0-9.]* $'
 syn match chapterBullet contained '^\s*\([0-9.*]\+\|[.*=]\+\)'
 
-hi def link memoTitle       Title
+hi def link memoTitle       Identifier
 hi def link titleBullet     Special
-hi def link titleCategory   Label
-hi def link chapterTitle    Define
-hi def link chapterNumber   Identifier
+hi def link titleCategory   Constant
+hi def link chapterTitle    Type
+hi def link chapterNumber   PreProc
 hi def link chapterBullet   Type
 
 "----------

@@ -558,16 +558,16 @@ function! s:syntaxHighlight()
     exe 'syn match qfixmemoTitleDesc "^'.l:qfixmemo_title.'$"'
     exe 'syn match qfixmemoTitleDesc contained "^'.l:qfixmemo_title.'"'
     syn match qfixmemoCategory contained +\(\[.\{-}\]\)\++
-    hi link qfixmemoTitle     Title
-    hi link qfixmemoTitleDesc Special
-    hi link qfixmemoCategory  Label
+    hi def link qfixmemoTitle     Title
+    hi def link qfixmemoTitleDesc Special
+    hi def link qfixmemoCategory  Statement
   endif
   if g:qfixmemo_syntax_flag =~ '^..1.'
     silent! syn clear qfixmemoKeyword
     if s:KeywordHighlight != ''
       exe 'syn match qfixmemoKeyword display "\V'.escape(s:KeywordHighlight, '"').'"'
     endif
-    hi link qfixmemoKeyword Underlined
+    hi def link qfixmemoKeyword Underlined
   endif
   if g:qfixmemo_syntax_flag =~ '^.1..'
     exe 'syn match qfixmemoDateTime "'.g:qfixmemo_timestamp_regxp . '" contains=qfixmemoDate,qfixmemoTime'
@@ -575,8 +575,8 @@ function! s:syntaxHighlight()
     syn match qfixmemoDate contained '\d\{4}/\d\{2}/\d\{2}'
     syn match qfixmemoTime contained '\d\{2}\(:\d\{2}\)\+'
 
-    hi link qfixmemoDate Underlined
-    hi link qfixmemoTime Constant
+    hi def link qfixmemoDate Underlined
+    hi def link qfixmemoTime Constant
   endif
   if g:qfixmemo_syntax_flag =~ '^1...'
     exe 'runtime! syntax/'.g:qfixmemo_syntax_file

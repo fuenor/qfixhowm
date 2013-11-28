@@ -625,8 +625,8 @@ function! s:BufWinEnterMenu(preview, head)
     let b:PreviewEnable = a:preview
   endif
 
-  hi link QFMenuButton Special
-  hi link QFMenuSButton Identifier
+  hi def link QFMenuButton Special
+  hi def link QFMenuSButton Identifier
   exe 'set ft='.g:qfixmemo_filetype
   call qfixmemo#Syntax()
   runtime! syntax/howm_schedule.vim
@@ -638,9 +638,9 @@ function! s:BufWinEnterMenu(preview, head)
   syn match qfLineNr    "[^|]*" contained contains=qfError
   syn match qfError     "error" contained
 
-  hi link mqfFileName Directory
-  hi link qfLineNr  LineNr
-  hi link qfError Error
+  hi def link mqfFileName Directory
+  hi def link qfLineNr  LineNr
+  hi def link qfError Error
   call QFixHowmQFsyntax()
 
   nnoremap <buffer> <silent> J :<C-u>call <SID>MenuCmd_J()<CR>

@@ -107,6 +107,9 @@ endif
 if !exists('g:openuri_cmd')
   if has('unix')
     let g:openuri_cmd = "call system('firefox %s &')"
+    if executable("getprop") && system("getprop net.bt.name") =~ 'Android'
+      let g:openuri_cmd = '!am start --user 0 -a android.intent.action.VIEW -t text/html -d %s'
+    endif
   else
     " Internet Explorer
     let g:openuri_cmd = '!start "C:/Program Files/Internet Explorer/iexplore.exe" %s'

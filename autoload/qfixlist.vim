@@ -815,6 +815,9 @@ if !exists('g:mygrepprg')
   if has('unix')
     let g:mygrepprg = 'grep'
   endif
+  if executable("getprop") && system("getprop net.bt.name") =~ 'Android'
+    let g:mygrepprg = 'agrep.vim'
+  endif
 endif
 " let mygrepprg=findstr, let mygrepprg=grepで切り替え可能に
 if !exists('g:grep') && exists('g:mygrepprg')
@@ -1361,8 +1364,12 @@ function! s:ExecGrep(cmd, prg, searchPath, searchWord, from_encoding, to_encodin
       let searchWord = iconv(a:searchWord, a:from_encoding, to_encoding)
     endif
     let searchWordList = [searchWord]
-    call writefile(searchWordList, g:qfixtempname, 'b')
-    let cmd = substitute(cmd, '#searchWordFile#', s:GrepEscapeVimPattern(g:qfixtempname), 'g')
+    let swfname = g:qfixtempname
+    if exists('g:qfixmemo_greptempname')
+      let swfname = fnamemodify(expand(g:qfixmemo_greptempname), ':p')
+    endif
+    call writefile(searchWordList, swfname , 'b')
+    let cmd = substitute(cmd, '#searchWordFile#', s:GrepEscapeVimPattern(swfname), 'g')
   endif
   if match(cmd, '#searchWord#') != -1
     let to_encoding = g:MyGrep_ShellEncoding

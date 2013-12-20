@@ -112,8 +112,8 @@ if !exists('g:openuri_cmd')
     endif
   else
     " Internet Explorer
-    let g:openuri_cmd = '!start "C:/Program Files/Internet Explorer/iexplore.exe" %s'
-    " let g:openuri_cmd = '!start "rundll32.exe" url.dll,FileProtocolHandler %s'
+    " let g:openuri_cmd = '!start "C:/Program Files/Internet Explorer/iexplore.exe" %s'
+    let g:openuri_cmd = '!start "rundll32.exe" url.dll,FileProtocolHandler %s'
   endif
   " netrw を使用する場合(:help gx)
   " let g:openuri_cmd = 'netrw'

@@ -55,6 +55,23 @@ if v:version < 700 || &cp || !has('quickfix')
 endif
 let s:debug = exists('g:fudist') ? g:fudist : 0
 
+" Quickfix処理を行わない
+if !exists('g:QFix_Enable')
+  let g:QFix_Enable = 1
+endif
+command! -nargs=? -bang QFixEnable call <SID>QFixEnable(<bang>0, <args>)
+" Quickfixコマンド実行時に自動で有効化
+if !exists('g:QFix_AutoEnable')
+  let g:QFix_AutoEnable = 0
+endif
+function! s:QFixEnable(mode, ...)
+  if (a:mode == 1)
+    let g:QFix_Enable = !g:QFix_Enable
+  elseif (a:0 == 1 && a:1 =~ '[01]')
+    let g:QFix_Enable = a:1
+  endif
+endfunction
+
 " ロケーションリスト使用
 if !exists('g:QFix_UseLocationList')
   let g:QFix_UseLocationList = 0
@@ -305,6 +322,9 @@ endfunction
 " QuickFixウィンドウ
 " BufWinEnter
 function! s:QFBufWinEnter(...)
+  if (g:QFix_Enable == 0)
+    return
+  endif
   call s:QFixSetBuftype()
   if b:qfixwin_buftype == g:QFix_UseLocationList
     let g:QFix_Win = expand('<abuf>')
@@ -431,6 +451,9 @@ endfunction
 
 " BufEnter
 function! s:QFixBufEnter(...)
+  if (g:QFix_Enable == 0)
+    return
+  endif
   if &previewwindow
     if s:QFix_PreviewWin == bufnr('%')
       if winnr('$') == 1
@@ -466,6 +489,9 @@ endfunction
 
 " BufLeave
 function! s:QFixBufLeave(...)
+  if (g:QFix_Enable == 0)
+    return
+  endif
   if &buftype == 'quickfix'
     exe 'let g:QFix_SelectedLine'.b:qfixwin_buftype.'='.line('.')
     let b:qfixwin_height = winheight(0)
@@ -484,6 +510,9 @@ endfunction
 
 " CursorHold
 function! s:QFPreview()
+  if (g:QFix_Enable == 0)
+    return
+  endif
   if g:QFix_PreviewEnable > 0 && &buftype == 'quickfix'
     call QFixPreview()
   endif
@@ -1036,6 +1065,9 @@ endfunction
 function! QFixCopen(...)
   if g:QFix_Disable
     return
+  endif
+  if g:QFix_AutoEnable
+    let g:QFix_Enable = 1
   endif
   if &buftype == 'quickfix'
     let b:qfixwin_height = winheight(0)

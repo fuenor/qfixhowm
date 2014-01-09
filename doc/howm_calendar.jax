@@ -122,31 +122,31 @@ BOM付きファイルエンコーディングはおすすめしませんが、�
 日付上で<CR>を押すと日記を書くなどのアクションが実行可能です。
 QFixHowm/QFixMemoを使用している場合は自動設定されるので設定不要です。
 
-サインは calendar_sign 、日付のアクションには calendar_actionで設定された関数
-が呼び出されるので任意の関数を実行することが可能です。
+サインは howm_calendar_sign 、日付のアクションには howm_calendar_actionで設定
+された関数が呼び出されるので任意の関数を実行することが可能です。
 サインとアクションのQFixHowm/QFixMemoでの設定と同じ物は以下の通りですので、好
 みに改変してください。
 
 サイン
 サインは +!#$%&@? が使用可能ですが #@ は休日としてハイライトされます。
 >
-  let calendar_sign   = "MyCalendarSign"
+  let howm_calendar_sign   = "MyCalendarSign"
 
   " カレンダーのサインを返す
   " NOTE: @ # は休日としてハイライトされる
-  let calendar_flag=['', '+', '@', '#']
+  let howm_calendar_flag=['', '+', '@', '#']
   function! MyCalendarSign(day, month, year)
     " holiday : 日曜以外の休日かどうか
     let holiday = datelib#HolidayCheck(a:year, a:month, a:day, 'Sun')
     " file    : フルパスの日記ファイル名
     let file = QFixMemoCalendarFile(a:year, a:month, a:day)
     let id = filereadable(expand(file)) + holiday*2
-    return g:calendar_flag[id]
+    return g:howm_calendar_flag[id]
   endfunction
 
 アクション
 >
-  let calendar_action = "MyCalendarDiary"
+  let howm_calendar_action = "MyCalendarDiary"
   " カレンダーの日付上で<CR>を押した場合に呼び出される
   " CAUTION: weekは calendar_vimとの整合性を保つためのもので使用不可
   " NOTE: dir には現在のqfixmemo_dir(howm_dir)がコピーされている

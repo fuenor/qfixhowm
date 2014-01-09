@@ -3,7 +3,7 @@
 "                 datelib.vim requiard
 "         Author: fuenor <fuenor@gmail.com>
 "                 http://sites.google.com/site/fudist/Home/qfixhowm
-"        Version: 2.01
+"        Version: 3.00
 "=============================================================================
 scriptencoding utf-8
 if v:version < 700 || &cp
@@ -15,64 +15,50 @@ if !exists('g:calendar_holidayfile')
   " let g:calendar_holidayfile = '~/qfixmemo/Sche-Hd-0000-00-00-000000.howm'
   let g:calendar_holidayfile = ''
 endif
-" CalHolidayのハイライト指定
-if !exists('g:calendar_CalHoliday')
-  " let g:calendar_CalHoliday = 'CalMemo'
-  let g:calendar_CalHoliday = 'CalSunday'
+" HowmCalHolidayのハイライト指定
+if !exists('g:howm_calendar_HowmCalHoliday')
+  " let g:howm_calendar_HowmCalHoliday = 'HowmCalMemo'
+  let g:howm_calendar_HowmCalHoliday = 'HowmCalSunday'
 endif
 " サインの表示位置 left-fit, left, right
-if !exists("g:calendar_mark") || (g:calendar_mark != 'left' && g:calendar_mark != 'left-fit' && g:calendar_mark != 'right')
-  let g:calendar_mark = 'left-fit'
+if !exists("g:howm_calendar_mark") || (g:howm_calendar_mark != 'left' && g:howm_calendar_mark != 'left-fit' && g:howm_calendar_mark != 'right')
+  let g:howm_calendar_mark = 'left-fit'
 endif
 
-if !exists('g:calendar_flag')
-  let g:calendar_flag=['', '+', '@', '#']
+if !exists('g:howm_calendar_flag')
+  let g:howm_calendar_flag=['', '+', '@', '#']
 endif
 
-if !exists('g:calendar_action')
-  let g:calendar_action = "<SID>CalendarDiary"
+if !exists('g:howm_calendar_action')
+  let g:howm_calendar_action = "howm_calendar#CalendarDiary"
 endif
-if !exists('g:calendar_sign')
-  let g:calendar_sign = "<SID>CalendarSign"
+if !exists('g:howm_calendar_sign')
+  let g:howm_calendar_sign = "howm_calendar#CalendarSign"
 endif
-if !exists('g:calendar_info')
-  let g:calendar_info = "<SID>CalendarInfo"
+if !exists('g:howm_calendar_info')
+  let g:howm_calendar_info = "<SID>CalendarInfo"
 endif
 
 " 独自ハイライトへの変更
 function! CalendarPost()
-  if g:calendar_howm_syntax == 0
-    return
-  endif
-  let ch = g:calendar_flag[2] . '_'
-  exe 'syn match CalConceal /['.ch.']/ contained'
-  let ch = g:calendar_flag[2] . g:calendar_flag[3]
-  if g:calendar_mark =~ 'left-fit'
-    exe 'syn match CalHoliday display "\s*\zs['.ch.']\d*\ze" contains=CalConceal'
-  elseif g:calendar_mark =~ 'right'
-    exe 'syn match CalHoliday display "\zs\d*['.ch.']\ze\s*" contains=CalConceal'
+  let ch = g:howm_calendar_flag[2] . '_'
+  exe 'syn match HowmCalConceal /['.ch.']/ contained'
+  let ch = g:howm_calendar_flag[2] . g:howm_calendar_flag[3]
+  if g:howm_calendar_mark =~ 'left-fit'
+    exe 'syn match HowmCalHoliday display "\s*\zs['.ch.']\d*\ze" contains=HowmCalConceal'
+  elseif g:howm_calendar_mark =~ 'right'
+    exe 'syn match HowmCalHoliday display "\zs\d*['.ch.']\ze\s*" contains=HowmCalConceal'
   else
-    exe 'syn match CalHoliday display "\zs['.ch.']\s*\d*\ze" contains=CalConceal'
+    exe 'syn match HowmCalHoliday display "\zs['.ch.']\s*\d*\ze" contains=HowmCalConceal'
   endif
   " 今日が休日
   if datelib#HolidayCheck(strftime('%Y'), strftime('%m'), strftime('%d'), 'Sun')
-    hi link CalToday CalHoliday
+    hi link HowmCalToday HowmCalHoliday
   endif
-  hi link CalMemo    PreProc
-  hi link CalSunday  WarningMsg
-  exe 'hi def link CalHoliday '.g:calendar_CalHoliday
-  hi def link CalConceal Ignore
-endfunction
-
-function! s:CalendarPost(win)
-  augroup Calendar
-    au!
-    if a:win
-      exe 'au BufEnter __Calendar resize '.winheight(0)
-    else
-      exe 'au BufEnter __Calendar vertical resize '.winwidth(0)
-    endif
-  augroup END
+  hi link HowmCalMemo    PreProc
+  hi link HowmCalSunday  WarningMsg
+  exe 'hi def link HowmCalHoliday '.g:howm_calendar_HowmCalHoliday
+  hi def link HowmCalConceal Ignore
 endfunction
 
 if !exists('*QFixMemoCalendarSign')
@@ -84,7 +70,7 @@ function! QFixMemoCalendarSign(day, month, year)
   " file    : 日記ファイル名(フルパス)
   let file = QFixMemoCalendarFile(a:year, a:month, a:day)
   let id = filereadable(expand(file)) + holiday*2
-  return g:calendar_flag[id]
+  return g:howm_calendar_flag[id]
 endfunction
 endif
 
@@ -140,16 +126,12 @@ function! s:CalendarSign(day, month, year)
   let sfile = g:calendar_diary."/".a:year."/".a:month."/".a:day.".cal"
   let hday = datelib#HolidayCheck(a:year, a:month, a:day, 'Sun')
   let id = filereadable(expand(sfile)) + hday*2
-  return g:calendar_flag[id]
+  return g:howm_calendar_flag[id]
 endfunction
 
 " カレンダーコマンドをオーバーライド
 if !exists('g:howm_calendar')
   let g:howm_calendar = 0
-endif
-" calendar.vimのコマンドをqfixmemo-calendar.vimのハイライト表示に変更
-if !exists('g:calendar_howm_syntax')
-  let g:calendar_howm_syntax = 1
 endif
 
 au VimEnter * call <SID>VimEnter()
@@ -157,9 +139,6 @@ function! s:VimEnter()
   if !exists(':Calendar') || g:howm_calendar
     command! -nargs=* Calendar  call HowmCalendar(0,<f-args>)
     command! -nargs=* CalendarH call HowmCalendar(1,<f-args>)
-  elseif g:calendar_howm_syntax
-    command! -nargs=* Calendar  call Calendar(0,<f-args>) | call CalendarPost()
-    command! -nargs=* CalendarH call Calendar(1,<f-args>) | call CalendarPost()
   endif
 endfunction
 
@@ -245,7 +224,7 @@ function! QFixMemoCalendar(dircmd, file, cnt, ...)
     let winsize = winwidth(0)
   endif
   let l:calendar_width = 3*7+strlen(g:submenu_calendar_lmargin)+1
-  let l:calendar_width += g:calendar_mark =~ 'right'
+  let l:calendar_width += g:howm_calendar_mark =~ 'right'
   if parent == 0
     let winsize = l:calendar_width
   else
@@ -412,7 +391,7 @@ function! s:CR(...)
     endif
     let week = line('.') - lnum - 1
     let dir = exists('g:qfixmemo_dir') ? g:qfixmemo_dir : g:calendar_diary
-    exe 'call '.g:calendar_action.'(key, month, year, week, dir)'
+    exe 'call '.g:howm_calendar_action.'(key, month, year, week, dir)'
   elseif key =~ 'up\|down'
     let b:calendar_month += key =~ 'up' ? -1 : 1
     call s:build()
@@ -515,10 +494,10 @@ function! s:Msg(id)
   let save_cursor = getpos('.')
   setlocal modifiable
   let lnum = search('^\s*_', 'ncW')
-  let padding = '_'.repeat(' ', 21+(g:calendar_mark =~ 'right'))
+  let padding = '_'.repeat(' ', 21+(g:howm_calendar_mark =~ 'right'))
   silent! exe '%s/^_.*/'.padding.'/g'
   if lnum && len(msg) > 0
-    let padding = repeat('_', (21+2+(g:calendar_mark =~ 'right'))*cnt)
+    let padding = repeat('_', (21+2+(g:howm_calendar_mark =~ 'right'))*cnt)
     call setline(lnum, padding.msg[0])
   endif
   setlocal nomodifiable
@@ -548,7 +527,7 @@ function! CalendarInfo()
   let month = matchstr(str, '/\zs\d\{2}')
   let day = expand('<cword>')
 
-  exe 'let info = '.g:calendar_info.'(day, month, year)'
+  exe 'let info = '.g:howm_calendar_info.'(day, month, year)'
   if info != []
     return info
   endif
@@ -608,7 +587,7 @@ function! s:CalendarStr(row, col)
   if mode
     let glist = ['', '', '', '', '', '', '', '',]
   endif
-  let tail = g:calendar_mark =~ 'right' ? ' ' : ''
+  let tail = g:howm_calendar_mark =~ 'right' ? ' ' : ''
   let year  = exists('b:calendar_year' ) ? b:calendar_year  : strftime('%Y')
   let month = exists('b:calendar_month') ? b:calendar_month : strftime('%m')
   let day   = exists('b:calendar_day'  ) ? b:calendar_day   : strftime('%d')
@@ -626,7 +605,7 @@ function! s:CalendarStr(row, col)
     let str = s:cal
     let eom = datelib#EndOfMonth(year, month, 0)
     let str = substitute(str, printf('\s%2.2d', eom+1).'.*$', '', '')
-    if g:calendar_mark =~ 'right'
+    if g:howm_calendar_mark =~ 'right'
       let str = substitute(str, '^ ', '', '').' '
     endif
     let fdow = datelib#DoWIdxStrftime(fday)
@@ -638,7 +617,7 @@ function! s:CalendarStr(row, col)
     let ty = strftime('%Y')
     let tm = strftime('%m')
     let td = str2nr(strftime('%d'))
-    let sign_cmd = 'let id = '.g:calendar_sign.'(n, month, year)'
+    let sign_cmd = 'let id = '.g:howm_calendar_sign.'(n, month, year)'
     for n in range(1, eom)
       exe sign_cmd
       if n == td && month == tm && year == ty
@@ -649,9 +628,9 @@ function! s:CalendarStr(row, col)
         if id !~ "[+!#$%&@?*]"
           let id = "+"
         endif
-        if g:calendar_mark =~ 'left-fit'
+        if g:howm_calendar_mark =~ 'left-fit'
           let str = substitute(str, printf('%3d', n), printf('%3s', id.string(n)), '')
-        elseif g:calendar_mark =~ 'right'
+        elseif g:howm_calendar_mark =~ 'right'
           let str = substitute(str, printf('%2d ', n), printf('%2d%s', n, id), '')
         else
           let str = substitute(str, printf('%3d', n), printf('%s%2d', id, n), '')
@@ -661,7 +640,7 @@ function! s:CalendarStr(row, col)
     let str = substitute(str, '\(.\{21}\)', '\1|', 'g')
     let list = split(str, '|')
     exe 'let list[-1] .= printf("%'.(strlen(list[0])-strlen(list[-1])).'s", "")'
-    if g:calendar_mark =~ 'right'
+    if g:howm_calendar_mark =~ 'right'
       call map(list, 'substitute(v:val, "^", " ", "")')
     endif
     call insert(list, g:calendar_dow.tail)
@@ -753,43 +732,41 @@ endfunction
 
 function! s:syntax()
   syn clear
-  exe 'syn match CalSaturday display /\d\+.\?$/'
-  exe 'syn match CalSaturday display /\d\+.\?\s\{,2}\ze|/'
+  exe 'syn match HowmCalSaturday display /\d\+.\?$/'
+  exe 'syn match HowmCalSaturday display /\d\+.\?\s\{,2}\ze|/'
 
   " today
-  if g:calendar_mark =~ 'left-fit'
-    syn match CalToday display "\s*\zs[*]\d\+\ze"
-    syn match CalMemo display "\s*\zs[+!$%&?]\d\+\ze"
-  elseif g:calendar_mark =~ 'right'
-    syn match CalToday display "\zs\d\+[*]\ze\s*"
-    syn match CalMemo display "\zs\d\+[+!$%&?]\ze\s*"
+  if g:howm_calendar_mark =~ 'left-fit'
+    syn match HowmCalToday display "\s*\zs[*]\d\+\ze"
+    syn match HowmCalMemo display "\s*\zs[+!$%&?]\d\+\ze"
+  elseif g:howm_calendar_mark =~ 'right'
+    syn match HowmCalToday display "\zs\d\+[*]\ze\s*"
+    syn match HowmCalMemo display "\zs\d\+[+!$%&?]\ze\s*"
   else
-    syn match CalToday display "\zs[*]\s*\d\+\ze"
-    syn match CalMemo display "\zs[+!$%&?]\s*\d\+\ze"
+    syn match HowmCalToday display "\zs[*]\s*\d\+\ze"
+    syn match HowmCalMemo display "\zs[+!$%&?]\s*\d\+\ze"
   endif
 
   " header
-  syn match CalHeader display '< \. > \d\{4}/\d\{2} [^ ]\+' contains=CalCmd
-  syn match CalCmd '< \. >' contained
+  syn match HowmCalHeader display '< \. > \d\{4}/\d\{2} [^ ]\+' contains=HowmCalCmd
+  syn match HowmCalCmd '< \. >' contained
 
   " ruler
-  exe 'syn match CalRulerNC display  "'.substitute(g:calendar_dow, '^\s*\|\s*$', '', '').'"'
-  exe 'syn match CalSunday  display "'.'^'.b:submenu_calendar_lmargin.' \?[+!$%&?]\? \{,2}\zs\d\+\ze" contains=CalToday'
-  exe 'syn match CalSunday  display "'.'|'.b:submenu_calendar_lmargin.' \?[+!$%&?]\? \{,2}\zs\d\+\ze" contains=CalToday'
-  syn match CalInfo display '\s*_.*$' contains=CalConceal
+  exe 'syn match HowmCalRulerNC display  "'.substitute(g:calendar_dow, '^\s*\|\s*$', '', '').'"'
+  exe 'syn match HowmCalSunday  display "'.'^'.b:submenu_calendar_lmargin.' \?[+!$%&?]\? \{,2}\zs\d\+\ze" contains=HowmCalToday'
+  exe 'syn match HowmCalSunday  display "'.'|'.b:submenu_calendar_lmargin.' \?[+!$%&?]\? \{,2}\zs\d\+\ze" contains=HowmCalToday'
+  syn match HowmCalInfo display '\s*_.*$' contains=HowmCalConceal
 
   exe 'runtime! syntax/'.g:submenu_calendar_syntax
-  hi def link CalCmd      Type
-  hi def link CalNavi     Search
-  hi def link CalSaturday Statement
-  hi def link CalSunday   Type
-  hi def link CalRuler    StatusLine
-  hi def link CalRulerNC  StatusLineNC
-  hi def link CalWeeknm   Comment
-  hi def link CalToday    Search
-  hi def link CalHeader   Special
-  hi def link CalMemo     PreProc
-  hi def link CalInfo     Identifier
+  hi def link HowmCalCmd      Type
+  hi def link HowmCalSaturday Statement
+  hi def link HowmCalSunday   Type
+  hi def link HowmCalRuler    StatusLine
+  hi def link HowmCalRulerNC  StatusLineNC
+  hi def link HowmCalToday    Search
+  hi def link HowmCalHeader   Constant
+  hi def link HowmCalMemo     PreProc
+  hi def link HowmCalInfo     Identifier
 endfunction
 
 if !exists('g:howm_calendar_wincmd')

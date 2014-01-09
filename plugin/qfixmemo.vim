@@ -361,20 +361,6 @@ endfunction
 endif
 
 function! s:VimEnter()
-  if !exists('g:calendar_action') || g:calendar_action == "<SID>CalendarDiary"
-    let g:calendar_action = "howm_calendar#CalendarDiary"
-  endif
-  if !exists('g:calendar_sign') || g:calendar_sign =~ '<SID>CalendarSign_\?' || g:calendar_sign == "CalendarSign_"
-    let g:calendar_sign   = "howm_calendar#CalendarSign"
-  endif
-  if g:qfixmemo_calendar
-    if g:calendar_action == 'vimwiki_diary#calendar_action'
-      let g:calendar_action = "howm_calendar#CalendarDiary"
-    endif
-    if g:calendar_sign == 'vimwiki_diary#calendar_sign'
-      let g:calendar_sign   = "howm_calendar#CalendarSign"
-    endif
-  endif
   call QFixMemoInit()
   call QFixMemoTitleRegxp()
   call QFixMemoVimEnter()
@@ -436,11 +422,7 @@ endfunction
 
 " カレンダーコマンドをオーバーライド
 if !exists('g:qfixmemo_calendar')
-  let g:qfixmemo_calendar = 1
-endif
-" calendar.vimのコマンドをqfixmemo-calendar.vimのハイライト表示に変更
-if !exists('g:calendar_howm_syntax')
-  let g:calendar_howm_syntax = 1
+  let g:qfixmemo_calendar = 0
 endif
 
 au VimEnter * call <SID>CalVimEnter()
@@ -448,9 +430,6 @@ function! s:CalVimEnter()
   if !exists(':Calendar') || g:qfixmemo_calendar
     command! -nargs=* Calendar  call howm_calendar#Calendar(0,<f-args>)
     command! -nargs=* CalendarH call howm_calendar#Calendar(1,<f-args>)
-  elseif g:calendar_howm_syntax
-    command! -nargs=* Calendar  call Calendar(0,<f-args>) | call howm_calendar#CalendarPost()
-    command! -nargs=* CalendarH call Calendar(1,<f-args>) | call howm_calendar#CalendarPost()
   endif
 endfunction
 

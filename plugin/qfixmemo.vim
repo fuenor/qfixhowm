@@ -424,12 +424,14 @@ endfunction
 if !exists('g:qfixmemo_calendar')
   let g:qfixmemo_calendar = 0
 endif
+command! -nargs=* HowmCalendar  call howm_calendar#Calendar(0, <f-args>)
+command! -nargs=* HowmCalendarH call howm_calendar#Calendar(1, <f-args>)
 
 au VimEnter * call <SID>CalVimEnter()
 function! s:CalVimEnter()
   if !exists(':Calendar') || g:qfixmemo_calendar
-    command! -nargs=* Calendar  call howm_calendar#Calendar(0,<f-args>)
-    command! -nargs=* CalendarH call howm_calendar#Calendar(1,<f-args>)
+    command! -nargs=* Calendar  call howm_calendar#Calendar(0, <f-args>)
+    command! -nargs=* CalendarH call howm_calendar#Calendar(1, <f-args>)
   endif
 endfunction
 

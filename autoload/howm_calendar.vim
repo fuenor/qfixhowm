@@ -133,12 +133,14 @@ endfunction
 if !exists('g:howm_calendar')
   let g:howm_calendar = 0
 endif
+command! -nargs=* HowmCalendar  call howm_calendar#Calendar(0,<f-args>)
+command! -nargs=* HowmCalendarH call howm_calendar#Calendar(1,<f-args>)
 
 au VimEnter * call <SID>VimEnter()
 function! s:VimEnter()
   if !exists(':Calendar') || g:howm_calendar
-    command! -nargs=* Calendar  call HowmCalendar(0,<f-args>)
-    command! -nargs=* CalendarH call HowmCalendar(1,<f-args>)
+    command! -nargs=* Calendar  call howm_calendar#Calendar(0,<f-args>)
+    command! -nargs=* CalendarH call howm_calendar#Calendar(1,<f-args>)
   endif
 endfunction
 
@@ -328,6 +330,8 @@ function! QFixMemoCalendar(dircmd, file, cnt, ...)
   nnoremap <silent> <buffer> <S-Left>  :<C-u>call <SID>CR('<.')<CR>
   nnoremap <silent> <buffer> w  :<C-u> call <SID>calmovecmd('')<CR>
   nnoremap <silent> <buffer> b  :<C-u> call <SID>calmovecmd('b')<CR>
+  nnoremap <silent> <buffer> h  :<C-u> call <SID>calmovecmd('b')<CR>
+  nnoremap <silent> <buffer> l  :<C-u> call <SID>calmovecmd('')<CR>
   let save_cursor = getpos('.')
   call cursor(1, 1)
   exe 'normal! z-'

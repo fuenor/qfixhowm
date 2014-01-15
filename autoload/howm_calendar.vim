@@ -768,7 +768,7 @@ function! s:syntax()
   hi def link HowmCalRuler    StatusLine
   hi def link HowmCalRulerNC  StatusLineNC
   hi def link HowmCalToday    Search
-  hi def link HowmCalHeader   Constant
+  hi def link HowmCalHeader   Comment
   hi def link HowmCalMemo     PreProc
   hi def link HowmCalInfo     Identifier
 endfunction

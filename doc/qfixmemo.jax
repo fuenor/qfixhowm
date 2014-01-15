@@ -46,7 +46,7 @@ CONTENTS                                                   *qfixmemo_contents*
     12.6.1 howm-chenv.vim                               |howm_chenv_vim|
     12.6.2 qfixmemo-chenv.vim                           |qfixmemo_chenv_vim|
   12.7 URIを開く                                        |qfixmemo_uri|
-  12.8 ロケーションリスト                               |qfixmemo_window|
+  12.8 QuickFix/ロケーションリスト                      |qfixmemo_window|
 13. HTML変換                                            |qfixmemo_html|
 14. ユーザー定義処理                                    |qfixmemo_userfunc|
 14. Appendix                                            |qfixmemo_appendix|
@@ -1455,20 +1455,50 @@ QFixMemoではURLや画像ファイル等のリンクを記述すると自動で
 詳しいことは|openuri_contents|を参照してください。
 
 ------------------------------------------------------------------------------
-12.8 ロケーションリスト                                 *qfixmemo_window*
+12.8 QuickFix/ロケーションリスト                                 *qfixmemo_window*
 
-Vimで作業中にmakeなどでQuickFixウィンドウを使用していると、QFixMemo/QFixGrepで
-はQuickFixウィンドウを使用したくない場面もあるかもしれません。
-makeの結果を見ながらソースをgrepして表示したい場合などです。
-そのような場合はQFixMemo/QFixGrep側をロケーションリストを使用して結果を表示す
-るように変更するという方法があります。
+QFixMemo/QFixGrepはデフォルト設定ではロケーションリストを使用するようになりま
+した。
+このためVimのコマンドモードからのウィンドウ再表示は :copen ではなく :lopen で
+行うことになります。
+ :QFixCopenで表示する場合は意識する必要はありません。
+
+デフォルトではgrepや他のプラグイン等でQuickFixウィンドウを開いてもプレビューや
+絞り込み等の拡張コマンド定義等は行いません。
+QuickFix/ロケーションリストのプレビュー処理等は以下のオプションで制御可能です。
+>
+  " Quickfix処理制御
+  " 0 : なにもしない
+  " 1 : QuickFix/ロケーションリストの両方で有効
+  " 2 : ロケーションリストのみ有効
+  " 3 : QFixMemo/QFixGrepコマンドで開いた場合のみ有効
+  let QFixWin_EnableMode = 2
+
+grepやQuickFixウィンドウを使用する他のプラグイン等でもプレビューや絞り込みを行
+いたい場合は 1 を指定してください。
+>
+  let QFixWin_EnableMode = 1
+
+QFixCopenでQuickFix/ロケーションリストを開いた場合は、QFixWin_EnableModeの設定
+にかかわらず各種拡張処理が有効になります。
+
+またQFixMemo/QFixGrepで使用するウィンドウは以下のオプションで制御可能です。
  >
-  " QFixWinでロケーションリストを使用する
+  " QFixMemo/QFixGrepで使用するウィンドウ指定
+  " 0 : QuickFixウィンドウを使用する
+  " 1 : ロケーションリストを使用する
   let QFix_UseLocationList = 1
+
+以前と同じ動作にしたい場合は以下のように設定してください。
+>
+  let QFixWin_EnableMode = 1
+  let QFix_UseLocationList = 0
 
 キーマップからも切替可能なので必要に応じて変更してみてください。
 
 <C-w>/        使用するウィンドウをQuickFix/ロケーションリストで切替
+
+(補足)
 
 QuickFixウィンドウとロケーションリストはどちらも機能的には同じものですが Vimと
 対応しているのが QuickFixウィンドウで、ウィンドウと対応しているのがロケーショ

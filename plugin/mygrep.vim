@@ -417,7 +417,7 @@ endfunction
 
 " ロケーションリスト使用
 if !exists('g:QFix_UseLocationList')
-  let g:QFix_UseLocationList = 0
+  let g:QFix_UseLocationList = 1
 endif
 
 function! QFixCmdCopy2QF()

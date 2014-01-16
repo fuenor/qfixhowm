@@ -122,14 +122,18 @@ silent! function QFixGrepMenubar(menu, leader)
   call s:addMenu(menucmd, 'Vimgrepadd(&V)'              , 'V',  ':<C-u>call <SID>QFGrep("Vimgrepadd")<CR>')
   call s:addMenu(menucmd, 'GrepBufferadd(&B)'           , 'B',  ':<C-u>BGrepadd<CR>')
   exe printf(sepcmd, 2)
+  let menucmd = 'amenu <silent> 41.333 '.a:menu.'.%s<Tab>'.'%s %s'
+  call s:addMenu(menucmd, 'OpenWindow(&W)'              , '<C-w>\.',  ':<C-u>QFixCopen<CR>')
+  exe printf(sepcmd, 3)
+  let menucmd = 'amenu <silent> 41.333 '.a:menu.'.%s<Tab>'.a:leader.'%s %s'
   call s:addMenu(menucmd, 'MultiEncoding(&G)'           , 'rm', ':<C-u>ToggleMultiEncodingGrep<CR>')
   call s:addMenu(menucmd, 'SetFileEncoding(&G)'         , 'rG', ':<C-u>call <SID>SetFileEncoding()<CR>')
   call s:addMenu(menucmd, 'CurrentDirMode(&D)'          , 'rD', ':<C-u>ToggleGrepCurrentDirMode<CR>')
   call s:addMenu(menucmd, 'RecursiveMode(&M)'           , 'rM', ':<C-u>ToggleGrepRecursiveMode<CR>')
-  exe printf(sepcmd, 3)
+  exe printf(sepcmd, 4)
   call s:addMenu(menucmd, 'Load\ Quickfix(&L)'          , 'k',  ':<C-u>MyGrepReadResult<CR>\|:call QFixCopen()<CR>')
   call s:addMenu(menucmd, 'Save\ Quickfix[Local]\ (&A)' , 'w',  ':<C-u>MyGrepWriteResult<CR>')
-  exe printf(sepcmd, 4)
+  exe printf(sepcmd, 5)
   call s:addMenu(menucmd, 'Help(&H)'                    , 'H',  ':<C-u>help '.g:QFixGrep_Help.'<CR>')
 endfunction
 

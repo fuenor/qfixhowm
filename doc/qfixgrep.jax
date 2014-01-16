@@ -67,6 +67,21 @@ Windowsは2.1以降(|qfixgrep_install_windows|)へ進んでください。
 コーディングが存在する場合(|qfixgrep_multiencoding|)に目を通しておいて下さい。
 
 ------------------------------------------------------------------------------
+QuickFixウィンドウのプレビューや絞り込み
+
+QFixGrepは「ロケーションリスト」を使用するので、デフォルトでは「QuickFixウィン
+ドウ」を開いてもプレビューや絞り込み等は行いません。
+QuickFixウィンドウでもプレビューや絞り込みを有効にしたい場合は以下を設定してください。
+>
+  " プレビューや絞り込みをQuickFix/ロケーションリストの両方で有効化(デフォルト:2)
+  let QFixWin_EnableMode = 1
+
+上記の設定を有効にすると、QuickFixウィンドウを使用するmakeや他のプラグイン等で
+もプレビューや絞込等が有効になります。
+最初はとりあえず有効にしておいて、他のプラグイン等との併用でなにか問題が起きた
+ら無効化するのをおすすめします。
+
+------------------------------------------------------------------------------
 2.1 Windowsの場合                               *qfixgrep_install_windows*
 
 Windowsの標準環境ではgrepが存在しないので代替として findstr (Windows2000以降)
@@ -270,6 +285,21 @@ Grepadd、 FGrepadd、RGrepadd、RFGrepadd を使用すると前回の結果を�
 >
   :Grepadd 追加検索 ./temp/*.txt
 
+結果表示は標準のgrepと違って、QuickFixウィンドウではなく、ロケーションリストで
+行われるため、ウィンドウの再表示はQFixCopenで行ってください。
+>
+  :QFixCopen ウィンドウ表示
+
+Vim標準のコマンドとしては:lopenが使えますが、:QFixCopenか<C-w>, <C-w>.のキーマ
+ップを使用することを推奨します。
+
+QFixGrepでもQuickFixウィンドウを使用したい場合は以下を設定してください。
+>
+  " QuickFixウィンドウを使用する
+  let QFix_UseLocationList = 0
+
+この場合は:copenでウィンドウを開くことになります。
+
 ==============================================================================
 5. QuickFix                                             *qfixgrep_quickfix*
 
@@ -359,7 +389,14 @@ QuickFixウィンドウ関係処理が必要ない場合は無効化すること
 ==============================================================================
 6. オプション                                           *qfixgrep_option*
 
-https://sites.google.com/site/fudist/Home/grep/qfixgrep-option
+QuickFix処理制御 >
+
+  " QuickFix処理制御
+  " 0 : なにもしない
+  " 1 : QuickFix/ロケーションリストの両方で有効
+  " 2 : ロケーションリストのみ有効
+  " 3 : QFixMemo/QFixGrepコマンドで開いた場合のみ有効
+  let QFixWin_EnableMode = 2
 
 QuickFixウィンドウ >
 
@@ -384,7 +421,7 @@ QuickFixウィンドウ >
   " QuickFixウィンドウの <S-CR> は分割ではなくタブで開くには 'tab'に設定する
   let QFix_Edit = ''
   " QuickFixウィンドウではなくロケーションリストを使用する
-  let QFix_UseLocationList = 0
+  let QFix_UseLocationList = 1
 
 プレビューウィンドウ >
 
@@ -452,7 +489,7 @@ grepオプション >
 
   " grep実行時にエラーメッセージが出たら表示
   let MyGrep_error = 0
-<
+
 ==============================================================================
 7. Appendix                                              *qfixgrep_appendix*
 

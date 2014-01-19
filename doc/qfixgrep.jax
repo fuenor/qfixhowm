@@ -58,7 +58,7 @@ android/iOSで使用する場合 >
   を追加してください。
   busyboxのgrepは日本語が扱えません。
   速度的に不満な場合はGNU grepを使用してください。
-  http://forum.xda-developers.com/showthread.php?t=1629521
+  https://sites.google.com/site/fudist/Home/qfixhowm/other-service/howm-android
 
 Windowsは2.1以降(|qfixgrep_install_windows|)へ進んでください。
 なおWindowsの場合はできるだけ外部grepを使用することを推奨します。

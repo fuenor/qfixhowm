@@ -151,7 +151,7 @@ android/iOS >
   を追加してください。
   busyboxのgrepは日本語が扱えません。
   速度的に不満な場合はGNU grepを使用してください。
-  http://forum.xda-developers.com/showthread.php?t=1629521
+  https://sites.google.com/site/fudist/Home/qfixhowm/other-service/howm-android
 
 NOTE:
 QFixHowm/QFixGrepは「ロケーションリスト」を使用するので、デフォルトでは
@@ -1570,18 +1570,27 @@ dirは基準ディレクトリで、qflistはQuickFixリスト(|getqflist|)と�
 
 また外部のプラグインなどからQFixMemoの処理結果を取得することも可能です。
 >
-  function! QFixListAltOpen(qflist, dir)
-    return a:qflist
-  endfunction
-
 前例同様に :let QFixListAltOpen = 1を設定してから<Leader>aにマップされている
 qfixmemo#ListCmd()を呼び出すと、エントリ一覧のQuickFixリストを取得することが
 できます。
+
+  関数定義
+ >
+  function! QFixListAltOpen(qflist, dir)
+    return a:qflist
+  endfunction
+<
+  呼び出し
 >
+  let QFixListAltOpen = 1
   let qflist = qfixmemo#ListCmd()
+  let QFixListAltOpen = 0
 
 ------------------------------------------------------------------------------
-QuickFix, QFixList, MRUで処理関数が違いますので気をつけてください。
+処理関数がQuickFix, QFixList, MRUで違いますので気をつける必要があります。
+<Leader>l等の表示がQuickFixで行われるコマンドはQuickFix、<Leader>a等の表示が
+バッファで行われるコマンドQFixList、MRUはMRUですので、以下の該当部分を参照して
+ください。
 
 QuickFix:
 >

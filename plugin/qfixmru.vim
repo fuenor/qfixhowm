@@ -811,6 +811,10 @@ function! s:WriteMru(mru, mrufile)
   let ostr = []
   silent! let ostr = readfile(mrufile)
   if mlist != ostr
+    let dir = fnamemodify(mrufile, ':p:h')
+    if (isdirectory(dir) == 0)
+      call mkdir(dir, 'p')
+    endif
     call writefile(mlist, mrufile)
   endif
 endfunction

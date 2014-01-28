@@ -131,6 +131,11 @@ pre {
 	_width: 95%; /* for IE6 */
 }
 
+code {
+	color: #086dac;
+	background-color: #ebf1f2;
+}
+
 /* List
 ---------------*/
 

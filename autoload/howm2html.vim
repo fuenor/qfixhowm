@@ -196,6 +196,10 @@ endif
 if !exists('HowmHtml_Bullet')
   let HowmHtml_Bullet = '■'
 endif
+" タイトルのアンカー記号
+if !exists('HowmHtml_BulletRegxp')
+  let HowmHtml_BulletRegxp = '^[.*=#]'
+endif
 " <p></p> で文章を囲まずbodyに直接書く
 if !exists('HowmHtml_br_mode')
   let HowmHtml_br_mode = 0
@@ -240,6 +244,9 @@ if !exists('g:HowmHtml_Title')
   let g:HowmHtml_Title = '='
   let g:HowmHtml_Title = exists('g:QFixHowm_Title') ? g:QFixHowm_Title : g:HowmHtml_Title
   let g:HowmHtml_Title = exists('g:qfixmemo_title') ? g:qfixmemo_title : g:HowmHtml_Title
+endif
+if !exists('g:HowmHtml_MarkdownTitle')
+  let g:HowmHtml_MarkdownTitle = '#'
 endif
 
 " if !exists('g:howm_fileencoding')
@@ -402,6 +409,10 @@ function! s:HowmStr2HTML(list, htmlname, anchor)
     endif
     if g:HowmHtml_ConvertLevel > 1
       let str = s:WikiLinkAndTag(str)
+      let str = substitute(str, '`\(.\{-}\)`','<code>\1</code>','g')
+      if str !~ '^\s*$'
+        let str = substitute(str, '^[*[:blank:]]\+$\|^[-[:blank:]]\+$','<hr>','')
+      endif
     endif
 
     let prevstr = str
@@ -425,7 +436,7 @@ function! s:HowmStr2HTML(list, htmlname, anchor)
         if str =~ '^===='
           " 続きを読む
           let [str, folding] = s:howmFolding(str, folding, a:anchor)
-        elseif str =~ '^[.*=]'
+        elseif str =~ g:HowmHtml_BulletRegxp
           " <h3>～<h6> .*= のアウトライン
           let [str, header, jump] = s:howmOutline(str, a:htmlname, a:anchor, header, jump)
         endif
@@ -451,8 +462,15 @@ function! s:HowmStr2HTML(list, htmlname, anchor)
           let prequote = 2
         elseif str =~ '^&gt;\(\s\|$\)'
           call add(html, '<blockquote><p>')
-          let str = str. brtag
+          let str = substitute(str, '^&gt;\s*', '', '')
+          let str = str
           let prequote = 3
+        elseif str =~ '^    \s*'
+          let class = '<code><pre>'
+          let preclose = '</pre></code>'
+          let str = substitute(str, '^    \s*', '', '')
+          let str = class.str
+          let prequote = 4
         endif
       elseif prequote == 1 && str =~ '^||&lt;$'
         let str = preclose
@@ -466,10 +484,14 @@ function! s:HowmStr2HTML(list, htmlname, anchor)
       elseif prequote == 3 && str !~ '^&gt;\(\s\|$\)'
         call add(html, '</p></blockquote>')
         let prequote = 0
+      elseif prequote == 4 && str !~ '^    \s*'
+        let str = preclose.str
+        let prequote = 0
       elseif prequote
         let str = ostr
+        let str = substitute(str, '^&gt;\s*\|    \s*', '', '')
         if prequote > 1
-          let str = str. brtag
+          let str = str
         endif
       endif
     endif
@@ -477,12 +499,14 @@ function! s:HowmStr2HTML(list, htmlname, anchor)
       let header = saved_header
       let folding = saved_folding
     endif
-    if ostr =~ '^[.*=]' && ostr !~ '^===='
+    if ostr =~ g:HowmHtml_BulletRegxp && ostr !~ '^===='
       let jump += 1
     endif
 
     " <p>タグでくくるか、<br />を付加
-    if list != 0 && str =~ '^\t'
+    if str == '<hr>'
+      " do nothing
+    elseif list != 0 && str =~ '^\t'
       let str = brtag.str
     elseif define != 0 && str =~ '^\t'
       if idx && html[-1] !~ '</dt><dd>$'
@@ -1851,19 +1875,19 @@ function! s:howmOutline(str, htmlname, anchor, header, jump)
   let header = a:header
   let jump = a:jump
 
-  let bullet = matchstr(str, '^[.*=]\+\s*')
+  let bullet = matchstr(str, g:HowmHtml_BulletRegxp.'\+\s*')
   if bullet == '' || (bullet =~ '^\.\+$' && bullet != str)
     return [str, header, jump]
   endif
-  let bullet = matchstr(bullet, '^[.*=]\+')
+  let bullet = matchstr(bullet, g:HowmHtml_BulletRegxp.'\+')
   let l = len(bullet) + 2 + s:Blogger
   let g:HowmHtml_Title = '='
   let g:HowmHtml_Title = exists('g:QFixHowm_Title') ? g:QFixHowm_Title : g:HowmHtml_Title
   let g:HowmHtml_Title = exists('g:qfixmemo_title') ? g:qfixmemo_title : g:HowmHtml_Title
-  if g:HowmHtml_Title == bullet[0]
+  if bullet[0] == g:HowmHtml_Title || bullet[0] == g:HowmHtml_MarkdownTitle
     let l -= 1
   endif
-  let str = substitute(str, '^[.*=]\+', '', '')
+  let str = substitute(str, g:HowmHtml_BulletRegxp.'\+', '', '')
   let l = l > 6 ? 6 : l
   let janchor = 'j'.a:anchor.jump
   if l >= g:HowmHtml_NoAnchorHeader

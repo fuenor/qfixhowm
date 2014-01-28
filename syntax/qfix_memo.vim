@@ -95,6 +95,16 @@ hi def link chapterNumber   PreProc
 hi def link chapterBullet   Type
 
 "----------
+" markdown style
+"----------
+syn region memoTitle start='^[#]\+' end='$' contains=titleBullet,titleCategory keepend
+syn match titleBullet contained '^\s*[#]\+'
+syn match codeQFixMemo display "^    \s*\zs.*\ze$"
+syn match codeQFixMemo display "`.\{-}`"
+
+hi def link codeQFixMemo  Comment
+
+"----------
 " howm2html.vim
 "----------
 syn match escapeTAG '^&&.*$'

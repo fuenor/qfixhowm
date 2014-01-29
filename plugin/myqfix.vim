@@ -320,7 +320,7 @@ function! s:QFixEnable(...)
     if !exists('b:qfixwin_buftype')
       call s:QFixSetBuftype()
     endif
-    if (b:qfixwin_buftype == 1) && (g:QFixWin_EnableMode == 2)
+    if (b:qfixwin_buftype == 1) && (g:QFixWin_EnableMode == 2) && (g:QFix_UseLocationList == 1)
       return 1
     endif
   endif

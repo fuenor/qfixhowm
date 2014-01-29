@@ -409,7 +409,6 @@ function! s:HowmStr2HTML(list, htmlname, anchor)
     endif
     if g:HowmHtml_ConvertLevel > 1
       let str = s:WikiLinkAndTag(str)
-      let str = substitute(str, '`\(.\{-}\)`','<code>\1</code>','g')
       if str !~ '^\s*$'
         let str = substitute(str, '^[*[:blank:]]\+$\|^[-[:blank:]]\+$','<hr>','')
       endif
@@ -463,14 +462,27 @@ function! s:HowmStr2HTML(list, htmlname, anchor)
         elseif str =~ '^&gt;\(\s\|$\)'
           call add(html, '<blockquote><p>')
           let str = substitute(str, '^&gt;\s*', '', '')
-          let str = str
+          let str = str. '<br />'
           let prequote = 3
         elseif str =~ '^    \s*'
           let class = '<code><pre>'
           let preclose = '</pre></code>'
-          let str = substitute(str, '^    \s*', '', '')
+          let str = substitute(str, '^    ', '', '')
           let str = class.str
           let prequote = 4
+        elseif str =~ '^```\s*[[:alnum:]]*$'
+          let class = substitute(str, '^```\s*', '', 'g')
+          if class == ''
+            let class = '<pre>'
+            let preclose = '</pre>'
+          else
+            let class = printf(g:HowmHtml_preFormat, class)
+            let preclose = '</pre></code>'
+          endif
+          let str = class
+          let prequote = 5
+        elseif str =~ '`\(.\{-}\)`'
+          let str = substitute(str, '`\(.\{-}\)`', '<code>\1</code>', 'g')
         endif
       elseif prequote == 1 && str =~ '^||&lt;$'
         let str = preclose
@@ -487,9 +499,16 @@ function! s:HowmStr2HTML(list, htmlname, anchor)
       elseif prequote == 4 && str !~ '^    \s*'
         let str = preclose.str
         let prequote = 0
+      elseif prequote == 5 && str =~ '^```$'
+        let str = preclose
+        let prequote = 0
       elseif prequote
         let str = ostr
-        let str = substitute(str, '^&gt;\s*\|    \s*', '', '')
+        if prequote == 4
+          let str = substitute(str, '^    ', '', '')
+        elseif prequote == 3
+          let str = substitute(str, '^&gt;\s*', '', '') . '<br />'
+        endif
         if prequote > 1
           let str = str
         endif
@@ -1320,16 +1339,21 @@ func! s:Convert2HTMLSnippet(...)
   call cursor(1,1)
   while 1
     let firstline = search('^>|.\+|$', 'cW')
+    let llreg = '^||<$'
+    if firstline == 0
+      let firstline = search('^```\s*[[:alnum:]]\+$', 'cW')
+      let llreg = '^```$'
+    endif
     if firstline == 0
       break
     endif
-    let lastline = search('^||<$', 'W')
-    if lastline == 0
-      break
-    endif
-    let type = substitute(getline(firstline), '^>|\||$', '', 'g')
+    let type = substitute(getline(firstline), '^>|\||$\|^```\s*', '', 'g')
     if type == ''
       continue
+    endif
+    let lastline = search(llreg, 'W')
+    if lastline == 0
+      break
     endif
     let class = substitute(getline(firstline), '^>|\||$', '', 'g')
     let class = printf(g:HowmHtml_preFormat, class)

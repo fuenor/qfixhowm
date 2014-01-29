@@ -67,10 +67,12 @@ hi def link txtHLine Label
 " hi link txtKeyword Define
 
 " hatena (superpreと引用)
+syn match hatenaBlockDelimiter '^>|.\{-}|$\|^||<$'
 syn region hatenaSuperPre   matchgroup=hatenaBlockDelimiter start=+^>|[^|]*|$+ end=+^||<$+
 syn region hatenaBlockQuote matchgroup=hatenaBlockDelimiter start=+^>>$+  end=+^<<$+ contains=ALL
+
 hi def link hatenaSuperPre       Comment
-hi def link hatenaBlockDelimiter Delimiter
+hi def link hatenaBlockDelimiter DiffText
 
 "----------
 " ワイルドカードチャプター
@@ -99,10 +101,14 @@ hi def link chapterBullet   Type
 "----------
 syn region memoTitle start='^[#]\+' end='$' contains=titleBullet,titleCategory keepend
 syn match titleBullet contained '^\s*[#]\+'
-syn match codeQFixMemo display "^    \s*\zs.*\ze$"
-syn match codeQFixMemo display "`.\{-}`"
+syn match qfixmemoCode display "^    \s*\zs.*\ze$"
+syn match qfixmemoCode display "`.\{-}`"
 
-hi def link codeQFixMemo  Comment
+" github Fenced code blocks
+syn match qfixmemoDelimiter '^```\s*[[:alnum:]]*$'
+
+hi def link qfixmemoCode      Comment
+hi def link qfixmemoDelimiter DiffText
 
 "----------
 " howm2html.vim

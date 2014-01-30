@@ -332,6 +332,8 @@ function! QFixMemoCalendar(dircmd, file, cnt, ...)
   nnoremap <silent> <buffer> b  :<C-u> call <SID>calmovecmd('b')<CR>
   nnoremap <silent> <buffer> h  :<C-u> call <SID>calmovecmd('b')<CR>
   nnoremap <silent> <buffer> l  :<C-u> call <SID>calmovecmd('')<CR>
+  nnoremap <silent> <buffer> <left>  :<C-u> call <SID>calmovecmd('b')<CR>
+  nnoremap <silent> <buffer> <right>  :<C-u> call <SID>calmovecmd('')<CR>
   let save_cursor = getpos('.')
   call cursor(1, 1)
   exe 'normal! z-'

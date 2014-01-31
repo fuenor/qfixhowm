@@ -1965,7 +1965,7 @@ if !exists('g:qfixmemo_submenu_winfixwidth')
 endif
 " サブメニュー自動保存を使用する
 if !exists('g:qfixmemo_submenu_autowrite')
-  let g:qfixmemo_submenu_autowrite = 1
+  let g:qfixmemo_submenu_autowrite = 0
 endif
 " サブメニューのシングルウィンドウモード
 if !exists('g:qfixmemo_submenu_single_mode')

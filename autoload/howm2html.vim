@@ -1008,8 +1008,7 @@ function! howm2html#Howm2html(output, ...)
 
   " ファイル指定ならバッファを開いて読込
   " if readmode == 1
-    silent! exec 'botright split '
-    silent! exec 'silent! e '.s:howmtempfile
+    silent! exec 'silent! split '.s:howmtempfile
     setlocal buftype=nofile
     setlocal noswapfile
     setlocal bufhidden=hide

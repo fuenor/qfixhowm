@@ -281,11 +281,25 @@ endif
 
 " タイトル検索用正規表現設定
 if !exists('*QFixMemoTitleRegxp')
+" MRUタイトルの正規表現リスト
+if !exists('g:QFixMRU_Title')
+  " let g:QFixMRU_Title = {'mkd' : '^#',  'wiki' : '^='}
+  let g:QFixMRU_Title = {}
+endif
+" MRUに登録しないファイル名(正規表現)
+if !exists('g:QFixMRU_IgnoreFile')
+  let g:QFixMRU_IgnoreFile = '/\.*$\|/pairlink/\|/__submenu'
+endif
+" MRUに登録しないタイトル(正規表現)
+if !exists('g:QFixMRU_IgnoreTitle')
+let g:QFixMRU_IgnoreTitle = '^\[\|\[:invisible'
+endif
+
 function QFixMemoTitleRegxp()
   let g:qfixmemo_ext = tolower(g:qfixmemo_ext)
   let l:qfixmemo_title = escape(g:qfixmemo_title, g:qfixmemo_escape)
   if !exists('g:QFixMRU_Title["'.g:qfixmemo_ext.'"]')
-    let g:QFixMRU_Title[g:qfixmemo_ext] = '^'.l:qfixmemo_title. '\([^'.g:qfixmemo_title[0].']\|$\)'
+    let g:QFixMRU_Title[g:qfixmemo_ext] = '^'.l:qfixmemo_title. '[^'.g:qfixmemo_title[0].']'
   endif
   " 使用するgrepに合わせて設定します
   if !exists('g:QFixMRU_Title["'.g:qfixmemo_ext.'_regxp"]')
@@ -303,6 +317,18 @@ function QFixMemoTitleRegxp()
   endif
 endfunction
 endif
+" MRU取得対象チェック
+" 0 : QFixMRU_Titleを利用しない(カレント行がタイトル行扱い)
+" 1 : QFixMRU_Titleを利用する
+function! QFixMRUGetPre(file)
+  let root = g:qfixmemo_dir
+  if exists('g:QFixMRU_RootDir')
+    let g:qfixmemo_dir = g:QFixMRU_RootDir
+  endif
+  let isQFixMemo = IsQFixMemo(fnamemodify(expand(a:file), ':p'))
+  let g:qfixmemo_dir = root
+  return isQFixMemo
+endfunction
 
 """"""""""""""""""""""""""""""
 " 起動時コマンドの基準時間

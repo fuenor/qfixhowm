@@ -1222,6 +1222,10 @@ function! qfixmemo#ListMru()
   if qfixmemo#Init()
     return
   endif
+  if !exists("g:loaded_QFixMRU") || g:loaded_QFixMRU == 0
+    redraw | echo 'QFixMemo : QFixMRU is not executable.'
+    return
+  endif
   if count
     let g:QFixMRU_Entries = count
   endif
@@ -2242,6 +2246,9 @@ function! QFixPreviewReadOpt(file)
 endfunction
 
 function! qfixmemo#MRUInit()
+  if !exists("g:loaded_QFixMRU") || g:loaded_QFixMRU == 0
+    return
+  endif
   if g:QFixMRU_state || g:QFixMRU_VimLeaveWrite
     return
   endif

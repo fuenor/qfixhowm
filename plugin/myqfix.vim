@@ -137,6 +137,10 @@ if !exists('g:QFix_PreviewExcludeLineRegxp')
   let g:QFix_PreviewExcludeLineRegxp = ''
   let g:QFix_PreviewExcludeLineRegxp = '^VimCrypt\~\d\{2}!'
 endif
+" ファイルサイズが大きいならプレビュー非表示
+if !exists('g:QFix_PreviewFileSize')
+  let g:QFix_PreviewFileSize = 1024*1024
+endif
 
 " プレビューする間隔
 " (この値でプレビューが有効か判定しているのでユニーク値を推奨)
@@ -221,6 +225,8 @@ endif
 " b:qfixwin_buftype = 0  |  Quickfix List
 " b:qfixwin_buftype = 1  |  Location List
 if !exists('g:QFixWin_QuickFixTitleReg')
+  " FIXME:真面目にやる場合はsrc/poから各言語の翻訳後の名前を拾ってくる
+  " 半分はquickfixの文字が含まれるのでまあいいか
   let g:QFixWin_QuickFixTitleReg = '\cQuickfix'
   " let g:QFixWin_QuickFixTitleReg = '\cLocation List\|場所リスト'
 endif
@@ -1470,17 +1476,31 @@ function! QFixPreviewOpen(file, line, ...)
     silent! call s:HighlightSearchWord(1)
   endif
   if bufloaded(file) "バッファが存在する場合
-    let glist = getbufline(file, 1,'$')
+    if filereadable(file) && getfsize(file) > g:QFix_PreviewFileSize
+      let glist = readfile(file, '', 1)
+      call add(glist, '--- large file ---')
+    else
+      let glist = getbufline(file, 1,'$')
+    endif
     call setline(1, glist)
   else
     let cmd = '-r '
     let file = substitute(file, '\\', '/', 'g')
     let cmd = cmd . QFixPreviewReadOpt(file)
     if filereadable(file)
+      if getfsize(file) > g:QFix_PreviewFileSize
+        let glist = readfile(file, '', 1)
+        call add(glist, '--- large file ---')
+        call setline(1, glist)
+        setlocal nomodifiable
+        silent! wincmd p
+        return
+      endif
       if g:QFix_PreviewExcludeLineRegxp != ''
         let glist = readfile(file, '', 1)
         if len(glist) == 0 || glist[0] =~ g:QFix_PreviewExcludeLineRegxp
           call setline(1, glist)
+          call setline(2, ['--- This file is encrypted ---'])
           setlocal nomodifiable
           silent! wincmd p
           return

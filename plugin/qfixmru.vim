@@ -33,8 +33,8 @@ if exists("g:loaded_QFixMRU") && g:loaded_QFixMRU && !exists('g:fudist')
   finish
 endif
 let g:QFixMRU_version = s:version
-let g:loaded_QFixMRU = 1
 if v:version < 700 || &cp || !has('quickfix')
+  let g:loaded_QFixMRU = 0
   finish
 endif
 let s:debug = exists('g:fudist') ? g:fudist : 0
@@ -335,6 +335,13 @@ endif
 " MRU表示前処理
 silent! function QFixMRUOpenPre(sq, entries, dir)
 endfunction
+" MRU取得対象チェック
+" 0の場合はカレント行がそのままタイトルになる。
+" 0 : QFixMRU_Titleを利用しない
+" 1 : QFixMRU_Titleを利用する
+silent! function QFixMRUGetPre(file)
+  return 1
+endfunction
 
 " MRU表示処理(Quickfixウィンドウを開く)
 let s:prevqf = []
@@ -538,6 +545,14 @@ function! QFixMRUGet(mode, mfile, lnum, ...)
     else
       call s:read(mfile)
     endif
+  endif
+
+  if QFixMRUGetPre(mfile) == 0
+    let text = getline(lnum)
+    if mfile != '%'
+      silent! bd
+    endif
+    return [text, -1, -1]
   endif
 
   let save_cursor = getpos('.')
@@ -904,3 +919,4 @@ function! s:escape(str, chars)
   return escape(a:str, a:chars.((has('win32')|| has('win64')) ? '#%&' : ''))
 endfunction
 
+let g:loaded_QFixMRU = 1

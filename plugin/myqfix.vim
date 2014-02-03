@@ -225,10 +225,8 @@ endif
 " b:qfixwin_buftype = 0  |  Quickfix List
 " b:qfixwin_buftype = 1  |  Location List
 if !exists('g:QFixWin_QuickFixTitleReg')
-  " FIXME:真面目にやる場合はsrc/poから各言語の翻訳後の名前を拾ってくる
-  " 半分はquickfixの文字が含まれるのでまあいいか
-  let g:QFixWin_QuickFixTitleReg = '\cQuickfix'
-  " let g:QFixWin_QuickFixTitleReg = '\cLocation List\|場所リスト'
+  " FIXME:QuickFix/場所リスト判定用 (未確認)
+  let g:QFixWin_QuickFixTitleReg = '\cQuickfix\|\[Listo de rapidriparoj\]\|\[Lista de cambios rápidos\]\|\[Listo de rapidriparoj\]\|\[Liosta Ceartúchán Tapa\]\|\[Список быстрых исправлений\]\|\[Список виправлень\]'
 endif
 
 let g:QFix_Win = -1
@@ -326,7 +324,7 @@ function! s:QFixEnable(...)
     if !exists('b:qfixwin_buftype')
       call s:QFixSetBuftype()
     endif
-    if (b:qfixwin_buftype == 1) && (g:QFixWin_EnableMode == 2) && (g:QFix_UseLocationList == 1)
+    if (b:qfixwin_buftype == 1) && (g:QFixWin_EnableMode == 2)
       return 1
     endif
   endif

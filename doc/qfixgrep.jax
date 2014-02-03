@@ -78,6 +78,9 @@ QuickFixウィンドウでもプレビューや絞り込みを有効にしたい
   " プレビューや絞り込みをQuickFix/ロケーションリストの両方で有効化(デフォルト:2)
   let QFixWin_EnableMode = 1
 
+  " QFixHowm/QFixGrepでロケーションリストを使用する/しない
+  let QFix_UseLocationList = 1
+
 上記の設定を有効にすると、QuickFixウィンドウを使用するmakeや他のプラグイン等で
 もプレビューや絞込等が有効になります。
 最初はとりあえず有効にしておいて、他のプラグイン等との併用でなにか問題が起きた
@@ -86,8 +89,11 @@ QuickFixウィンドウでもプレビューや絞り込みを有効にしたい
 なお挙動面でQuicFixとロケーションリストでは異なる場合があります。
 QFixGrepでQuickFixを使用したい場合は以下を設定します。
 >
-  " QFixHowm/QFixGrepでロケーションリストを使用しない
-  let QFix_UseLocationList = 0
+  " プレビューや絞り込みをQuickFix/ロケーションリストの両方で有効化(デフォルト:2)
+  let QFixWin_EnableMode = 1
+
+  " QFixGrepでロケーションリストを使用する/しない
+  let MyGrep_UseLocationList = 0
 
 ------------------------------------------------------------------------------
 2.1 Windowsの場合                               *qfixgrep_install_windows*

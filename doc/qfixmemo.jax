@@ -1590,8 +1590,16 @@ QFixHowm/QFixGrepで指定するウィンドウ指定
   " 1 : QuickFix/ロケーションリストの両方で有効
   let QFixWin_EnableMode = 1
 
-最初はとりあえず有効にしておいて、何か問題があったらデフォルトに戻すことをおす
-すめします。
+  " QFixHowm/QFixGrepでロケーションリストを使用する/しない
+  let QFix_UseLocationList = 1
+
+最初はとりあえず有効にしておいて、何か問題があったらデフォルトに戻すか変更を行
+うことをおすすめします。
+>
+また以下を追加設定するとQFixGrepの検索とQFixMemoのMRU等が同時に表示可能です。
+>
+  " QFixGrepでロケーションリストを使用する/しない
+  let MyGrep_UseLocationList = 0
 
 ------------------------------------------------------------------------------
 12.8.2 ロケーションリスト
@@ -1620,6 +1628,11 @@ QFixHowm/QFixGrepでもQuickFixウィンドウを使用するには以下のよ�
   " プレビューや絞り込みの拡張機能有効化オプション
   " 3 : QFixHowm/QFixGrepのみ有効
   let QFixWin_EnableMode = 3
+
+QFixGrepのみの制御は次のように行えます。
+>
+  " QFixGrepでロケーションリストを使用する/しない
+  let MyGrep_UseLocationList = 0
 
 ==============================================================================
 13. HTML変換                                            *qfixmemo_html*

@@ -264,6 +264,7 @@ function! QFixGrep(cmd, pattern, path, filepattern, fenc, ...)
   else
     call qfixlist#copen(s:prevResult, path)
   endif
+  let g:QFix_UseLocationList = s:useLocationList
 endfunction
 
 function! s:QFGrep(cmd)
@@ -345,8 +346,10 @@ function! s:QFixCmdGrep(cmd, arg)
   else
     call qfixlist#copen(s:prevResult, path)
   endif
+  let g:QFix_UseLocationList = s:useLocationList
 endfunction
 
+let s:useLocationList=0
 function! s:setenv(cmd)
   let cmd = a:cmd
   let g:MyGrep_Regexp     = 1
@@ -361,6 +364,10 @@ function! s:setenv(cmd)
   endif
   if cmd =~ '\cvimgrep'
     let g:MyGrep_UseVimgrep = 1
+  endif
+  let s:useLocationList = g:QFix_UseLocationList
+  if exists('g:MyGrep_UselocationList')
+    let g:QFix_UseLocationList = g:MyGrep_UselocationList
   endif
   return cmd =~ '\cadd'
 endfunction

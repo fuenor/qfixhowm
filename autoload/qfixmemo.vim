@@ -2080,21 +2080,21 @@ function! s:OpenQFixSubWin(file, id)
         if g:qfixmemo_submenu_autowrite
           exe 'au BufWinLeave,VimLeave '.fnamemodify(file, ':t').' call <SID>SubMenuBufAutoWrite()'
         endif
+        exe 'au BufWinLeave '.fnamemodify(file, ':t').' silent! update'
       augroup END
   else
     let wcmd = '+buffer' . bufnum
   endif
   let opt = ''
-  " let opt = ' ++enc='.g:qfixmemo_fileencoding .' ++ff='.g:qfixmemo_fileformat
+  let opt = ' ++enc='.g:qfixmemo_fileencoding .' ++ff='.g:qfixmemo_fileformat
+  " exe 'set fenc='.g:qfixmemo_fileencoding
+  " exe 'set ff='.g:qfixmemo_fileformat
   exe 'silent! ' . windir . ' ' . (winsize == 0 ? '' : string(winsize)) ' split ' .opt. ' ' . wcmd
-  exe 'set fenc='.g:qfixmemo_fileencoding
-  exe 'set ff='.g:qfixmemo_fileformat
 
   if g:qfixmemo_submenu_autowrite
     setlocal buftype=nowrite
   endif
   setlocal bufhidden=hide
-  setlocal noswapfile
   setlocal foldcolumn=0
   setlocal nobuflisted
   setlocal nolist

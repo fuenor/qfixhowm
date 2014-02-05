@@ -115,6 +115,9 @@ silent! function QFixGrepMenubar(menu, leader)
   call s:addMenu(menucmd, 'Vimgrep(&V)'                 , 'v',  ':<C-u>call <SID>QFGrep("Vimgrep")<CR>')
   call s:addMenu(menucmd, 'GrepBuffer(&B)'              , 'b',  ':<C-u>BGrep<CR>')
   exe printf(sepcmd, 1)
+
+  let submenu = '.GrepAdd\ (&\.)'
+  let menucmd = 'amenu <silent> 41.333 '.a:menu.submenu.'.%s<Tab>'.a:leader.'%s %s'
   call s:addMenu(menucmd, 'Grepadd(&G)'                 , 'E',  ':<C-u>call <SID>QFGrep("Grepadd")<CR>')
   call s:addMenu(menucmd, 'FGrepadd(&F)'                , 'F',  ':<C-u>call <SID>QFGrep("FGrepadd")<CR>')
   call s:addMenu(menucmd, 'RGrepadd(&R)'                , 'rE', ':<C-u>call <SID>QFGrep("RGrepadd")<CR>')

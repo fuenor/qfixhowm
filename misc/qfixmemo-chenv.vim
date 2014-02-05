@@ -177,6 +177,10 @@ function! QFixMemoChEnv(dir, fname, title)
 
   " スクリプト作成
   let file = expand(g:qfixmemo_chenv_file)
+  let dir = fnamemodify(file, ':p:h')
+  if (isdirectory(dir) == 0)
+    silent! call mkdir(dir, 'p')
+  endif
   let str = []
   let cmd = 'silent call QFixMemoChEnv('."'".a:dir."', '".a:fname."', '".a:title."')"
   call add(str, cmd)

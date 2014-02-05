@@ -199,6 +199,10 @@ function! HowmChEnv(dir, fname, title)
 
   " スクリプト作成
   let file = expand(g:QFixHowmChEnvFile)
+  let dir = fnamemodify(file, ':p:h')
+  if (isdirectory(dir) == 0)
+    silent! call mkdir(dir, 'p')
+  endif
   let str = []
   let cmd = 'silent call HowmChEnv('."'".a:dir."', '".a:fname."', '".a:title."')"
   cal add(str, cmd)

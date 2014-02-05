@@ -1656,7 +1656,7 @@ peachpuff.css(misc/css/peachpuff.css)をHTML出力先へコピーして使用し
 howm形式だけではなく、外部コマンドを使用してMarkdown等のHTML変換も行えます。
 
 詳しい解説は
-doc/howm2html.zipを解凍してできたhowm2html.htmlか、以下を参照してください。
+misc/howm2html.zipを解凍してできたhowm2html.htmlか、以下を参照してください。
 https://sites.google.com/site/fudist/Home/qfixhowm/commands/user-command
 
 ==============================================================================
@@ -1774,7 +1774,7 @@ datelib.vim
 
 howm2html.vim
 現在のバッファをHTML変換するプラグインです。
-howm2html.vimで実際に変換したHTMLのヘルプが doc/howm2html.zipとして同梱されて
+howm2html.vimで実際に変換したHTMLのヘルプが misc/howm2html.zipとして同梱されて
 います。
 
 qfixmru.vim

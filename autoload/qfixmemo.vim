@@ -491,38 +491,29 @@ if !exists('*QFixMRUMoveCursor')
 function! QFixMRUMoveCursor(pos, ...)
 endfunction
 endif
+
+function! s:bufkeycmd(key, cmd, ...)
+  let mode = a:0 ? a:1 : 'n'
+  exe 'silent! '.mode.'noremap <silent> <buffer> '.g:maplocalleader.a:key.' '.a:cmd
+endfunction
+
 function! s:QFixMemoLocalKeymap()
   if exists('*QFixMemoLocalKeymap')
     call QFixMemoLocalKeymap()
     return
   endif
-  nnoremap <silent> <buffer> <LocalLeader>P :QFixMRUMoveCursor top<CR>:<C-u>call qfixmemo#Template('top')<CR>
-  nnoremap <silent> <buffer> <LocalLeader>p :QFixMRUMoveCursor prev<CR>:<C-u>call qfixmemo#Template('prev')<CR>
-  nnoremap <silent> <buffer> <LocalLeader>n :QFixMRUMoveCursor next<CR>:<C-u>call qfixmemo#Template('next')<CR>
-  nnoremap <silent> <buffer> <LocalLeader>N :QFixMRUMoveCursor bottom<CR>:<C-u>call qfixmemo#Template('bottom')<CR>
-
-  nnoremap <silent> <buffer> <LocalLeader>x :<C-u>call qfixmemo#DeleteEntry()<CR>
-  nnoremap <silent> <buffer> <LocalLeader>X :<C-u>call qfixmemo#DeleteEntry('Move')<CR>
-  nnoremap <silent> <buffer> <LocalLeader>W :<C-u>call qfixmemo#DivideEntry()<CR>
-  vnoremap <silent> <buffer> <LocalLeader>W :call qfixmemo#DivideEntry()<CR>
-
-  nnoremap <silent> <buffer> <LocalLeader>S  :<C-u>call qfixmemo#UpdateTime(1)<CR>
-  nnoremap <silent> <buffer> <LocalLeader>rs :<C-u>call qfixmemo#SortEntry('Normal')<CR>
-  nnoremap <silent> <buffer> <LocalLeader>rS :<C-u>call qfixmemo#SortEntry('Reverse')<CR>
-
-  nnoremap <silent> <buffer> <LocalLeader>f :<C-u>call qfixmemo#FGrep()<CR>
-  nnoremap <silent> <buffer> <LocalLeader>e :<C-u>call qfixmemo#Grep()<CR>
-
-  nnoremap <silent> <buffer> <LocalLeader>w :<C-u>call qfixmemo#ForceWrite()<CR>
-
-  nnoremap <silent> <buffer> <LocalLeader>rn :<C-u>call qfixmemo#Rename()<CR>
-
-  nnoremap <silent> <buffer> <CR> :call QFixMemoUserModeCR()<CR>
-
+  for key in keys(g:qfixmemo_keymap_local)
+    call s:bufkeycmd(key, ':'.g:qfixmemo_keymap_local[key].'<CR>')
+  endfor
+  for key in keys(g:qfixmemo_keymap_local_v)
+    call s:bufkeycmd(key, ':'.g:qfixmemo_keymap_local_v[key].'<CR>', 'v')
+  endfor
   if g:qfixmemo_use_howm_schedule
-    nnoremap <silent> <buffer> <LocalLeader>z :<C-u>call CnvWildcardChapter()<CR>
-    vnoremap <silent> <buffer> <LocalLeader>z :<C-u>call CnvWildcardChapter()<CR>
+    for key in keys(g:qfixmemo_keymap_local_wc)
+      call s:bufkeycmd(key, ':'.g:qfixmemo_keymap_local_wc[key].'<CR>', '')
+    endfor
   endif
+  nnoremap <silent> <buffer> <CR> :call QFixMemoUserModeCR()<CR>
 endfunction
 
 " フォールディングレベル計算
@@ -1598,6 +1589,9 @@ function! qfixmemo#Calendar(...)
     return
   endif
   silent! call howm_calendar#init()
+  if count
+    let g:qfixmemo_calendar_count = count
+  endif
   call QFixMemoCalendar(g:qfixmemo_calendar_wincmd, '__Calendar__', g:qfixmemo_calendar_count)
 endfunction
 

@@ -25,6 +25,8 @@ if v:version < 700 || &cp
   finish
 endif
 let s:debug = exists('g:fudist') ? g:fudist : 0
+let s:saved_cpo = &cpo
+set cpo&vim
 
 " g:qfixmemo_prescriptで指定されたスクリプトを読み込み
 if exists('g:qfixmemo_prescript') && filereadable(g:qfixmemo_prescript)
@@ -68,11 +70,140 @@ if !exists('g:qfixmemo_help')
   let g:qfixmemo_help = 'qfixmemo_help'
 endif
 
+" コマンドラインコマンド
+" コマンドは:QFixMemo [cmd]でも実行可能です。
+" cmdにはキーマップを指定します。
+" :QFixMemo c  " 新規作成
+command! -nargs=1 -count QFixMemo exe <SID>qfixmemo_command(<q-args>)
+command! -nargs=1 -count QFixHowm exe <SID>qfixmemo_command(<q-args>)
+
 " howm2htmlユーザーコマンド
 command! -bang -nargs=* -range=% Howm2html call howm2html#Howm2html(<bang>0, <f-args>)
 command! -bang -nargs=* Jump2html          call howm2html#Jump2html(<bang>0, <f-args>)
 command! -nargs=* HowmHtmlConvFiles        call howm2html#HowmHtmlConvFiles('%', <q-args>)
 command! -nargs=* -bang HowmHtmlUpdate     call howm2html#HowmHtmlConvFiles('%', <q-args>, '<bang>')
+
+if !exists('g:qfixmemo_keymap')
+  let g:qfixmemo_keymap = {
+    \ 'C'       : 'call qfixmemo#EditInput()',
+    \ 'c'       : 'call qfixmemo#EditNew()',
+    \ 'u'       : 'call qfixmemo#Quickmemo()',
+    \ 'U'       : 'call qfixmemo#Quickmemo(0)',
+    \ '<Space>' : 'call qfixmemo#EditDiary(g:qfixmemo_diary)',
+    \ 'j'       : 'call qfixmemo#PairFile("%")',
+    \ 'i'       : 'call qfixmemo#SubMenu()',
+    \ 'I'       : 'call qfixmemo#SubMenu(0)',
+    \ 'm'       : 'call qfixmemo#ListMru()',
+    \ 'l'       : 'call qfixmemo#ListRecent()',
+    \ 'L'       : 'call qfixmemo#ListRecentTimeStamp()',
+    \ 'a'       : 'call qfixmemo#ListCmd()',
+    \ 'ra'      : 'call qfixmemo#ListCmd("nocache")',
+    \ 'A'       : 'call qfixmemo#ListFile(g:qfixmemo_diary)',
+    \ 'rA'      : 'call qfixmemo#Glob(g:qfixmemo_dir, "**/*", "open")',
+    \ 'rN'      : 'call qfixmemo#ListRenameFile(g:qfixmemo_filename)',
+    \ 'rr'      : 'call qfixmemo#RandomWalk(g:qfixmemo_random_file)',
+    \ 'rR'      : 'call qfixmemo#RebuildRandomCache(g:qfixmemo_random_file)',
+    \ 'rk'      : 'call qfixmemo#RebuildKeyword()',
+    \ 's'       : 'call qfixmemo#FGrep()',
+    \ 'g'       : 'call qfixmemo#Grep()',
+    \ 'q'       : 'call qfixmemo#Calendar()',
+    \ 'Q'       : 'call qfixmemo#Calendar("LR")',
+    \ 'o'       : 'call QFixMemoOutline()',
+    \ 'd'       : 'call qfixmemo#InsertDate("Date")',
+    \ 'T'       : 'call qfixmemo#InsertDate("Time")'
+    \ }
+endif
+
+if !exists('g:qfixmemo_keymap_schedule')
+  let g:qfixmemo_keymap_schedule = {
+  \ 't'     : 'call qfixmemo#ListReminderCache("todo")',
+  \ 'rt'    : 'call qfixmemo#ListReminder("todo")',
+  \ 'y'     : 'call qfixmemo#ListReminderCache("schedule")',
+  \ '<Tab>' : 'call qfixmemo#ListReminderCache("schedule")',
+  \ 'ry'    : 'call qfixmemo#ListReminder("schedule")',
+  \ 'rd'    : 'call qfixmemo#GenerateRepeatDate()',
+  \ ','     : 'call qfixmemo#OpenMenu("cache")',
+  \ 'r,'    : 'call qfixmemo#OpenMenu()',
+  \ }
+endif
+
+if !exists('g:qfixmemo_keymap_html')
+  let g:qfixmemo_keymap_html = {
+  \ 'hi'    : 'Howm2html!',
+  \ 'hr'    : 'Howm2html',
+  \ 'hI'    : 'Howm2html! %',
+  \ 'hR'    : 'Howm2html %',
+  \ 'hj'    : 'Jump2html!',
+  \ 'hJ'    : 'Jump2html!',
+  \ }
+endif
+
+if !exists('g:qfixmemo_keymap_local')
+  let g:qfixmemo_keymap_local = {
+    \ 'P'  : 'QFixMRUMoveCursor top<CR>:<C-u>call qfixmemo#Template("top")',
+    \ 'p'  : 'QFixMRUMoveCursor prev<CR>:<C-u>call qfixmemo#Template("prev")',
+    \ 'n'  : 'QFixMRUMoveCursor next<CR>:<C-u>call qfixmemo#Template("next")',
+    \ 'N'  : 'QFixMRUMoveCursor bottom<CR>:<C-u>call qfixmemo#Template("bottom")',
+    \ 'x'  : '<C-u>call qfixmemo#DeleteEntry()',
+    \ 'X'  : '<C-u>call qfixmemo#DeleteEntry("Move")',
+    \ 'W'  : '<C-u>call qfixmemo#DivideEntry()',
+    \ 'S'  : '<C-u>call qfixmemo#UpdateTime(1)',
+    \ 'rs' : '<C-u>call qfixmemo#SortEntry("Normal")',
+    \ 'rS' : '<C-u>call qfixmemo#SortEntry("Reverse")',
+    \ 'f'  : '<C-u>call qfixmemo#FGrep()',
+    \ 'e'  : '<C-u>call qfixmemo#Grep()',
+    \ 'w'  : '<C-u>call qfixmemo#ForceWrite()',
+    \ 'rn' : '<C-u>call qfixmemo#Rename()'
+  \ }
+endif
+if !exists('g:qfixmemo_keymap_local_v')
+  let g:qfixmemo_keymap_local_v = {
+    \ 'W'  : 'call qfixmemo#DivideEntry()',
+  \ }
+endif
+if !exists('g:qfixmemo_keymap_local_wc')
+  let g:qfixmemo_keymap_local_wc = {
+    \ 'z'  : 'call qfixmemo#DivideEntry()',
+  \ }
+endif
+
+if !exists('g:qfixmemo_keymap_menu_local')
+  let g:qfixmemo_keymap_menu_local = {
+    \ 'o'  : 'call QFixMemoOutline()',
+    \ 'P'  : 'call qfixmemo#Template("top")',
+    \ 'p'  : 'call qfixmemo#Template("prev")',
+    \ 'n'  : 'call qfixmemo#Template("next")',
+    \ 'N'  : 'call qfixmemo#Template("bottom")',
+    \ 'S'  : 'call qfixmemo#UpdateTime(1)',
+    \ 'rs' : 'call qfixmemo#SortEntry("Normal")',
+    \ 'rS' : 'call qfixmemo#SortEntry("Reverse")',
+    \ 'x'  : 'call qfixmemo#DeleteEntry()',
+    \ 'X'  : 'call qfixmemo#DeleteEntry("Move")',
+    \ 'W'  : 'call qfixmemo#DivideEntry()',
+    \ }
+endif
+
+function! s:qfixmemo_command(cmd)
+  let qfcmd = ''
+  let cmd = a:cmd
+  if cmd == 'H'
+    return 'help '.g:qfixmemo_help
+  endif
+
+  let cmd = cmd =~ '\cspace' ? '<Space>' : cmd
+  let cmd = cmd =~ '\ctab' ? '<Tab>' : cmd
+
+  if exists('g:qfixmemo_keymap[cmd]')
+    let qfcmd = g:qfixmemo_keymap[cmd]
+  elseif g:qfixmemo_use_howm_schedule && exists('g:qfixmemo_keymap_schedule[cmd]')
+    let qfcmd = g:qfixmemo_keymap_schedule[cmd]
+  elseif g:qfixmemo_use_howm2html && exists('g:qfixmemo_keymap_html[cmd]')
+    let qfcmd = g:qfixmemo_keymap_html[cmd]
+  elseif exists('g:qfixmemo_keymap_menu_local[cmd]')
+    let qfcmd = g:qfixmemo_keymap_menu_local[cmd]
+  endif
+  return qfcmd
+endfunction
 
 " デフォルトキーマップ
 function! s:QFixMemoKeymap()
@@ -81,156 +212,124 @@ function! s:QFixMemoKeymap()
     return
   endif
   let leader = g:qfixmemo_mapleader
+  exe 'silent! nnoremap <silent> <unique> '.leader.' <Nop>'
 
-  call s:qfkeycmd(leader, '', '<Nop>')
-
-  call s:qfkeycmd(leader, 'C'       , ':<C-u>call qfixmemo#EditInput()<CR>')
-  call s:qfkeycmd(leader, 'c'       , ':<C-u>call qfixmemo#EditNew()<CR>')
-  call s:qfkeycmd(leader, 'u'       , ':<C-u>call qfixmemo#Quickmemo()<CR>')
-  call s:qfkeycmd(leader, 'U'       , ':<C-u>call qfixmemo#Quickmemo(0)<CR>')
-  call s:qfkeycmd(leader, '<Space>' , ':<C-u>call qfixmemo#EditDiary(g:qfixmemo_diary)<CR>')
-  call s:qfkeycmd(leader, 'j'       , ':<C-u>call qfixmemo#PairFile("%")<CR>')
-  call s:qfkeycmd(leader, 'i'       , ':<C-u>call qfixmemo#SubMenu()<CR>')
-  call s:qfkeycmd(leader, 'I'       , ':<C-u>call qfixmemo#SubMenu(0)<CR>')
-
-  call s:qfkeycmd(leader, 'm'       , ':<C-u>call qfixmemo#ListMru()<CR>')
-  call s:qfkeycmd(leader, 'l'       , ':<C-u>call qfixmemo#ListRecent()<CR>')
-  call s:qfkeycmd(leader, 'L'       , ':<C-u>call qfixmemo#ListRecentTimeStamp()<CR>')
-  call s:qfkeycmd(leader, 'a'       , ':<C-u>call qfixmemo#ListCmd()<CR>')
-  call s:qfkeycmd(leader, 'ra'      , ':<C-u>call qfixmemo#ListCmd("nocache")<CR>')
-  call s:qfkeycmd(leader, 'A'       , ':<C-u>call qfixmemo#ListFile(g:qfixmemo_diary)<CR>')
-  call s:qfkeycmd(leader, 'rA'      , ':<C-u>call qfixmemo#Glob(g:qfixmemo_dir, "**/*", "open")<CR>')
-  call s:qfkeycmd(leader, 'rN'      , ':<C-u>call qfixmemo#ListRenameFile(g:qfixmemo_filename)<CR>')
-
-  call s:qfkeycmd(leader, 'rr'      , ':<C-u>call qfixmemo#RandomWalk(g:qfixmemo_random_file)<CR>')
-  call s:qfkeycmd(leader, 'rR'      , ':<C-u>call qfixmemo#RebuildRandomCache(g:qfixmemo_random_file)<CR>')
-  call s:qfkeycmd(leader, 'rk'      , ':<C-u>call qfixmemo#RebuildKeyword()<CR>')
-
-  call s:qfkeycmd(leader, 's'       , ':<C-u>call qfixmemo#FGrep()<CR>')
-  call s:qfkeycmd(leader, 'g'       , ':<C-u>call qfixmemo#Grep()<CR>')
-
-  call s:qfkeycmd(leader, 'q'       , ':<C-u>call qfixmemo#Calendar()<CR>')
-  call s:qfkeycmd(leader, 'Q'       , ':<C-u>call qfixmemo#Calendar("LR")<CR>')
-  call s:qfkeycmd(leader, 'o'       , ':<C-u>call QFixMemoOutline()<CR>')
-
-  call s:qfkeycmd(leader, 'd'       , ':<C-u>call qfixmemo#InsertDate("Date")<CR>')
-  call s:qfkeycmd(leader, 'T'       , ':<C-u>call qfixmemo#InsertDate("Time")<CR>')
+  for key in keys(g:qfixmemo_keymap)
+    call s:qfkeycmd(leader, key, ':<C-u>'.g:qfixmemo_keymap[key].'<CR>')
+  endfor
 
   if g:qfixmemo_use_howm_schedule
     let g:qfixmemo_howm_schedule_key = 1
-    call s:qfkeycmd(leader, 't'     , ':<C-u>call qfixmemo#ListReminderCache("todo")<CR>')
-    call s:qfkeycmd(leader, 'rt'    , ':<C-u>call qfixmemo#ListReminder("todo")<CR>')
-    call s:qfkeycmd(leader, 'y'     , ':<C-u>call qfixmemo#ListReminderCache("schedule")<CR>')
-    call s:qfkeycmd(leader, '<Tab>' , ':<C-u>call qfixmemo#ListReminderCache("schedule")<CR>')
-    call s:qfkeycmd(leader, 'ry'    , ':<C-u>call qfixmemo#ListReminder("schedule")<CR>')
-    call s:qfkeycmd(leader, 'rd'    , ':<C-u>call qfixmemo#GenerateRepeatDate()<CR>')
-    call s:qfkeycmd(leader, ','     , ':<C-u>call qfixmemo#OpenMenu("cache")<CR>')
-    call s:qfkeycmd(leader, 'r,'    , ':<C-u>call qfixmemo#OpenMenu()<CR>')
+    for key in keys(g:qfixmemo_keymap_schedule)
+      call s:qfkeycmd(leader, key, ':<C-u>'.g:qfixmemo_keymap_schedule[key].'<CR>')
+    endfor
   endif
 
   if g:qfixmemo_use_howm2html
-    call s:qfkeycmd(leader, 'hi'    , ':Howm2html!<CR>')
-    call s:qfkeycmd(leader, 'hr'    , ':Howm2html<CR>')
-    call s:qfkeycmd(leader, 'hI'    , ':Howm2html! %<CR>')
-    call s:qfkeycmd(leader, 'hR'    , ':Howm2html %<CR>')
-    call s:qfkeycmd(leader, 'hj'    , ':Jump2html!<CR>')
-    call s:qfkeycmd(leader, 'hJ'    , ':Jump2html!<CR>')
+    for key in keys(g:qfixmemo_keymap_html)
+      call s:qfkeycmd(leader, key, g:qfixmemo_keymap_html[key].'<CR>')
+    endfor
   endif
 endfunction
 
-function! s:qfkeycmd(leader, key, cmd)
-  exe 'silent! nnoremap <silent> <unique> '.a:leader.a:key.' '.a:cmd
+function! s:qfkeycmd(leader, key, cmd, ...)
+  let mode = a:0 ? a:1 : 'n'
+  exe 'silent! '.mode.'noremap <silent> <unique> '.a:leader.a:key.' '.a:cmd
 endfunction
 
 silent! function QFixMemoMenubar(menu, leader)
   let leader  = escape(a:leader, '\\')
   let sepcmd  = 'amenu <silent> 41.333 '.a:menu.'.-sep%d-			<Nop>'
   let menucmd = 'amenu <silent> 41.333 '.a:menu.'.%s<Tab>'.leader.'%s %s'
-  call s:addMenu(menucmd, 'CreateNew(&C)'      , 'c', ':<C-u>call qfixmemo#EditNew()<CR>')
-  call s:addMenu(menucmd, 'CreateNew(Name)(&N)', 'C', ':<C-u>call qfixmemo#EditInput()<CR>')
-  call s:addMenu(menucmd, 'QuickMemo(&U)'      , 'u', ':<C-u>call qfixmemo#Quickmemo()<CR>')
-  call s:addMenu(menucmd, 'Diary(&D)'    , '<Space>', ':<C-u>call qfixmemo#EditDiary(g:qfixmemo_diary)<CR>')
-  call s:addMenu(menucmd, 'PairFile(&J)'       , 'j', ':<C-u>call qfixmemo#PairFile("%")<CR>')
+  call s:addMenu(menucmd, 'CreateNew(&C)'      , 'c')
+  call s:addMenu(menucmd, 'CreateNew(Name)(&N)', 'C')
+  call s:addMenu(menucmd, 'QuickMemo(&U)'      , 'u')
+  call s:addMenu(menucmd, 'Diary(&D)'    , '<Space>')
+  call s:addMenu(menucmd, 'PairFile(&J)'       , 'j')
   exe printf(sepcmd, 1)
   let sepcmd  = 'amenu <silent> 41.334 '.a:menu.'.-sep%d-			<Nop>'
   let menucmd = 'amenu <silent> 41.334 '.a:menu.'.%s<Tab>'.leader.'%s %s'
-  call s:addMenu(menucmd, 'MRU(&M)'              , 'm', ':<C-u>call qfixmemo#ListMru()<CR>')
-  call s:addMenu(menucmd, 'ListRecent(&L)'       , 'l', ':<C-u>call qfixmemo#ListRecent()<CR>')
-  call s:addMenu(menucmd, 'ListRecent(Stamp)(&2)', 'L', ':<C-u>call qfixmemo#ListRecentTimeStamp()<CR>')
+  call s:addMenu(menucmd, 'MRU(&M)'              , 'm')
+  call s:addMenu(menucmd, 'ListRecent(&L)'       , 'l')
+  call s:addMenu(menucmd, 'ListRecent(Stamp)(&2)', 'L')
 
   if g:qfixmemo_qfixlist_cache
-    call s:addMenu(menucmd, 'List(cache)(&E)', 'a',  ':<C-u>call qfixmemo#ListCmd()<CR>')
-    call s:addMenu(menucmd, 'ListAll(&A)'    , 'ra', ':<C-u>call qfixmemo#ListCmd("nocahe")<CR>')
+    call s:addMenu(menucmd, 'List(cache)(&E)', 'a')
+    call s:addMenu(menucmd, 'ListAll(&A)'    , 'ra')
   else
-    call s:addMenu(menucmd, 'ListAll(&A)',     'a',  ':<C-u>call qfixmemo#ListCmd()<CR>')
+    call s:addMenu(menucmd, 'ListAll(&A)',     'a')
   endif
-  call s:addMenu(menucmd, 'DiaryList(&O)',     'A',  ':<C-u>call qfixmemo#ListFile(g:qfixmemo_diary)<CR>')
-  call s:addMenu(menucmd, 'FileList(&F)',      'rA', ':<C-u>call qfixmemo#Glob(g:qfixmemo_dir, "**/*", "open")<CR>')
+  call s:addMenu(menucmd, 'DiaryList(&O)',     'A')
+  call s:addMenu(menucmd, 'FileList(&F)',      'rA')
   exe printf(sepcmd, 2)
-  call s:addMenu(menucmd, 'Calendar(&Q)', 'q', ':<C-u>call qfixmemo#Calendar()<CR>')
-  call s:addMenu(menucmd, 'SubMenu(&I)' , 'i', ':<C-u>call qfixmemo#SubMenu()<CR>')
+  call s:addMenu(menucmd, 'Calendar(&Q)', 'q')
+  call s:addMenu(menucmd, 'SubMenu(&I)' , 'i')
   exe printf(sepcmd, 3)
-  call s:addMenu(menucmd, 'FGrep(&S)', 's', ':<C-u>call qfixmemo#FGrep()<CR>')
-  call s:addMenu(menucmd, 'Grep(&G)' , 'g', ':<C-u>call qfixmemo#Grep()<CR>')
+  call s:addMenu(menucmd, 'FGrep(&S)', 's')
+  call s:addMenu(menucmd, 'Grep(&G)' , 'g')
   if g:qfixmemo_use_howm_schedule
     exe printf(sepcmd, 4)
-    call s:addMenu(menucmd, 'Menu(&,)'            , ',',  ':<C-u>call qfixmemo#OpenMenu()<CR>')
-    call s:addMenu(menucmd, 'Schedule(&Y)'        , 'y',  ':<C-u>call qfixmemo#ListReminder("schedule")<CR>')
-    call s:addMenu(menucmd, 'Todo(&T)'            , 't',  ':<C-u>call qfixmemo#ListReminder("todo")<CR>')
-    call s:addMenu(menucmd, 'Rebuild-Menu(&\.)'   , 'r,', ':<C-u>call qfixmemo#OpenMenu("cache")<CR>')
-    call s:addMenu(menucmd, 'Rebuild-Schedule(&V)', 'ry', ':<C-u>call qfixmemo#ListReminderCache("schedule")<CR>')
-    call s:addMenu(menucmd, 'Rebuild-Todo(&W)'    , 'rt', ':<C-u>call qfixmemo#ListReminderCache("todo")<CR>')
+    call s:addMenu(menucmd, 'Menu(&,)'            , ',')
+    call s:addMenu(menucmd, 'Schedule(&Y)'        , 'y')
+    call s:addMenu(menucmd, 'Todo(&T)'            , 't')
+    let submenu = '.Rebuild\ (&\.)'
+    let menucmd = 'amenu <silent> 41.334 '.a:menu.submenu.'.%s<Tab>'.leader.'%s %s'
+    call s:addMenu(menucmd, 'Rebuild-Menu(&\.)'   , 'r,')
+    call s:addMenu(menucmd, 'Rebuild-Schedule(&V)', 'ry')
+    call s:addMenu(menucmd, 'Rebuild-Todo(&W)'    , 'rt')
   endif
   let submenu = '.HTML\ (&P)'
   let menucmd = 'amenu <silent> 41.335 '.a:menu.submenu.'.%s<Tab>'.leader.'%s %s'
   if g:qfixmemo_use_howm2html
     exe printf(sepcmd, 5)
-    call s:addMenu(menucmd, 'HTML(&I)'                 , 'hi', ':Howm2html!<CR>')
-    call s:addMenu(menucmd, 'Rebuild-HTML(&R)'         , 'hr', ':Howm2html % <CR>')
-    call s:addMenu(menucmd, 'HTML(static)(&I)'         , 'hI', ':Howm2html! % <CR>')
-    call s:addMenu(menucmd, 'Rebuild-HTML(static)(&R)' , 'hR', ':Howm2html % <CR>')
+    call s:addMenu(menucmd, 'HTML(&I)'                 , 'hi')
+    call s:addMenu(menucmd, 'Rebuild-HTML(&R)'         , 'hr')
+    call s:addMenu(menucmd, 'HTML(static)(&I)'         , 'hI')
+    call s:addMenu(menucmd, 'Rebuild-HTML(static)(&R)' , 'hR')
   endif
   let sepcmd  = 'amenu <silent> 41.336 '.a:menu.'.-sep%d-			<Nop>'
   let menucmd = 'amenu <silent> 41.336 '.a:menu.'.%s<Tab>'.leader.'%s %s'
   exe printf(sepcmd, 6)
-  call s:addMenu(menucmd, 'RandomWalk(&R)'        , 'rr', ':<C-u>call qfixmemo#RandomWalk(g:qfixmemo_random_file)<CR>')
-  call s:addMenu(menucmd, 'Rebuild-RandomWalk(&X)', 'rR', ':<C-u>call qfixmemo#RebuildRandomCache(g:qfixmemo_random_file)<CR>')
+  call s:addMenu(menucmd, 'RandomWalk(&R)'        , 'rr')
+  call s:addMenu(menucmd, 'Rebuild-RandomWalk(&X)', 'rR')
   exe printf(sepcmd, 7)
-  call s:addMenu(menucmd, 'Rebuild-Keyword(&K)', 'rk', ':<C-u>call qfixmemo#RebuildKeyword()<CR>')
+  call s:addMenu(menucmd, 'Rebuild-Keyword(&K)', 'rk')
   exe printf(sepcmd, 8)
-  call s:addMenu(menucmd, 'Rename(&Z)',       'rn', ':<C-u>call qfixmemo#Rename()<CR>')
-  call s:addMenu(menucmd, 'Rename-files(&Z)', 'rN', ':<C-u>call qfixmemo#ListRenameFile(g:qfixmemo_filename)<CR>')
+  call s:addMenu(menucmd, 'Rename(&Z)',       'rn')
+  " call s:addMenu(menucmd, 'Rename-files(&Z)', 'rN')
   if g:qfixmemo_use_howm_schedule
     exe printf(sepcmd, 9)
-    call s:addMenu(menucmd, 'Help(&H)', 'H', ':help '.g:qfixmemo_help.'<CR>')
+    call s:addMenu(menucmd, 'Help(&H)', 'H')
   endif
   exe printf(sepcmd, 10)
   let submenu = '.Buffer[Local]\ (&B)'
   let sepcmd  = 'amenu <silent> 41.337 '.a:menu.submenu.'.-sep%d-			<Nop>'
   let menucmd = 'amenu <silent> 41.337 '.a:menu.submenu.'.%s<Tab>'.leader.'%s %s'
   exe printf(sepcmd, 1)
-  call s:addMenu(menucmd, 'Outline(&O)', 'o',  ':<C-u>call QFixMemoOutline()<CR>')
+  call s:addMenu(menucmd, 'Outline(&O)', 'o')
   exe printf(sepcmd, 2)
-  call s:addMenu(menucmd, 'NewEntry(&1)', 'P', ':<C-u>call qfixmemo#Template("top")<CR>')
-  call s:addMenu(menucmd, 'NewEntry(&P)', 'p', ':<C-u>call qfixmemo#Template("prev")<CR>')
-  call s:addMenu(menucmd, 'NewEntry(&N)', 'n', ':<C-u>call qfixmemo#Template("next")<CR>')
-  call s:addMenu(menucmd, 'NewEntry(&B)', 'N', ':<C-u>call qfixmemo#Template("bottom")<CR>')
+  call s:addMenu(menucmd, 'NewEntry(&1)', 'P')
+  call s:addMenu(menucmd, 'NewEntry(&P)', 'p')
+  call s:addMenu(menucmd, 'NewEntry(&N)', 'n')
+  call s:addMenu(menucmd, 'NewEntry(&B)', 'N')
   exe printf(sepcmd, 3)
-  call s:addMenu(menucmd, 'UpdateTime(&S)'    , 'S',  ':<C-u>call qfixmemo#UpdateTime(1)<CR>')
-  call s:addMenu(menucmd, 'SortEntry(&S)'     , 'rs', ':<C-u>call qfixmemo#SortEntry("Normal")<CR>')
-  call s:addMenu(menucmd, 'SortEntry(rev)(&S)', 'rS', ':<C-u>call qfixmemo#SortEntry("Reverse")<CR>')
+  call s:addMenu(menucmd, 'UpdateTime(&S)'    , 'S')
+  call s:addMenu(menucmd, 'SortEntry(&S)'     , 'rs')
+  call s:addMenu(menucmd, 'SortEntry(rev)(&S)', 'rS')
 
   exe printf(sepcmd, 4)
-  call s:addMenu(menucmd, 'DeleteEntry(&X)', 'x' ,':<C-u>call qfixmemo#DeleteEntry()<CR>')
-  call s:addMenu(menucmd, 'MoveEntry(&M)'  , 'X' ,':<C-u>call qfixmemo#DeleteEntry("Move")<CR>')
-  call s:addMenu(menucmd, 'DivideEntry(&W)', 'W' ,':<C-u>call qfixmemo#DivideEntry()<CR>')
+  call s:addMenu(menucmd, 'DeleteEntry(&X)', 'x')
+  call s:addMenu(menucmd, 'MoveEntry(&M)'  , 'X')
+  call s:addMenu(menucmd, 'DivideEntry(&W)', 'W')
   if exists('*QFixMemoMenubarPost')
     call QFixMemoMenubarPost(a:menu, a:leader)
   endif
 endfunction
 
-function! s:addMenu(menu, acc, key, cmd)
-  exe printf(a:menu, a:acc, a:key, a:cmd)
+function! s:addMenu(menu, acc, key)
+  " exe printf(a:menu, a:acc, a:key, a:cmd)
+  let cmd = ':<C-u>'.s:qfixmemo_command(a:key).'<CR>'
+  exe printf(a:menu, a:acc, a:key, cmd)
 endfunction
 
 """"""""""""""""""""""""""""""
@@ -460,6 +559,9 @@ function! s:CalVimEnter()
     command! -nargs=* CalendarH call howm_calendar#Calendar(1, <f-args>)
   endif
 endfunction
+
+let &cpo = s:saved_cpo
+unlet s:saved_cpo
 
 " autoload読み込み
 if g:qfixmemo_autoload

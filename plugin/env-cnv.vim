@@ -534,6 +534,18 @@ endfunction
 if !exists('g:QFixHowm_WildCardChapter')
   let g:QFixHowm_WildCardChapter = 0
 endif
+"折りたたみのパターン
+if !exists('g:QFixHowm_FoldingPattern')
+  if exists('g:qfixmemo_folding_pattern')
+    let g:QFixHowm_FoldingPattern = g:qfixmemo_folding_pattern
+  elseif exists('g:qfixmemo_title')
+    let g:QFixHowm_FoldingPattern = '^['.g:qfixmemo_title.'.*]'
+  elseif exists('g:QFixHowm_Title')
+    let g:QFixHowm_FoldingPattern = '^['.g:QFixHowm_Title.'.*]'
+  else
+    let g:QFixHowm_FoldingPattern = '^[=.*]'
+  endif
+endif
 function! QFixMemoSetFolding()
   call howm_schedule#Init()
   if exists('*QFixHowmSetFolding')

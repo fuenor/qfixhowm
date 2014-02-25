@@ -176,7 +176,7 @@ if !exists('g:qfixmemo_folding')
 endif
 " フォールディングパターン
 if !exists('g:qfixmemo_folding_pattern')
-  let g:qfixmemo_folding_pattern = '^=[^=]'
+  let g:qfixmemo_folding_pattern = '^['.g:qfixmemo_title.'][^'.g:qfixmemo_title.']'
 endif
 
 " 自動タイトル行の文字数

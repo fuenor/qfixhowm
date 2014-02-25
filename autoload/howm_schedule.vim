@@ -2640,7 +2640,15 @@ if !exists('g:QFixHowm_FoldingChapterTitle')
 endif
 "折りたたみのパターン
 if !exists('g:QFixHowm_FoldingPattern')
-  let g:QFixHowm_FoldingPattern = '^[=.*]'
+  if exists('g:qfixmemo_folding_pattern')
+    let g:QFixHowm_FoldingPattern = g:qfixmemo_folding_pattern
+  elseif exists('g:qfixmemo_title')
+    let g:QFixHowm_FoldingPattern = '^['.g:qfixmemo_title.'.*]'
+  elseif exists('g:QFixHowm_Title')
+    let g:QFixHowm_FoldingPattern = '^['.g:QFixHowm_Title.'.*]'
+  else
+    let g:QFixHowm_FoldingPattern = '^[=.*]'
+  endif
 endif
 "折りたたみのレベル設定
 if !exists('g:QFixHowm_FoldingMode')

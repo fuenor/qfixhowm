@@ -22,6 +22,14 @@ endif
 let g:openuri_version = s:version
 let g:loaded_openuri = 1
 
+if !exists('g:openuri_urichr')
+  " let g:openuri_urichr = "[-0-9a-zA-Z!#$%&'()*+,./:;=?@_~]"
+  let g:openuri_urichr = "[-0-9a-zA-Z!#$%&'*+,./:;=?@_~]"
+endif
+if !exists('g:openuri_pathchr')
+  let g:openuri_pathchr = "[-0-9a-zA-Z!#$%&'()*+,./:;=?@_~{}[\\]\\\\]"
+endif
+
 " 文字列指定された場合は文字列をURIとして開く
 " カーソル位置のURIを開いたら 1 を返す
 function! openuri#open(...)
@@ -198,8 +206,8 @@ function! s:cursorline()
   endif
 
   " カーソル位置の文字列を拾う
-  let urichr  =  "[-0-9a-zA-Z;/?@&=+$,_.!~*'()%:#]"
-  let pathchr =  "[-0-9a-zA-Z;/?@&=+$,_.!~*'()%:{}[\\]\\\\]"
+  let urichr = g:openuri_urichr
+  let pathchr = g:openuri_pathchr
   let pathhead = '\([A-Za-z]:[/\\]\|\~[/\\]\)'
   let urireg = '\(\(http\|https\|file\|ftp'.g:openuri_schemereg.'\)://\|'.pathhead.'\)'
   let [lnum, colf] = searchpos(urireg, 'nbc', line('.'))
@@ -348,7 +356,7 @@ function! s:openuri(uri)
 
   let uri = substitute(a:uri, '^\s*\|\s*$', '', 'g')
   if uri =~ '^\(https\?\|ftp\)://'
-    let urichr  = "[-0-9a-zA-Z;/?@&=+$,_.!~*'()%:#]"
+    let urichr = g:openuri_urichr
     let uri = matchstr(uri, urichr.'\+')
   endif
   if has("win32") || has("win95") || has("win64") || has("win16")

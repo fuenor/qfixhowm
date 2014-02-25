@@ -129,12 +129,12 @@ endif
 
 if !exists('g:qfixmemo_keymap_html')
   let g:qfixmemo_keymap_html = {
-  \ 'hi'    : 'Howm2html!',
-  \ 'hr'    : 'Howm2html',
-  \ 'hI'    : 'Howm2html! %',
-  \ 'hR'    : 'Howm2html %',
-  \ 'hj'    : 'Jump2html!',
-  \ 'hJ'    : 'Jump2html!',
+  \ 'hi'    : ':Howm2html!',
+  \ 'hr'    : ':Howm2html',
+  \ 'hI'    : ':Howm2html! %',
+  \ 'hR'    : ':Howm2html %',
+  \ 'hj'    : ':Jump2html!',
+  \ 'hJ'    : ':Jump2html!',
   \ }
 endif
 

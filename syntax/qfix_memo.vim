@@ -102,13 +102,14 @@ hi def link chapterBullet   Type
 "----------
 syn region memoTitle start='^[#]\+' end='$' contains=titleBullet,titleCategory keepend
 syn match titleBullet contained '^\s*[#]\+'
-syn match qfixmemoCode display "^    \s*\zs.*\ze$"
 syn match qfixmemoCode display "`.\{-}`"
+syn match qfixmemoCodeSpace display "^    .*"
 
 " github Fenced code blocks
 syn match qfixmemoDelimiter '^```\s*[[:alnum:]]*$'
 
 hi def link qfixmemoCode      Comment
+hi def link qfixmemoCodeSpace Comment
 hi def link qfixmemoDelimiter DiffText
 
 "----------

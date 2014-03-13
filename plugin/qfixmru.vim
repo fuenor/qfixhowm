@@ -164,8 +164,11 @@ function! QFixMRU(...)
   endif
   for index in range (1, a:0)
     if a:{index} == '^\s*$'
-    elseif a:{index} =~ '^/:clear$'
-      call QFixMRUClear()
+    elseif a:{index} =~ '^/:rebuild$'
+      redraw|echo 'QFixMRU: rebuilding...'
+      call QFixMRURebuild()
+      redraw|echo 'QFixMRU: done.'
+      return
     elseif a:{index} =~ '^/:dir$'
       let dirmode = 1
     elseif a:{index} =~ '^/:all$'
@@ -181,6 +184,10 @@ function! QFixMRU(...)
   call QFixMRUWrite(0)
   let saved_ei = &eventignore
   set eventignore=all
+  let prevPath = s:escape(getcwd(), ' ')
+  silent! exe 'lchdir ' . s:escape(expand(dir), ' ')
+  let dir = getcwd()
+  silent! exe 'lchdir ' . prevPath
   call QFixMRUOpenPre(s:MruDic, entries, dir)
   let sq = QFixMRUPrecheck(s:MruDic, entries, dir)
   let &eventignore = saved_ei
@@ -675,27 +682,25 @@ function! QFixMRUSetList(list)
   let s:MruDic = deepcopy(a:list)
 endfunction
 
-function! QFixMRUClear()
+function! QFixMRURebuild()
   let idx = 0
   for d in s:MruDic
-    let tpattern = ''
-    let suffix tolower(fnamemodify(d['filename'], ':e'))
-    if exists('g:QFixMRU_Title[suffix]')
-      let tpattern = g:QFixMRU_Title[suffix]
-    endif
-    if tpattern != '' && d['text'] =~ tpattern.'\s*$'
+    if (!filereadable(d['filename']))
       call remove(s:MruDic, idx)
       continue
     endif
+    let [text, min, max] = QFixMRUGet('title', d['filename'], d['lnum'])
+    let d['text'] = text
     let idx += 1
   endfor
+  call QFixMRUWrite(1)
 endfunction
 
 " MRU register / write
 " 0 : 登録処理
 " 1 : セーブ
-"call QFixMRUWrite(0)
-"call QFixMRUWrite(1, {filename}, {basedir})
+" call QFixMRUWrite(0)
+" call QFixMRUWrite(1, {filename}, {basedir})
 function! QFixMRUWrite(write, ...)
   if g:QFixMRU_Disable
     return
@@ -809,7 +814,7 @@ function! s:WriteMru(mru, mrufile)
   let mline = g:QFixMRU_BaseDir
   call add(mlist, mline)
   silent! exe 'lchdir ' . s:escape(expand(g:QFixMRU_BaseDir), ' ')
-  let head = QFixNormalizePath(expand(g:QFixMRU_BaseDir)).'/'
+  let head = QFixNormalizePath(getcwd()).'/'
   for d in mrudic
     let file = d['filename']
     if !g:QFixMRU_FullPathMode

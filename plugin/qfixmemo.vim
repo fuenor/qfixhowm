@@ -522,12 +522,27 @@ function! IsQFixMemo(file)
     return 0
   endif
   let file = QFixNormalizePath(file, 'compare')
-  let head = expand(g:qfixmemo_dir)
+  let head = fnamemodify(expand(g:qfixmemo_dir), ':p:h')
+  let head = QFixNormalizePath(head, 'compare')
+  if stridx(file, head) == 0
+    return 1
+  endif
+  let saved_ei = &eventignore
+  set eventignore=all
+  let prevPath = s:escape(getcwd(), ' ')
+  silent! exe 'lchdir ' . s:escape(expand(g:qfixmemo_dir), ' ')
+  let head = getcwd()
+  silent! exe 'lchdir ' . prevPath
+  let &eventignore = saved_ei
   let head = QFixNormalizePath(head, 'compare')
   if stridx(file, head) == 0
     return 1
   endif
   return 0
+endfunction
+
+function! s:escape(str, chars)
+  return escape(a:str, a:chars.((has('win32')|| has('win64')) ? '#%&' : ''))
 endfunction
 
 function! s:BufEnter()

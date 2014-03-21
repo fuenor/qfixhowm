@@ -14,15 +14,14 @@ hi def link qfixmemoDate        Underlined
 hi def link qfixmemoTime        Constant
 
 " URLとファイル
-" syn match txtUrl  '\(http\|https\|ftp\)://[-0-9a-zA-Z!#$%&'()*+,./:;=?@_~]*'
-syn match txtUrl  '\(http\|https\|ftp\)://[-0-9a-zA-Z!#$%&'*+,./:;=?@_~]*'
-syn match txtFile '\(file\|rel\|memo\|howm\)://[-0-9a-zA-Z!#$%&'()*+,./:;=?@_~{}[\]\\]*'
-syn match txtFile '\([A-Za-z]:[/\\]\|\~[/\\]\)[-0-9a-zA-Z!#$%&'()*+,./:;=?@_~{}[\]\\]\+'
 syn match txtFile '\[:\?&\?\zs\(memo\|rel\|howm\|https\|http\|file\|ftp\)://[^:]\+\ze:[^\]]*]'
 syn match txtFile '\[:\?&\?\zs\([A-Za-z]:[/\\]\|\~[/\\]\|\.\.\?[/\\]\|[/\\]\)[^:]\+\ze:[^\]]*]'
+syn match txtFile '\([A-Za-z]:[/\\]\|\~[/\\]\)[-0-9a-zA-Z!#$%&'()*+,./:;=?@_~{}[\]\\]\+'
+syn match txtFile '\(file\|rel\|memo\|howm\)://[-0-9a-zA-Z!#$%&'()*+,./:;=?@_~{}[\]\\]*'
+syn match txtUrl  '\(http\|https\|ftp\)://[-0-9a-zA-Z!#$%&'*+,./:;=?@_~]*'
 
-hi def link txtUrl  Underlined
 hi def link txtFile Underlined
+hi def link txtUrl  Underlined
 
 " 引用文 (行頭の'> ')
 syn match txtQuote '^\s*>\(\s.*\|$\)'

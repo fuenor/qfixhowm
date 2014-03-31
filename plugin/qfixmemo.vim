@@ -527,6 +527,9 @@ function! IsQFixMemo(file)
   if stridx(file, head) == 0
     return 1
   endif
+  if !isdirectory(g:qfixmemo_dir)
+    return 0
+  endif
   let saved_ei = &eventignore
   set eventignore=all
   let prevPath = s:escape(getcwd(), ' ')

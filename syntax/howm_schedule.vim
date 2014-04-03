@@ -54,6 +54,15 @@ if exists('g:QFixHowm_Date')
 endif
 exe 'syn match howmFinished "'.s:pattern.'"'
 
+syn match txtFile '\([A-Za-z]:[/\\]\|\~[/\\]\)[-0-9a-zA-Z!#$%&'()*+,./:;=?@_~{}[\]\\]\+'
+syn match txtFile '\(file\|rel\|memo\|howm\)://[-0-9a-zA-Z!#$%&'()*+,./:;=?@_~{}[\]\\]*'
+syn match txtFile '\[:\?&\?\zs\(memo\|rel\|howm\|https\|http\|file\|ftp\)://[^:]\+\ze:[^\]]*]'
+syn match txtFile '\[:\?&\?\zs\([A-Za-z]:[/\\]\|\~[/\\]\|\.\.\?[/\\]\|[/\\]\)[^:]\+\ze:[^\]]*]'
+syn match txtUrl  '\(http\|https\|ftp\)://[-0-9a-zA-Z!#$%&'*+,./:;=?@_~]*'
+
+hi def link txtFile Underlined
+hi def link txtUrl  Underlined
+
 if exists('g:howm_glink_pattern') && g:howm_glink_pattern != ''
   exe "syn match howmLink '" . g:howm_glink_pattern . ".*'" . '"'
 endif

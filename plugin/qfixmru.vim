@@ -419,7 +419,7 @@ function! QFixMRURead(...)
   let mdic = readfile(file)
   let from = g:QFixMRU_fileencoding
   let to   = &enc
-  let d = substitute(iconv(mdic[0], from, to), '\\', '/', 'g')
+  let d = QFixNormalizePath(iconv(mdic[0], from, to))
   let d = substitute(d, '|.*', '', '')
   if isdirectory(expand(d))
     let g:QFixMRU_BaseDir = d
@@ -437,7 +437,7 @@ function! QFixMRURead(...)
   silent! exe 'lchdir ' . s:escape(expand(g:QFixMRU_BaseDir), ' ')
   silent! exe 'lchdir ' . s:escape(expand(basedir), ' ')
   let bpath = getcwd()
-  let bpath = substitute(bpath, '\\', '/', 'g').'/'
+  let bpath = QFixNormalizePath(bpath).'/'
   let s:MruDic = []
   let pathhead = '^\([A-Za-z]:[/\\]\|\~[/\\]\|[/\\]\)'
   for d in mdic
@@ -456,7 +456,7 @@ function! QFixMRURead(...)
     " elseif !filereadable(file)
       " continue
     endif
-    let file = substitute(file, '\\', '/', 'g')
+    let file = QFixNormalizePath(file)
     let d = strpart(d, idx+1)
     let idx = match(d, '|')
     let lnum = strpart(d, 0, idx)
@@ -474,7 +474,7 @@ function! QFixMRURead(...)
   if basedir != ''
     let g:QFixMRU_BaseDir = basedir
   elseif a:0 > 1
-    let g:QFixMRU_BaseDir = substitute(a:2, '\\', '/', 'g')
+    let g:QFixMRU_BaseDir = QFixNormalizePath(a:2)
   endif
   call QFixMRUWrite(0)
   " redraw | echo ''
@@ -640,7 +640,7 @@ endfunction
 
 " Change basedir
 function! QFixMRUSetBaseDir(basedir)
-  let g:QFixMRU_BaseDir = substitute(a:basedir, '\\', '/', 'g')
+  let g:QFixMRU_BaseDir = QFixNormalizePath(a:basedir)
 endfunction
 
 function! QFixCmd_MRURemove(...)
@@ -713,7 +713,7 @@ function! QFixMRUWrite(write, ...)
       let mfile = a:{index}
       let mrufile = a:{index}
     else
-      let g:QFixMRU_BaseDir = substitute(a:{index}, '\\', '/', 'g')
+      let g:QFixMRU_BaseDir = QFixNormalizePath(a:{index})
     endif
   endfor
   if write
@@ -724,7 +724,7 @@ function! QFixMRUWrite(write, ...)
     return
   endif
   let prevPath = s:escape(getcwd(), ' ')
-  let mfile = substitute(mfile, '\\', '/', 'g')
+  let mfile = QFixNormalizePath(mfile)
   if g:QFixMRU_IgnoreFile != '' && mfile =~ g:QFixMRU_IgnoreFile
     return
   endif
@@ -809,7 +809,7 @@ function! s:WriteMru(mru, mrufile)
   let from = &enc
   let to   = g:QFixMRU_fileencoding
   let prevPath = s:escape(getcwd(), ' ')
-  let g:QFixMRU_BaseDir = substitute(g:QFixMRU_BaseDir, '\\', '/', 'g')
+  let g:QFixMRU_BaseDir = QFixNormalizePath(g:QFixMRU_BaseDir)
   let mlist = []
   let mline = g:QFixMRU_BaseDir
   call add(mlist, mline)

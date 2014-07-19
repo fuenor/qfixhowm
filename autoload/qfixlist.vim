@@ -1063,10 +1063,11 @@ function! s:MyGrep(pattern, searchPath, filepattern, fenc, addflag, ...)
     silent! exe 'lchdir ' . s:escape(searchPath, ' ')
     let pattern = escape(pattern, '/')
     let vopt = g:QFix_UseLocationList ? 'l' : ''
+    let rec = (g:MyGrep_Recursive && a:filepattern !~ '\*\*') ? '**/' : ''
     if addflag
-      silent! exe ':'.vopt.'vimgrepadd /' . pattern . '/j ' . a:filepattern
+      silent! exe ':'.vopt.'vimgrepadd /' . pattern . '/j ' . rec.a:filepattern
     else
-      silent! exe ':'.vopt.'vimgrep /' . pattern . '/j ' . a:filepattern
+      silent! exe ':'.vopt.'vimgrep /' . pattern . '/j ' . rec.a:filepattern
     endif
     " FIXME:vimgrepでエラーが出るとコマンドラインのシンタックスがおかしくなる
     echohl None

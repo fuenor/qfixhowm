@@ -200,6 +200,7 @@ command! OpenQFixWin   call OpenQFixWin()
 command! CloseQFixWin  call QFixCclose()
 command! ToggleQFixWin call ToggleQFixWin()
 command! MoveToQFixWin call MoveToQFixWin()
+command! MoveToAltQFixWin call MoveToQFixWin('alt')
 command! -nargs=* -bang -count MyGrepWriteResult call MyGrepWriteResult(<bang>0, <q-args>)
 command! -count -nargs=* -bang MyGrepReadResult call MyGrepReadResult(<bang>0, <q-args>)
 command! -nargs=? -count QFdo call QFdo(<q-args>, <count>)
@@ -1018,6 +1019,9 @@ endfunction
 " Quickfixウィンドウへ移動
 """"""""""""""""""""""""""""""
 function! MoveToQFixWin(...)
+  if a:0
+    let g:QFix_UseLocationList = !g:QFix_UseLocationList
+  endif
   let winnum = bufwinnr(g:QFix_Win)
   if winnum == -1
     call QFixCopen()
@@ -1026,10 +1030,16 @@ function! MoveToQFixWin(...)
       exe winnum . 'wincmd w'
     else
       call s:ResizeOnQFix()
+      if a:0
+        let g:QFix_UseLocationList = !g:QFix_UseLocationList
+      endif
       return
     endif
   endif
   call s:QFixResize()
+  if a:0
+    let g:QFix_UseLocationList = !g:QFix_UseLocationList
+  endif
 endfunction
 
 """"""""""""""""""""""""""""""

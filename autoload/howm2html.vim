@@ -673,9 +673,11 @@ if !exists('g:HowmHtml_KeywordList')
   let g:HowmHtml_KeywordList = []
 endif
 
-silent! function QFixHowmGetKeyword()
+if !exists('*QFixHowmGetKeyword')
+function QFixHowmGetKeyword()
   return g:HowmHtml_KeywordList
 endfunction
+endif
 
 "
 " HTMLヘッダ出力
@@ -1659,7 +1661,8 @@ endfunction
 
 let s:firstrun = 0
 " エクスポートコマンド
-silent! function QFixHowmUserCmd(list)
+if !exists('*QFixHowmUserCmd')
+function QFixHowmUserCmd(list)
   let htmldir  = g:HowmHtml_htmldir
   let htmlname = g:HowmHtml_DefaultName
   let s:date = strftime(g:HowmHtml_DatePattern)
@@ -1715,6 +1718,7 @@ silent! function QFixHowmUserCmd(list)
   OpenQFixWin
   let s:firstrun = 1
 endfunction
+endif
 
 " エスケープされたHTMLタグ
 function! s:howmEscapehtml(str)

@@ -635,8 +635,10 @@ function! s:BeforeJump()
   call cursor(count, 1)
 endfunction
 
-silent! function QFixCR(mode)
+if !exists('*QFixCR')
+function QFixCR(mode)
 endfunction
+endif
 
 """"""""""""""""""""""""""""""
 " After <CR>
@@ -1557,9 +1559,11 @@ function! s:QFixFtype_(file)
   return ''
 endfunction
 
-silent! function QFixFtype(file)
+if !exists('*QFixFtype')
+function QFixFtype(file)
   return 0
 endfunction
+endif
 
 """"""""""""""""""""""""""""""
 " quickfixからファイル名を取り出し。

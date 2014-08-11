@@ -501,7 +501,8 @@ function! s:HowmMenuReplace(sq, rep, head)
   call setpos('.', save_cursor)
 endfunction
 
-silent! function HowmMenuCmd_()
+if !exists('*HowmMenuCmd_')
+function HowmMenuCmd_()
   call HowmMenuCmdMap(',')
   call HowmMenuCmdMap('r,')
   call HowmMenuCmdMap('I', 'H')
@@ -527,6 +528,7 @@ silent! function HowmMenuCmd_()
   call HowmMenuCmdMap('rA')
   call HowmMenuCmdMap('R', 'rA')
 endfunction
+endif
 
 function! HowmMenuCmdMap(cmd, ...)
   let cmd = a:0 ? a:1 : a:cmd

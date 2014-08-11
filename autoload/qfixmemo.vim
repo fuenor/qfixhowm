@@ -312,24 +312,34 @@ endif
 " User function
 """"""""""""""""""""""""""""""
 " ローカルキーマップ
-silent! function QFixMemoLocalKeymapPost()
+if !exists('*QFixMemoLocalKeymapPost')
+function QFixMemoLocalKeymapPost()
 endfunction
+endif
 
 " BufNewFile,BufRead
-silent! function QFixMemoBufRead()
+if !exists('*QFixMemoBufRead')
+function QFixMemoBufRead()
 endfunction
+endif
 
 " BufReadPost
-silent! function QFixMemoBufLeave()
+if !exists('*QFixMemoBufLeave')
+function QFixMemoBufLeave()
 endfunction
+endif
 
 " BufWinEnter
-silent! function QFixMemoBufWinEnter()
+if !exists('*QFixMemoBufWinEnter')
+function QFixMemoBufWinEnter()
 endfunction
+endif
 
 " BufEnter
-silent! function QFixMemoBufEnter()
+if !exists('*QFixMemoBufEnter')
+function QFixMemoBufEnter()
 endfunction
+endif
 
 " BufWritePre
 if !exists('*QFixMemoBufWritePre')
@@ -348,8 +358,10 @@ endfunction
 endif
 
 " BufWritePost
-silent! function QFixMemoBufWritePost()
+if !exists('*QFixMemoBufWritePost')
+function QFixMemoBufWritePost()
 endfunction
+endif
 
 " アウトラインコマンド
 if !exists('*QFixMemoOutline')
@@ -2198,7 +2210,8 @@ endif
 
 " デフォルトアウトラインモード
 " 外部で定義されている場合はそちらが優先されます。
-silent! function QFixMemoSubMenuOutline(id)
+if !exists('*QFixMemoSubMenuOutline')
+function QFixMemoSubMenuOutline(id)
   if !g:qfixmemo_submenu_outline
     return
   endif
@@ -2206,6 +2219,7 @@ silent! function QFixMemoSubMenuOutline(id)
   setlocal ts=2 sw=2 sts=2
   call qfixmemo#EzOutline(id)
 endfunction
+endif
 
 """"""""""""""""""""""""""""""
 " Quickfix

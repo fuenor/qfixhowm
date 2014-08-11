@@ -340,19 +340,24 @@ endfunction
 endif
 
 " MRU表示前処理
-silent! function QFixMRUOpenPre(sq, entries, dir)
+if !exists('*QFixMRUOpenPre')
+function QFixMRUOpenPre(sq, entries, dir)
 endfunction
+endif
 " MRU取得対象チェック
 " 0の場合はカレント行がそのままタイトルになる。
 " 0 : QFixMRU_Titleを利用しない
 " 1 : QFixMRU_Titleを利用する
-silent! function QFixMRUGetPre(file)
+if !exists('*QFixMRUGetPre')
+function QFixMRUGetPre(file)
   return 1
 endfunction
+endif
 
 " MRU表示処理(Quickfixウィンドウを開く)
 let s:prevqf = []
-silent! function QFixMRUOpen(qf, basedir)
+if !exists('*QFixMRUOpen')
+function QFixMRUOpen(qf, basedir)
   if exists('g:loaded_QFixWin')
     let g:QFix_SearchPath = a:basedir
     let cmd = ''
@@ -371,6 +376,7 @@ silent! function QFixMRUOpen(qf, basedir)
     silent! copen
   endif
 endfunction
+endif
 
 if !exists('g:QFixMRUAltOpen')
   let g:QFixMRUAltOpen = 0
@@ -862,12 +868,14 @@ function! s:Remove(mru)
 endfunction
 
 " MRU登録時チェック
-silent! function QFixMRURegisterCheck(mru)
+if !exists('*QFixMRURegisterCheck')
+function QFixMRURegisterCheck(mru)
   let mfile = a:mru['filename']
   let lnum  = a:mru['lnum']
   let text  = a:mru['text']
   return 0
 endfunction
+endif
 
 function! s:BufEnter()
   " BufEnterでQFixMRUWrite(0)を行うとbuftype設定前の特殊バッファも登録される
@@ -917,8 +925,10 @@ function! s:VimLeave()
   endif
 endfunction
 
-silent! function QFixMRUVimLeave()
+if !exists('*QFixMRUVimLeave')
+function QFixMRUVimLeave()
 endfunction
+endif
 
 function! s:escape(str, chars)
   return escape(a:str, a:chars.((has('win32')|| has('win64')) ? '#%&' : ''))

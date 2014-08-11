@@ -105,7 +105,8 @@ if !exists('g:QFixGrep_Help')
   let g:QFixGrep_Help= 'qfixgrep_help'
 endif
 
-silent! function QFixGrepMenubar(menu, leader)
+if !exists('*QFixGrepMenubar')
+function QFixGrepMenubar(menu, leader)
   let sepcmd  = 'amenu <silent> 41.333 '.a:menu.'.-sep%d-			<Nop>'
   let menucmd = 'amenu <silent> 41.333 '.a:menu.'.%s<Tab>'.a:leader.'%s %s'
   call s:addMenu(menucmd, 'Grep(&G)'                    , 'e',  ':<C-u>call <SID>QFGrep("Grep")<CR>')
@@ -139,6 +140,7 @@ silent! function QFixGrepMenubar(menu, leader)
   exe printf(sepcmd, 5)
   call s:addMenu(menucmd, 'Help(&H)'                    , 'H',  ':<C-u>help '.g:QFixGrep_Help.'<CR>')
 endfunction
+endif
 
 function! s:addMenu(menu, acc, key, cmd)
   exe printf(a:menu, a:acc, a:key, a:cmd)

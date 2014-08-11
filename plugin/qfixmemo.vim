@@ -237,7 +237,8 @@ function! s:qfkeycmd(leader, key, cmd, ...)
   exe 'silent! '.mode.'noremap <silent> <unique> '.a:leader.a:key.' '.a:cmd
 endfunction
 
-silent! function QFixMemoMenubar(menu, leader)
+if !exists('*QFixMemoMenubar')
+function QFixMemoMenubar(menu, leader)
   let leader  = escape(a:leader, '\\')
   let sepcmd  = 'amenu <silent> 41.333 '.a:menu.'.-sep%d-			<Nop>'
   let menucmd = 'amenu <silent> 41.333 '.a:menu.'.%s<Tab>'.leader.'%s %s'
@@ -325,6 +326,7 @@ silent! function QFixMemoMenubar(menu, leader)
     call QFixMemoMenubarPost(a:menu, a:leader)
   endif
 endfunction
+endif
 
 function! s:addMenu(menu, acc, key)
   " exe printf(a:menu, a:acc, a:key, a:cmd)
@@ -336,8 +338,10 @@ endfunction
 " global keymap
 """"""""""""""""""""""""""""""
 " ユーザーキーマップ
-silent! function QFixMemoKeymapPost()
+if !exists('*QFixMemoKeymapPost')
+function QFixMemoKeymapPost()
 endfunction
+endif
 
 if exists('g:mapleader')
   let s:mapleader = g:mapleader

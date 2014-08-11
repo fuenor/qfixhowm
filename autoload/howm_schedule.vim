@@ -1832,13 +1832,15 @@ endif
 "   endif
 " endfunction
 
-silent! function QFixHowmUserModeCR(...)
+if !exists('*QFixHowmUserModeCR')
+function QFixHowmUserModeCR(...)
   if QFixHowmScheduleAction()
     return
   endif
   let cmd = a:0 ? a:1 : "normal! \<CR>"
   exe cmd
 endfunction
+endif
 
 function! QFixHowmScheduleAction()
   if QFixHowmUserScheduleAction()
@@ -1958,9 +1960,11 @@ function! QFixHowmScheduleActionStr()
   return "\<CR>"
 endfunction
 
-silent! function QFixHowmOpenCursorline()
+if !exists('*QFixHowmOpenCursorline')
+function QFixHowmOpenCursorline()
   return openuri#open()
 endfunction
+endif
 
 " if !exists('*QFixHowmOpenKeywordLink')
 " function QFixHowmOpenKeywordLink()
@@ -2657,7 +2661,8 @@ endif
 
 " *. 形式のワイルドカードチャプター対応フォールディング
 let s:schepat = '^\s*'.s:sch_dateT.s:sch_Ext
-silent! function QFixHowmFoldingLevelWCC(lnum)
+if !exists('*QFixHowmFoldingLevelWCC')
+function QFixHowmFoldingLevelWCC(lnum)
   let s:titlepat = '^'.escape(g:QFixHowm_Title, g:QFixHowm_EscapeTitle).'\([^'.g:QFixHowm_Title.']\|$\)'
   let text = getline(a:lnum)
   if text =~ s:titlepat || text =~ s:schepat
@@ -2692,9 +2697,11 @@ silent! function QFixHowmFoldingLevelWCC(lnum)
   endif
   return '1'
 endfunction
+endif
 
 " *. 形式のワイルドカードチャプターを数字に変換
-silent! function CnvWildcardChapter(...) range
+if !exists('*CnvWildcardChapter')
+function CnvWildcardChapter(...) range
   let firstline = a:firstline
   let lastline = a:lastline
   if a:0 == 0
@@ -2750,6 +2757,7 @@ silent! function CnvWildcardChapter(...) range
   endfor
   call setpos('.', save_cursor)
 endfunction
+endif
 
 if !exists('*QFixHowmInit')
 let s:QFixHowm_Init  = 0

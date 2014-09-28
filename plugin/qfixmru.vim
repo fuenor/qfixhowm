@@ -312,9 +312,9 @@ function! s:QFixMRUEntryRange(file, lnum, title, tpattern)
   let s:prevfname = a:file
   call cursor(lnum, 1)
   let title = escape(a:title, '[].*~\#')
-  let min = search(title, 'cbW')
+  silent! let min = search(title, 'cbW')
   if min == 0
-    let min = search(title, 'cW')
+    silent! let min = search(title, 'cW')
   endif
   let max = search(tpattern, 'W') - 1
   if max < 1

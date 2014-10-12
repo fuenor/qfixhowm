@@ -94,6 +94,7 @@ if !exists('g:qfixmemo_keymap')
     \ 'i'       : 'call qfixmemo#SubMenu()',
     \ 'I'       : 'call qfixmemo#SubMenu(0)',
     \ 'm'       : 'call qfixmemo#ListMru()',
+    \ 'M'       : 'call qfixmemo#MoveToAltQFixWin()',
     \ 'l'       : 'call qfixmemo#ListRecent()',
     \ 'L'       : 'call qfixmemo#ListRecentTimeStamp()',
     \ 'a'       : 'call qfixmemo#ListCmd()',

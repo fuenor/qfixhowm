@@ -308,6 +308,12 @@ if !exists('g:QFix_UseAltCR')
   let g:QFix_UseAltCR = 2
 endif
 
+" QuickFix/Location listの
+" myqfix.vimが存在しない/無効な場合のデフォルト
+if !exists('g:QFix_UseLocationList')
+  let g:QFix_UseLocationList = 1
+endif
+
 """"""""""""""""""""""""""""""
 " User function
 """"""""""""""""""""""""""""""
@@ -1336,6 +1342,18 @@ function! qfixmemo#ListRecentTimeStamp(...)
   endfor
   redraw | echo ''
   return qfixlist#copen(qflist, g:qfixmemo_dir)
+endfunction
+
+""""""""""""""""""""""""""""""
+" MRUを開く
+function! qfixmemo#MoveToAltQFixWin()
+  if exists('g:loaded_QFixWin')
+    MoveToAltQFixWin
+  elseif ((exists("g:QFix_UseLocationList") && g:QFix_UseLocationList == 1))
+    copen
+  else
+    lopen
+  endif
 endfunction
 
 " キーマップ用リストコマンド

@@ -371,6 +371,9 @@ function QFixMRUOpen(qf, basedir)
       let cmd = 'call cursor(1, 1)'
     endif
     exe cmd
+  elseif ((exists("g:QFix_UseLocationList") && g:QFix_UseLocationList == 1))
+    silent! call setloclist(0, a:qf)
+    silent! lopen
   else
     silent! call setqflist(a:qf)
     silent! copen

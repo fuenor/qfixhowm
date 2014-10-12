@@ -1025,7 +1025,10 @@ function! MoveToQFixWin(...)
     let g:QFix_UseLocationList = !g:QFix_UseLocationList
   endif
   let winnum = bufwinnr(g:QFix_Win)
-  if winnum == -1
+  if (winnum == -1 || a:0)
+    if a:0 && g:QFix_PreviewEnable == 1
+      call QFixPclose()
+    endif
     call QFixCopen()
   else
     if winnum != winnr()

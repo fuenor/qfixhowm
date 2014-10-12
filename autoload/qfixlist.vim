@@ -1002,7 +1002,7 @@ if !exists('g:MyGrep_Recursive')
   let g:MyGrep_Recursive = 0
 endif
 if !exists('g:QFix_UseLocationList')
-  let g:QFix_UseLocationList = 0
+  let g:QFix_UseLocationList = 1
 endif
 if !exists('g:QFix_SearchPath')
   let g:QFix_SearchPath = ''

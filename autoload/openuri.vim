@@ -439,7 +439,7 @@ let s:tempfile = g:qfixtempname
 
 augroup OpenURI
   au!
-  au VimLeave * call <SID>VimLeave()
+  au VimLeavePre * call <SID>VimLeave()
 augroup END
 
 function! s:VimLeave()

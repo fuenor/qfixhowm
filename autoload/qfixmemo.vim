@@ -2102,7 +2102,7 @@ function! s:OpenQFixSubWin(file, id)
         endif
         exe 'au BufLeave '.fnamemodify(file, ':t').' call <SID>QFixMemoSubMenuBufLeave()'
         if g:qfixmemo_submenu_autowrite
-          exe 'au BufWinLeave,VimLeave '.fnamemodify(file, ':t').' call <SID>SubMenuBufAutoWrite()'
+          exe 'au BufWinLeave,VimLeavePre '.fnamemodify(file, ':t').' call <SID>SubMenuBufAutoWrite()'
         endif
         exe 'au BufWinLeave '.fnamemodify(file, ':t').' silent! update'
       augroup END

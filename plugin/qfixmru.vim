@@ -139,7 +139,7 @@ endfunction
 
 augroup QFixMRU
   au!
-  au VimLeave                    * call <SID>VimLeave()
+  au VimLeavePre                 * call <SID>VimLeave()
   au BufRead,BufNewFile,BufEnter * call <SID>BufEnter()
   au BufWinLeave                 * call <SID>BufWinLeave()
   au BufLeave                    * call <SID>BufLeave()

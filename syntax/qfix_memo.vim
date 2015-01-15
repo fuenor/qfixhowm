@@ -78,7 +78,7 @@ hi def link hatenaBlockDelimiter DiffText
 " ワイルドカードチャプター
 "----------
 syn region memoTitle start='^[=]\+' end='$' contains=titleBullet,titleCategory keepend
-syn region chapterTitle start='^\s*[*]' end='$' contains=chapterBullet,titleCategory keepend
+syn region chapterTitle start='^\s*[*]' end='\(\*\|$\)' contains=chapterBullet,titleCategory keepend
 syn region chapterNumber start='^\s*\(*\|\d\+\)\.\(\(*\|\d\+\)\.\)*\(*\|\d\+\)\(\s\|$\)' end='$' contains=chapterBullet,titleCategory keepend
 syn region chapterNumber start='^\s*\(*\|\d\+\)\.\(\s\|$\)' end='$' contains=chapterBullet,titleCategory keepend
 syn region chapterNumber start='^[.]\+\s' end='$' contains=chapterBullet,titleCategory keepend

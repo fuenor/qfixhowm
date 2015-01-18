@@ -2715,7 +2715,11 @@ function QFixMemoUserModeCR(...)
   if qfixmemo#CR()
     return
   endif
-  exe "normal! \<CR>"
+  if exists('g:qfixmemo_cr_cmd')
+    exe g:qfixmemo_cr_cmd
+  else
+    exe "normal! \<CR>"
+  endif
 endfunction
 endif
 

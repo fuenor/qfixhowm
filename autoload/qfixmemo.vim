@@ -1034,6 +1034,9 @@ endfunction
 
 function! s:getEditWinnr()
   let pwin = winnr()
+  if &buftype == 'quickfix'
+    let pwin = -1
+  endif
   let max = winnr('$')
   let hidden = &hidden
   let w = -1
@@ -1047,7 +1050,10 @@ function! s:getEditWinnr()
       let w = i
     endif
   endfor
-  exe pwin.'wincmd w'
+  if (pwin != -1)
+    exe pwin.'wincmd w'
+  endif
+
   return w
 endfunction
 

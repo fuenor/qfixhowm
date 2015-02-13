@@ -523,14 +523,6 @@ function! s:QFixMemoLocalKeymap()
   for key in keys(g:qfixmemo_keymap_local)
     call s:bufkeycmd(key, ':'.g:qfixmemo_keymap_local[key].'<CR>')
   endfor
-  for key in keys(g:qfixmemo_keymap_local_v)
-    call s:bufkeycmd(key, ':'.g:qfixmemo_keymap_local_v[key].'<CR>', 'v')
-  endfor
-  if g:qfixmemo_use_howm_schedule
-    for key in keys(g:qfixmemo_keymap_local_wc)
-      call s:bufkeycmd(key, ':'.g:qfixmemo_keymap_local_wc[key].'<CR>', '')
-    endfor
-  endif
   nnoremap <silent> <buffer> <CR> :call QFixMemoUserModeCR()<CR>
 endfunction
 

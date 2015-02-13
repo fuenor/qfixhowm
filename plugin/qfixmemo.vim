@@ -109,7 +109,6 @@ if !exists('g:qfixmemo_keymap')
     \ 'g'       : 'call qfixmemo#Grep()',
     \ 'q'       : 'call qfixmemo#Calendar()',
     \ 'Q'       : 'call qfixmemo#Calendar("LR")',
-    \ 'o'       : 'call QFixMemoOutline()',
     \ 'd'       : 'call qfixmemo#InsertDate("Date")',
     \ 'T'       : 'call qfixmemo#InsertDate("Time")'
     \ }
@@ -154,23 +153,14 @@ if !exists('g:qfixmemo_keymap_local')
     \ 'f'  : '<C-u>call qfixmemo#FGrep()',
     \ 'e'  : '<C-u>call qfixmemo#Grep()',
     \ 'w'  : '<C-u>call qfixmemo#ForceWrite()',
-    \ 'rn' : '<C-u>call qfixmemo#Rename()'
-  \ }
-endif
-if !exists('g:qfixmemo_keymap_local_v')
-  let g:qfixmemo_keymap_local_v = {
-    \ 'W'  : 'call qfixmemo#DivideEntry()',
-  \ }
-endif
-if !exists('g:qfixmemo_keymap_local_wc')
-  let g:qfixmemo_keymap_local_wc = {
-    \ 'z'  : 'call qfixmemo#DivideEntry()',
+    \ 'rn' : '<C-u>call qfixmemo#Rename()',
+    \ 'o'  : 'call QFixMemoOutline()',
+    \ 'z'  : 'call CnvWildcardChapter()'
   \ }
 endif
 
 if !exists('g:qfixmemo_keymap_menu_local')
   let g:qfixmemo_keymap_menu_local = {
-    \ 'o'  : 'call QFixMemoOutline()',
     \ 'P'  : 'call qfixmemo#Template("top")',
     \ 'p'  : 'call qfixmemo#Template("prev")',
     \ 'n'  : 'call qfixmemo#Template("next")',

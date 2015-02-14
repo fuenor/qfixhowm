@@ -116,12 +116,17 @@ function! s:QFixMemoSetTimeFormatRegxp(fmt)
 endfunction
 
 " タイムスタンプ(strftime)
-if !exists('g:qfixmemo_timeformat')
-  let g:qfixmemo_timeformat = '[%Y-%m-%d %H:%M]'
+if !exists('g:qfixmemo_datepattern')
+  let g:qfixmemo_datepattern = '%Y-%m-%d'
 endif
-" タイムスタンプ(strftime)
+if !exists('g:qfixmemo_timepattern')
+  let g:qfixmemo_timepattern = '%H:%M'
+endif
 if !exists('g:qfixmemo_dateformat')
-  let g:qfixmemo_dateformat = '[%Y-%m-%d]'
+  let g:qfixmemo_dateformat = '['.g:qfixmemo_datepattern.']'
+endif
+if !exists('g:qfixmemo_timeformat')
+  let g:qfixmemo_timeformat = '['.g:qfixmemo_datepattern.' '.g:qfixmemo_timepattern.']'
 endif
 " qfixmemo#UpdateTime()でタイムスタンプの置換に使用する正規表現(Vim)
 if !exists('g:qfixmemo_timeformat_regxp')
@@ -525,19 +530,6 @@ function! s:QFixMemoLocalKeymap()
   endfor
   nnoremap <silent> <buffer> <CR> :call QFixMemoUserModeCR()<CR>
 endfunction
-
-" フォールディングレベル計算
-if !exists('*QFixMemoSetFolding')
-function QFixMemoSetFolding()
-  setlocal nofoldenable
-  setlocal foldmethod=expr
-  if exists('*QFixMemoFoldingLevel')
-    setlocal foldexpr=QFixMemoFoldingLevel(v:lnum)
-  else
-    setlocal foldexpr=getline(v:lnum)=~g:qfixmemo_folding_pattern?'>1':'1'
-  endif
-endfunction
-endif
 
 function! s:filetype()
   let file = QFixNormalizePath(expand('%:p'), 'compare')
@@ -2964,4 +2956,161 @@ endfunction
 function! s:escape(str, chars)
   return escape(a:str, a:chars.((has('win32')|| has('win64')) ? '#%&' : ''))
 endfunction
+
+"=============================================================================
+"折りたたみに ワイルドカードチャプターを使用する
+if !exists('g:qfixmemo_wildcard_chapter')
+  let g:qfixmemo_wildcard_chapter = 0
+endif
+"階層付きテキストもワイルドカードチャプター変換の対象にする
+if !exists('g:qfixmemo_wildcard_chapter_mode')
+  let g:qfixmemo_wildcard_chapter_mode = 1
+endif
+"チャプターのタイトル行を折りたたみに含める/含めない
+if !exists('g:qfixmemo_folding_chapter_title')
+  let g:qfixmemo_folding_chapter_title = 0
+endif
+"折りたたみのレベル設定
+if !exists('g:qfixmemo_folding_mode')
+  let g:qfixmemo_folding_mode = 0
+endif
+
+"正規表現パーツ
+function! s:makeRegxp(dpattern, tpattern)
+  let s:hts_date     = a:dpattern
+  let s:hts_time     = a:tpattern
+
+  "let s:sch_date     = '\d\{4}-\d\{2}-\d\{2}'
+  let s:sch_date = s:hts_date
+  let s:sch_date = substitute(s:sch_date, '%Y', '\\d\\{4}', 'g')
+  let s:sch_date = substitute(s:sch_date, '%m', '\\d\\{2}', 'g')
+  let s:sch_date = substitute(s:sch_date, '%d', '\\d\\{2}', 'g')
+
+  "let s:sch_time     = '\d\{2}:\d\{2}'
+  let s:sch_time = s:hts_time
+  let s:sch_time = substitute(s:sch_time, '%H', '\\d\\{2}', '')
+  let s:sch_time = substitute(s:sch_time, '%M', '\\d\\{2}', '')
+  let s:sch_time = substitute(s:sch_time, '%S', '\\d\\{2}', '')
+
+  let s:sch_dateT = '\['.s:sch_date.'\( '.s:sch_time.'\)\?\]'
+  let s:sch_ext   = '-@!+~.'
+  let s:sch_Ext   = '['.s:sch_ext.']'
+  let s:schepat   = '^\s*'.s:sch_dateT.s:sch_Ext
+endfunction
+
+call s:makeRegxp(g:qfixmemo_datepattern, g:qfixmemo_timepattern)
+
+" *. 形式のワイルドカードチャプター対応フォールディング
+if !exists('*QFixHowmFoldingLevelWCC')
+function QFixHowmFoldingLevelWCC(lnum)
+  let titlepat = '^'.escape(g:qfixmemo_title, g:qfixmemo_escape).'\([^'.g:qfixmemo_title.']\|$\)'
+  let text = getline(a:lnum)
+  if text =~ titlepat || text =~ s:schepat
+    if g:qfixmemo_folding == 1
+      return '>1'
+    endif
+    return '0'
+  endif
+  "カードチャプターに応じて折りたたみレベルを設定する
+  let wild = '\(\(\d\+\|\*\)\.\)\+\(\d\+\|\*\)\?'
+  let str = matchstr(text, '^\s*'.wild.'\s*')
+  let str = substitute(str, '\d\+', '*', 'g')
+  let level = strlen(substitute(str, '[^*]', '' , 'g'))
+  if level == 0 && g:qfixmemo_folding_pattern != ""
+    let str = matchstr(text, g:qfixmemo_folding_pattern.'\+')
+    let str = substitute(str, '[^'.str[0].'].*$', '', 'g')
+    let level = strlen(str)
+  endif
+  if g:qfixmemo_folding_mode == 0
+    if level
+      if g:qfixmemo_folding_chapter_title == 0
+        return '>1'
+      endif
+      return '0'
+    endif
+    return '1'
+  elseif g:qfixmemo_folding_mode == 1
+    if level
+      return '>'.level
+    endif
+    return 'a'
+  endif
+  return '1'
+endfunction
+endif
+
+" *. 形式のワイルドカードチャプターを数字に変換
+if !exists('*CnvWildcardChapter')
+function CnvWildcardChapter(...) range
+  let firstline = a:firstline
+  let lastline = a:lastline
+  if a:0 == 0
+    let firstline = 1
+    let lastline = line('$')
+  endif
+  let top = 0
+  let wild = '\(\*\.\)\+\*\?\s*'
+  if g:qfixmemo_wildcard_chapter_mode
+    let wild = wild . '\|^\.\+\s*'
+  endif
+  let nwild = '\(\d\+\.\)\+\(\d\+\)\?'
+  let chap = [top, 0, 0, 0, 0, 0, 0, 0]
+  let plevel = 1
+  let save_cursor = getpos('.')
+  for l in range(firstline, lastline)
+    let str = matchstr(getline(l), '^\s*'.nwild.'\s*')
+    if str != ''
+      for c in range(8)
+        let ch = matchstr(str,'\d\+', 0 ,c+1)
+        let chap[c] = 0
+        if ch != ''
+          let chap[c] = ch
+        endif
+      endfor
+      continue
+    endif
+    let str = matchstr(getline(l), '^\s*'.wild)
+    let len = strlen(str)
+    if str[0] == '.'
+      let str = substitute(str, '\.', '*.', 'g')
+      if strlen(substitute(str, '\s*$', '', '')) > 2
+        let str = substitute(str, '\.\(\s*\)$', '\1', 'g')
+      endif
+    endif
+    let level = strlen(substitute(str, '[^*]', '' , 'g'))
+    if level == 0
+      continue
+    endif
+    let chap[level-1] = chap[level-1] + 1
+    if level < plevel
+      for n in range(level, 8-1)
+        let chap[n] = 0
+      endfor
+    endif
+    let plevel = level
+    for n in range(level)
+      let str = substitute(str, '\*', chap[n], '')
+    endfor
+    let nstr = str . strpart(getline(l), len)
+    let sline = line('.')
+    call setline(l, [nstr])
+  endfor
+  call setpos('.', save_cursor)
+endfunction
+endif
+
+" フォールディングレベル計算
+if !exists('*QFixMemoSetFolding')
+function! QFixMemoSetFolding()
+  setlocal nofoldenable
+  setlocal foldmethod=expr
+  if g:qfixmemo_wildcard_chapter
+    setlocal foldexpr=QFixHowmFoldingLevelWCC(v:lnum)
+  elseif exists('*QFixHowmFoldingLevel')
+    setlocal foldexpr=QFixHowmFoldingLevel(v:lnum)
+  else
+    setlocal foldexpr=getline(v:lnum)=~g:qfixmemo_folding_pattern?'>1':'1'
+  endif
+endfunction
+endif
 

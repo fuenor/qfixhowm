@@ -6,6 +6,9 @@
 let s:version = 100
 scriptencoding utf-8
 
+let s:saved_cpo = &cpo
+set cpo&vim
+
 if !exists('g:QFixHowm_Convert')
   let g:QFixHowm_Convert = 1
 endif
@@ -216,17 +219,20 @@ if !exists('g:qfixmemo_random_file')
 endif
 
 " タイムスタンプ(strftime)
-if !exists('g:qfixmemo_timeformat')
-  let g:qfixmemo_timeformat = '[%Y-%m-%d %H:%M]'
+if !exists('g:qfixmemo_datepattern')
+  let g:qfixmemo_datepattern = '%Y-%m-%d'
   if exists('g:QFixHowm_DatePattern')
-    let g:qfixmemo_timeformat = '['.g:QFixHowm_DatePattern.' %H:%M]'
+    let g:qfixmemo_datepattern = g:QFixHowm_DatePattern
   endif
 endif
+if !exists('g:qfixmemo_timepattern')
+  let g:qfixmemo_timepattern = '%H:%M'
+endif
 if !exists('g:qfixmemo_dateformat')
-  let g:qfixmemo_dateformat = '[%Y-%m-%d]'
-  if exists('g:QFixHowm_DatePattern')
-    let g:qfixmemo_dateformat = '['.g:QFixHowm_DatePattern.']'
-  endif
+  let g:qfixmemo_dateformat = '['.g:qfixmemo_datepattern.']'
+endif
+if !exists('g:qfixmemo_timeformat')
+  let g:qfixmemo_timeformat = '['.g:qfixmemo_datepattern.' '.g:qfixmemo_timepattern.']'
 endif
 " qfixmemo#UpdateTime()でタイムスタンプの置換に使用する正規表現(Vim)
 if !exists('g:qfixmemo_timeformat_regxp')
@@ -375,6 +381,10 @@ let s:cnvopt = [
   \ ['let g:qfixmemo_keyword_mode            = %s', 'g:QFixHowm_Wiki'],
   \ ['let g:qfixmemo_keyword_dir             = %s', 'g:QFixHowm_WikiDir'],
   \ ['let g:qfixmemo_keyword_file            = %s', 'g:QFixHowm_keywordfile'],
+  \ ['let g:qfixmemo_wildcard_chapter        = %s', 'g:QFixHowm_WildCardChapter'],
+  \ ['let g:qfixmemo_wildcard_chapter_mode   = %s', 'g:QFixHowm_WildCardChapterMode'],
+  \ ['let g:qfixmemo_folding_chapter_title   = %s', 'g:QFixHowm_FoldingChapterTitle'],
+  \ ['let g:qfixmemo_folding_mode            = %s', 'g:QFixHowm_FoldingMode'],
   \ ]
 
 function! QFixHowmSetup()
@@ -547,7 +557,6 @@ if !exists('g:QFixHowm_FoldingPattern')
   endif
 endif
 function! QFixMemoSetFolding()
-  call howm_schedule#Init()
   if exists('*QFixHowmSetFolding')
     call QFixHowmSetFolding()
     return
@@ -566,3 +575,4 @@ endfunction
 " QFixMemoとQFixHowmのオプションを同期
 call QFixHowmSetup()
 
+let &cpo = s:saved_cpo

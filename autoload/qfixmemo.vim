@@ -383,9 +383,12 @@ endif
 
 """"""""""""""""""""""""""""""
 function! qfixmemo#InsertDate(type)
-  let fmt = g:qfixmemo_timeformat
   if a:type == 'Date'
     let fmt = g:qfixmemo_dateformat
+  elseif g:qfixmemo_use_howm_schedule
+    let fmt = '['.g:qfixmemo_datepattern.' %H:%M]'
+  else
+    let fmt = g:qfixmemo_timeformat
   endif
   let str = strftime(fmt)
   silent! put=str

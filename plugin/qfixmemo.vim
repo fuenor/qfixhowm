@@ -159,6 +159,13 @@ if !exists('g:qfixmemo_keymap_local')
   \ }
 endif
 
+if !exists('g:qfixmemo_keymap_local_v')
+  let g:qfixmemo_keymap_local_v = {
+    \ 'W'  : 'call qfixmemo#DivideEntry()',
+    \ 'z'  : 'call CnvWildcardChapter("visual")',
+  \ }
+endif
+
 if !exists('g:qfixmemo_keymap_menu_local')
   let g:qfixmemo_keymap_menu_local = {
     \ 'P'  : 'call qfixmemo#Template("top")',

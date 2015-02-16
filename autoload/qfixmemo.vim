@@ -531,6 +531,9 @@ function! s:QFixMemoLocalKeymap()
   for key in keys(g:qfixmemo_keymap_local)
     call s:bufkeycmd(key, ':'.g:qfixmemo_keymap_local[key].'<CR>')
   endfor
+  for key in keys(g:qfixmemo_keymap_local_v)
+    call s:bufkeycmd(key, ':'.g:qfixmemo_keymap_local_v[key].'<CR>', 'v')
+  endfor
   nnoremap <silent> <buffer> <CR> :call QFixMemoUserModeCR()<CR>
 endfunction
 
@@ -3047,7 +3050,7 @@ if !exists('*CnvWildcardChapter')
 function CnvWildcardChapter(...) range
   let firstline = a:firstline
   let lastline = a:lastline
-  if a:0 == 0
+  if a:0 == 0 && count == 0
     let firstline = 1
     let lastline = line('$')
   endif

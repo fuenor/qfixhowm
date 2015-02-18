@@ -131,7 +131,7 @@ let s:qfixmemo_random_file = g:qfixmemo_random_file
 
 command! -nargs=1 QFixMemoChdir let qfixmemo_dir = qfixmemo_chenv_dir.<q-args> |echo "qfixmemo_dir = ".qfixmemo_dir
 function! QFixMemoChEnv(dir, fname, title)
-  if g:QFixMRU_state == 1
+  if exists('g:QFixMRU_state') && g:QFixMRU_state == 1
     call QFixMRUWrite(0)
     call QFixMRUWrite(1)
   endif
@@ -173,7 +173,7 @@ function! QFixMemoChEnv(dir, fname, title)
     " do nothing
   endif
 
-  echo "qfixmemo_dir = ".g:qfixmemo_dir
+  echo "qfixmemo : ". (a:dir != "" ? a:dir : 'all')
 
   " スクリプト作成
   let file = expand(g:qfixmemo_chenv_file)

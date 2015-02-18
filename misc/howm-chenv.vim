@@ -138,7 +138,7 @@ let s:QFixHowm_RandomWalkFile = g:QFixHowm_RandomWalkFile
 
 command! -nargs=1 HowmChdir let howm_dir = QFixHowm_ChDir.<q-args> |echo "howm_dir = ".howm_dir
 function! HowmChEnv(dir, fname, title)
-  if g:QFixMRU_state == 1
+  if exists('g:QFixMRU_state') && g:QFixMRU_state == 1
     call QFixMRUWrite(0)
     call QFixMRUWrite(1)
   endif
@@ -195,7 +195,7 @@ function! HowmChEnv(dir, fname, title)
   if exists('*QFixHowmSetup')
     call QFixHowmSetup()
   endif
-  echo "howm_dir = ".g:howm_dir
+  echo "howm_dir : ". (a:dir != "" ? a:dir : 'all')
 
   " スクリプト作成
   let file = expand(g:QFixHowmChEnvFile)

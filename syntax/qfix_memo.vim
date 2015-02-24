@@ -21,7 +21,7 @@ if exists('g:qfixmemo_title')
   exe "syn match qfixmemoTitleBullet contained '^\\s*[".g:qfixmemo_title."]\\+'"
 endif
 
-hi def link qfixmemoSubTitle    Normal
+hi def link qfixmemoSubTitle    Identifier
 hi def link qfixmemoTitleBullet Special
 
 " URLとファイル

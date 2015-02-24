@@ -1,70 +1,81 @@
 " Vim syntax file
 "
-" Language:    qfixmemo
+" Language:    qfix_memo
 " Maintainer:  fuenor@gmail.com
-" Last Change: 2013-11-26 23:01
+" Last Change: 2015-02-24
 scriptencoding utf-8
 
-hi def link qfixmemoTitle       Title
-hi def link qfixmemoTitleDesc   Delimiter
-hi def link qfixmemoCategory    Label
+"----------
+" default
+"----------
+hi def link qfixmemoTitle     Title
+hi def link qfixmemoTitleDesc Delimiter
+hi def link qfixmemoCategory  Statement
 
-hi def link qfixmemoKeyword     Underlined
-hi def link qfixmemoDate        Underlined
-hi def link qfixmemoTime        Constant
+hi def link qfixmemoKeyword   Underlined
+hi def link qfixmemoDate      Underlined
+hi def link qfixmemoTime      Constant
+
+if exists('g:qfixmemo_title')
+  exe "syn region qfixmemoSubTitle start='^[".g:qfixmemo_title."]\\+' end='$' contains=qfixmemoTitleBullet,qfixmemoCategory keepend"
+  exe "syn match qfixmemoTitleBullet contained '^\\s*[".g:qfixmemo_title."]\\+'"
+endif
+
+hi def link qfixmemoSubTitle    Normal
+hi def link qfixmemoTitleBullet Special
 
 " URLとファイル
-syn match txtFile '\([A-Za-z]:[/\\]\|\~[/\\]\)[-0-9a-zA-Z!#$%&'()*+,./:;=?@_~{}[\]\\]\+'
-syn match txtFile '\(file\|rel\|memo\|howm\)://[-0-9a-zA-Z!#$%&'()*+,./:;=?@_~{}[\]\\]*'
-syn match txtFile '\[:\?&\?\zs\(memo\|rel\|howm\|https\|http\|file\|ftp\)://[^:]\+\ze:[^\]]*]'
-syn match txtFile '\[:\?&\?\zs\([A-Za-z]:[/\\]\|\~[/\\]\|\.\.\?[/\\]\|[/\\]\)[^:]\+\ze:[^\]]*]'
-syn match txtUrl  '\(http\|https\|ftp\)://[-0-9a-zA-Z!#$%&'*+,./:;=?@_~]*'
+syn match qfixmemoTextFile '\([A-Za-z]:[/\\]\|\~[/\\]\)[-0-9a-zA-Z!#$%&'()*+,./:;=?@_~{}[\]\\]\+'
+syn match qfixmemoTextFile '\(file\|rel\|memo\|howm\)://[-0-9a-zA-Z!#$%&'()*+,./:;=?@_~{}[\]\\]*'
+syn match qfixmemoTextFile '\[:\?&\?\zs\(memo\|rel\|howm\|https\|http\|file\|ftp\)://[^:]\+\ze:[^\]]*]'
+syn match qfixmemoTextFile '\[:\?&\?\zs\([A-Za-z]:[/\\]\|\~[/\\]\|\.\.\?[/\\]\|[/\\]\)[^:]\+\ze:[^\]]*]'
+syn match qfixmemoTextUrl  '\(http\|https\|ftp\)://[-0-9a-zA-Z!#$%&'*+,./:;=?@_~]*'
 
-hi def link txtFile Underlined
-hi def link txtUrl  Underlined
+hi def link qfixmemoTextFile Underlined
+hi def link qfixmemoTextUrl  Underlined
 
 " 引用文 (行頭の'> ')
-syn match txtQuote '^\s*>\(\s.*\|$\)'
-hi def link txtQuote Comment
+syn match qfixmemoTextQuote '^\s*>\(\s.*\|$\)'
+hi def link qfixmemoTextQuote Comment
 
 " リスト (行頭の '-' '+')
-syn region txtList start='^\s*[-+]\+\s*' end='\s:' end='$' contains=txtListBullet,txtListDefinition,txtUrl,txtFile keepend
-syn match txtListBullet contained '^\s*[-+*]\+\s*'
-syn match txtListColon  contained '\s:'
-syn match txtListDefinition contained '\s:' contains=txtListColon
+syn region qfixmemoTextList start='^\s*[-+]\+\s*' end='\s:' end='$' contains=qfixmemoTextListBullet,qfixmemoTextListDefinition,qfixmemoTextUrl,qfixmemoTextFile keepend
+syn match qfixmemoTextListBullet contained '^\s*[-+*]\+\s*'
+syn match qfixmemoTextListColon  contained '\s:'
+syn match qfixmemoTextListDefinition contained '\s:' contains=qfixmemoTextListColon
 
-hi def link txtList       Constant
-hi def link txtListBullet Statement
-hi def link txtListColon  Label
+hi def link qfixmemoTextList       Constant
+hi def link qfixmemoTextListBullet Statement
+hi def link qfixmemoTextListColon  Label
 
 " |*テーブル | 項目 |  (セル内で'*'を使うとタイトル)
-syn match txtTable +^\s*|.*|$+ contains=txtTableSeparator,txtTableHeader,txtUrl,txtFile
-syn match txtTableSeparator contained +|+
-syn match txtTableHeader contained '|\s*\*[^|]\+' contains=txtTableSeparator
+syn match qfixmemoTextTable +^\s*|.*|$+ contains=qfixmemoTextTableSeparator,qfixmemoTextTableHeader,qfixmemoTextUrl,qfixmemoTextFile
+syn match qfixmemoTextTableSeparator contained +|+
+syn match qfixmemoTextTableHeader contained '|\s*\*[^|]\+' contains=qfixmemoTextTableSeparator
 
-hi def link txtTableHeader    Title
-hi def link txtTableSeparator Statement
+hi def link qfixmemoTextTableHeader    Title
+hi def link qfixmemoTextTableSeparator Statement
 
 " 定義リスト （行頭の':'と' :')
-syn match txtDefinition '^\s*:.\{-}\s:' contains=txtDefColon
-syn match txtDefColon  contained '^\s*:\|\s:'
+syn match qfixmemoTextDefinition '^\s*:.\{-}\s:' contains=qfixmemoTextDefColon
+syn match qfixmemoTextDefColon  contained '^\s*:\|\s:'
 
-hi def link txtDefinition Identifier
-hi def link txtDefColon Label
+hi def link qfixmemoTextDefinition Identifier
+hi def link qfixmemoTextDefColon   Label
 
 " TODO: FIXME: (行頭の'TODO:' 'FIXME:')
-syn match txtWarning '^\s*\(TODO\|FIXME\):'
-hi def link txtWarning TODO
+syn match qfixmemoTextWarning '^\s*\(TODO\|FIXME\):'
+hi def link qfixmemoTextWarning TODO
 
 " 区切り線
-syn match txtHLine '-\{20,}'
-syn match txtHLine '=\{20,}'
-hi def link txtHLine Label
+syn match qfixmemoTextHLine '-\{20,}'
+syn match qfixmemoTextHLine '=\{20,}'
+hi def link qfixmemoTextHLine Label
 
 " キーワード ( ' か " で囲まれた文字列)
-" syn region txtKeyword start=+"+ skip=+\\"+ end=+"+ end=+$+
-" syn region txtKeyword start=+'+ skip=+\\'+ end=+'+ end=+$+
-" hi link txtKeyword Define
+" syn region qfixmemoTextKeyword start=+"+ skip=+\\"+ end=+"+ end=+$+
+" syn region qfixmemoTextKeyword start=+'+ skip=+\\'+ end=+'+ end=+$+
+" hi link qfixmemoTextKeyword Define
 
 " hatena (superpreと引用)
 syn match hatenaBlockDelimiter '^>|.\{-}|$\|^||<$'
@@ -77,48 +88,57 @@ hi def link hatenaBlockDelimiter DiffText
 "----------
 " ワイルドカードチャプター
 "----------
-syn region memoTitle start='^[=]\+' end='$' contains=titleBullet,titleCategory keepend
-syn region chapterTitle start='^\s*[*]' end='\(\*\|$\)' contains=chapterBullet,titleCategory keepend
-syn region chapterNumber start='^\s*\(*\|\d\+\)\.\(\(*\|\d\+\)\.\)*\(*\|\d\+\)\(\s\|$\)' end='$' contains=chapterBullet,titleCategory keepend
-syn region chapterNumber start='^\s*\(*\|\d\+\)\.\(\s\|$\)' end='$' contains=chapterBullet,titleCategory keepend
-syn region chapterNumber start='^[.]\+\s' end='$' contains=chapterBullet,titleCategory keepend
+if exists('g:qfixmemo_title') && g:qfixmemo_title !~ "[.]"
+  syn region qfixmemoChapterNumber start='^\s*[.]\+\(\s\|$\)' end='$' contains=qfixmemoChapterBullet,qfixmemoChapterCategory keepend
+endif
+if exists('g:qfixmemo_title') && g:qfixmemo_title != '*'
+  syn region qfixmemoMarkdownList start='^\s*\*' end='$' contains=qfixmemoMarkdownBullet,qfixmemoChapterCategory keepend
+endif
 
-syn match titleBullet   contained '^\s*[.*=]\+'
-syn match titleCategory contained '\[.\{-}\]'
-syn match chapterBullet contained '^\s*\(\*\.\)\+\*\?$'
-syn match chapterBullet contained '^\s*[0-9][0-9.]* $'
-syn match chapterBullet contained '^\s*\([0-9.*]\+\|[.*=]\+\)'
+" syn region qfixmemoChapterNumber start='^\s*\(\*\.\)\+\*' end='$' contains=qfixmemoChapterBullet,qfixmemoChapterCategory keepend
+syn region qfixmemoChapterNumber start='^\s*\(\*\|\d\+\)\.\(\(\*\|\d\+\)\.\)*\(\*\|\d\+\.\?\)\(\s\|$\)' end='$' contains=qfixmemoChapterBullet,qfixmemoChapterCategory keepend
+syn region qfixmemoChapterNumber start='^\s*\(\*\|\d\+\)\.\(\s\|$\)' end='$' contains=qfixmemoChapterBullet,qfixmemoChapterCategory keepend
 
-hi def link memoTitle       Identifier
-hi def link titleBullet     Special
-hi def link titleCategory   Constant
-hi def link chapterTitle    Type
-hi def link chapterNumber   PreProc
-hi def link chapterBullet   Type
+syn match qfixmemoChapterCategory contained '\[.\{-}\]'
+syn match qfixmemoChapterBullet contained '^\s*\(\*\.\)\+\*\?$'
+syn match qfixmemoChapterBullet contained '^\s*[0-9][0-9.]* $'
+syn match qfixmemoChapterBullet contained '^\s*\([0-9.*]\+\|[.*]\+\)'
+syn match qfixmemoMarkdownBullet contained '^\s*\*\+'
+
+hi def link qfixmemoChapterNumber   PreProc
+hi def link qfixmemoChapterCategory Label
+hi def link qfixmemoChapterBullet   Type
+hi def link qfixmemoMarkdownList    Normal
+hi def link qfixmemoMarkdownBullet  Type
 
 "----------
 " markdown style
 "----------
-syn region memoTitle start='^[#]\+' end='$' contains=titleBullet,titleCategory keepend
-syn match titleBullet contained '^\s*[#]\+'
+if !exists('g:qfixmemo_title') || g:qfixmemo_title != '#'
+  syn region qfixmemoSubTitle start='^[#]\+' end='$' contains=qfixmemoTitleBullet,qfixmemoCategory keepend
+  syn match qfixmemoTitleBullet contained '^\s*[#]\+'
+endif
+
 syn match qfixmemoCode display "`.\{-}`"
 syn match qfixmemoCodeSpace display "^    .*"
 
 " github Fenced code blocks
 syn match qfixmemoDelimiter '^```\s*[[:alnum:]]*$'
 
-hi def link qfixmemoCode      Comment
-hi def link qfixmemoCodeSpace Comment
-hi def link qfixmemoDelimiter DiffText
+hi def link qfixmemoCode         Comment
+hi def link qfixmemoCodeSpace    Comment
+hi def link qfixmemoDelimiter    DiffText
 
 "----------
 " howm2html.vim
 "----------
-syn match escapeTAG '^&&.*$'
-syn match escapeTAG '&<[^>]\+>'
-hi def link escapeTAG Folded
+syn match qfixmemoEscapeTag '^&&.*$'
+syn match qfixmemoEscapeTag '&<[^>]\+>'
+hi def link qfixmemoEscapeTag Folded
 
+"----------
 " howmの予定・TODO
+"----------
 " runtime! syntax/howm_schedule.vim
 
 if !exists('g:qfixmemo_wiki_syntax') || g:qfixmemo_wiki_syntax == 0

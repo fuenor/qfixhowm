@@ -3057,7 +3057,7 @@ function CnvWildcardChapter(...) range
   let top = 0
   let wild = '\(\*\.\)\+\*\?\s*'
   if g:qfixmemo_wildcard_chapter_mode
-    let wild = wild . '\|^\.\+\s*'
+    let wild = wild . '\|^\.\+\(\s\|$\)'
   endif
   let nwild = '\(\d\+\.\)\+\(\d\+\)\?'
   let chap = [top, 0, 0, 0, 0, 0, 0, 0]

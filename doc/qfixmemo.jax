@@ -955,12 +955,16 @@ qfixmemo_foldingが 0 だと qfixmemoのフォールディングは無効化さ�
 ら好みの関数を作成してください。
 デフォルトでは以下の関数と同等の式が設定されます。
 >
-  " フォールディングレベル計算
-  function! QFixMemoSetFolding()
-    setlocal nofoldenable
-    setlocal foldmethod=expr
-    setlocal foldexpr=getline(v:lnum)=~qfixmemo_folding_pattern?'>1':'1'
-  endfunction
+    " フォールディングレベル計算
+    function! QFixMemoSetFolding()
+      setlocal nofoldenable
+      setlocal foldmethod=expr
+      setlocal foldexpr=getline(v:lnum)=~qfixmemo_folding_pattern?'>1':'1'
+    endfunction
+
+autocmdでファイルタイプに対してのfoldmethod等を設定することも可能です。
+
+    au FileType qfix_memo set foldmethod=indent
 
 ==============================================================================
 8. サブメニュー                                         *qfixmemo_submenu*

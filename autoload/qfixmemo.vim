@@ -3108,6 +3108,9 @@ endif
 " フォールディングレベル計算
 if !exists('*QFixMemoSetFolding')
 function! QFixMemoSetFolding()
+  if (&foldmethod != 'manual' || &foldexpr != 0)
+    return
+  endif
   setlocal nofoldenable
   setlocal foldmethod=expr
   if g:qfixmemo_wildcard_chapter

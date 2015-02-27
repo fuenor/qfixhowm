@@ -502,9 +502,9 @@ function! s:SetEquinox(year, table)
     endif
   elseif mod == 3
     if year >= 1903 && year <= 1923
-      let day = 21
+      let day = 22
     elseif year >= 1927 && year <= 2055
-      let day = 20
+      let day = 21
     elseif year >= 2059 && year <= 2099
       let day = 20
     endif

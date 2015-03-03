@@ -225,9 +225,12 @@ endif
 " ロケーションリスト
 " b:qfixwin_buftype = 0  |  Quickfix List
 " b:qfixwin_buftype = 1  |  Location List
+" FIXME:QuickFix/場所リスト判定用 (未確認)
 if !exists('g:QFixWin_QuickFixTitleReg')
-  " FIXME:QuickFix/場所リスト判定用 (未確認)
-  let g:QFixWin_QuickFixTitleReg = '\cQuickfix\|\[Listo de rapidriparoj\]\|\[Lista de cambios rápidos\]\|\[Listo de rapidriparoj\]\|\[Liosta Ceartúchán Tapa\]\|\[Список быстрых исправлений\]\|\[Список виправлень\]'
+  let g:QFixWin_QuickFixTitleReg = '\cQuickfix\|Liosta Ceartúchán Tapa\|Lista de cambios rápidos\|Listo de rapidriparoj\|Pikakorjausluettelo\|Ñïèñîê áûñòðûõ èñïðàâëåíèé\|Ñïèñîê âèïðàâëåíü\|Список быстрых исправлений\|Список виправлень'
+endif
+if !exists('g:QFixWin_LocationListTitleReg')
+  let g:QFixWin_LocationListTitleReg = '\cLocation\|Liosta Suíomh\|Lista Locazioni\|Lista de locais\|Lista de ubicaciones\|Lista lokacji\|Liste des emplacements\|Listo de lokoj\|Llista de posicions\|Locatielijst\|Location\|Plassliste\|Positionsliste\|Sijaintiluettelo\|Ñïèñîê ì³ñöü\|Ñïèñîê ðàñïîëîæåíèé\|Список місць\|Список расположений\|場所リスト\|是帖 鯉系\|위치 목록'
 endif
 
 let g:QFix_Win = -1
@@ -428,7 +431,8 @@ endfunction
 function! s:QFixSetBuftype(...)
   if &buftype == 'quickfix' && !exists('b:qfixwin_buftype')
     silent! let info = s:QFixGetBufInfo(bufnr('%'))
-    let b:qfixwin_buftype = info !~ g:QFixWin_QuickFixTitleReg
+    " let b:qfixwin_buftype = info !~ g:QFixWin_QuickFixTitleReg
+    let b:qfixwin_buftype = info =~ g:QFixWin_LocationListTitleReg
   endif
 endfunction
 

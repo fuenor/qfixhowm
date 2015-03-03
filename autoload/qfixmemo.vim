@@ -2305,6 +2305,7 @@ function! qfixmemo#Cmd_AT(mode) range
   if qfixmemo#Init()
     return
   endif
+  let bufnum = bufnr('%')
   let save_cursor = getpos('.')
   let g:QFixMRU_Disable = 1
 
@@ -2337,9 +2338,11 @@ function! qfixmemo#Cmd_AT(mode) range
       let entry = insert(entry, str, 1)
     endif
     let rez = extend(rez, entry)
+    unlet entry
   endfor
 
   let g:QFix_Height = h
+  call s:mvbufwinnr(bufnum)
   call qfixmemo#Edit(g:qfixmemo_filename)
   setlocal buftype=nofile
   setlocal bufhidden=hide
@@ -2360,6 +2363,7 @@ function! qfixmemo#Cmd_Replace(mode)
   if qfixmemo#Init()
     return
   endif
+  let bufnum = bufnr('%')
   let prevPath = s:escape(getcwd(), ' ')
   let sq = QFixGetqflist()
   let idx = 0
@@ -2374,6 +2378,7 @@ function! qfixmemo#Cmd_Replace(mode)
     call filter(nsq, "(v:val['bufnr'] == ".bufnr . '&&'. "v:val['text'] == '".text ."') == 0")
     call add(nsq, sqdat)
   endfor
+  call s:mvbufwinnr(bufnum)
   call QFixSetqflist(nsq)
   exe 'lchdir ' . prevPath
   call QFixCopen()
@@ -2386,6 +2391,7 @@ function! qfixmemo#Cmd_RD(cmd) range
   if qfixmemo#Init()
     return
   endif
+  let bufnum = bufnr('%')
   let fline = a:firstline - 1
   let lline = a:lastline - 1
   if a:cmd == 'Delete'
@@ -2410,6 +2416,7 @@ function! qfixmemo#Cmd_RD(cmd) range
     endif
     call remove(qf, idx)
   endfor
+  call s:mvbufwinnr(bufnum)
   call QFixSetqflist(qf)
   call QFixCopen()
   call setpos('.', save_cursor)
@@ -2420,6 +2427,7 @@ function! qfixmemo#Cmd_X(...) range
   if qfixmemo#Init()
     return
   endif
+  let bufnum = bufnr('%')
   let lnum = QFixGet('lnum')
   let qf = QFixGetqflist()
   if len(qf) == 0
@@ -2446,12 +2454,23 @@ function! qfixmemo#Cmd_X(...) range
     write!
     let s:qfixmemoWriteUpdateTime = 1
     silent! wincmd p
+    call s:mvbufwinnr(bufnum)
     let qf = QFixGetqflist()
     call remove(qf, l)
     call QFixSetqflist(qf)
     call cursor(l+1, 1)
   endif
   let g:QFixMRU_Disable = 1
+endfunction
+
+function! s:mvbufwinnr(buf)
+  let max = winnr('$')
+  for i in range(1, max)
+    exe i . 'wincmd w'
+    if (winnr() == a:buf)
+      return
+    endif
+  endfor
 endfunction
 
 """"""""""""""""""""""""""""""

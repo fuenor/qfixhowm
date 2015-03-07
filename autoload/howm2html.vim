@@ -281,8 +281,7 @@ if !exists('g:HowmHtml_OpenURIcmd')
       let g:HowmHtml_OpenURIcmd = '!am start --user 0 -a android.intent.action.VIEW -t text/html -d %s'
     endif
   else
-    " Internet Explorer
-    let g:HowmHtml_OpenURIcmd = '!start "C:/Program Files/Internet Explorer/iexplore.exe" %s'
+    let g:HowmHtml_OpenURIcmd = '!start "rundll32.exe" url.dll,FileProtocolHandler %s'
   endif
 endif
 
@@ -1658,6 +1657,12 @@ function! s:OpenUri(uri)
     return 1
   endif
 endfunction
+
+if exists('*openuri#init')
+function! s:OpenUri(uri)
+  return openuri#open(a:uri)
+endfunction
+endif
 
 let s:firstrun = 0
 " エクスポートコマンド

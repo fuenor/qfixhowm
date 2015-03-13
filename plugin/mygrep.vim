@@ -86,7 +86,7 @@ if !exists('g:MyGrep_FilePattern')
 endif
 " 検索時にカーソル位置の単語を拾う
 if !exists('g:MyGrep_DefaultSearchWord')
-  let g:MyGrep_DefaultSearchWord = 1
+  let g:MyGrep_DefaultSearchWord = 0
 endif
 " 検索ディレクトリはカレントディレクトリを基点にする
 if !exists('g:MyGrep_CurrentDirMode')

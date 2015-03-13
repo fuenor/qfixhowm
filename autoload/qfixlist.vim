@@ -915,7 +915,7 @@ if !exists('g:MyGrep_GrepFilePattern')
 endif
 " 検索時にカーソル位置の単語を拾う
 if !exists('g:MyGrep_DefaultSearchWord')
-  let g:MyGrep_DefaultSearchWord = 1
+  let g:MyGrep_DefaultSearchWord = 0
 endif
 " デフォルトのerrorformat
 if !exists('g:MyGrep_errorformat')

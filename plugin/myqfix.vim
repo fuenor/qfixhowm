@@ -55,19 +55,22 @@ if v:version < 700 || &cp || !has('quickfix')
 endif
 let s:debug = exists('g:fudist') ? g:fudist : 0
 
-" Quickfix処理制御
-" 0 : なにもしない
-" 1 : 常に行う
-" 2 : ロケーションリストのみ行う
-" 3 : QFixMemo/QFixGrepコマンドのみ行う
+" Quickfixの拡張コマンドとプレビュー表示
+" 0 : 全て無効
+" 1 : QuickFix/ロケーションリストの両方で有効
+" 2 : ロケーションリストのみ有効
+" 3 : QFixMemo/QFixGrepコマンドのみ有効
 if !exists('g:QFixWin_EnableMode')
   let g:QFixWin_EnableMode = 2
 endif
 
-" ロケーションリスト使用
+" qfixlistの表示にロケーションリストを使用する
+" 0 : QuickFixウィンドウ
+" 1 : ロケーションリスト
 if !exists('g:QFix_UseLocationList')
   let g:QFix_UseLocationList = 1
 endif
+
 " プレビューの有効/無効
 if !exists('g:QFix_PreviewEnable')
   let g:QFix_PreviewEnable = 1

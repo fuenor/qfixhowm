@@ -56,9 +56,9 @@ exe 'syn match howmFinished "'.s:pattern.'"'
 
 syn match txtFile '\([A-Za-z]:[/\\]\|\~[/\\]\)[-0-9a-zA-Z!#$%&'()*+,./:;=?@_~{}[\]\\]\+'
 syn match txtFile '\(file\|rel\|memo\|howm\)://[-0-9a-zA-Z!#$%&'()*+,./:;=?@_~{}[\]\\]*'
-syn match txtFile '\[:\?&\?\zs\(memo\|rel\|howm\|https\|http\|file\|ftp\)://[^:]\+\ze:[^\]]*]'
+syn match txtFile '\[:\?&\?\zs\(memo\|rel\|howm\|https\|http\|file\|ftp\|git\)://[^:]\+\ze:[^\]]*]'
 syn match txtFile '\[:\?&\?\zs\([A-Za-z]:[/\\]\|\~[/\\]\|\.\.\?[/\\]\|[/\\]\)[^:]\+\ze:[^\]]*]'
-syn match txtUrl  '\(http\|https\|ftp\)://[-0-9a-zA-Z!#$%&'*+,./:;=?@_~]*'
+syn match txtUrl  '\(http\|https\|ftp\|git\)://[-0-9a-zA-Z!#$%&'*+,./:;=?@_~]*'
 
 hi def link txtFile Underlined
 hi def link txtUrl  Underlined

@@ -27,9 +27,9 @@ hi def link qfixmemoTitleBullet Special
 " URLとファイル
 syn match qfixmemoTextFile '\([A-Za-z]:[/\\]\|\~[/\\]\)[-0-9a-zA-Z!#$%&'()*+,./:;=?@_~{}[\]\\]\+'
 syn match qfixmemoTextFile '\(file\|rel\|memo\|howm\)://[-0-9a-zA-Z!#$%&'()*+,./:;=?@_~{}[\]\\]*'
-syn match qfixmemoTextFile '\[:\?&\?\zs\(memo\|rel\|howm\|https\|http\|file\|ftp\)://[^:]\+\ze:[^\]]*]'
+syn match qfixmemoTextFile '\[:\?&\?\zs\(memo\|rel\|howm\|git\|https\|http\|file\|ftp\|git\)://[^:]\+\ze:[^\]]*]'
 syn match qfixmemoTextFile '\[:\?&\?\zs\([A-Za-z]:[/\\]\|\~[/\\]\|\.\.\?[/\\]\|[/\\]\)[^:]\+\ze:[^\]]*]'
-syn match qfixmemoTextUrl  '\(http\|https\|ftp\)://[-0-9a-zA-Z!#$%&'*+,./:;=?@_~]*'
+syn match qfixmemoTextUrl  '\(http\|https\|ftp\|git\)://[-0-9a-zA-Z!#$%&'*+,./:;=?@_~]*'
 
 hi def link qfixmemoTextFile Underlined
 hi def link qfixmemoTextUrl  Underlined

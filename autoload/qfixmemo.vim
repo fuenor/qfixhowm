@@ -1031,7 +1031,7 @@ function! s:getEditWinnr()
   let hidden = &hidden
   let w = -1
   for i in range(1, max)
-    exe i . 'wincmd w'
+    silent! exe i . 'wincmd w'
     if &buftype == '' && &previewwindow == 0
       if &modified == 0
         let w = i

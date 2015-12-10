@@ -561,9 +561,6 @@ function! QFixMemoSetFolding()
     call QFixHowmSetFolding()
     return
   endif
-  if (&foldmethod != 'manual' || &foldexpr != 0)
-    return
-  endif
   setlocal nofoldenable
   setlocal foldmethod=expr
   if g:QFixHowm_WildCardChapter

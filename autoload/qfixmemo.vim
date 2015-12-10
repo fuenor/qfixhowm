@@ -589,6 +589,9 @@ function! s:BufEnter()
   if g:qfixmemo_default_keymap
     nnoremap <silent> <buffer> <CR> :call QFixMemoUserModeCR()<CR>
   endif
+  if g:qfixmemo_folding
+    call QFixMemoSetFolding()
+  endif
   call QFixMemoBufEnter()
 endfunction
 
@@ -3127,9 +3130,6 @@ endif
 " フォールディングレベル計算
 if !exists('*QFixMemoSetFolding')
 function! QFixMemoSetFolding()
-  if (&foldmethod != 'manual' || &foldexpr != 0)
-    return
-  endif
   setlocal nofoldenable
   setlocal foldmethod=expr
   if g:qfixmemo_wildcard_chapter

@@ -208,7 +208,7 @@ function! s:cursorline()
   " カーソル位置の文字列を拾う
   let urichr = g:openuri_urichr
   let pathchr = g:openuri_pathchr
-  let pathhead = '\([A-Za-z]:[/\\]\|\~[/\\]\)'
+  let pathhead = '\([A-Za-z]:[/\\]\|\~[/\\]\|\.\.\?[/\\]\(\.\.[/\\]\)*\)'
   let urireg = '\(\(http\|https\|file\|ftp'.g:openuri_schemereg.'\)://\|'.pathhead.'\)'
   let [lnum, colf] = searchpos(urireg, 'nbc', line('.'))
   if colf == 0 && lnum == 0

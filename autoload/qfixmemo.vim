@@ -1044,7 +1044,7 @@ function! s:getEditWinnr()
     endif
   endfor
   if (pwin != -1)
-    exe pwin.'wincmd w'
+    silent! exe pwin.'wincmd w'
   endif
 
   return w

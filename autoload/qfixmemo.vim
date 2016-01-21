@@ -1026,28 +1026,38 @@ function! s:edit(file, ...)
 endfunction
 
 function! s:getEditWinnr()
-  let pwin = winnr()
-  if &buftype == 'quickfix'
-    let pwin = -1
-  endif
+  silent! let bufinfo = s:GetBufferInfo()
   let max = winnr('$')
-  let hidden = &hidden
   let w = -1
   for i in range(1, max)
-    silent! exe i . 'wincmd w'
-    if &buftype == '' && &previewwindow == 0
-      if &modified == 0
+    let bufnum = winbufnr(i)
+    let modified = -1
+    for attr in bufinfo
+      if attr[0] =~ '^'.bufnum
         let w = i
+        let modified = attr[0] =~ '+'
         break
       endif
-      let w = i
+    endfor
+    if w != -1 && modified == 0
+      break
     endif
   endfor
-  if (pwin != -1)
-    silent! exe pwin.'wincmd w'
-  endif
-
   return w
+endfunction
+
+function! s:GetBufferInfo()
+  redir => bufoutput
+  buffers
+  redir END
+
+  let bufinfo = []
+  for buf in split(bufoutput, '\n')
+    let bits = split(buf, '"')
+    let bits[0] = substitute(bits[0], '^\s*\|\s*$', '', 'g')
+    call add(bufinfo, bits)
+  endfor
+  return bufinfo
 endfunction
 
 function! qfixmemo#Template(cmd)

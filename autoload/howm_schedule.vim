@@ -498,7 +498,7 @@ function! s:QFixHowmListReminder_(mode,...)
     endif
   endif
   call QFixPclose(1)
-  silent! exe 'lchdir ' . s:escape(l:howm_dir, ' ')
+  silent! exe 'chdir ' . s:escape(l:howm_dir, ' ')
   let ext = s:sch_Ext
   if a:mode =~ 'todo'
     let ext = g:QFixHowm_ListReminder_TodoExt
@@ -563,7 +563,7 @@ function! s:QFixHowmListReminder_(mode,...)
   let sq = s:QFixHowmSortReminder(sq, a:mode)
   let sq = s:AddTodayLine(sq)
   let sq = s:CnvDayOfWeek(sq)
-  silent! exe 'lchdir ' . prevPath
+  silent! exe 'chdir ' . prevPath
   if a:mode == 'menu' || (a:0 && a:1 == 'qflist')
     let s:reminder_cache = 0
     redraw | echo ''
@@ -587,7 +587,7 @@ function! s:QFixHowmListReminder_(mode,...)
       redraw|echo 'QFixHowm : Cached '.a:mode . '. ('.lt/60.' minutes ago)'
     endif
   endif
-  silent! exe 'lchdir ' . prevPath
+  silent! exe 'chdir ' . prevPath
   let s:reminder_cache = 0
   return sq
 endfunction
@@ -701,7 +701,7 @@ endfunction
 function! s:altHolidayVimgrep(dir, file, pattern)
   " 高速化のためテンポラリバッファを使用
   let prevPath = s:escape(getcwd(), ' ')
-  silent! exe 'lchdir ' . s:escape(path, ' ')
+  silent! exe 'chdir ' . s:escape(path, ' ')
   silent! exe 'silent! botright split '.g:qfixtempname
   silent! setlocal bt=nofile bh=hide noswf nobl
 
@@ -719,7 +719,7 @@ function! s:altHolidayVimgrep(dir, file, pattern)
     let lnum += 1
   endfor
   silent! close
-  exe 'lchdir ' . prevPath
+  exe 'chdir ' . prevPath
   return qflist
 endfunction
 

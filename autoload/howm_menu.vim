@@ -124,9 +124,9 @@ function! s:Getfile(lnum, ...)
   endif
   let file = substitute(str, '|.*$', '', '')
   let prevPath = s:escape(getcwd(), ' ')
-  silent! exe 'lchdir ' . s:escape(dir, ' ')
+  silent! exe 'chdir ' . s:escape(dir, ' ')
   let file = fnamemodify(file, ':p')
-  silent! exe 'lchdir ' . prevPath
+  silent! exe 'chdir ' . prevPath
   if !filereadable(file)
     return ['', 0]
   endif
@@ -200,7 +200,7 @@ function! s:SortExec(...)
   elseif g:QFix_Sort == 'reverse'
     let sq = reverse(sq)
   endif
-  silent! exe 'lchdir ' . s:escape(g:qfixmemo_dir, ' ')
+  silent! exe 'chdir ' . s:escape(g:qfixmemo_dir, ' ')
   let s:glist = []
   for d in sq
     let filename = fnamemodify(d['filename'], ':.')
@@ -329,7 +329,7 @@ function! QFixHowmOpenMenu(...)
   else
     let mfile = g:QFixHowm_MenuDir  . '/' . g:QFixHowm_Menufile
   endif
-  silent! exe 'lchdir ' . s:escape(g:qfixmemo_dir, ' ')
+  silent! exe 'chdir ' . s:escape(g:qfixmemo_dir, ' ')
   let mfile = fnamemodify(mfile, ':p')
   let mfile = substitute(mfile, '\\', '/', 'g')
   let mfile = substitute(mfile, '/\+', '/', 'g')
@@ -411,7 +411,7 @@ function! QFixHowmOpenMenu(...)
   silent! %delete _
   silent! exe 'silent! -1put=glist'
   silent! $delete _
-  silent! exe 'lchdir ' . s:escape(g:qfixmemo_dir, ' ')
+  silent! exe 'chdir ' . s:escape(g:qfixmemo_dir, ' ')
   call cursor(1, 1)
   if search('%menu%', 'cW') > 0
     let str = substitute(getline('.'), '%menu%', mfile, '')
@@ -427,7 +427,7 @@ function! QFixHowmOpenMenu(...)
   if use_random
     call s:HowmMenuReplace(random, '^\s*%random', 'howm://')
   endif
-  silent! exe 'lchdir ' . prevPath
+  silent! exe 'chdir ' . prevPath
   call setpos('.', g:HowmMenuLnum)
   if exists("*QFixHowmOpenMenuPost")
     call QFixHowmOpenMenuPost()
@@ -460,7 +460,7 @@ function! QFixHowmOpenMenu(...)
     " wincmd p
   endif
   let g:QFix_Disable = 0
-  silent! exe 'lchdir ' . prevPath
+  silent! exe 'chdir ' . prevPath
 endfunction
 
 let s:first = 0
@@ -653,7 +653,7 @@ function! s:BufWinEnterMenu(preview, head)
   nnoremap <buffer> <silent> i :<C-u>call <SID>TogglePreview('menu')<CR>
   nnoremap <buffer> <silent> <CR> :<C-u>call <SID>HowmMenuCR()<CR>
   nnoremap <buffer> <silent> <2-LeftMouse> <ESC>:<C-u>call <SID>HowmMenuCR()<CR>
-  silent! exe 'lchdir ' . s:escape(g:qfixmemo_dir, ' ')
+  silent! exe 'chdir ' . s:escape(g:qfixmemo_dir, ' ')
   let s:howm_menu_height = winheight(0)
   let s:howm_menu_width = winwidth(0)
 endfunction

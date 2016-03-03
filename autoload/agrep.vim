@@ -81,7 +81,7 @@ function! agrep#MyGrepScript(searchWord, to_encoding, searchPath, options)
   endif
   " 高速化のためテンポラリバッファを使用
   let prevPath = s:escape(getcwd(), ' ')
-  silent! exe 'lchdir ' . s:escape(path, ' ')
+  silent! exe 'chdir ' . s:escape(path, ' ')
   silent! exe 'silent! botright split '.s:tempfile
   silent! setlocal bt=nofile bh=hide noswf nobl
 
@@ -109,7 +109,7 @@ function! agrep#MyGrepScript(searchWord, to_encoding, searchPath, options)
     endfor
   endfor
   silent! close
-  exe 'lchdir ' . prevPath
+  exe 'chdir ' . prevPath
   redraw | echo ''
   return retval
 endfunction
@@ -133,7 +133,7 @@ function! s:glob(path, file)
     let choice = confirm(mes, "&OK", 1, "W")
     return []
   endif
-  exe 'lchdir ' . s:escape(path, ' ')
+  exe 'chdir ' . s:escape(path, ' ')
   redraw | echo 'agrep.vim : glob...'
   let files = split(glob(a:file), '\n')
   let qflist = []
@@ -142,7 +142,7 @@ function! s:glob(path, file)
       call add(qflist, n)
     endif
   endfor
-  exe 'lchdir ' . prevPath
+  exe 'chdir ' . prevPath
   return qflist
 endfunction
 

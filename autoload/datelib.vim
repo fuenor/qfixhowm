@@ -350,7 +350,7 @@ function! s:readfilebuf(file)
   silent! exe cmd . ' ' . opt .' '. s:escape(file, ' ')
   let tlist = getline(1, '$')
   silent! close
-  silent! exe 'lchdir ' . prevPath
+  silent! exe 'chdir ' . prevPath
   return tlist
 endfunction
 
@@ -376,9 +376,9 @@ function! s:setholidayfile()
     let l:howm_dir = '~'
   endif
   let prevPath = s:escape(getcwd(), ' ')
-  silent! exe 'lchdir ' . s:escape(l:howm_dir, ' ')
+  silent! exe 'chdir ' . s:escape(l:howm_dir, ' ')
   let file = fnamemodify(file, ':p')
-  exe 'lchdir ' . prevPath
+  exe 'chdir ' . prevPath
   let file = substitute(expand(file), "\<NL>.*", '', '')
   let file = substitute(file, '\\', '/', 'g')
   return split(file, "\<NL>")

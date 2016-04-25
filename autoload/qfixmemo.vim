@@ -2598,16 +2598,18 @@ function! qfixmemo#AddKeyword(...)
     else
       let list = s:GetKeywordStr(g:howm_clink_pattern .'.\+')
     endif
-    for keyword in list
-      let keyword = substitute(keyword, '^.*'.g:howm_clink_pattern.'\s*', '', '')
-      let keyword = substitute(keyword, '\s*$', '', '')
-      if g:qfixmemo_keyword_exclude != '' && keyword =~ g:qfixmemo_keyword_exclude
-        continue
-      endif
-      if count(s:KeywordDic, keyword) == 0 && keyword !~ '^\s*$'
-        let addkey += 1
-        call add(s:KeywordDic, keyword)
-      endif
+    for string in list
+      let string = matchstr(string, g:howm_clink_pattern.'.*$')
+      for keyword in split(string, g:howm_clink_pattern)
+        let keyword = substitute(keyword, '^\s*\|\s*$', '', 'g')
+        if g:qfixmemo_keyword_exclude != '' && keyword =~ g:qfixmemo_keyword_exclude
+          continue
+        endif
+        if count(s:KeywordDic, keyword) == 0 && keyword !~ '^\s*$'
+          let addkey += 1
+          call add(s:KeywordDic, keyword)
+        endif
+      endfor
     endfor
   endif
 

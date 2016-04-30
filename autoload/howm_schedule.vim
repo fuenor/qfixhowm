@@ -460,6 +460,10 @@ function! QFixHowmListReminder(mode)
 endfunction
 
 let s:holiday_sq = []
+function! QFixHowmListReminder_qf(mode)
+  return s:QFixHowmListReminder_(a:mode, 'qflist')
+endfunction
+
 function! s:QFixHowmListReminder_(mode,...)
   if exists('*QFixHowmInit') && QFixHowmInit()
     return []

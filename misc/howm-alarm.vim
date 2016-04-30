@@ -220,6 +220,10 @@ augroup HowmAlarm
   autocmd VimEnter * call <SID>QFixHowmAlarmReadFileVimEnter(g:HowmAlarmUseQFixHowm)
 augroup END
 
+function! QFixHowmAlarmReadFile_qf(qf)
+  call s:QFixHowmAlarmReadFile(3, a:qf)
+endfunction
+
 function! s:QFixHowmAlarmReadFileVimEnter(mode, ...)
   call s:QFixHowmAlarmReadFile(a:mode)
   if a:mode == 4 || a:mode == 5

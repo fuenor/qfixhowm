@@ -456,6 +456,9 @@ function! QFixHowmListReminder(mode)
   if a:mode =~ 'menu'
     call setloclist(0, saved_sq)
   endif
+  if exists('*QFixHowmAlarmReadFile_qf') && g:HowmAlarmUseQFixHowm != 0
+    call QFixHowmAlarmReadFile_qf(sq)
+  endif
   return sq
 endfunction
 

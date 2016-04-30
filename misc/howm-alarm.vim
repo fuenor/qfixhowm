@@ -226,7 +226,7 @@ endfunction
 
 function! s:QFixHowmAlarmReadFileVimEnter(mode, ...)
   call s:QFixHowmAlarmReadFile(a:mode)
-  if a:mode == 4 || a:mode == 5
+  if (a:mode == 4 || a:mode == 5) && exists('g:loaded_qfixmemo_init')
     call feedkeys(g:qfixmemo_mapleader.'y', 't')
   endif
 endfunction

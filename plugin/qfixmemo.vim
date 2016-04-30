@@ -535,9 +535,9 @@ function! IsQFixMemo(file)
   let saved_ei = &eventignore
   set eventignore=all
   let prevPath = s:escape(getcwd(), ' ')
-  silent! exe 'chdir ' . s:escape(expand(g:qfixmemo_dir), ' ')
+  silent! exe 'lchdir ' . s:escape(expand(g:qfixmemo_dir), ' ')
   let head = getcwd()
-  silent! exe 'chdir ' . prevPath
+  silent! exe 'lchdir ' . prevPath
   let &eventignore = saved_ei
   let head = QFixNormalizePath(head, 'compare')
   if stridx(file, head) == 0

@@ -185,9 +185,9 @@ function! QFixMRU(...)
   let saved_ei = &eventignore
   set eventignore=all
   let prevPath = s:escape(getcwd(), ' ')
-  silent! exe 'chdir ' . s:escape(expand(dir), ' ')
+  silent! exe 'lchdir ' . s:escape(expand(dir), ' ')
   let dir = getcwd()
-  silent! exe 'chdir ' . prevPath
+  silent! exe 'lchdir ' . prevPath
   call QFixMRUOpenPre(s:MruDic, entries, dir)
   let sq = QFixMRUPrecheck(s:MruDic, entries, dir)
   let &eventignore = saved_ei
@@ -443,8 +443,8 @@ function! QFixMRURead(...)
     let mergedic = deepcopy(s:MruDic)
   endif
   let prevPath = s:escape(getcwd(), ' ')
-  silent! exe 'chdir ' . s:escape(expand(g:QFixMRU_BaseDir), ' ')
-  silent! exe 'chdir ' . s:escape(expand(basedir), ' ')
+  silent! exe 'lchdir ' . s:escape(expand(g:QFixMRU_BaseDir), ' ')
+  silent! exe 'lchdir ' . s:escape(expand(basedir), ' ')
   let bpath = getcwd()
   let bpath = QFixNormalizePath(bpath).'/'
   let s:MruDic = []
@@ -479,7 +479,7 @@ function! QFixMRURead(...)
       call s:Register(m)
     endfor
   endif
-  silent! exe 'chdir ' . prevPath
+  silent! exe 'lchdir ' . prevPath
   if basedir != ''
     let g:QFixMRU_BaseDir = basedir
   elseif a:0 > 1
@@ -822,7 +822,7 @@ function! s:WriteMru(mru, mrufile)
   let mlist = []
   let mline = g:QFixMRU_BaseDir
   call add(mlist, mline)
-  silent! exe 'chdir ' . s:escape(expand(g:QFixMRU_BaseDir), ' ')
+  silent! exe 'lchdir ' . s:escape(expand(g:QFixMRU_BaseDir), ' ')
   let head = QFixNormalizePath(getcwd()).'/'
   for d in mrudic
     let file = d['filename']
@@ -836,7 +836,7 @@ function! s:WriteMru(mru, mrufile)
     let mline = iconv(mline, from, to)
     call add(mlist, mline)
   endfor
-  silent! exe 'chdir ' . prevPath
+  silent! exe 'lchdir ' . prevPath
   let ostr = []
   silent! let ostr = readfile(mrufile)
   if mlist != ostr

@@ -123,10 +123,8 @@ function! s:Getfile(lnum, ...)
     let str = substitute(str, '^'.head, '', '')
   endif
   let file = substitute(str, '|.*$', '', '')
-  let prevPath = s:escape(getcwd(), ' ')
   silent! exe 'lchdir ' . s:escape(dir, ' ')
   let file = fnamemodify(file, ':p')
-  silent! exe 'lchdir ' . prevPath
   if !filereadable(file)
     return ['', 0]
   endif
@@ -308,7 +306,6 @@ endfunction
 
 function! QFixHowmOpenMenu(...)
   call qfixmemo#Init()
-  let prevPath = s:escape(getcwd(), ' ')
   if count > 0
     let g:QFixHowm_ShowScheduleMenu = count
   endif
@@ -329,8 +326,10 @@ function! QFixHowmOpenMenu(...)
   else
     let mfile = g:QFixHowm_MenuDir  . '/' . g:QFixHowm_Menufile
   endif
+  let prevPath = s:escape(getcwd(), ' ')
   silent! exe 'lchdir ' . s:escape(g:qfixmemo_dir, ' ')
   let mfile = fnamemodify(mfile, ':p')
+  silent! exe 'lchdir ' . prevPath
   let mfile = substitute(mfile, '\\', '/', 'g')
   let mfile = substitute(mfile, '/\+', '/', 'g')
   let mfilename = '__HOWM_MENU__'
@@ -427,7 +426,6 @@ function! QFixHowmOpenMenu(...)
   if use_random
     call s:HowmMenuReplace(random, '^\s*%random', 'howm://')
   endif
-  silent! exe 'lchdir ' . prevPath
   call setpos('.', g:HowmMenuLnum)
   if exists("*QFixHowmOpenMenuPost")
     call QFixHowmOpenMenuPost()
@@ -460,7 +458,6 @@ function! QFixHowmOpenMenu(...)
     " wincmd p
   endif
   let g:QFix_Disable = 0
-  silent! exe 'lchdir ' . prevPath
 endfunction
 
 let s:first = 0

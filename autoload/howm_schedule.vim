@@ -468,7 +468,6 @@ function! s:QFixHowmListReminder_(mode,...)
   if exists('*QFixHowmInit') && QFixHowmInit()
     return []
   endif
-  let prevPath = s:escape(getcwd(), ' ')
   let addflag = 0
   let l:howm_dir = '~/howm'
   let l:howm_dir = exists('g:howm_dir') ? g:howm_dir : l:howm_dir
@@ -502,6 +501,7 @@ function! s:QFixHowmListReminder_(mode,...)
     endif
   endif
   call QFixPclose(1)
+  let prevPath = s:escape(getcwd(), ' ')
   silent! exe 'lchdir ' . s:escape(l:howm_dir, ' ')
   let ext = s:sch_Ext
   if a:mode =~ 'todo'
@@ -567,7 +567,6 @@ function! s:QFixHowmListReminder_(mode,...)
   let sq = s:QFixHowmSortReminder(sq, a:mode)
   let sq = s:AddTodayLine(sq)
   let sq = s:CnvDayOfWeek(sq)
-  silent! exe 'lchdir ' . prevPath
   if a:mode == 'menu' || (a:0 && a:1 == 'qflist')
     let s:reminder_cache = 0
     redraw | echo ''

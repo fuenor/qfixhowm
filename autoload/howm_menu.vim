@@ -480,6 +480,10 @@ function! s:GetBufferInfo()
 endfunction
 
 function! s:HowmMenuReplace(sq, rep, head)
+  let prevPath = s:escape(getcwd(), ' ')
+  if a:head =~ '^sche://' && a:head == 'sche://' && g:QFixHowm_ScheduleSearchDir != ''
+    silent! exe 'lchdir ' . s:escape(g:QFixHowm_ScheduleSearchDir, ' ')
+  endif
   let glist = []
   for d in a:sq
     if exists('d["filename"]')
@@ -499,6 +503,7 @@ function! s:HowmMenuReplace(sq, rep, head)
     silent! exe 'silent! -1put=glist'
   endif
   call setpos('.', save_cursor)
+  exe 'lchdir ' . prevPath
 endfunction
 
 if !exists('*HowmMenuCmd_')

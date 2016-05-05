@@ -484,7 +484,11 @@ function! s:QFixHowmListReminder_(mode,...)
     let l:SearchFile = g:QFixHowm_SearchHowmFile
   endif
   if g:QFixHowm_ScheduleSearchFile != ''
-    let l:SearchFile = g:QFixHowm_ScheduleSearchFile
+    let sdir = fnamemodify(g:QFixHowm_ScheduleSearchFile, ':h')
+    if sdir != '.'
+      let l:howm_dir = sdir
+    endif
+    let l:SearchFile = fnamemodify(g:QFixHowm_ScheduleSearchFile, ':t')
   endif
 
   if s:reminder_cache == 0 || count

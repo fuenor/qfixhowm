@@ -271,9 +271,9 @@ function! s:openstr(str)
   if str =~ '^'.pathhead
     if str !~ '^\\\\'
       let prevPath = s:escape(getcwd(), ' ')
-      exe 'lchdir ' . s:escape(fnamemodify(expand('%'), ':h'), ' ')
+      exe 'chdir ' . s:escape(fnamemodify(expand('%'), ':h'), ' ')
       let str = fnamemodify(str, ':p')
-      silent! exe 'lchdir ' . prevPath
+      silent! exe 'chdir ' . prevPath
     endif
     if str !~ l:vimextreg
       if g:openuri_cmd =~ '\c^'.'netrw'

@@ -123,7 +123,7 @@ function! s:Getfile(lnum, ...)
     let str = substitute(str, '^'.head, '', '')
   endif
   let file = substitute(str, '|.*$', '', '')
-  silent! exe 'lchdir ' . s:escape(dir, ' ')
+  silent! exe 'chdir ' . s:escape(dir, ' ')
   let file = fnamemodify(file, ':p')
   if !filereadable(file)
     return ['', 0]
@@ -198,7 +198,7 @@ function! s:SortExec(...)
   elseif g:QFix_Sort == 'reverse'
     let sq = reverse(sq)
   endif
-  silent! exe 'lchdir ' . s:escape(g:qfixmemo_dir, ' ')
+  silent! exe 'chdir ' . s:escape(g:qfixmemo_dir, ' ')
   let s:glist = []
   for d in sq
     let filename = fnamemodify(d['filename'], ':.')
@@ -305,6 +305,7 @@ function! howm_menu#Init()
 endfunction
 
 function! QFixHowmOpenMenu(...)
+  let prevPath = s:escape(getcwd(), ' ')
   call qfixmemo#Init()
   if count > 0
     let g:QFixHowm_ShowScheduleMenu = count
@@ -327,10 +328,10 @@ function! QFixHowmOpenMenu(...)
     let mfile = g:QFixHowm_MenuDir  . '/' . g:QFixHowm_Menufile
   endif
   let prevPath = s:escape(getcwd(), ' ')
-  silent! exe 'lchdir ' . s:escape(g:qfixmemo_dir, ' ')
+  silent! exe 'chdir ' . s:escape(g:qfixmemo_dir, ' ')
   let l:qfixmemo_dir = fnamemodify(getcwd(), ":p:h")
   let mfile = fnamemodify(mfile, ':p')
-  silent! exe 'lchdir ' . prevPath
+  silent! exe 'chdir ' . prevPath
   let mfile = substitute(mfile, '\\', '/', 'g')
   let mfile = substitute(mfile, '/\+', '/', 'g')
   let mfilename = '__HOWM_MENU__'
@@ -411,7 +412,7 @@ function! QFixHowmOpenMenu(...)
   silent! %delete _
   silent! exe 'silent! -1put=glist'
   silent! $delete _
-  silent! exe 'lchdir ' . s:escape(g:qfixmemo_dir, ' ')
+  silent! exe 'chdir ' . s:escape(g:qfixmemo_dir, ' ')
   call cursor(1, 1)
   if search('%menu%', 'cW') > 0
     let str = substitute(getline('.'), '%menu%', mfile, '')
@@ -459,6 +460,7 @@ function! QFixHowmOpenMenu(...)
     " wincmd p
   endif
   let g:QFix_Disable = 0
+  exe 'chdir ' . prevPath
 endfunction
 
 let s:first = 0
@@ -484,10 +486,10 @@ function! s:HowmMenuReplace(sq, rep, head)
   let prevPath = s:escape(getcwd(), ' ')
   let dir = g:qfixmemo_dir
   if a:rep =~ 'recent'
-    silent! exe 'lchdir ' . s:escape(g:qfixmemo_dir, ' ')
+    silent! exe 'chdir ' . s:escape(g:qfixmemo_dir, ' ')
     let dir = getcwd()
   elseif a:head =~ '^sche://' && a:head == 'sche://' && g:QFixHowm_ScheduleSearchDir != ''
-    silent! exe 'lchdir ' . s:escape(g:QFixHowm_ScheduleSearchDir, ' ')
+    silent! exe 'chdir ' . s:escape(g:QFixHowm_ScheduleSearchDir, ' ')
     let dir = g:QFixHowm_ScheduleSearchDir
   endif
   let dir = QFixNormalizePath(dir)
@@ -511,7 +513,7 @@ function! s:HowmMenuReplace(sq, rep, head)
     silent! exe 'silent! -1put=glist'
   endif
   call setpos('.', save_cursor)
-  exe 'lchdir ' . prevPath
+  exe 'chdir ' . prevPath
 endfunction
 
 if !exists('*HowmMenuCmd_')
@@ -663,7 +665,7 @@ function! s:BufWinEnterMenu(preview, head)
   nnoremap <buffer> <silent> i :<C-u>call <SID>TogglePreview('menu')<CR>
   nnoremap <buffer> <silent> <CR> :<C-u>call <SID>HowmMenuCR()<CR>
   nnoremap <buffer> <silent> <2-LeftMouse> <ESC>:<C-u>call <SID>HowmMenuCR()<CR>
-  silent! exe 'lchdir ' . s:escape(g:qfixmemo_dir, ' ')
+  silent! exe 'chdir ' . s:escape(g:qfixmemo_dir, ' ')
   let s:howm_menu_height = winheight(0)
   let s:howm_menu_width = winwidth(0)
 endfunction

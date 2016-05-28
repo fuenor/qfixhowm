@@ -271,10 +271,10 @@ function! qfixlist#open(...)
   if loaded
     let b:qfixlist_lnum = exists('b:qfixlist_lnum') ? b:qfixlist_lnum : line('.')
     call cursor(b:qfixlist_lnum, 1)
-    silent! exe 'lchdir ' . s:escape(s:QFixList_dir, ' ')
+    silent! exe 'chdir ' . s:escape(s:QFixList_dir, ' ')
     return
   endif
-  silent! exe 'lchdir ' . s:escape(path, ' ')
+  silent! exe 'chdir ' . s:escape(path, ' ')
   setlocal buftype=nowrite
   setlocal bufhidden=hide
   setlocal noswapfile
@@ -283,7 +283,7 @@ function! qfixlist#open(...)
   setlocal cursorline
   setlocal nofoldenable
 
-  silent! exe 'lchdir ' . s:escape(s:QFixList_dir, ' ')
+  silent! exe 'chdir ' . s:escape(s:QFixList_dir, ' ')
 
   let glist = []
   if g:qfixlist_use_fnamemodify == 0
@@ -392,7 +392,7 @@ function! qfixlist#search(pattern, dir, cmd, days, fenc, file)
   let list = s:MyGrep(a:pattern, dir, a:file, fenc, 0)
 
   redraw | echo 'QFixList : Formatting...'
-  silent! exe 'lchdir ' . s:escape(expand(dir), ' ')
+  silent! exe 'chdir ' . s:escape(expand(dir), ' ')
   if g:qfixlist_use_fnamemodify == 0
     let head = fnamemodify(expand(dir), ':p')
     let head = QFixNormalizePath(head)
@@ -416,7 +416,7 @@ function! qfixlist#search(pattern, dir, cmd, days, fenc, file)
       let d['lnum'] = d['lnum'] + 0
     endfor
   endif
-  silent! exe 'lchdir ' . prevPath
+  silent! exe 'chdir ' . prevPath
 
   redraw | echo 'QFixList : Sorting...'
   if cmd =~ 'mtime'
@@ -560,7 +560,7 @@ function! s:BufWinEnter(preview)
   hi def link qfLineNr	LineNr
   hi def link qfError	Error
 
-  silent! exe 'lchdir ' . s:escape(s:QFixList_dir, ' ')
+  silent! exe 'chdir ' . s:escape(s:QFixList_dir, ' ')
 endfunction
 
 function! s:ListCmd_J()
@@ -660,7 +660,7 @@ function! s:Getfile(lnum, ...)
     let str = substitute(str, '^'.head, '', '')
   endif
   let file = substitute(str, '|.*$', '', '')
-  silent! exe 'lchdir ' . s:escape(s:QFixList_dir, ' ')
+  silent! exe 'chdir ' . s:escape(s:QFixList_dir, ' ')
   let file = fnamemodify(file, ':p')
   if !filereadable(file)
     return ['', 0]
@@ -729,7 +729,7 @@ function! s:SortExec(...)
   elseif g:QFix_Sort == 'reverse'
     let sq = reverse(sq)
   endif
-  silent! exe 'lchdir ' . s:escape(s:QFixList_dir, ' ')
+  silent! exe 'chdir ' . s:escape(s:QFixList_dir, ' ')
   let s:QFixList_Cache = deepcopy(sq)
   let s:glist = []
   for d in sq
@@ -1060,7 +1060,7 @@ function! s:MyGrep(pattern, searchPath, filepattern, fenc, addflag, ...)
     endif
   endif
   if g:mygrepprg == 'internal' || g:mygrepprg == '' || g:MyGrep_UseVimgrep != 0
-    silent! exe 'lchdir ' . s:escape(searchPath, ' ')
+    silent! exe 'chdir ' . s:escape(searchPath, ' ')
     let pattern = escape(pattern, '/')
     let vopt = g:QFix_UseLocationList ? 'l' : ''
     let rec = (g:MyGrep_Recursive && a:filepattern !~ '\*\*') ? '**/' : ''
@@ -1084,7 +1084,7 @@ function! s:MyGrep(pattern, searchPath, filepattern, fenc, addflag, ...)
     endfor
     call QFixSetqflist(save_qflist)
     if g:MyGrep_StayGrepDir == 0
-      silent! exe 'lchdir ' . prevPath
+      silent! exe 'chdir ' . prevPath
     endif
     let g:MyGrep_Regexp = 1
     let g:MyGrep_Ignorecase = g:MyGrep_DefaultIgnorecase
@@ -1162,7 +1162,7 @@ function! s:MyGrep(pattern, searchPath, filepattern, fenc, addflag, ...)
   let g:MyGrep_Ignorecase = g:MyGrep_DefaultIgnorecase
   let grepcmd = substitute(g:MyGrepcmd, '#defopt#', {_grepcmd}, '')
   let grepcmd = substitute(grepcmd, '#useropt#', g:MyGrepcmd_useropt, '')
-  silent! exe 'lchdir ' . s:escape(searchPath, ' ')
+  silent! exe 'chdir ' . s:escape(searchPath, ' ')
   let g:MyGrep_qflist = s:ExecGrepMulti(grepcmd, g:mygrepprg, searchPath, pattern, &enc, a:fenc, a:filepattern)
   if g:MyGrep_error && g:MyGrep_qflist == [] && g:MyGrep_retval != ''
     echoe 'qfixlist : ' g:MyGrep_execmd
@@ -1177,7 +1177,7 @@ function! s:MyGrep(pattern, searchPath, filepattern, fenc, addflag, ...)
   " if g:MyGrep_Return
   "   let g:MyGrep_Return = 0
     if g:MyGrep_StayGrepDir == 0
-      silent! exe 'lchdir ' . prevPath
+      silent! exe 'chdir ' . prevPath
     endif
     redraw|echo ''
     return g:MyGrep_qflist
@@ -1190,7 +1190,7 @@ function! s:MyGrep(pattern, searchPath, filepattern, fenc, addflag, ...)
   "   call QFixSetqflist(g:MyGrep_qflist, flag)
   " endif
   " if g:MyGrep_StayGrepDir == 0
-  "   silent! exe 'lchdir ' . prevPath
+  "   silent! exe 'chdir ' . prevPath
   " endif
   " let g:QFix_SearchPath = searchPath
   " redraw | echo ''
@@ -1380,7 +1380,7 @@ function! s:ExecGrep(cmd, prg, searchPath, searchWord, from_encoding, to_encodin
 
   " 検索実行
   let prevPath = s:escape(getcwd(), ' ')
-  silent! exe 'lchdir ' . s:escape(a:searchPath, ' ')
+  silent! exe 'chdir ' . s:escape(a:searchPath, ' ')
   silent! let saved_path = $PATH
   let dir = fnamemodify(a:prg, ':h')
   if dir != '.'
@@ -1508,7 +1508,7 @@ function! s:ParseSearchResult(searchPath, searchResult, filepattern, shellenc, f
       endif
     endwhile
   endfor
-  silent! exe 'lchdir ' . prevPath
+  silent! exe 'chdir ' . prevPath
   if s:debug && len(qflist) == 0 && a:searchResult != ''
     " let mes = iconv(g:MyGrep_retval, a:shellenc, &enc)
     " redraw | echoe string(mes)

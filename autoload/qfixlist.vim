@@ -207,6 +207,7 @@ endfunction
 
 let s:qfixlistloaded = 1
 function! qfixlist#open(...)
+  let prevPath = s:escape(getcwd(), ' ')
   let loaded = s:qfixlistloaded
   let s:qfixlistloaded = 1
   if a:0 > 0
@@ -271,10 +272,10 @@ function! qfixlist#open(...)
   if loaded
     let b:qfixlist_lnum = exists('b:qfixlist_lnum') ? b:qfixlist_lnum : line('.')
     call cursor(b:qfixlist_lnum, 1)
-    silent! exe 'chdir ' . s:escape(s:QFixList_dir, ' ')
+    " silent! exe 'chdir ' . s:escape(s:QFixList_dir, ' ')
     return
   endif
-  silent! exe 'chdir ' . s:escape(path, ' ')
+  " silent! exe 'chdir ' . s:escape(path, ' ')
   setlocal buftype=nowrite
   setlocal bufhidden=hide
   setlocal noswapfile
@@ -356,6 +357,7 @@ function! qfixlist#open(...)
     let g:MyGrep_ErrorMes = ''
     " echohl None
   endif
+  silent! exe 'chdir ' . prevPath
 endfunction
 
 function! qfixlist#GetList(...)
@@ -560,7 +562,7 @@ function! s:BufWinEnter(preview)
   hi def link qfLineNr	LineNr
   hi def link qfError	Error
 
-  silent! exe 'chdir ' . s:escape(s:QFixList_dir, ' ')
+  " silent! exe 'lchdir ' . s:escape(s:QFixList_dir, ' ')
 endfunction
 
 function! s:ListCmd_J()
@@ -660,8 +662,10 @@ function! s:Getfile(lnum, ...)
     let str = substitute(str, '^'.head, '', '')
   endif
   let file = substitute(str, '|.*$', '', '')
+  let prevPath = s:escape(getcwd(), ' ')
   silent! exe 'chdir ' . s:escape(s:QFixList_dir, ' ')
   let file = fnamemodify(file, ':p')
+  silent! exe 'chdir ' . prevPath
   if !filereadable(file)
     return ['', 0]
   endif
@@ -729,6 +733,7 @@ function! s:SortExec(...)
   elseif g:QFix_Sort == 'reverse'
     let sq = reverse(sq)
   endif
+  let prevPath = s:escape(getcwd(), ' ')
   silent! exe 'chdir ' . s:escape(s:QFixList_dir, ' ')
   let s:QFixList_Cache = deepcopy(sq)
   let s:glist = []
@@ -737,6 +742,7 @@ function! s:SortExec(...)
     let line = printf("%s|%d|%s", filename, d['lnum'], d['text'])
     call add(s:glist, line)
   endfor
+  silent! exe 'chdir ' . prevPath
   setlocal modifiable
   silent! %delete _
   call setline(1, s:glist)

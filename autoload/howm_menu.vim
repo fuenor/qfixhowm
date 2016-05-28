@@ -328,7 +328,7 @@ function! QFixHowmOpenMenu(...)
   endif
   let prevPath = s:escape(getcwd(), ' ')
   silent! exe 'lchdir ' . s:escape(g:qfixmemo_dir, ' ')
-  let l:qfixmemo_dir = expand('%:p:h')
+  let l:qfixmemo_dir = fnamemodify(getcwd(), ":p:h")
   let mfile = fnamemodify(mfile, ':p')
   silent! exe 'lchdir ' . prevPath
   let mfile = substitute(mfile, '\\', '/', 'g')

@@ -328,6 +328,7 @@ function! QFixHowmOpenMenu(...)
   endif
   let prevPath = s:escape(getcwd(), ' ')
   silent! exe 'lchdir ' . s:escape(g:qfixmemo_dir, ' ')
+  let l:qfixmemo_dir = expand('%:p:h')
   let mfile = fnamemodify(mfile, ':p')
   silent! exe 'lchdir ' . prevPath
   let mfile = substitute(mfile, '\\', '/', 'g')
@@ -352,9 +353,9 @@ function! QFixHowmOpenMenu(...)
   let from = g:qfixmemo_fileencoding
   let to   = &enc
 
-  redraw|echo 'QFixHowm : Make mru list...'
   if use_recent
-    let recent = QFixMRUGetList(g:qfixmemo_dir, g:QFixHowm_MenuRecent)
+    redraw|echo 'QFixHowm : Make mru list...'
+    let recent = QFixMRUGetList(l:qfixmemo_dir, g:QFixHowm_MenuRecent)
   endif
   if use_random
     redraw|echo 'QFixHowm : Read random cache...'
@@ -481,9 +482,16 @@ endfunction
 
 function! s:HowmMenuReplace(sq, rep, head)
   let prevPath = s:escape(getcwd(), ' ')
-  if a:head =~ '^sche://' && a:head == 'sche://' && g:QFixHowm_ScheduleSearchDir != ''
+  let dir = g:qfixmemo_dir
+  if a:rep =~ 'recent'
+    silent! exe 'lchdir ' . s:escape(g:qfixmemo_dir, ' ')
+    let dir = getcwd()
+  elseif a:head =~ '^sche://' && a:head == 'sche://' && g:QFixHowm_ScheduleSearchDir != ''
     silent! exe 'lchdir ' . s:escape(g:QFixHowm_ScheduleSearchDir, ' ')
+    let dir = g:QFixHowm_ScheduleSearchDir
   endif
+  let dir = QFixNormalizePath(dir)
+  let dirlen = strlen(dir)
   let glist = []
   for d in a:sq
     if exists('d["filename"]')
@@ -491,7 +499,7 @@ function! s:HowmMenuReplace(sq, rep, head)
     else
       let file = bufname(d['bufnr'])
     endif
-    let file = fnamemodify(file, ':.')
+    let file = strpart(QFixNormalizePath(file), dirlen+1)
     let file = a:head.file
     let lnum = d['lnum'] < 1 ? 0 : d['lnum']
     call add(glist, printf("%s|%d| %s", file, lnum, d['text']))

@@ -25,14 +25,17 @@ hi def link qfixmemoSubTitle    Identifier
 hi def link qfixmemoTitleBullet Special
 
 " URLとファイル
-syn match qfixmemoTextFile '\([A-Za-z]:[/\\]\|\~[/\\]\|\.\.\?[/\\]\(\.\.[/\\]\)*\)[-0-9a-zA-Z!#$%&'()*+,./:;=?@_~{}[\]\\]\+'
-syn match qfixmemoTextFile '\(file\|rel\|memo\|howm\)://[-0-9a-zA-Z!#$%&'()*+,./:;=?@_~{}[\]\\]*'
-syn match qfixmemoTextFile '\[:\?&\?\zs\(memo\|rel\|howm\|git\|https\|http\|file\|ftp\|git\)://[^:]\+\ze:[^\]]*]'
-syn match qfixmemoTextFile '\[:\?&\?\zs\([A-Za-z]:[/\\]\|\~[/\\]\|\.\.\?[/\\]\|[/\\]\)[^:]\+\ze:[^\]]*]'
-syn match qfixmemoTextUrl  '\(http\|https\|ftp\|git\)://[-0-9a-zA-Z!#$%&'*+,./:;=?@_~]*'
+" syn match qfixmemoTextUrl  '\(http\|https\|ftp\|git\)://[-0-9a-zA-Z!#$%&'*+,./:;=?@_~]*'
+" syn match qfixmemoTextFile '\(file\|rel\|memo\|howm\)://[-0-9a-zA-Z!#$%&'()*+,./:;=?@_~{}[\]\\]*'
+" syn match qfixmemoTextFile '\zs\([A-Za-z]:[/\\]\|\~[/\\]\|[\\][\\]\|\.\.\?[/\\]\)[-0-9a-zA-Z!#$%&'()*+,./:;=?@_~{}[\]\\]\+\ze[^\])[:blank:]]\?'
+" if !exists('g:openuri_unix_style_path') || g:openuri_unix_style_path
+"   syn match qfixmemoTextFile '\zs\(/[^0-9[:blank:]]\)[-0-9a-zA-Z!#$%&'()*+,./:;=?@_~{}[\]\\]\+\ze[^\])[:blank:]]\?'
+" endif
+" syn match qfixmemoTextFile '\[:\?&\?\zs\(memo\|rel\|howm\|https\|http\|file\|ftp\|git\)://\([a-zA-Z]:\)\?[^:]\+\ze:[^\]]*]'
+" syn match qfixmemoTextFile '\[:\?&\?\zs\([A-Za-z]:[/\\]\|\~[/\\]\|\.\.\?[/\\]\|[/\\]\)[^:]\+\ze:[^\]]*]'
 
-hi def link qfixmemoTextFile Underlined
 hi def link qfixmemoTextUrl  Underlined
+hi def link qfixmemoTextFile Underlined
 
 " 引用文 (行頭の'> ')
 syn match qfixmemoTextQuote '^\s*>\(\s.*\|$\)'

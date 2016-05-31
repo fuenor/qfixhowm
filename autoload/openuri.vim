@@ -22,6 +22,9 @@ endif
 let g:openuri_version = s:version
 let g:loaded_openuri = 1
 
+if !exists('g:openuri_unix_style_path')
+  let g:openuri_unix_style_path = 1
+endif
 if !exists('g:openuri_urichr')
   " let g:openuri_urichr = "[-0-9a-zA-Z!#$%&'()*+,./:;=?@_~]"
   let g:openuri_urichr = "[-0-9a-zA-Z!#$%&'*+,./:;=?@_~]"
@@ -211,25 +214,38 @@ function! s:cursorline()
   " カーソル位置の文字列を拾う
   let urichr = g:openuri_urichr
   let pathchr = g:openuri_pathchr
-  let pathhead = '\([A-Za-z]:[/\\]\|\~[/\\]\|\.\.\?[/\\]\(\.\.[/\\]\)*\)'
+  let pathhead = '\(\([A-Za-z]:[/\\]\|\~[/\\]\|[\\][\\]\|\.\.\?[/\\]\)\)'
   let urireg = '\(\(http\|https\|file\|ftp'.g:openuri_schemereg.'\)://\|'.pathhead.'\)'
   let [lnum, colf] = searchpos(urireg, 'nbc', line('.'))
-  if colf == 0 && lnum == 0
-    return "\<CR>"
-  endif
-  let str = strpart(getline('.'), colf-1)
-  if str =~ '^https\?:\|^ftp:'
-    let str = matchstr(str, urichr.'\+')
-  else
+  if colf == 0 && lnum == 0 && g:openuri_unix_style_path
+    let urireg = '/[[:alpha:]]'.pathchr.'*\ze'
+    let [lnum, colf] = searchpos(urireg, 'nbc', line('.'))
+    if colf == 0 && lnum == 0
+      return "\<CR>"
+    endif
+    let str = strpart(getline('.'), colf-1)
     let str = matchstr(str, pathchr.'\+')
-  endif
-  if colf > prevcol || colf + strlen(str) <= prevcol
-    return "\<CR>"
-  endif
-
-  let str = substitute(str, ':\+$', '', '')
-  if str != ''
-    return s:openstr(str)
+    if colf <= prevcol && colf + strlen(str) > prevcol
+      let str = substitute(str, '[)\]]$', '', '')
+      let str = substitute(str, ':\+$', '', '')
+      if str != ''
+        return s:openstr(str)
+      endif
+    endif
+  else
+    let str = strpart(getline('.'), colf-1)
+    if str =~ '^https\?:\|^ftp:'
+      let str = matchstr(str, urichr.'\+')
+    else
+      let str = matchstr(str, pathchr.'\+')
+    endif
+    if colf <= prevcol && colf + strlen(str) > prevcol
+      let str = substitute(str, ':\+$', '', '')
+      let str = substitute(str, '[)\]]$', '', '')
+      if str != ''
+        return s:openstr(str)
+      endif
+    endif
   endif
   return "\<CR>"
 endfunction

@@ -279,6 +279,9 @@ if !exists('g:HowmHtml_OpenURIcmd')
     let g:HowmHtml_OpenURIcmd = "call system('firefox %s &')"
     if executable("getprop") && system("getprop net.bt.name") =~ 'Android'
       let g:HowmHtml_OpenURIcmd = '!am start --user 0 -a android.intent.action.VIEW -t text/html -d %s'
+      if exists("*ATEModIntent")
+        let g:HowmHtml_OpenURIcmd = "call ATEModIntent('VIEW', '%s')"
+      endif
     endif
   else
     let g:HowmHtml_OpenURIcmd = '!start "rundll32.exe" url.dll,FileProtocolHandler %s'

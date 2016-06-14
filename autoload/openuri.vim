@@ -218,7 +218,7 @@ function! s:cursorline()
   let urireg = '\(\(http\|https\|file\|ftp'.g:openuri_schemereg.'\)://\|'.pathhead.'\)'
   let [lnum, colf] = searchpos(urireg, 'nbc', line('.'))
   if colf == 0 && lnum == 0 && g:openuri_unix_style_path
-    let urireg = '/[[:alpha:]]'.pathchr.'*\ze'
+    let urireg = '\(/'.pathchr.'\+\)\{2,}\ze'
     let [lnum, colf] = searchpos(urireg, 'nbc', line('.'))
     if colf == 0 && lnum == 0
       return "\<CR>"
@@ -469,6 +469,6 @@ endfunction
 
 """"""""""""""""""""""""""""""
 function! s:escape(str, chars)
-  return escape(a:str, a:chars.((has('win32')|| has('win64')) ? '#%&' : ''))
+  return escape(a:str, a:chars.((has('win32')|| has('win64')) ? '#%&' : '#%$'))
 endfunction
 

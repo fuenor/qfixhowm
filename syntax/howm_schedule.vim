@@ -58,7 +58,7 @@ syn match txtUrl  '\(http\|https\|ftp\|git\)://[-0-9a-zA-Z!#$%&'*+,./:;=?@_~]*'
 syn match txtFile '\(file\|rel\|memo\|howm\)://[-0-9a-zA-Z!#$%&'()*+,./:;=?@_~{}[\]\\]*'
 syn match txtFile '\zs\([A-Za-z]:[/\\]\|\~[/\\]\|[\\][\\]\|\.\.\?[/\\]\)[-0-9a-zA-Z!#$%&'()*+,./:;=?@_~{}[\]\\]\+\ze[^\])[:blank:]]\?'
 if !exists('g:openuri_unix_style_path') || g:openuri_unix_style_path
-  syn match txtFile '\zs\(/[^0-9[:blank:]]\)[-0-9a-zA-Z!#$%&'()*+,./:;=?@_~{}[\]\\]\+\ze[^\])[:blank:]]\?'
+  syn match txtFile '\zs\(/[-0-9a-zA-Z!#$%&'()*+,./:;=?@_~{}[\]\\]\+\)\{2,}\ze[^\])[:blank:]]\?'
 endif
 syn match txtFile '\[:\?&\?\zs\(memo\|rel\|howm\|https\|http\|file\|ftp\|git\)://\([a-zA-Z]:\)\?[^:]\+\ze:[^\]]*]'
 syn match txtFile '\[:\?&\?\zs\([A-Za-z]:[/\\]\|\~[/\\]\|\.\.\?[/\\]\|[/\\]\)[^:]\+\ze:[^\]]*]'

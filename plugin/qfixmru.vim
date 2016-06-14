@@ -185,7 +185,7 @@ function! QFixMRU(...)
   let saved_ei = &eventignore
   set eventignore=all
   let prevPath = s:escape(getcwd(), ' ')
-  silent! exe 'chdir ' . s:escape(expand(dir), ' ')
+  silent! exe 'chdir ' . s:escape(dir, ' ')
   let dir = getcwd()
   silent! exe 'chdir ' . prevPath
   call QFixMRUOpenPre(s:MruDic, entries, dir)
@@ -443,8 +443,8 @@ function! QFixMRURead(...)
     let mergedic = deepcopy(s:MruDic)
   endif
   let prevPath = s:escape(getcwd(), ' ')
-  silent! exe 'chdir ' . s:escape(expand(g:QFixMRU_BaseDir), ' ')
-  silent! exe 'chdir ' . s:escape(expand(basedir), ' ')
+  silent! exe 'chdir ' . s:escape(g:QFixMRU_BaseDir, ' ')
+  silent! exe 'chdir ' . s:escape(basedir, ' ')
   let bpath = getcwd()
   let bpath = QFixNormalizePath(bpath).'/'
   let s:MruDic = []
@@ -822,7 +822,7 @@ function! s:WriteMru(mru, mrufile)
   let mlist = []
   let mline = g:QFixMRU_BaseDir
   call add(mlist, mline)
-  silent! exe 'chdir ' . s:escape(expand(g:QFixMRU_BaseDir), ' ')
+  silent! exe 'chdir ' . s:escape(g:QFixMRU_BaseDir, ' ')
   let head = QFixNormalizePath(getcwd()).'/'
   for d in mrudic
     let file = d['filename']
@@ -934,7 +934,7 @@ endfunction
 endif
 
 function! s:escape(str, chars)
-  return escape(a:str, a:chars.((has('win32')|| has('win64')) ? '#%&' : ''))
+  return escape(a:str, a:chars.((has('win32')|| has('win64')) ? '#%&' : '#%$'))
 endfunction
 
 let g:loaded_QFixMRU = 1

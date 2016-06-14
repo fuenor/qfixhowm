@@ -147,6 +147,6 @@ function! s:glob(path, file)
 endfunction
 
 function! s:escape(str, chars)
-  return escape(a:str, a:chars.((has('win32')|| has('win64')) ? '#%&' : ''))
+  return escape(a:str, a:chars.((has('win32')|| has('win64')) ? '#%&' : '#%$'))
 endfunction
 

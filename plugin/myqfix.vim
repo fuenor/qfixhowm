@@ -1271,7 +1271,7 @@ endfunction
 
 function! s:SetSearchPath(qf, path, ...)
   let prevPath = s:escape(getcwd(), ' ')
-  silent! exe 'chdir ' . s:escape(expand(a:path), ' ')
+  silent! exe 'chdir ' . s:escape(a:path, ' ')
   if a:0
     let cmd = a:1
   else
@@ -1932,6 +1932,6 @@ function! s:QFdoexec(cmd, fline, lline)
 endfunction
 
 function! s:escape(str, chars)
-  return escape(a:str, a:chars.((has('win32')|| has('win64')) ? '#%&' : ''))
+  return escape(a:str, a:chars.((has('win32')|| has('win64')) ? '#%&' : '#%$'))
 endfunction
 

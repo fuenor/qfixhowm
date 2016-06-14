@@ -1315,7 +1315,7 @@ function! qfixmemo#ListRecentTimeStamp(...)
     let tregxp = substitute(tregxp, '|', ' ', 'g')
     let prevPath = s:escape(getcwd(), ' ')
     let qf = getqflist()
-    exe 'chdir ' . s:escape(expand(g:qfixmemo_dir), ' ')
+    exe 'chdir ' . s:escape(g:qfixmemo_dir, ' ')
     let cmd = 'grep! /n /p /r /i /s /b "' . tregxp . '" *.*'
     silent! exe cmd
     exe 'chdir ' . prevPath
@@ -1821,7 +1821,7 @@ function! s:randomWriteFile(file, dir)
     call filter(sq, "v:val['text']     !~ '".rexclude."'")
     call filter(sq, "v:val['filename'] !~ '".rexclude."'")
   endif
-  exe 'chdir ' . s:escape(expand(dir), ' ')
+  exe 'chdir ' . s:escape(dir, ' ')
   let result = []
   call add(result, dir)
   let head = QFixNormalizePath(expand(dir)) . '/'
@@ -2073,7 +2073,7 @@ endfunction
 function! s:submenu_mkdir(basedir)
   let pathhead = '\([A-Za-z]:[/\\]\|\~[/\\]\|\.\.\?[/\\]\|[/\\]\)'
   let prevPath = s:escape(getcwd(), ' ')
-  exe 'chdir ' . s:escape(expand(a:basedir), ' ')
+  exe 'chdir ' . s:escape(a:basedir, ' ')
   let file = expand(s:qfixmemo_submenu_title)
   if file !~ '^'.pathhead
     let file = expand(a:basedir).'/'.file
@@ -2671,7 +2671,7 @@ function! qfixmemo#RebuildKeyword()
     let basedir = g:qfixmemo_submenu_dir
   endif
   let prevPath = s:escape(getcwd(), ' ')
-  exe 'chdir ' . s:escape(expand(basedir), ' ')
+  exe 'chdir ' . s:escape(basedir, ' ')
   let file = fnamemodify(g:qfixmemo_submenu_title, ':p')
   let saved_sq = getloclist(0)
   silent! exe 'lvimgrep /'.pattern.'/j '. s:escape(file, ' ')
@@ -2994,7 +2994,7 @@ endfunction
 
 """"""""""""""""""""""""""""""
 function! s:escape(str, chars)
-  return escape(a:str, a:chars.((has('win32')|| has('win64')) ? '#%&' : ''))
+  return escape(a:str, a:chars.((has('win32')|| has('win64')) ? '#%&' : '#%$'))
 endfunction
 
 "=============================================================================

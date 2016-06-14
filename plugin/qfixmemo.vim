@@ -535,7 +535,7 @@ function! IsQFixMemo(file)
   let saved_ei = &eventignore
   set eventignore=all
   let prevPath = s:escape(getcwd(), ' ')
-  silent! exe 'chdir ' . s:escape(expand(g:qfixmemo_dir), ' ')
+  silent! exe 'chdir ' . s:escape(g:qfixmemo_dir, ' ')
   let head = getcwd()
   silent! exe 'chdir ' . prevPath
   let &eventignore = saved_ei
@@ -547,7 +547,7 @@ function! IsQFixMemo(file)
 endfunction
 
 function! s:escape(str, chars)
-  return escape(a:str, a:chars.((has('win32')|| has('win64')) ? '#%&' : ''))
+  return escape(a:str, a:chars.((has('win32')|| has('win64')) ? '#%&' : '#%$'))
 endfunction
 
 function! s:BufEnter()

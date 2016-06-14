@@ -394,7 +394,7 @@ function! qfixlist#search(pattern, dir, cmd, days, fenc, file)
   let list = s:MyGrep(a:pattern, dir, a:file, fenc, 0)
 
   redraw | echo 'QFixList : Formatting...'
-  silent! exe 'chdir ' . s:escape(expand(dir), ' ')
+  silent! exe 'chdir ' . s:escape(dir, ' ')
   if g:qfixlist_use_fnamemodify == 0
     let head = fnamemodify(expand(dir), ':p')
     let head = QFixNormalizePath(head)
@@ -1624,7 +1624,7 @@ function! QFixNormalizePath(path, ...)
 endfunction
 
 function! s:escape(str, chars)
-  return escape(a:str, a:chars.((has('win32')|| has('win64')) ? '#%&' : ''))
+  return escape(a:str, a:chars.((has('win32')|| has('win64')) ? '#%&' : '#%$'))
 endfunction
 
 function! qfixlist#init()

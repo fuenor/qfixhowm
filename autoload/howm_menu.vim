@@ -492,7 +492,7 @@ function! s:HowmMenuReplace(sq, rep, head)
     silent! exe 'chdir ' . s:escape(g:QFixHowm_ScheduleSearchDir, ' ')
     let dir = g:QFixHowm_ScheduleSearchDir
   endif
-  let dir = QFixNormalizePath(dir)
+  let dir = QFixNormalizePath(expand(dir, ':p'))
   let dirlen = strlen(dir)
   let glist = []
   for d in a:sq
@@ -501,7 +501,7 @@ function! s:HowmMenuReplace(sq, rep, head)
     else
       let file = bufname(d['bufnr'])
     endif
-    let file = strpart(QFixNormalizePath(file), dirlen+1)
+    let file = strpart(QFixNormalizePath(expand(file, ':p')), dirlen+1)
     let file = a:head.file
     let lnum = d['lnum'] < 1 ? 0 : d['lnum']
     call add(glist, printf("%s|%d| %s", file, lnum, d['text']))

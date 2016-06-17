@@ -267,7 +267,7 @@ function! s:Cmd_RD(cmd, fline, lline)
   endif
   for lnum in range(a:fline, a:lline)
     let [file, lnum] = s:Getfile(lnum)
-    let dst = expand(g:qfixmemo_dir).'/'.fnamemodify(file, ':t')
+    let dst = fnamemodify(g:qfixmemo_dir, ':p').'/'.fnamemodify(file, ':t')
     if a:cmd == 'Delete'
       call delete(file)
     elseif a:cmd == 'Remove'
@@ -496,7 +496,7 @@ function! s:HowmMenuReplace(sq, rep, head)
     silent! exe 'chdir ' . s:escape(g:QFixHowm_ScheduleSearchDir, ' ')
     let dir = g:QFixHowm_ScheduleSearchDir
   endif
-  let dir = QFixNormalizePath(expand(dir, ':p'))
+  let dir = QFixNormalizePath(fnamemodify(dir, ':p'))
   let dirlen = strlen(dir)
   let glist = []
   for d in a:sq
@@ -505,7 +505,10 @@ function! s:HowmMenuReplace(sq, rep, head)
     else
       let file = bufname(d['bufnr'])
     endif
-    let file = strpart(QFixNormalizePath(expand(file, ':p')), dirlen+1)
+    let file = QFixNormalizePath(fnamemodify(file, ':p'))
+    if strpart(file, 0, dirlen) == dir
+      let file = strpart(file, dirlen)
+    endif
     let file = a:head.file
     let lnum = d['lnum'] < 1 ? 0 : d['lnum']
     call add(glist, printf("%s|%d| %s", file, lnum, d['text']))

@@ -360,7 +360,11 @@ function! QFixHowmOpenMenu(...)
   endif
   if use_random
     redraw|echo 'QFixHowm : Read random cache...'
-    let random = qfixmemo#RandomWalk(g:qfixmemo_random_file, 'qflist')
+    if (getftime(fnamemodify(g:qfixmemo_random_file, ':p')) < (localtime()-24*60*60))
+      let random = qfixmemo#RebuildRandomCache(g:qfixmemo_random_file, 'qflist')
+    else
+      let random = qfixmemo#RandomWalk(g:qfixmemo_random_file, 'qflist')
+    endif
   endif
   let reminder = []
   if use_reminder

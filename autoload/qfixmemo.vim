@@ -1686,7 +1686,7 @@ function! qfixmemo#RandomWalk(file, ...)
 endfunction
 
 " ランダムキャッシュ再作成
-function! qfixmemo#RebuildRandomCache(file)
+function! qfixmemo#RebuildRandomCache(file, ...)
   if qfixmemo#Init()
     return
   endif
@@ -1700,6 +1700,9 @@ function! qfixmemo#RebuildRandomCache(file)
   let file = a:file
   redraw | echo 'QFixMemo : Rebuild random cache...'
   let s:rwalk = s:randomWriteFile(file, dir)
+  if a:0
+    return s:rwalk
+  endif
   call qfixmemo#RandomWalk(file)
 endfunction
 

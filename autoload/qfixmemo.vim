@@ -235,7 +235,7 @@ if !exists('g:qfixmemo_random_file')
 endif
 " ランダム表示ファイル更新時間(日数)
 if !exists('g:qfixmemo_random_time')
-  let g:qfixmemo_random_time = 10
+  let g:qfixmemo_random_time = 3
 endif
 " ランダム表示数
 if !exists('g:qfixmemo_random_columns')

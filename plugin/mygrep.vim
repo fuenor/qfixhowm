@@ -222,6 +222,8 @@ endfunction
 """"""""""""""""""""""""""""""
 let s:prevResult = []
 function! QFixGrep(cmd, pattern, path, filepattern, fenc, ...)
+  let prevPath = s:escape(getcwd(), ' ')
+  let cwd = getcwd()
   let pattern = a:pattern
   if a:cmd =~ '\CV$'
     exe 'normal! vgvy'
@@ -236,9 +238,16 @@ function! QFixGrep(cmd, pattern, path, filepattern, fenc, ...)
     return
   endif
 
+  silent! exe 'chdir ' . prevPath
+  " FIXME : autochdirが有効の場合:pwdとgetcwd()が一致しないことがある
+  if exists('+autochdir') && &autochdir
+    let path = expand('%:p:h')
+    let cwd = path
+    let prevPath = s:escape(path, ' ')
+  endif
   let path = a:path
   if path == ''
-    let path = g:MyGrep_CurrentDirMode ? getcwd() : expand('%:p:h')
+    let path = g:MyGrep_CurrentDirMode ? cwd : expand('%:p:h')
   endif
 
   let filepattern = a:filepattern != '' ? a:filepattern : '*'
@@ -263,6 +272,7 @@ function! QFixGrep(cmd, pattern, path, filepattern, fenc, ...)
   endif
   let qflist = qfixlist#sortgrep(pattern, path, g:MyGrep_Sort, filepattern, fenc)
   let s:prevResult = extend(s:prevResult, qflist)
+  silent! exe 'chdir ' . prevPath
   if empty(qflist)
     redraw | echo 'QFixGrep : Not found!'
     echo pattern.' | '.fenc.' | '.filepattern.' | '. path
@@ -443,5 +453,9 @@ endfunction
 function s:help()
   let file = exists('g:qfixmemo_help') ? g:qfixmemo_help : g:QFixGrep_Help
   exe 'help '.file
+endfunction
+
+function! s:escape(str, chars)
+  return escape(a:str, a:chars.((has('win32')|| has('win64')) ? '#%&' : '#%$'))
 endfunction
 

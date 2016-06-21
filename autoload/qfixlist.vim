@@ -816,13 +816,12 @@ let s:MSWindows = has('win95') || has('win16') || has('win32') || has('win64')
 if !exists('g:mygrepprg')
   let g:mygrepprg = 'agrep.vim'
   if has('win32') + has('win64') - has('win95') > 0
-    let g:mygrepprg = 'findstr'
+    if &enc != 'utf-8'
+      let g:mygrepprg = 'findstr'
+    endif
   endif
-  if has('unix')
+  if executable('grep')
     let g:mygrepprg = 'grep'
-  endif
-  if executable("getprop") && system("getprop net.bt.name") =~ 'Android'
-    let g:mygrepprg = 'agrep.vim'
   endif
 endif
 " let mygrepprg=findstr, let mygrepprg=grepで切り替え可能に

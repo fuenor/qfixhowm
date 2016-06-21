@@ -277,7 +277,7 @@ if !exists('g:HowmHtml_OpenURIcmd')
     let g:HowmHtml_OpenURIcmd = g:QFixHowm_OpenURIcmd
   elseif has('unix')
     let g:HowmHtml_OpenURIcmd = "call system('firefox %s &')"
-    if executable("getprop") && system("getprop net.bt.name") =~ 'Android'
+    if exists('$ANDROID_DATA')
       let g:HowmHtml_OpenURIcmd = '!am start --user 0 -a android.intent.action.VIEW -t text/html -d %s'
       if exists("*ATEModIntent")
         let g:HowmHtml_OpenURIcmd = "call ATEModIntent('VIEW', '%s')"

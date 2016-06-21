@@ -789,7 +789,7 @@ function! s:BufWritePost()
 endfunction
 
 let s:init = 0
-let s:android = executable("getprop") && system("getprop net.bt.name") =~ 'Android'
+let s:android = exists('$ANDROID_DATA')
 function! qfixmemo#Init(...)
   " for qfixwin
   if &buftype == 'quickfix'

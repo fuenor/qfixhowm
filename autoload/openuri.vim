@@ -118,7 +118,7 @@ endif
 if !exists('g:openuri_cmd')
   if has('unix')
     let g:openuri_cmd = "call system('firefox %s &')"
-    if executable("getprop") && system("getprop net.bt.name") =~ 'Android'
+    if exists('$ANDROID_DATA')
       let g:openuri_cmd = '!am start --user 0 -a android.intent.action.VIEW -t text/html -d %s'
       if exists("*ATEModIntent")
         let g:openuri_cmd = "call ATEModIntent('VIEW', '%s')"

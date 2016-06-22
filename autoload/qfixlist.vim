@@ -816,9 +816,7 @@ let s:MSWindows = has('win95') || has('win16') || has('win32') || has('win64')
 if !exists('g:mygrepprg')
   let g:mygrepprg = 'agrep.vim'
   if has('win32') + has('win64') - has('win95') > 0
-    if &enc != 'utf-8'
-      let g:mygrepprg = 'findstr'
-    endif
+    let g:mygrepprg = 'findstr'
   endif
   if executable('grep')
     let g:mygrepprg = 'grep'

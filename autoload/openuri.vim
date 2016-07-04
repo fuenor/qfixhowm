@@ -414,8 +414,12 @@ function! s:openuri(uri)
       silent! exe cmd
       return 1
     endif
+
     let cmd = substitute(cmd, '%s', escape(uri, '&'), '')
-    let cmd = escape(cmd, '%#')
+    if has("win32") || has("win95") || has("win64") || has("win16")
+      let cmd = escape(cmd, '%#!')
+      let cmd = substitute(cmd, '^\\!start','!start', '')
+    endif
     silent! exe cmd
     return 1
   endif
@@ -425,6 +429,25 @@ endfunction
 """"""""""""""""""""""""""""""
 " URL Encode
 """"""""""""""""""""""""""""""
+let s:pcte = [
+    \ ['%', '%25'],
+    \ ["'", '%27'],
+    \ [' ', '%20'],
+    \ ['!', '%21'],
+    \ ['#', '%23'],
+    \ ['&', '%26'],
+    \ ['(', '%28'],
+    \ [')', '%29'],
+    \ ['+', '%2B'],
+    \ [';', '%3B'],
+    \ ['=', '%3D'],
+    \ ['?', '%3F'],
+    \ ['@', '%40'],
+    \ ['\$', '%24'],
+    \ ['\*', '%2A'],
+    \ ['\[', '%5B'],
+    \ ['\]', '%5D']
+    \ ]
 function! s:EncodeURL(str, ...)
   let to_enc = 'utf8'
   if a:0
@@ -435,7 +458,9 @@ function! s:EncodeURL(str, ...)
   let &enc = to_enc
   " FIXME:本当は'[^-0-9a-zA-Z._~]'を変換？
   let str = substitute(str, '[^\x00-\xff]', '\=s:URLByte2hex(s:URLStr2byte(submatch(0)))', 'g')
-  let str = substitute(str, ' ', '%20', 'g')
+  for pe in s:pcte
+    let str = substitute(str, pe[0], pe[1], 'g')
+  endfor
   let &enc = save_enc
   return str
 endfunction

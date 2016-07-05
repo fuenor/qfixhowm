@@ -391,6 +391,7 @@ function! s:HowmStr2HTML(list, htmlname, anchor)
   let prequote = 0
   let folding = 0
   for str in strlist
+
     if str =~ '^&&.*&&$'
       " 本文が && で囲まれていたら、HTMLには出力しない
       continue
@@ -408,6 +409,7 @@ function! s:HowmStr2HTML(list, htmlname, anchor)
     let str = substitute(str, '<', '\&lt;', 'g')
     let ostr = str
     let [saved_header, saved_list, saved_table, saved_folding, saved_define] = [header, list, table, folding, define]
+    let str = s:CnvLocalPath2Uri(str)
     if g:HowmHtml_ConvertLevel > 0
       " リンクタグ (>>> http:// c:\temp)
       let str = s:howmLinktag(str)
@@ -1947,6 +1949,29 @@ function! s:howmOutline(str, htmlname, anchor, header, jump)
   return [str, header, jump]
 endfunction
 
+function! s:CnvLocalPath2Uri(str)
+  let str = a:str
+  let pathhead = '\(\.\.\?[/\\]\)\+'
+  let pathchr  = '-!#%&+,.(){}0-9;=?@A-Za-z_~\\'
+
+  let prevPath = s:escape(getcwd(), ' ')
+  exe 'chdir ' . s:escape(fnamemodify(expand('%'), ':h'), ' ')
+  while match(str, pathhead) != -1
+    let uri = matchstr(str, pathhead)
+    let uri = QFixNormalizePath(fnamemodify(uri, ':p'))
+    let str = substitute(str, pathhead, 'file://'.uri, '')
+  endwhile
+  let filehead = '\([^'.pathchr.':]\[\?\|\[:\)\(\([/\\]['.pathchr.']\+\)\{2,}\)'
+  let str = substitute(str, filehead, '\1file://\2', 'g')
+  let str = substitute(str, 'file:///', 'file://'.fnamemodify('/', ':p'), 'g')
+  silent! exe 'chdir ' . prevPath
+  return str
+endfunction
+
+function! s:escape(str, chars)
+  return escape(a:str, a:chars.((has('win32')|| has('win64')) ? '#%&' : '#%$'))
+endfunction
+
 " リンクタグ
 function! s:howmLinktag(str)
   let urireg = '\([A-Za-z]:[/\\]\|\~/\|&gt;&gt;&gt;\)'
@@ -1962,7 +1987,7 @@ function! s:howmLinktag(str)
   let gstr = matchstr(str, glink.'.*$')
   let str = substitute(str, glink.'.*$', '', '')
 
-  let pathchr  = '[-!#%&+,.{}/0-9:;=?@A-Za-z_~\\]'
+  let pathchr  = "[-\\'!#$%&+,.\\[\\](){}/0-9:;=?@A-Za-z_~\\\\]"
   let str = s:uri2tag(str, pathchr)
 
   let pathchr  = '.'
@@ -2006,6 +2031,8 @@ function! s:uri2tag(str, pathchr)
     let urilen = strlen(uri)
     let uri = substitute(uri, 'memo://', 'howm://', '')
     let file = uri
+
+
     if uri =~ 'howm://'
       if g:HowmHtml_base_relmode == 0 && s:publish == ''
         let suri = substitute(uri, 'howm:///\?', s:howm_dir.'/', '')
@@ -2139,7 +2166,9 @@ function! s:uri2tag(str, pathchr)
       let orguri = alttext
     endif
     if uri =~ '^'.pathhead
-      let uri = expand(uri)
+      let uri = fnamemodify(uri, ':p')
+      let uri = substitute(uri, '&amp;', '\&', 'g')
+      let uri = s:EncodeURL(uri)
       let uri = substitute(uri, '\\', '/', 'g')
       let uri = 'file://'.uri
     endif
@@ -2176,6 +2205,54 @@ function! s:uri2tag(str, pathchr)
     let lstr = matchstr(lstr, urireg.'.*$')
   endwhile
   return str
+endfunction
+
+""""""""""""""""""""""""""""""
+" URL Encode
+""""""""""""""""""""""""""""""
+let s:pcte = [
+    \ ['%', '%25'],
+    \ ["'", '%27'],
+    \ [' ', '%20'],
+    \ ['!', '%21'],
+    \ ['#', '%23'],
+    \ ['&', '%26'],
+    \ ['(', '%28'],
+    \ [')', '%29'],
+    \ ['+', '%2B'],
+    \ [';', '%3B'],
+    \ ['=', '%3D'],
+    \ ['?', '%3F'],
+    \ ['@', '%40'],
+    \ ['\$', '%24'],
+    \ ['\*', '%2A'],
+    \ ['\[', '%5B'],
+    \ ['\]', '%5D']
+    \ ]
+
+function! s:EncodeURL(str, ...)
+  let to_enc = 'utf8'
+  if a:0
+    let to_enc = a:1
+  endif
+  let str = iconv(a:str, &enc, to_enc)
+  let save_enc = &enc
+  let &enc = to_enc
+  " FIXME:本当は'[^-0-9a-zA-Z._~]'を変換？
+  let str = substitute(str, '[^\x00-\xff]', '\=s:URLByte2hex(s:URLStr2byte(submatch(0)))', 'g')
+  for pe in s:pcte
+    let str = substitute(str, pe[0], pe[1], 'g')
+  endfor
+  let &enc = save_enc
+  return str
+endfunction
+
+function! s:URLStr2byte(str)
+  return map(range(len(a:str)), 'char2nr(a:str[v:val])')
+endfunction
+
+function! s:URLByte2hex(bytes)
+  return join(map(copy(a:bytes), 'printf("%%%02X", v:val)'), '')
 endfunction
 
 " 相対パスへ変換

@@ -1667,7 +1667,7 @@ function! qfixmemo#RandomWalk(file, ...)
   if count
     let g:qfixmemo_random_columns = count
   endif
-  if &ft == 'qf'
+  if &ft == 'qf' && winheight(0) > columns
     let columns = winheight(0)
   endif
   let dir = g:qfixmemo_dir

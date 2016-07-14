@@ -1488,7 +1488,8 @@ function! QFixPreviewOpen(file, line, ...)
 
   syntax clear
   if g:QFix_PreviewFtypeHighlight != 0
-    call s:QFixFtype_(file)
+    let qffile = file !~ '|' ? file : bufname(substitute(file, '|', '', 'g')+0)
+    call s:QFixFtype_(qffile)
     " BufReadの副作用への安全策
     silent! %delete _
     setlocal nofoldenable
@@ -1503,6 +1504,13 @@ function! QFixPreviewOpen(file, line, ...)
       let glist = getbufline(file, 1,'$')
     endif
     call setline(1, glist)
+  elseif file =~ '|'
+    let glist = getbufline(substitute(file, '|', '', 'g')+0, 1, '$')
+    if len(glist) > g:QFix_PreviewFileSize
+      call add(glist, '--- large file ---')
+    else
+      call setline(1, glist)
+    endif
   else
     let cmd = '-r '
     let file = substitute(file, '\\', '/', 'g')

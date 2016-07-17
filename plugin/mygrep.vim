@@ -43,7 +43,7 @@ if exists("g:loaded_MyGrep") && g:loaded_MyGrep && !exists('g:fudist')
 endif
 let g:MyGrep_version = s:version
 let g:loaded_MyGrep = 1
-if v:version < 700 || &cp
+if v:version < 700
   finish
 endif
 let s:debug = exists('g:fudist') ? g:fudist : 0

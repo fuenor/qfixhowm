@@ -71,7 +71,7 @@ if exists('g:loaded_QFixList') && g:loaded_QFixList && !exists('g:fudist')
 endif
 let g:QFixList_version = s:version
 let g:loaded_QFixList = 1
-if v:version < 700 || &cp
+if v:version < 700
   finish
 endif
 let s:debug = exists('g:fudist') ? g:fudist : 0

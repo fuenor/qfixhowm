@@ -6,7 +6,7 @@
 "        Version: 3.00
 "=============================================================================
 scriptencoding utf-8
-if v:version < 700 || &cp
+if v:version < 700
   finish
 endif
 " calendar.vimで使う休日定義ファイル
@@ -151,7 +151,7 @@ endfunction
 "=============================================================================
 let s:version = 104
 scriptencoding utf-8
-if v:version < 700 || &cp
+if v:version < 700
   finish
 endif
 

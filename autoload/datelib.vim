@@ -13,7 +13,7 @@ let s:version = 101
 " endif
 let g:datelib_version = s:version
 let g:loaded_datelib_vim = 1
-if v:version < 700 || &cp
+if v:version < 700
   finish
 endif
 

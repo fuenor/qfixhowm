@@ -13,7 +13,7 @@ endif
 if exists("g:loaded_Howm2html") && !exists('g:fudist')
   finish
 endif
-if v:version < 700 || &cp
+if v:version < 700
   finish
 endif
 let g:loaded_Howm2html = 1

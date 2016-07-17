@@ -21,7 +21,7 @@ if exists('g:loaded_qfixmemo_init') && g:loaded_qfixmemo_init && !exists('g:fudi
 endif
 let g:qfixmemo_init_version = s:version
 let g:loaded_qfixmemo_init = 1
-if v:version < 700 || &cp
+if v:version < 700
   finish
 endif
 let s:debug = exists('g:fudist') ? g:fudist : 0

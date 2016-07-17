@@ -1,4 +1,4 @@
-if v:version < 700 || &cp
+if v:version < 700
   finish
 endif
 scriptencoding utf-8

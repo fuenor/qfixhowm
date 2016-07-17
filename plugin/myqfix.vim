@@ -50,7 +50,7 @@ if exists("g:loaded_QFixWin") && g:loaded_QFixWin && !exists('g:fudist')
 endif
 let g:QFixWin_version = s:version
 let g:loaded_QFixWin = 1
-if v:version < 700 || &cp || !has('quickfix')
+if v:version < 700 || !has('quickfix')
   finish
 endif
 let s:debug = exists('g:fudist') ? g:fudist : 0

@@ -83,9 +83,6 @@ if exists('disable_HowmAlarm') && disable_HowmAlarm
   finish
 endif
 let loaded_HowmAlarm = 1
-if &cp
-  finish
-endif
 
 " 使用する定義ファイル
 if !exists('g:HowmAlarmFile')

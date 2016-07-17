@@ -33,7 +33,7 @@ if exists("g:loaded_QFixMRU") && g:loaded_QFixMRU && !exists('g:fudist')
   finish
 endif
 let g:QFixMRU_version = s:version
-if v:version < 700 || &cp || !has('quickfix')
+if v:version < 700 || !has('quickfix')
   let g:loaded_QFixMRU = 0
   finish
 endif

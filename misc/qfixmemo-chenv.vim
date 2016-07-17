@@ -22,7 +22,7 @@ if exists("loaded_QFixMemoChEnv")
   finish
 endif
 let loaded_QFixMemoChEnv = 1
-if v:version < 700 || &cp
+if v:version < 700
   finish
 endif
 

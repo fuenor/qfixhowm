@@ -25,7 +25,7 @@ if exists("loaded_QFixHowmChEnv")
   finish
 endif
 let loaded_QFixHowmChEnv = 1
-if v:version < 700 || &cp
+if v:version < 700
   finish
 endif
 

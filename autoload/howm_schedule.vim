@@ -50,7 +50,7 @@ if exists("g:loaded_HowmSchedule") && g:loaded_HowmSchedule && !exists('fudist')
   finish
 endif
 let g:QFixHowmSchedule_version = s:version
-if v:version < 700 || &cp || !has('quickfix')
+if v:version < 700 || !has('quickfix')
   finish
 endif
 let s:debug = exists('g:fudist') ? g:fudist : 0

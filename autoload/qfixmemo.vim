@@ -229,6 +229,12 @@ if !exists('g:qfixmemo_switch_action_max')
   let g:qfixmemo_switch_action_max = 8
 endif
 
+" 現バッファがQuickFixウィンドウでなければ、QuickFixウィンドウへ移動
+" <C-w>, の代替コマンドとして ,m が使えるようになる
+if !exists('g:qfixmemo_alt_list_mru')
+  let g:qfixmemo_alt_list_mru = 0
+endif
+
 " ランダム表示保存ファイル
 if !exists('g:qfixmemo_random_file')
   let g:qfixmemo_random_file = '~/.qfixmemo-random'
@@ -1239,6 +1245,16 @@ endfunction
 function! qfixmemo#ListMru()
   if qfixmemo#Init()
     return
+  endif
+  if g:qfixmemo_alt_list_mru && exists('*QFixGetqflist') && exists('g:QFix_Win') && QFixGetqflist() != []
+    let winnum = bufwinnr(g:QFix_Win)
+    if winnum == -1
+      call ToggleQFixWin()
+      return
+    elseif winnum != winnr()
+      call MoveToQFixWin()
+      return
+    endif
   endif
   if !exists("g:loaded_QFixMRU") || g:loaded_QFixMRU == 0
     redraw | echo 'QFixMemo : QFixMRU is not executable.'

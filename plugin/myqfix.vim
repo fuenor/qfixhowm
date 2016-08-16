@@ -433,9 +433,15 @@ endfunction
 
 function! s:QFixSetBuftype(...)
   if &buftype == 'quickfix' && !exists('b:qfixwin_buftype')
-    silent! let info = s:QFixGetBufInfo(bufnr('%'))
-    " let b:qfixwin_buftype = info !~ g:QFixWin_QuickFixTitleReg
-    let b:qfixwin_buftype = info =~ g:QFixWin_LocationListTitleReg
+    if v:version > 704 || (v:version == 704 && has('patch2215'))
+      let winnum = bufwinnr("%")
+      let winfo = getwininfo(win_getid(winnum))[0]
+      let b:qfixwin_buftype = (winfo.loclist == 1)
+    else
+      silent! let info = s:QFixGetBufInfo(bufnr('%'))
+      " let b:qfixwin_buftype = info !~ g:QFixWin_QuickFixTitleReg
+      let b:qfixwin_buftype = info =~ g:QFixWin_LocationListTitleReg
+    endif
   endif
 endfunction
 

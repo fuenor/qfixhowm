@@ -169,6 +169,9 @@ if !exists('g:QFix_HeightDefault')
   let g:QFix_HeightDefault = g:QFix_Height
 endif
 
+if !exists('g:QFix_Copen_Resize')
+  let g:QFix_Copen_Resize   = 0
+endif
 if !exists('g:QFix_Copen_winfixheight')
   let g:QFix_Copen_winfixheight   = 1
 endif
@@ -502,11 +505,11 @@ function! s:QFixBufEnter(...)
     if expand('<abuf>') == g:QFix_Win
       let w = &lines - winheight(0) - &cmdheight - (&laststatus > 0 ? 1 : 0)
       if w > 0
-        if exists('b:qfixwin_height') && b:qfixwin_height
+        if exists('b:qfixwin_height') && b:qfixwin_height && g:QFix_Copen_Resize
           exe 'resize '. b:qfixwin_height
         endif
       endif
-      if exists('b:qfixwin_width') && b:qfixwin_width
+      if exists('b:qfixwin_width') && b:qfixwin_width && g:QFix_Copen_Resize
         " exe 'vertical resize '. b:qfixwin_width
       endif
       if g:QFix_PreviewEnable > 0
@@ -743,7 +746,7 @@ function! s:QFixResize(...)
     let size = a:1
   endif
   let w = &lines - winheight(0) - &cmdheight - (&laststatus > 0 ? 1 : 0)
-  if w  > 0
+  if w  > 0 && g:QFix_Copen_Resize
     exe 'resize ' . size
   endif
   let g:QFix_Height = size
@@ -1178,7 +1181,7 @@ function! QFixCopen(...)
   let b:QFix_SearchPath = spath
   exe 'let g:QFix_SearchPath'.b:qfixwin_buftype.'=b:QFix_SearchPath'
   let g:QFix_Win = bufnr('%')
-  if g:QFix_Width > 0
+  if g:QFix_Width > 0 && g:QFix_Copen_Resize
     exe "vertical resize ".g:QFix_Width
   endif
   let g:QFix_PreviewEnable = saved_pe
@@ -1219,7 +1222,7 @@ function! QFixSetqfShortPath()
     silent! exe 'chdir ' . s:escape(spath, ' ')
     silent! exe cmd . 'open '
     let w = &lines - winheight(0) - &cmdheight - (&laststatus > 0 ? 1 : 0)
-    if w > 0 && &buftype == 'quickfix'
+    if w > 0 && &buftype == 'quickfix' && g:QFix_Copen_Resize
       exe 'resize '. wh
       " exe 'vertical resize '. ww
     endif
@@ -1329,7 +1332,7 @@ function! QFixSetqflist(sq, ...)
     exe 'call setqflist('.cmd.')'
   endif
   let w = &lines - winheight(0) - &cmdheight - (&laststatus > 0 ? 1 : 0)
-  if w > 0 && &buftype == 'quickfix'
+  if w > 0 && &buftype == 'quickfix' && g:QFix_Copen_Resize
     exe 'resize '. wh
     exe 'vertical resize '. ww
   endif
@@ -1374,7 +1377,7 @@ function! QFixPclose(...)
     let &winfixheight = saved_winfixheight
     let &winfixwidth  = saved_winfixwidth
     let w = &lines - winheight(0) - &cmdheight - (&laststatus > 0 ? 1 : 0)
-    if w > 0
+    if w > 0 && g:QFix_Copen_Resize
       exe 'resize '.wh
       " exe 'vertical resize '.ww
     endif

@@ -705,6 +705,8 @@ function! s:Close()
   let winnum = 1+(g:QFixHowm_MenuCalendar && (bufwinnr(s:calender_exists) != -1))
   if tabpagenr('$') == 1 && winnr('$') == winnum
     silent! bprev
+  elseif tabpagenr('$') > 1
+    tabclose
   else
     close
   endif

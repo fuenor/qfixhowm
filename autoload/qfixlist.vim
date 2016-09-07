@@ -835,19 +835,14 @@ if !exists('g:myjpgrepprg')
   let myjpgrepprg = ''
 endif
 
-" Windowsから cygwin 1.7以降のgrep.exeを使用する場合に
-" UTF-8の一部文字が検索不可能な問題に対する対処
-" cygwin 1.5のgrep.exe等他のgrepを使用する場合は必ず 0
-" findstrには影響しない
-if !exists('g:MyGrep_cygwin17')
-  let g:MyGrep_cygwin17 = 0
+" Windowsからgrep.exeを使用する場合に、UTF-8の一部文字が検索不可能なので
+" UTF-8文字列はコードページを変更してgrep
+" 古いgrep.exeで動作しない場合はMyGrep_chcp=0に設定する
+if !exists('g:MyGrep_chcp')
+  let g:MyGrep_chcp = 1
 endif
 " cygwin上で動作している場合は不要
 if has('win32unix')
-  let g:MyGrep_cygwin17 = 0
-endif
-" UTF-8文字列はコードページを変更してgrep(Windows)
-if !exists('g:MyGrep_chcp')
   let g:MyGrep_chcp = 0
 endif
 " grepを実行する際に$LANGも設定する
@@ -1221,7 +1216,7 @@ function! s:SetGrepEnv(mode, ...)
     endif
   endif
   if g:mygrepprg != 'findstr' && g:mygrepprg !~ '\.vim$' && g:mygrepprg !~ 'jvgrep'
-    if !s:MSWindows || g:MyGrep_LANG == '' || g:MyGrep_cygwin17 + g:MyGrep_chcp == 0
+    if !s:MSWindows || g:MyGrep_LANG == '' || g:MyGrep_chcp == 0
       return
     endif
     if a:mode == 'set'
@@ -1406,8 +1401,8 @@ function! s:ExecGrep(cmd, prg, searchPath, searchWord, from_encoding, to_encodin
   endif
   if exists('$CYGWIN') && s:MSWindows
     let saved_CYGWIN = $CYGWIN
-    let $CYGWIN = 'nodosfilewarning'
   endif
+  let $CYGWIN = 'nodosfilewarning'
 
   let g:MyGrep_path   = a:searchPath
   let g:MyGrep_execmd = cmd

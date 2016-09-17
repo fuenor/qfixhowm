@@ -2360,6 +2360,13 @@ function! qfixmemo#Cmd_AT(mode) range
     let file = QFixGet('file', firstline+n)
     let lnum = QFixGet('lnum', firstline+n)
     let [entry, flnum, llnum] = QFixMRUGet('entry', file, lnum, tpattern)
+    if flnum == -1 || llnum == -1
+      call setpos('.', save_cursor)
+      silent! wincmd p
+      let g:QFixMRU_Disable = 0
+      redraw | echo 'qfixmemo : This is not qfixmemo entries.'
+      return
+    endif
     let tdesc = entry[0] . flnum . llnum
     if count(elist, tdesc) != 0
       continue
@@ -2406,6 +2413,12 @@ function! qfixmemo#Cmd_Replace(mode)
     let file = bufname(bufnr)
     let lnum = d['lnum']
     let [text, lnum, llnum] = QFixMRUGet('title', file, lnum, tpattern)
+    if lnum == -1 || llnum == -1
+      silent! wincmd p
+      exe 'chdir ' . prevPath
+      redraw | echo 'qfixmemo : This is not qfixmemo entries.'
+      return
+    endif
     let sqdat = {'bufnr': bufnr, 'lnum': lnum, 'text': text}
     call filter(nsq, "(v:val['bufnr'] == ".bufnr . '&&'. "v:val['text'] == '".text ."') == 0")
     call add(nsq, sqdat)

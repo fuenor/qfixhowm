@@ -518,11 +518,45 @@ function! s:localkeymap()
 endfunction
 
 " デフォルトローカルキーマップ
-command! -count -nargs=1 QFixMRUMoveCursor call QFixMRUMoveCursor(<q-args>)
-if !exists('*QFixMRUMoveCursor')
-function! QFixMRUMoveCursor(pos, ...)
+function! qfixmemo#QFixMRUMoveCursor(pos, ...)
+  if exists('*QFixMRUMoveCursor')
+    call QFixMRUMoveCursor(a:pos, v:count)
+    return
+  endif
+  if a:pos == 'top'
+    call cursor(1, 1)
+  elseif a:pos == 'bottom'
+    call cursor(line('$'), 1)
+  else
+    let tpattern = '^'.escape(g:qfixmemo_title, g:qfixmemo_escape)
+    let cnt = 1
+    if v:count > 0
+      let cnt = v:count
+    endif
+    for i in range(1, cnt)
+      if a:pos == 'next'
+        let fline = search(tpattern, 'nW')
+        if fline == 0
+          let fline = line('$')
+        elseif i == cnt
+          let fline = fline - 1
+        endif
+      elseif a:pos == 'prev'
+        let opt = 'nbW'
+        if i == 1
+          let opt = 'cnbW'
+        endif
+        let fline = search(tpattern, opt)
+        if fline == 0
+          let fline = line('1')
+        else
+          let fline = fline
+        endif
+      endif
+      call cursor(fline, 1)
+    endfor
+  endif
 endfunction
-endif
 
 function! s:bufkeycmd(key, cmd, ...)
   let mode = a:0 ? a:1 : 'n'
@@ -802,6 +836,9 @@ function! qfixmemo#Init(...)
     let b:qfixwin_height = winheight(0)
     let b:qfixwin_width  = winwidth(0)
     let g:QFix_Height = b:qfixwin_height
+  endif
+  if !exists('g:loaded_QFixMRU')
+    call qfixmru#init()
   endif
   call QFixMemoInit()
   call QFixMemoTitleRegxp()
@@ -1249,10 +1286,10 @@ function! qfixmemo#ListMru()
   if g:qfixmemo_alt_list_mru && exists('*QFixGetqflist') && exists('g:QFix_Win') && QFixGetqflist() != []
     let winnum = bufwinnr(g:QFix_Win)
     if winnum == -1
-      call ToggleQFixWin()
+      call QFixToggleWin()
       return
     elseif winnum != winnr()
-      call MoveToQFixWin()
+      call QFixMoveToWin()
       return
     endif
   endif
@@ -1373,7 +1410,7 @@ endfunction
 " MRUを開く
 function! qfixmemo#MoveToAltQFixWin()
   if exists('g:loaded_QFixWin')
-    MoveToAltQFixWin
+    call QFixMoveToWin('alt')
   elseif ((exists("g:QFix_UseLocationList") && g:QFix_UseLocationList == 1))
     copen
   else

@@ -74,14 +74,14 @@ endif
 " コマンドは:QFixMemo [cmd]でも実行可能です。
 " cmdにはキーマップを指定します。
 " :QFixMemo c  " 新規作成
-command! -nargs=1 -count QFixMemo exe <SID>qfixmemo_command(<q-args>)
-command! -nargs=1 -count QFixHowm exe <SID>qfixmemo_command(<q-args>)
+" command! -nargs=1 -count QFixMemo exe <SID>qfixmemo_command(<q-args>)
+" command! -nargs=1 -count QFixHowm exe <SID>qfixmemo_command(<q-args>)
 
 " howm2htmlユーザーコマンド
 command! -bang -nargs=* -range=% Howm2html call howm2html#Howm2html(<bang>0, <f-args>)
-command! -bang -nargs=* Jump2html          call howm2html#Jump2html(<bang>0, <f-args>)
-command! -nargs=* HowmHtmlConvFiles        call howm2html#HowmHtmlConvFiles('%', <q-args>)
-command! -nargs=* -bang HowmHtmlUpdate     call howm2html#HowmHtmlConvFiles('%', <q-args>, '<bang>')
+command! -bang -nargs=* Howm2htmlJump      call howm2html#Jump2html(<bang>0, <f-args>)
+command! -nargs=* Howm2HtmlConvFiles       call howm2html#HowmHtmlConvFiles('%', <q-args>)
+command! -nargs=* -bang Howm2HtmlUpdate    call howm2html#HowmHtmlConvFiles('%', <q-args>, '<bang>')
 
 if !exists('g:qfixmemo_keymap')
   let g:qfixmemo_keymap = {
@@ -133,17 +133,17 @@ if !exists('g:qfixmemo_keymap_html')
   \ 'hr'    : ':Howm2html',
   \ 'hI'    : ':Howm2html! %',
   \ 'hR'    : ':Howm2html %',
-  \ 'hj'    : ':Jump2html!',
-  \ 'hJ'    : ':Jump2html!',
+  \ 'hj'    : ':Howm2htmlJump!',
+  \ 'hJ'    : ':Howm2htmlJump!',
   \ }
 endif
 
 if !exists('g:qfixmemo_keymap_local')
   let g:qfixmemo_keymap_local = {
-    \ 'P'  : 'QFixMRUMoveCursor top<CR>:<C-u>call qfixmemo#Template("top")',
-    \ 'p'  : 'QFixMRUMoveCursor prev<CR>:<C-u>call qfixmemo#Template("prev")',
-    \ 'n'  : 'QFixMRUMoveCursor next<CR>:<C-u>call qfixmemo#Template("next")',
-    \ 'N'  : 'QFixMRUMoveCursor bottom<CR>:<C-u>call qfixmemo#Template("bottom")',
+    \ 'P'  : 'call qfixmemo#QFixMRUMoveCursor("top")<CR>:<C-u>call qfixmemo#Template("top")',
+    \ 'p'  : 'call qfixmemo#QFixMRUMoveCursor("prev")<CR>:<C-u>call qfixmemo#Template("prev")',
+    \ 'n'  : 'call qfixmemo#QFixMRUMoveCursor("next")<CR>:<C-u>call qfixmemo#Template("next")',
+    \ 'N'  : 'call qfixmemo#QFixMRUMoveCursor("bottom")<CR>:<C-u>call qfixmemo#Template("bottom")',
     \ 'x'  : '<C-u>call qfixmemo#DeleteEntry()',
     \ 'X'  : '<C-u>call qfixmemo#DeleteEntry("Move")',
     \ 'W'  : '<C-u>call qfixmemo#DivideEntry()',
@@ -544,6 +544,24 @@ function! IsQFixMemo(file)
     return 1
   endif
   return 0
+endfunction
+
+" Windowsパス正規化
+let s:MSWindows = has('win95') + has('win16') + has('win32') + has('win64')
+function! QFixNormalizePath(path, ...)
+  let path = a:path
+  if s:MSWindows
+    if a:0 " 比較しかしないならキャピタライズ
+      let path = toupper(path)
+    else
+      " expand('~') で展開されるとドライブレターは大文字、
+      " expand('c:/')ではそのままなので統一
+      let path = substitute(path, '^\([a-z]\):', '\u\1:', '')
+    endif
+    let path = substitute(path, '\\', '/', 'g')
+  endif
+  " let path = expand(a:path)
+  return path
 endfunction
 
 function! s:escape(str, chars)

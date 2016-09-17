@@ -347,9 +347,9 @@ function! qfixlist#open(...)
   nnoremap <buffer> <silent> u :<C-u>call <SID>Exec('undo')<CR>
   nnoremap <buffer> <silent> <C-r> :<C-u>call <SID>Exec("redo")<CR>
 
-  nnoremap <buffer> <silent> A :MyGrepWriteResult<CR>
-  silent! nnoremap <buffer> <unique> <silent> o :MyGrepWriteResult<CR>
-  nnoremap <buffer> <silent> O :MyGrepReadResult<CR>
+  " nnoremap <buffer> <silent> A :MyGrepWriteResult<CR>
+  " silent! nnoremap <buffer> <unique> <silent> o :MyGrepWriteResult<CR>
+  " nnoremap <buffer> <silent> O :MyGrepReadResult<CR>
 
   if g:MyGrep_ErrorMes != ''
     " echohl ErrorMsg
@@ -507,8 +507,6 @@ let s:QFixList_qfCache = []
 let g:MyGrep_ErrorMes = ''
 
 function! s:QFBufWinEnter(name)
-  nnoremap <buffer> <silent> <C-g> :call <SID>Cmd_QFixListQFcopy('normal')<CR>
-  vnoremap <buffer> <silent> <C-g> :call <SID>Cmd_QFixListQFcopy('visual')<CR>
   if !g:qfixlist_autoclose
     return
   endif
@@ -765,13 +763,6 @@ function! s:Exec(cmd, ...) range
   setlocal modifiable
   exe cmd
   exe 'setlocal '.mod.'modifiable'
-endfunction
-
-function! qfixlist#copy2qfwin()
-  redraw|echo 'QFixList : Copying...'
-  call qfixlist#open(QFixGetqflist(), getcwd())
-  call cursor(1, 1)
-  redraw|echo ''
 endfunction
 
 if !exists('g:qfixmemo_dir')
@@ -1556,7 +1547,7 @@ endfunction
 endif
 " copen
 if !exists('*QFixCopen')
-command -nargs=* -bang QFixCopen call QFixCopen(<q-args>, <bang>0)
+" command -nargs=* -bang QFixCopen call QFixCopen(<q-args>, <bang>0)
 function QFixCopen(...)
   if g:QFix_UseLocationList
     silent! lopen
@@ -1567,7 +1558,7 @@ endfunction
 endif
 " cclose
 if !exists('*QFixCclose')
-command! QFixCclose call QFixCclose()
+" command! QFixCclose call QFixCclose()
 function! QFixCclose(...)
   if g:QFix_UseLocationList
     silent! lclose
@@ -1583,19 +1574,12 @@ endfunction
 endif
 " pclose
 if !exists('*QFixPclose')
-command QFixPclose call QFixPclose()
+" command QFixPclose call QFixPclose()
 function QFixPclose(...)
 endfunction
 endif
 if !exists('*QFixAltWincmdMap')
 function QFixAltWincmdMap(...)
-endfunction
-endif
-" MyGrepReadResult stab
-if !exists('*MyGrepReadResult')
-command! -count -nargs=* -bang MyGrepReadResult call MyGrepReadResult(<bang>0, <q-args>)
-function! MyGrepReadResult(readflag, ...)
-  echoe "MyGrepReadResult : cannot read QFixlib!"
 endfunction
 endif
 

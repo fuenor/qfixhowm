@@ -1506,9 +1506,9 @@ endfunction
 
 " ユーザーコマンド
 command! -bang -nargs=* -range=% Howm2html call howm2html#Howm2html(<bang>0, <f-args>)
-command! -bang -nargs=* Jump2html          call howm2html#Jump2html(<bang>0, <f-args>)
-command! -nargs=* HowmHtmlConvFiles        call howm2html#HowmHtmlConvFiles('%', <q-args>)
-command! -nargs=* -bang HowmHtmlUpdate     call howm2html#HowmHtmlConvFiles('%', <q-args>, '<bang>')
+command! -bang -nargs=* Howm2htmlJump      call howm2html#Jump2html(<bang>0, <f-args>)
+command! -nargs=* Howm2HtmlConvFiles       call howm2html#HowmHtmlConvFiles('%', <q-args>)
+command! -nargs=* -bang Howm2HtmlUpdate    call howm2html#HowmHtmlConvFiles('%', <q-args>, '<bang>')
 
 if !exists('s:howmtempfile')
   let s:howmtempfile = tempname()
@@ -1725,7 +1725,7 @@ function QFixHowmUserCmd(list)
   call s:OpenUri(uri)
 
   " Quickfixウィンドウを開く
-  OpenQFixWin
+  call QFixCopen()
   let s:firstrun = 1
 endfunction
 endif

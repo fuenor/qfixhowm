@@ -209,13 +209,6 @@ S                    ソート
 @                    表示中(選択中)のファイルを連結表示
 <F5>                 ランダム表示
 
-&                    現在のQuickFixリストをロケーションリストにコピー
-<C-g>                現在のQuickFixリストをQFixListにコピー
-A                    Quickfixウィンドウを保存
-<Leader>w            Quickfixウィンドウを保存
-O                    Quickfixウィンドウを読み込む
-<Leader>k            Quickfixウィンドウを読み込む(グローバル)
-
 R                    (選択中の)ファイルをqfixmemo_dir(howm_dir)へ移動
 D                    (選択中の)ファイルを削除
 x                    エントリを削除

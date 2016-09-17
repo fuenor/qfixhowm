@@ -327,10 +327,16 @@ endif
 " commands
 """"""""""""""""""""""""""""""
 " ShowReminder commands
-command! -count -nargs=* QFixHowmListReminderSche      call QFixHowmListReminder("schedule")
-command! -count -nargs=* QFixHowmListReminderTodo      call QFixHowmListReminder("todo")
-command! -count -nargs=* QFixHowmListReminderScheCache call QFixHowmListReminderCache("schedule")
-command! -count -nargs=* QFixHowmListReminderTodoCache call QFixHowmListReminderCache("todo")
+" command! -count -bang -nargs=* QFixHowmListReminderSche call <SID>QFixHowmListReminder("schedule", <bang>0)
+" command! -count -bang -nargs=* QFixHowmListReminderTodo call <SID>QFixHowmListReminder("todo", <bang>0)
+
+function! s:QFixHowmListReminder(mode, bang)
+  if a:bang
+    call QFixHowmListReminder(a:mode)
+  else
+    call QFixHowmListReminderCache(a:mode)
+  endif
+endfunction
 
 function! s:makeRegxp(dpattern)
   let s:hts_date     = a:dpattern
@@ -2662,7 +2668,7 @@ endfunction
 endif
 
 if !exists('*QFixPclose')
-command QFixPclose call QFixPclose()
+" command QFixPclose call QFixPclose()
 function QFixPclose(...)
 endfunction
 endif

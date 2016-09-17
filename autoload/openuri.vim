@@ -46,7 +46,7 @@ function! openuri#open(...)
 endfunction
 
 """"""""""""""""""""""""""""""
-command! -nargs=? Openuri call openuri#cursorline(<q-args>)
+" command! -nargs=? Openuri call openuri#cursorline(<q-args>)
 function! openuri#cursorline(...)
   let str = a:0 ? a:1 : ''
   if !openuri#open(str)

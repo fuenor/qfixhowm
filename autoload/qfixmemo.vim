@@ -496,6 +496,7 @@ function! qfixmemo#BufRead()
   if g:qfixmemo_folding
     call QFixMemoSetFolding()
   endif
+  set nofoldenable
   call s:localkeymap()
   call QFixMemoBufRead()
 endfunction
@@ -3073,7 +3074,7 @@ if !exists('g:qfixmemo_wildcard_chapter')
 endif
 "階層付きテキストもワイルドカードチャプター変換の対象にする
 if !exists('g:qfixmemo_wildcard_chapter_mode')
-  let g:qfixmemo_wildcard_chapter_mode = 1
+  let g:qfixmemo_wildcard_chapter_mode = 0
 endif
 "チャプターのタイトル行を折りたたみに含める/含めない
 if !exists('g:qfixmemo_folding_chapter_title')
@@ -3112,19 +3113,31 @@ call s:makeRegxp(g:qfixmemo_datepattern, g:qfixmemo_timepattern)
 " *. 形式のワイルドカードチャプター対応フォールディング
 if !exists('*QFixHowmFoldingLevelWCC')
 function QFixHowmFoldingLevelWCC(lnum)
-  let titlepat = '^'.escape(g:qfixmemo_title, g:qfixmemo_escape).'\([^'.g:qfixmemo_title.']\|$\)'
+  let titlepat = '^['.g:qfixmemo_title.'#.]\+\s'
   let text = getline(a:lnum)
-  if text =~ titlepat || text =~ s:schepat
+  if text =~ titlepat
+    if g:qfixmemo_folding_mode == 0
+      return '>1'
+    endif
+    if g:qfixmemo_folding == 1
+      let [str, f, e] = matchstrpos(text, '['.g:qfixmemo_title.'#.]\+')
+      return '>'. (e-f)
+    endif
+    return '='
+  elseif text =~ s:schepat
     if g:qfixmemo_folding == 1
       return '>1'
     endif
-    return '0'
+    return '='
+  endif
+  if text !~ '^\s*\(\*\.\|[0-9]\+\.\)'
+    return '='
   endif
   "カードチャプターに応じて折りたたみレベルを設定する
-  let wild = '\(\(\d\+\|\*\)\.\)\+\(\d\+\|\*\)\?'
-  let str = matchstr(text, '^\s*'.wild.'\s*')
+  let str = matchstr(text, '\(\(\d\+\|\*\)\.\)[*0-9.]*')
   let str = substitute(str, '\d\+', '*', 'g')
-  let level = strlen(substitute(str, '[^*]', '' , 'g'))
+  let str = substitute(str, '[^*]', '', 'g')
+  let level = strlen(str)
   if level == 0 && g:qfixmemo_folding_pattern != ""
     let str = matchstr(text, g:qfixmemo_folding_pattern.'\+')
     let str = substitute(str, '[^'.str[0].'].*$', '', 'g')
@@ -3135,14 +3148,14 @@ function QFixHowmFoldingLevelWCC(lnum)
       if g:qfixmemo_folding_chapter_title == 0
         return '>1'
       endif
-      return '0'
+      return '='
     endif
     return '1'
   elseif g:qfixmemo_folding_mode == 1
     if level
       return '>'.level
     endif
-    return 'a'
+    return '='
   endif
   return '1'
 endfunction

@@ -542,7 +542,7 @@ endfunction
 " フォールディングレベル計算
 " 折りたたみに ワイルドカードチャプターを使用する
 if !exists('g:QFixHowm_WildCardChapter')
-  let g:QFixHowm_WildCardChapter = 0
+  let g:QFixHowm_WildCardChapter = exists('g:qfixmemo_wildcard_chapter') ? g:qfixmemo_wildcard_chapter : 0
 endif
 "折りたたみのパターン
 if !exists('g:QFixHowm_FoldingPattern')
@@ -561,7 +561,6 @@ function! QFixMemoSetFolding()
     call QFixHowmSetFolding()
     return
   endif
-  setlocal nofoldenable
   setlocal foldmethod=expr
   if g:QFixHowm_WildCardChapter
     setlocal foldexpr=QFixHowmFoldingLevelWCC(v:lnum)

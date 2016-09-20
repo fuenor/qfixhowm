@@ -85,45 +85,52 @@ command! -nargs=* -bang Howm2HtmlUpdate    call howm2html#HowmHtmlConvFiles('%',
 
 if !exists('g:qfixmemo_keymap')
   let g:qfixmemo_keymap = {
-    \ 'C'       : 'call qfixmemo#EditInput()',
-    \ 'c'       : 'call qfixmemo#EditNew()',
-    \ 'u'       : 'call qfixmemo#Quickmemo()',
-    \ 'U'       : 'call qfixmemo#Quickmemo(0)',
-    \ '<Space>' : 'call qfixmemo#EditDiary(g:qfixmemo_diary)',
-    \ 'j'       : 'call qfixmemo#PairFile("%")',
-    \ 'i'       : 'call qfixmemo#SubMenu()',
-    \ 'I'       : 'call qfixmemo#SubMenu(0)',
-    \ 'm'       : 'call qfixmemo#ListMru()',
-    \ 'M'       : 'call qfixmemo#MoveToAltQFixWin()',
-    \ 'l'       : 'call qfixmemo#ListRecent()',
-    \ 'L'       : 'call qfixmemo#ListRecentTimeStamp()',
-    \ 'a'       : 'call qfixmemo#ListCmd()',
-    \ 'ra'      : 'call qfixmemo#ListCmd("nocache")',
-    \ 'A'       : 'call qfixmemo#ListFile(g:qfixmemo_diary)',
-    \ 'rA'      : 'call qfixmemo#Glob(g:qfixmemo_dir, "**/*", "open")',
-    \ 'rN'      : 'call qfixmemo#ListRenameFile(g:qfixmemo_filename)',
-    \ 'rr'      : 'call qfixmemo#RandomWalk(g:qfixmemo_random_file)',
-    \ 'rR'      : 'call qfixmemo#RebuildRandomCache(g:qfixmemo_random_file)',
-    \ 'rk'      : 'call qfixmemo#RebuildKeyword()',
-    \ 's'       : 'call qfixmemo#FGrep()',
-    \ 'g'       : 'call qfixmemo#Grep()',
-    \ 'q'       : 'call qfixmemo#Calendar()',
-    \ 'Q'       : 'call qfixmemo#Calendar("LR")',
-    \ 'd'       : 'call qfixmemo#InsertDate("Date")',
-    \ 'T'       : 'call qfixmemo#InsertDate("Time")'
+    \ 'C'       : ':<C-u>call qfixmemo#EditInput()',
+    \ 'c'       : ':<C-u>call qfixmemo#EditNew()',
+    \ 'u'       : ':<C-u>call qfixmemo#Quickmemo()',
+    \ 'U'       : ':<C-u>call qfixmemo#Quickmemo(0)',
+    \ '<Space>' : ':<C-u>call qfixmemo#EditDiary(g:qfixmemo_diary)',
+    \ 'j'       : ':<C-u>call qfixmemo#PairFile("%")',
+    \ 'i'       : ':<C-u>call qfixmemo#SubMenu()',
+    \ 'I'       : ':<C-u>call qfixmemo#SubMenu(0)',
+    \ 'm'       : ':<C-u>call qfixmemo#ListMru()',
+    \ 'M'       : ':<C-u>call qfixmemo#MoveToAltQFixWin()',
+    \ 'l'       : ':<C-u>call qfixmemo#ListRecent()',
+    \ 'L'       : ':<C-u>call qfixmemo#ListRecentTimeStamp()',
+    \ 'a'       : ':<C-u>call qfixmemo#ListCmd()',
+    \ 'ra'      : ':<C-u>call qfixmemo#ListCmd("nocache")',
+    \ 'A'       : ':<C-u>call qfixmemo#ListFile(g:qfixmemo_diary)',
+    \ 'rA'      : ':<C-u>call qfixmemo#Glob(g:qfixmemo_dir, "**/*", "open")',
+    \ 'rN'      : ':<C-u>call qfixmemo#ListRenameFile(g:qfixmemo_filename)',
+    \ 'rr'      : ':<C-u>call qfixmemo#RandomWalk(g:qfixmemo_random_file)',
+    \ 'rR'      : ':<C-u>call qfixmemo#RebuildRandomCache(g:qfixmemo_random_file)',
+    \ 'rk'      : ':<C-u>call qfixmemo#RebuildKeyword()',
+    \ 's'       : ':<C-u>call qfixmemo#FGrep()',
+    \ 'g'       : ':<C-u>call qfixmemo#Grep()',
+    \ 'q'       : ':<C-u>call qfixmemo#Calendar()',
+    \ 'Q'       : ':<C-u>call qfixmemo#Calendar("LR")',
+    \ 'd'       : ':<C-u>call qfixmemo#InsertDate("Date")',
+    \ 'T'       : ':<C-u>call qfixmemo#InsertDate("Time")',
+    \ 'z'       : ':call qfixmemo#WildcardChapter()'
     \ }
+endif
+
+if !exists('g:qfixmemo_keymap_v')
+  let g:qfixmemo_keymap_v = {
+    \ 'z'  : ':call qfixmemo#WildcardChapter("visual")'
+  \ }
 endif
 
 if !exists('g:qfixmemo_keymap_schedule')
   let g:qfixmemo_keymap_schedule = {
-  \ 't'     : 'call qfixmemo#ListReminderCache("todo")',
-  \ 'rt'    : 'call qfixmemo#ListReminder("todo")',
-  \ 'y'     : 'call qfixmemo#ListReminderCache("schedule")',
-  \ '<Tab>' : 'call qfixmemo#ListReminderCache("schedule")',
-  \ 'ry'    : 'call qfixmemo#ListReminder("schedule")',
-  \ 'rd'    : 'call qfixmemo#GenerateRepeatDate()',
-  \ ','     : 'call qfixmemo#OpenMenu("cache")',
-  \ 'r,'    : 'call qfixmemo#OpenMenu()',
+  \ 't'     : ':<C-u>call qfixmemo#ListReminderCache("todo")',
+  \ 'rt'    : ':<C-u>call qfixmemo#ListReminder("todo")',
+  \ 'y'     : ':<C-u>call qfixmemo#ListReminderCache("schedule")',
+  \ '<Tab>' : ':<C-u>call qfixmemo#ListReminderCache("schedule")',
+  \ 'ry'    : ':<C-u>call qfixmemo#ListReminder("schedule")',
+  \ 'rd'    : ':<C-u>call qfixmemo#GenerateRepeatDate()',
+  \ ','     : ':<C-u>call qfixmemo#OpenMenu("cache")',
+  \ 'r,'    : ':<C-u>call qfixmemo#OpenMenu()',
   \ }
 endif
 
@@ -140,44 +147,43 @@ endif
 
 if !exists('g:qfixmemo_keymap_local')
   let g:qfixmemo_keymap_local = {
-    \ 'P'  : 'call qfixmemo#QFixMRUMoveCursor("top")<CR>:<C-u>call qfixmemo#Template("top")',
-    \ 'p'  : 'call qfixmemo#QFixMRUMoveCursor("prev")<CR>:<C-u>call qfixmemo#Template("prev")',
-    \ 'n'  : 'call qfixmemo#QFixMRUMoveCursor("next")<CR>:<C-u>call qfixmemo#Template("next")',
-    \ 'N'  : 'call qfixmemo#QFixMRUMoveCursor("bottom")<CR>:<C-u>call qfixmemo#Template("bottom")',
-    \ 'x'  : '<C-u>call qfixmemo#DeleteEntry()',
-    \ 'X'  : '<C-u>call qfixmemo#DeleteEntry("Move")',
-    \ 'W'  : '<C-u>call qfixmemo#DivideEntry()',
-    \ 'S'  : '<C-u>call qfixmemo#UpdateTime(1)',
-    \ 'rs' : '<C-u>call qfixmemo#SortEntry("Normal")',
-    \ 'rS' : '<C-u>call qfixmemo#SortEntry("Reverse")',
-    \ 'f'  : '<C-u>call qfixmemo#FGrep()',
-    \ 'e'  : '<C-u>call qfixmemo#Grep()',
-    \ 'w'  : '<C-u>call qfixmemo#ForceWrite()',
-    \ 'rn' : '<C-u>call qfixmemo#Rename()',
-    \ 'o'  : 'call QFixMemoOutline()',
-    \ 'z'  : 'call CnvWildcardChapter()'
+    \ 'P'  : ':call qfixmemo#QFixMRUMoveCursor("top")<CR>:<C-u>call qfixmemo#Template("top")',
+    \ 'p'  : ':call qfixmemo#QFixMRUMoveCursor("prev")<CR>:<C-u>call qfixmemo#Template("prev")',
+    \ 'n'  : ':call qfixmemo#QFixMRUMoveCursor("next")<CR>:<C-u>call qfixmemo#Template("next")',
+    \ 'N'  : ':call qfixmemo#QFixMRUMoveCursor("bottom")<CR>:<C-u>call qfixmemo#Template("bottom")',
+    \ 'x'  : ':<C-u>call qfixmemo#DeleteEntry()',
+    \ 'X'  : ':<C-u>call qfixmemo#DeleteEntry("Move")',
+    \ 'W'  : ':<C-u>call qfixmemo#DivideEntry()',
+    \ 'S'  : ':<C-u>call qfixmemo#UpdateTime(1)',
+    \ 'rs' : ':<C-u>call qfixmemo#SortEntry("Normal")',
+    \ 'rS' : ':<C-u>call qfixmemo#SortEntry("Reverse")',
+    \ 'f'  : ':<C-u>call qfixmemo#FGrep()',
+    \ 'e'  : ':<C-u>call qfixmemo#Grep()',
+    \ 'w'  : ':<C-u>call qfixmemo#ForceWrite()',
+    \ 'rn' : ':<C-u>call qfixmemo#Rename()',
+    \ 'o'  : ':call QFixMemoOutline()',
   \ }
 endif
 
 if !exists('g:qfixmemo_keymap_local_v')
   let g:qfixmemo_keymap_local_v = {
-    \ 'W'  : 'call qfixmemo#DivideEntry()',
-    \ 'z'  : 'call CnvWildcardChapter("visual")',
+    \ 'W'  : ':call qfixmemo#DivideEntry()',
   \ }
 endif
 
 if !exists('g:qfixmemo_keymap_menu_local')
   let g:qfixmemo_keymap_menu_local = {
-    \ 'P'  : 'call qfixmemo#Template("top")',
-    \ 'p'  : 'call qfixmemo#Template("prev")',
-    \ 'n'  : 'call qfixmemo#Template("next")',
-    \ 'N'  : 'call qfixmemo#Template("bottom")',
-    \ 'S'  : 'call qfixmemo#UpdateTime(1)',
-    \ 'rs' : 'call qfixmemo#SortEntry("Normal")',
-    \ 'rS' : 'call qfixmemo#SortEntry("Reverse")',
-    \ 'x'  : 'call qfixmemo#DeleteEntry()',
-    \ 'X'  : 'call qfixmemo#DeleteEntry("Move")',
-    \ 'W'  : 'call qfixmemo#DivideEntry()',
+    \ 'P'  : ':call qfixmemo#QFixMRUMoveCursor("top")<CR>:<C-u>call qfixmemo#Template("top")',
+    \ 'p'  : ':call qfixmemo#QFixMRUMoveCursor("prev")<CR>:<C-u>call qfixmemo#Template("prev")',
+    \ 'n'  : ':call qfixmemo#QFixMRUMoveCursor("next")<CR>:<C-u>call qfixmemo#Template("next")',
+    \ 'N'  : ':call qfixmemo#QFixMRUMoveCursor("bottom")<CR>:<C-u>call qfixmemo#Template("bottom")',
+    \ 'S'  : ':<C-u>call qfixmemo#UpdateTime(1)',
+    \ 'rs' : ':<C-u>call qfixmemo#SortEntry("Normal")',
+    \ 'rS' : ':<C-u>call qfixmemo#SortEntry("Reverse")',
+    \ 'x'  : ':<C-u>call qfixmemo#DeleteEntry()',
+    \ 'X'  : ':<C-u>call qfixmemo#DeleteEntry("Move")',
+    \ 'W'  : ':<C-u>call qfixmemo#DivideEntry()',
+    \ 'o'  : ':call QFixMemoOutline()',
     \ }
 endif
 
@@ -185,7 +191,7 @@ function! s:qfixmemo_command(cmd)
   let qfcmd = ''
   let cmd = a:cmd
   if cmd == 'H'
-    return 'help '.g:qfixmemo_help
+    return ':help '.g:qfixmemo_help
   endif
 
   let cmd = cmd =~ '\cspace' ? '<Space>' : cmd
@@ -213,13 +219,17 @@ function! s:QFixMemoKeymap()
   exe 'silent! nnoremap <silent> <unique> '.leader.' <Nop>'
 
   for key in keys(g:qfixmemo_keymap)
-    call s:qfkeycmd(leader, key, ':<C-u>'.g:qfixmemo_keymap[key].'<CR>')
+    call s:qfkeycmd(leader, key, g:qfixmemo_keymap[key].'<CR>')
+  endfor
+
+  for key in keys(g:qfixmemo_keymap_v)
+    call s:qfkeycmd(leader, key, g:qfixmemo_keymap_v[key].'<CR>', 'v')
   endfor
 
   if g:qfixmemo_use_howm_schedule
     let g:qfixmemo_howm_schedule_key = 1
     for key in keys(g:qfixmemo_keymap_schedule)
-      call s:qfkeycmd(leader, key, ':<C-u>'.g:qfixmemo_keymap_schedule[key].'<CR>')
+      call s:qfkeycmd(leader, key, g:qfixmemo_keymap_schedule[key].'<CR>')
     endfor
   endif
 
@@ -293,8 +303,8 @@ function QFixMemoMenubar(menu, leader)
   call s:addMenu(menucmd, 'Rebuild-RandomWalk(&X)', 'rR')
   exe printf(sepcmd, 7)
   call s:addMenu(menucmd, 'Rebuild-Keyword(&K)', 'rk')
-  exe printf(sepcmd, 8)
-  call s:addMenu(menucmd, 'Rename(&Z)',       'rn')
+  " exe printf(sepcmd, 8)
+  " call s:addMenu(menucmd, 'Rename(&Z)',       'rn')
   " call s:addMenu(menucmd, 'Rename-files(&Z)', 'rN')
   if g:qfixmemo_use_howm_schedule
     exe printf(sepcmd, 9)
@@ -328,7 +338,7 @@ endif
 
 function! s:addMenu(menu, acc, key)
   " exe printf(a:menu, a:acc, a:key, a:cmd)
-  let cmd = ':<C-u>'.s:qfixmemo_command(a:key).'<CR>'
+  let cmd = s:qfixmemo_command(a:key).'<CR>'
   exe printf(a:menu, a:acc, a:key, cmd)
 endfunction
 

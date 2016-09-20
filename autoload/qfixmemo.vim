@@ -191,7 +191,7 @@ endif
 
 " grep時にカーソル位置の単語を拾う
 if !exists('g:qfixmemo_grep_cword')
-  let g:qfixmemo_grep_cword = 1
+  let g:qfixmemo_grep_cword = 0
 endif
 
 " 連結表示のセパレータ
@@ -570,10 +570,10 @@ function! s:QFixMemoLocalKeymap()
     return
   endif
   for key in keys(g:qfixmemo_keymap_local)
-    call s:bufkeycmd(key, ':'.g:qfixmemo_keymap_local[key].'<CR>')
+    call s:bufkeycmd(key, g:qfixmemo_keymap_local[key].'<CR>')
   endfor
   for key in keys(g:qfixmemo_keymap_local_v)
-    call s:bufkeycmd(key, ':'.g:qfixmemo_keymap_local_v[key].'<CR>', 'v')
+    call s:bufkeycmd(key, g:qfixmemo_keymap_local_v[key].'<CR>', 'v')
   endfor
   nnoremap <silent> <buffer> <CR> :call QFixMemoUserModeCR()<CR>
 endfunction
@@ -1589,7 +1589,7 @@ function! qfixmemo#Rename()
   let from = substitute(fnamemodify(expand('%'), ':p'), '\\', '/', 'g')
   let tpattern = qfixmemo#TitleRegxp()
   let [title, flnum, llnum] = QFixMRUGet('title', '%', 1, tpattern)
-  let title = s:formatFileName(title, g:qfixmemo_rename_length)
+  let title = ''
   while 1
     let to = input('Rename to : ', title)
     if to == ''
@@ -3162,8 +3162,8 @@ endfunction
 endif
 
 " *. 形式のワイルドカードチャプターを数字に変換
-if !exists('*CnvWildcardChapter')
-function CnvWildcardChapter(...) range
+function qfixmemo#WildcardChapter(...) range
+  call qfixmemo#Init()
   let firstline = a:firstline
   let lastline = a:lastline
   if a:0 == 0 && count == 0
@@ -3219,7 +3219,6 @@ function CnvWildcardChapter(...) range
   endfor
   call setpos('.', save_cursor)
 endfunction
-endif
 
 " フォールディングレベル計算
 if !exists('*QFixMemoSetFolding')

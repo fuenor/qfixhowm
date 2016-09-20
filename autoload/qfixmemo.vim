@@ -593,14 +593,14 @@ endfunction
 function! s:syntaxHighlight()
   if g:qfixmemo_syntax_flag =~ '^...1'
     silent! syn clear qfixmemoTitle
-    let l:qfixmemo_title = escape(g:qfixmemo_title, g:qfixmemo_escape)
-    exe 'syn region qfixmemoTitle start="^'.l:qfixmemo_title.'[^'.g:qfixmemo_title.']'.'" end="$" contains=qfixmemoTitleDesc,qfixmemoCategory'
-    exe 'syn match qfixmemoTitleDesc "^'.l:qfixmemo_title.'$"'
-    exe 'syn match qfixmemoTitleDesc contained "^'.l:qfixmemo_title.'"'
-    syn match qfixmemoCategory contained +\(\[.\{-}\]\)\++
-    hi def link qfixmemoTitle     Title
-    hi def link qfixmemoTitleDesc Special
-    hi def link qfixmemoCategory  Statement
+    silent! syn clear qfixmemoTitleBullet
+    silent! syn clear qfixmemoTitleCategory
+    exe 'syn region qfixmemoTitle start="^['.g:qfixmemo_title.']" end="$" keepend contains=qfixmemoTitleBullet,qfixmemoTitleCategory'
+    exe 'syn match qfixmemoTitleBullet contained "^['.g:qfixmemo_title.']\{1,6}"'
+    syn match qfixmemoTitleCategory contained '\[.\{-}\]'
+    hi def link qfixmemoTitle         Title
+    hi def link qfixmemoTitleBullet   Special
+    hi def link qfixmemoTitleCategory Identifier
   endif
   if g:qfixmemo_syntax_flag =~ '^..1.'
     silent! syn clear qfixmemoKeyword
@@ -610,10 +610,12 @@ function! s:syntaxHighlight()
     hi def link qfixmemoKeyword Underlined
   endif
   if g:qfixmemo_syntax_flag =~ '^.1..'
+    silent! syn clear qfixmemoDateTime
+    silent! syn clear qfixmemoDate
+    silent! syn clear qfixmemoTime
     exe 'syn match qfixmemoDateTime "'.g:qfixmemo_timestamp_regxp . '" contains=qfixmemoDate,qfixmemoTime'
-    syn match qfixmemoDate contained '\d\{4}-\d\{2}-\d\{2}'
-    syn match qfixmemoDate contained '\d\{4}/\d\{2}/\d\{2}'
-    syn match qfixmemoTime contained '\d\{2}\(:\d\{2}\)\+'
+    syn match qfixmemoDate contained '\d\{4}[-/]\d\{2}[-/]\d\{2}'
+    syn match qfixmemoTime contained '\d\{2}\(:\d\{2}\)\{1,2}'
 
     hi def link qfixmemoDate Underlined
     hi def link qfixmemoTime Constant

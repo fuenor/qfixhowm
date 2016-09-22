@@ -72,14 +72,6 @@ syn match qfixmemoDefColon  contained '^\s*:\|\s:'
 hi def link qfixmemoDefinition Identifier
 hi def link qfixmemoDefColon   Label
 
-" hatena (pre, quote)
-syn match hatenaBlockDelimiter '^\s*>|.\{-}|$\|^||<$'
-syn region hatenaSuperPre   matchgroup=hatenaBlockDelimiter start=+^>|[^|]*|$+ end=+^||<$+
-syn region hatenaBlockQuote matchgroup=hatenaBlockDelimiter start=+^>>$+  end=+^<<$+ contains=ALL
-
-hi def link hatenaSuperPre       Comment
-hi def link hatenaBlockDelimiter DiffText
-
 "----------
 " chapter
 "----------
@@ -128,9 +120,13 @@ syn match qfixmemoListBullet contained '^\s*-\+'
 hi def link qfixmemoList       Normal
 hi def link qfixmemoListBullet Label
 
+" fenced language
+syn region qfixmemoBlock matchgroup=qfixmemoBlockDelimiter start=+^\s*```.*+ end=+^\s*```$+
+hi def link qfixmemoBlockDelimiter Delimiter
+
 " block quote
-syn region qfixmemoBlockQuote start='^>\{1,}\%(\s\|$\)' end='$' contains=qfixmemoBlockQuoteDelimiter,howmLink
-syn match qfixmemoBlockQuoteDelimiter contained '^>\%(\s\|$\)'
+syn region qfixmemoBlockQuote start='^>\s*' end='$' contains=qfixmemoBlockQuoteDelimiter,howmLink,hatenaSuperPre
+syn match qfixmemoBlockQuoteDelimiter contained '^>[>[:space:]]*'
 hi def link qfixmemoBlockQuoteDelimiter Comment
 
 " horizontal rule
@@ -146,6 +142,16 @@ syn match qfixmemoCodeDelimiter contained '`'
 
 " hi def link qfixmemoCode          Comment
 hi def link qfixmemoCodeDelimiter Delimiter
+
+"----------
+" hatena
+"----------
+" pre, quote
+syn match hatenaBlockDelimiter '^\s*>|.\{-}|$\|^||<$'
+syn region hatenaSuperPre matchgroup=hatenaBlockDelimiter start=+^\s*>|[^|]*|$+ end=+^\s*||<$+
+
+hi def link hatenaSuperPre       Comment
+hi def link hatenaBlockDelimiter Delimiter
 
 "----------
 " howm2html.vim

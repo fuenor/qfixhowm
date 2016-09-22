@@ -15,7 +15,6 @@ if g:qfixmemo_markdown_syntax
   if !exists('g:qfixmemo_markdown_emphasis') || g:qfixmemo_markdown_emphasis == 0
     silent! syntax clear markdownBold
     silent! syntax clear markdownItalic
-  else
   endif
 endif
 let b:current_syntax = "qfix_memo"
@@ -36,8 +35,7 @@ hi def link txtUrl  Underlined
 "----------
 " contains markdown.vim
 "----------
-" code block
-syn region qfixmemoCodeBlock start="^\(    \|\t\)" end="$" contains=markdownCode
+syn region qfixmemoCodeBlock start="^\(    \|\t\)" end="$"
 " hi def link qfixmemoQuote Comment
 
 "----------

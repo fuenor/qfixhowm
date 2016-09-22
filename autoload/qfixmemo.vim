@@ -3135,31 +3135,18 @@ function QFixHowmFoldingLevelWCC(lnum)
   if text !~ '^\s*\(\*\.\|[0-9]\+\.\)'
     return '='
   endif
-  "カードチャプターに応じて折りたたみレベルを設定する
+  if g:qfixmemo_folding_mode == 0
+    return '>1'
+  endif
+  " ワイルドカードチャプターに応じて折りたたみレベルを設定する
   let str = matchstr(text, '\(\(\d\+\|\*\)\.\)[*0-9.]*')
   let str = substitute(str, '\d\+', '*', 'g')
   let str = substitute(str, '[^*]', '', 'g')
   let level = strlen(str)
-  if level == 0 && g:qfixmemo_folding_pattern != ""
-    let str = matchstr(text, g:qfixmemo_folding_pattern.'\+')
-    let str = substitute(str, '[^'.str[0].'].*$', '', 'g')
-    let level = strlen(str)
+  if level
+    return '>'.level
   endif
-  if g:qfixmemo_folding_mode == 0
-    if level
-      if g:qfixmemo_folding_chapter_title == 0
-        return '>1'
-      endif
-      return '='
-    endif
-    return '1'
-  elseif g:qfixmemo_folding_mode == 1
-    if level
-      return '>'.level
-    endif
-    return '='
-  endif
-  return '1'
+  return '='
 endfunction
 endif
 

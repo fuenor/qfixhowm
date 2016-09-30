@@ -710,6 +710,7 @@ function! qfixmemo#AddTitle(...)
           if strlen(str) != len
             let str = str . '...'
           endif
+          let str = substitute(str, '\s*$', '', '')
           let title = substitute(title, '\s*$', ' ', '') . str
           let title = substitute(title, '^'. l:qfixmemo_title . '\s*', g:qfixmemo_title . ' ' , '')
           call setline(fline, title)

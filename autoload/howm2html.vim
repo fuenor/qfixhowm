@@ -4,7 +4,7 @@
 "     Maintainer: fuenor@gmail.com
 "                 http://dl.dropbox.com/u/1736409/howm/howm2html.html
 "=============================================================================
-let s:version  = '1.31'
+let s:version  = '1.32'
 scriptencoding utf-8
 
 if exists('g:disable_Howm2html') && g:disable_Howm2html == 1
@@ -358,7 +358,7 @@ function! s:MarkdownStr2HTML(list, ...)
     call map(html, 'iconv(v:val, to, from)')
   endif
 
-  let pathhead = '\([A-Za-z]:[/\\]\|\~/\)'
+  let pathhead = '\(\(^\|[\s]*\|[^[:alpha:]]\)[A-Za-z]:[/\\]\|\~/\)'
   for i in range(len(html))
     let str = html[i]
     if str =~ '\[:\?.\{-}\.\(jpg\|jpeg\|png\|bmp\|gif\):.\{-}\]'
@@ -1951,19 +1951,19 @@ endfunction
 
 function! s:CnvLocalPath2Uri(str)
   let str = a:str
-  let pathhead = '\(\.\.\?[/\\]\)\+'
+  let pathhead = '\(^\|[:space:]\|[^[:graph:]]\)\(\.\.\?[/\\]\)\+'
   let pathchr  = '-!#%&+,.(){}0-9;=?@A-Za-z_~\\'
 
   let prevPath = s:escape(getcwd(), ' ')
   exe 'chdir ' . s:escape(fnamemodify(expand('%'), ':h'), ' ')
+  let filehead = '\([^'.pathchr.':]\[\?\|\[:\)\(\([/\\]['.pathchr.']\+\)\{2,}\)'
   while match(str, pathhead) != -1
     let uri = matchstr(str, pathhead)
     let uri = QFixNormalizePath(fnamemodify(uri, ':p'))
     let str = substitute(str, pathhead, 'file://'.uri, '')
+    let str = substitute(str, filehead, '\1file://\2', 'g')
+    let str = substitute(str, 'file:///', 'file://'.fnamemodify('/', ':p'), 'g')
   endwhile
-  let filehead = '\([^'.pathchr.':]\[\?\|\[:\)\(\([/\\]['.pathchr.']\+\)\{2,}\)'
-  let str = substitute(str, filehead, '\1file://\2', 'g')
-  let str = substitute(str, 'file:///', 'file://'.fnamemodify('/', ':p'), 'g')
   silent! exe 'chdir ' . prevPath
   return str
 endfunction
@@ -2007,7 +2007,7 @@ function! s:uri2tag(str, pathchr)
   let imgsfx   = '\(\.jpg\|\.jpeg\|\.png\|\.bmp\|\.gif\)$'
   let imgp = g:HowmHtml_imgproperty
 
-  let pathhead = '\([A-Za-z]:[/\\]\|\~/\)'
+  let pathhead = '\(\(^\|[\s]*\|[^[:alpha:]]\)[A-Za-z]:[/\\]\|\~/\)'
   let urireg = '\(\(memo\|howm\|rel\|https\|http\|file\|ftp\)://\|'.pathhead.'\)'.a:pathchr.'\+'
   if s:LocalLink == 0
     let urireg = '\(https\|http\|ftp\)://'.a:pathchr.'\+'
@@ -2312,7 +2312,7 @@ if !exists('HowmHtml_HttpHeader')
     \ '<meta http-equiv="Content-Style-Type" content="text/css" />',
     \ '<meta name="generator" content="howm2html" />',
     \ '<meta name="description" content="%FILENAME%" />',
-    \ '<title> %SUBJECT% (%SIGHTNAME%)</title>',
+    \ '<title> %SUBJECT% </title>',
     \ '<link rel="stylesheet" type="text/css" href="%CSSNAME%" />'
   \]
 endif

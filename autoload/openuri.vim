@@ -116,7 +116,9 @@ endif
 
 " カーソル位置のファイルを開くコマンド
 if !exists('g:openuri_cmd')
-  if has('unix')
+  if has('mac')
+    let g:openuri_cmd = "call system('open %s')"
+  elseif has('unix')
     let g:openuri_cmd = "call system('firefox %s &')"
     if exists('$ANDROID_DATA')
       let g:openuri_cmd = '!am start --user 0 -a android.intent.action.VIEW -t text/html -d %s'

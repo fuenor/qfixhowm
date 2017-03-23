@@ -147,7 +147,9 @@ Vimで開くファイルの拡張子とopenuriで開くブラウザをオプシ�
 テキストリンクをを開くブラウザ指定を独自に行うことも可能です。
 >
   " リンクを開くブラウザ指定
-  if has('unix')
+  if has('mac')
+    let g:openuri_cmd = "call system('open %s')"
+  elseif has('unix')
     let openuri_cmd = "call system('firefox %s &')"
   else
     " let openuri_cmd = '!start "rundll32.exe" url.dll,FileProtocolHandler %s'

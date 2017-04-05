@@ -1604,14 +1604,14 @@ function! s:QFixHowmGetPriority(priority, cmd, opt, today)
   elseif cmd =~ '^\~'
     "# 指定日から, 浮き沈みをくりかえす
     "# 指定日までは底に潜伏
-    let cycle = opt / 2
     if priority <= today
+      let cycle = opt / 2
       let term = priority - today
       let len = term % cycle
-      if (term / opt) % 2
-        let priority = today - len
+      if (term / cycle) % 2
+        let priority = today - (len + cycle)
       else
-        let priority = today - cycle + len
+        let priority = today + len
       endif
     else
       let priority = 0

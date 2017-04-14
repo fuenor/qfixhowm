@@ -242,7 +242,7 @@ endfunction
 
 function! s:qfkeycmd(leader, key, cmd, ...)
   let mode = a:0 ? a:1 : 'n'
-  exe 'silent! '.mode.'noremap <silent> <unique> '.a:leader.a:key.' '.a:cmd
+  exe 'silent! '.mode.'noremap <silent> '.a:leader.a:key.' '.a:cmd
 endfunction
 
 if !exists('*QFixMemoMenubar')

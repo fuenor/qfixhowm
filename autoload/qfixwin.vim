@@ -1475,7 +1475,7 @@ function! QFixPreviewOpen(file, line, ...)
       let glist = getbufline(file, 1,'$')
     endif
     call setline(1, glist)
-  elseif file =~ '|'
+  elseif file =~ '|$'
     let glist = getbufline(substitute(file, '|', '', 'g')+0, 1, '$')
     if len(glist) > g:QFix_PreviewFileSize
       call add(glist, '--- large file ---')
@@ -1505,7 +1505,7 @@ function! QFixPreviewOpen(file, line, ...)
           return
         endif
       endif
-      silent! exe cmd.' '.s:escape(file, ' ')
+      silent! exe cmd.' '.s:escape(file, '| ')
       silent! $delete _
     endif
   endif

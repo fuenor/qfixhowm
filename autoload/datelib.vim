@@ -93,14 +93,15 @@ function! datelib#StrftimeCnvDoWShift(year, month, day, cnvdow, sft)
   endif
   if sft =~ '[-+]\?\s*\d\+'
     let time += str2nr(sft)*24*60*60
-  elseif sft =~ '[-+]\s*\c\(Hol\|Hdy\)'
-    let t = str2nr(substitute(sft, '\c\(Hol\|Hdy\)', '1', '')) * 24*60*60
+  elseif sft =~ '[-+]\s*\c\(Hol\|Hdy\|Wdy\|Holiday\|Weekday\)'
+    let t = str2nr(substitute(sft, '\c\(Hol\|Hdy\|Wdy\|Holiday\|Weekday\)', '1', '')) * 24*60*60
     while 1
       let y = strftime('%Y', time)
       let m = strftime('%m', time)
       let d = strftime('%d', time)
       let date = printf('%4.4d%2.2d%2.2d', y, m, d)
-      if exists('s:holidaytbl[date]') == 0
+
+      if ((exists('s:holidaytbl[date]') == 0) && (sft !~ '\c\(Weekday\|Wdy\)' || (s:Date2Int(y, m, d) % 7) != 5))
         break
       endif
       let time += t
@@ -232,12 +233,16 @@ function! datelib#MakeHolidayTable(year, ...)
   endfor
 endfunction
 
+function! Debug()
+  echo s:holidaytbl
+endfunction
+
 if !exists('g:qfixtempname')
   let g:qfixtempname = tempname()
 endif
 
 " 休日定義ファイルを読み込み
-let s:DoWregxp = '\c\(Sun\|Mon\|Tue\|Wed\|Thu\|Fri\|Sat\|Hol\|Hdy\)'
+let s:DoWregxp = '\c\(Sun\|Mon\|Tue\|Wed\|Thu\|Fri\|Sat\|Hol\|Hdy\|Wdy\|Holiday\|Weekday\)'
 function! s:ReadScheduleFile(files, table)
   let dict = []
   for file in a:files
@@ -287,7 +292,7 @@ function! s:ReadScheduleFile(files, table)
       let repeat = substitute(repeat, '(', '', '')
       let text = substitute(str, '^'.sch_cmd, '', '')
       if cmd == '@'
-        if repeat == '' && sft !~ '\c\(Hol\|Hdy\)'
+        if repeat == '' && sft !~ '\c\(Hol\|Hdy\|Wdy\|Holiday\|Weekday\)'
           let opt = (opt == '' || opt == 0) ? 1 : opt
           let time = datelib#StrftimeCnvDoWShift(year, month, day, cnvdow, sft)
           for i in range(opt)
@@ -390,9 +395,9 @@ function! s:SetScheduleTable(year, dict, table, hol)
       if a:year < d['year']
         continue
       endif
-      if !a:hol && d['sft'] =~ '\c\(Hol\|Hdy\)'
+      if !a:hol && d['sft'] =~ '\c\(Hol\|Hdy\|Wdy\|Holiday\|Weekday\)'
         continue
-      elseif a:hol && d['sft'] !~ '\c\(Hol\|Hdy\)'
+      elseif a:hol && d['sft'] !~ '\c\(Hol\|Hdy\|Wdy\|Holiday\|Weekday\)'
         continue
       endif
       if d['cmd'] == '@@@'

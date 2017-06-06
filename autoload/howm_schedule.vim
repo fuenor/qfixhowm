@@ -381,7 +381,7 @@ function! s:makeRegxp(dpattern)
 
   let s:sch_dateT    = '\['.s:sch_date.'\( '.s:sch_time.'\)\?\]'
   let s:sch_dateTime = '\['.s:sch_date.' '.s:sch_time.'\]'
-  let s:sch_dow      = '\c\(\(Sun\|Mon\|Tue\|Wed\|Thu\|Fri\|Sat\|Hol\|Hdy\)\)'
+  let s:sch_dow      = '\c\(\(Sun\|Mon\|Tue\|Wed\|Thu\|Fri\|Sat\|Hol\|Hdy\|Holiday\|Wdy\|Weekday\)\)'
   let s:sch_ext      = '-@!+~.'
   let s:sch_Ext      = '['.s:sch_ext.']'
   let s:sch_notExt   = '[^'.s:sch_ext.']'
@@ -1536,7 +1536,7 @@ function! s:DayOfWeekShift(cmd, str)
 "   let dow = substitute(dow, '[-+]', '', 'g')
 "
 "   "休日シフト
-"   if dow =~ '\c\(Hol\|Hdy\)' && exists('s:HolidayList') && s:HolidayList != []
+"   if dow =~ '\c\(Hol\|Hdy\|Holiday\|Wdy\|Weekday\)' && exists('s:HolidayList') && s:HolidayList != []
 "     while 1
 "       if count(s:HolidayList, actday) == 0  && '\c'.g:DoWStrftime[actday%7] !~ 'Sun'
 "         break

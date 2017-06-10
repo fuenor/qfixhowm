@@ -3,7 +3,6 @@
 "                 see doc/openuri.jax
 "         Author: fuenor <fuenor@gmail.com>
 "                 http://sites.google.com/site/fudist/Home  (Japanese)
-"  Last Modified: 2011-11-14 22:31
 "=============================================================================
 let s:version = 102
 scriptencoding utf-8
@@ -121,9 +120,16 @@ if !exists('g:openuri_cmd')
   elseif has('unix')
     let g:openuri_cmd = "call system('firefox %s &')"
     if exists('$ANDROID_DATA')
-      let g:openuri_cmd = '!am start --user 0 -a android.intent.action.VIEW -t text/html -d %s'
-      if exists("*ATEModIntent")
-        let g:openuri_cmd = "call ATEModIntent('VIEW', '%s')"
+      if !exists("g:netrw_browsex_viewer")
+        let g:netrw_browsex_viewer = '!am start --user 0 -a android.intent.action.VIEW -t text/html -d %s'
+      endif
+      if exists('$AMAZON_COMPONENT_LIST') || (system("getprop ro.build.version.sdk") >= 24)
+        let g:openuri_cmd = "netrw"
+      else
+        let g:openuri_cmd = '!am start --user 0 -a android.intent.action.VIEW -t text/html -d %s'
+        if exists("*ATEModIntent")
+          let g:openuri_cmd = "call ATEModIntent('VIEW', '%s')"
+        endif
       endif
     endif
   else
@@ -304,7 +310,7 @@ function! s:openstr(str)
           endif
         endif
         " let str = 'file://'.str
-        call netrw#NetrwBrowseX(str, g:openuri_netrw_remote)
+        call netrw#BrowseX(str, g:openuri_netrw_remote)
         return 1
       endif
       let ext = tolower(fnamemodify(str, ':e'))
@@ -394,7 +400,7 @@ function! s:openuri(uri)
     if str =~ '^'.pathhead
       " let str = 'file://'.str
     endif
-    call netrw#NetrwBrowseX(uri, g:openuri_netrw_remote)
+    call netrw#BrowseX(uri, g:openuri_netrw_remote)
     return 1
   endif
   if g:openuri_cmd != ''

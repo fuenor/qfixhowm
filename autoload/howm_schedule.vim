@@ -421,18 +421,18 @@ endfunction
 
 let s:reminder_cache = 0
 function! QFixHowmListReminderCache(mode)
-  if count > 0
+  if v:count > 0
     if a:mode =~ 'schedule'
-      let g:QFixHowm_ShowSchedule = count
+      let g:QFixHowm_ShowSchedule = v:count
     elseif a:mode =~ 'todo'
-      let g:QFixHowmListReminderTodo = count
+      let g:QFixHowmListReminderTodo = v:count
     endif
   endif
   if exists('*QFixHowmInit') && QFixHowmInit()
     return
   endif
   exe 'let lt = localtime() - s:LT_' . a:mode
-  if count
+  if v:count
     " let lt = g:QFixHowm_ListReminderCacheTime + 1
   endif
   if g:QFixHowm_ListReminderCacheTime > 0 && lt < g:QFixHowm_ListReminderCacheTime
@@ -445,11 +445,11 @@ function! QFixHowmListReminderCache(mode)
 endfunction
 
 function! QFixHowmListReminder(mode)
-  if count > 0
+  if v:count > 0
     if a:mode =~ 'schedule'
-      let g:QFixHowm_ShowSchedule = count
+      let g:QFixHowm_ShowSchedule = v:count
     elseif a:mode =~ 'todo'
-      let g:QFixHowmListReminderTodo = count
+      let g:QFixHowmListReminderTodo = v:count
     endif
   endif
   if exists('*QFixHowmInit') && QFixHowmInit()
@@ -497,7 +497,7 @@ function! s:QFixHowmListReminder_(mode,...)
     let l:SearchFile = fnamemodify(g:QFixHowm_ScheduleSearchFile, ':t')
   endif
 
-  if s:reminder_cache == 0 || count
+  if s:reminder_cache == 0 || v:count
     redraw | echo 'QFixHowm : making holiday...'
     if g:QFixHowm_HolidayFile == ''
       let files = split(glob(l:howm_dir.'/**/Sche-Hd-0000-00-00-000000.*'), '\n')
@@ -1664,7 +1664,7 @@ endfunction
 "繰り返し予定展開
 function! QFixHowmGenerateRepeatDate()
   let save_cursor = getpos('.')
-  let loop = count
+  let loop = v:count
   if loop == 0
     let loop = 1
   endif

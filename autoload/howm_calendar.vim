@@ -344,14 +344,14 @@ function! QFixMemoCalendar(dircmd, file, cnt, ...)
 endfunction
 
 function! s:CR(...)
-  if count == 0
+  if v:count == 0
     let key = expand('<cWORD>')
     if key !~ '[<>./]\|\(^[A-Z][a-z]\{2}$\)'
       let key = expand('<cword>')
     endif
     let key =  a:0 ? a:1 :key
-  elseif count < 32
-    let key = count
+  elseif v:count < 32
+    let key = v:count
   else
     echo 'QFixCalendar : invalid argument.'
     return
@@ -450,7 +450,7 @@ function! s:CR(...)
 endfunction
 
 function! s:calmovecmd(cmd)
-  let c = count > 0 ? count : 1
+  let c = v:count > 0 ? v:count : 1
   for n in range(c)
     call search('\([*] \?\)\?[0-9<.>]\+[*]\?', a:cmd)
     while expand('<cWORD>') =~ '\d\{4}/\d\{2}' " && expand('<cword>') =~ '^\d\{2}$'

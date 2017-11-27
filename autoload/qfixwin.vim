@@ -615,10 +615,10 @@ endfunction
 function! s:BeforeJump()
   call QFixPclose()
   call QFixCR('before')
-  if count == 0
+  if v:count == 0
     return
   endif
-  call cursor(count, 1)
+  call cursor(v:count, 1)
 endfunction
 
 if !exists('*QFixCR')
@@ -1064,8 +1064,8 @@ function! s:ResizeOnQFix(...)
     return
   endif
   let size = g:QFix_HeightDefault
-  if count > 1
-    let size = count
+  if v:count > 1
+    let size = v:count
   endif
   call s:QFixResize(size)
 endfunction
@@ -1684,8 +1684,8 @@ endif
 
 function! s:MyGrepWriteResult(mode, file) range
   let file = expand(g:MyGrep_Resultfile)
-  if count
-    let file = substitute(file, '\(\.[^.]\+$\)', count.'\1', '')
+  if v:count
+    let file = substitute(file, '\(\.[^.]\+$\)', v:count.'\1', '')
   endif
   if a:file != ''
     let file = a:file
@@ -1722,8 +1722,8 @@ function! s:MyGrepReadResult(readflag, ...)
   if a:0 > 1
     let file = a:2
   endif
-  if count
-    let file = substitute(file, '\(\.[^.]\+$\)', count.'\1', '')
+  if v:count
+    let file = substitute(file, '\(\.[^.]\+$\)', v:count.'\1', '')
   endif
   if a:readflag
     let s:resulttime = 0

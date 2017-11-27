@@ -935,8 +935,8 @@ function! qfixmemo#EditNew()
     return
   endif
   let file = g:qfixmemo_filename
-  if count
-    exe 'let file = g:qfixmemo_filename'.count
+  if v:count
+    exe 'let file = g:qfixmemo_filename'.v:count
   endif
   call qfixmemo#Edit(file)
 endfunction
@@ -948,8 +948,8 @@ function! qfixmemo#EditInput()
     return
   endif
   let fname = g:qfixmemo_misc_file
-  if count
-    exe 'let fname = g:qfixmemo_misc_file'.count
+  if v:count
+    exe 'let fname = g:qfixmemo_misc_file'.v:count
   endif
   let fname = substitute(fname, '[/\\]\+', '/', 'g')
   while 1
@@ -982,9 +982,9 @@ function! qfixmemo#Quickmemo(...)
     let s:qfixmemo_quickmemo = g:qfixmemo_quickmemo
   endif
   let file = s:qfixmemo_quickmemo
-  let num = a:0 ? a:1 : count
-  if count
-    exe 'let file = g:qfixmemo_quickmemo'.count
+  let num = a:0 ? a:1 : v:count
+  if v:count
+    exe 'let file = g:qfixmemo_quickmemo'.v:count
     let s:qfixmemo_quickmemo = file
   endif
   if fnamemodify(file, ':e') == ''
@@ -1301,8 +1301,8 @@ function! qfixmemo#ListMru()
     redraw | echo 'QFixMemo : QFixMRU is not executable.'
     return
   endif
-  if count
-    let g:QFixMRU_Entries = count
+  if v:count
+    let g:QFixMRU_Entries = v:count
   endif
   redraw | echo 'QFixMemo : Read MRU...'
   call QFixMRU(g:qfixmemo_dir, '/:dir')
@@ -1313,8 +1313,8 @@ function! qfixmemo#ListRecent()
   if qfixmemo#Init()
     return
   endif
-  if count
-    let g:qfixmemo_recentdays = count
+  if v:count
+    let g:qfixmemo_recentdays = v:count
   endif
   let title = QFixMRUGetTitleGrepRegxp(g:qfixmemo_ext)
   let qflist = qfixlist#search(title, g:qfixmemo_dir, 'mtime', g:qfixmemo_recentdays, g:qfixmemo_fileencoding, '**/*')
@@ -1327,8 +1327,8 @@ function! qfixmemo#ListRecentTimeStamp(...)
     return
   endif
   call qfixlist#Init()
-  if count
-    let g:qfixmemo_recentdays = count
+  if v:count
+    let g:qfixmemo_recentdays = v:count
   endif
   let days = g:qfixmemo_recentdays
 
@@ -1685,8 +1685,8 @@ function! qfixmemo#Calendar(...)
     return
   endif
   silent! call howm_calendar#init()
-  if count
-    let g:qfixmemo_calendar_count = count
+  if v:count
+    let g:qfixmemo_calendar_count = v:count
   endif
   call QFixMemoCalendar(g:qfixmemo_calendar_wincmd, '__Calendar__', g:qfixmemo_calendar_count)
 endfunction
@@ -1721,8 +1721,8 @@ function! qfixmemo#RandomWalk(file, ...)
     let s:rwalk = s:randomReadFile(file, dir)
   endif
   let columns = g:qfixmemo_random_columns
-  if count
-    let g:qfixmemo_random_columns = count
+  if v:count
+    let g:qfixmemo_random_columns = v:count
   endif
   if &ft == 'qf' && winheight(0) > columns
     let columns = winheight(0)
@@ -2079,7 +2079,7 @@ function! qfixmemo#SubMenu(...)
   if exists('g:qfixmemo_submenu_dir')
     let basedir = g:qfixmemo_submenu_dir
   endif
-  let l:count = a:0 && a:1 ? a:1 : count
+  let l:count = a:0 && a:1 ? a:1 : v:count
   let file = s:submenu_mkdir(basedir)
   let bufnum = bufnr(file)
   let winnum = bufwinnr(file)
@@ -3156,7 +3156,7 @@ function qfixmemo#WildcardChapter(...) range
   call qfixmemo#Init()
   let firstline = a:firstline
   let lastline = a:lastline
-  if a:0 == 0 && count == 0
+  if a:0 == 0 && v:count == 0
     let firstline = 1
     let lastline = line('$')
   endif

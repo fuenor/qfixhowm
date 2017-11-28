@@ -28,6 +28,7 @@ if !exists('g:openuri_urichr')
   " let g:openuri_urichr = "[-0-9a-zA-Z!#$%&'()*+,./:;=?@_~]"
   let g:openuri_urichr = "[-0-9a-zA-Z!#$%&'*+,./:;=?@_~]"
 endif
+
 if !exists('g:openuri_pathchr')
   let g:openuri_pathchr = "[-0-9a-zA-Z!#$%&'()*+,./:;=?@_~{}[\\]\\\\]"
 endif
@@ -120,16 +121,17 @@ if !exists('g:openuri_cmd')
   elseif has('unix')
     let g:openuri_cmd = "call system('firefox %s &')"
     if exists('$ANDROID_DATA')
+      let g:openuri_cmd = '!am start --user 0 -a android.intent.action.VIEW -t text/html -d %s'
       if !exists("g:netrw_browsex_viewer")
-        let g:netrw_browsex_viewer = '!am start --user 0 -a android.intent.action.VIEW -t text/html -d %s'
+        let g:netrw_browsex_viewer = g:openuri_cmd
       endif
       if exists('$AMAZON_COMPONENT_LIST') || (system("getprop ro.build.version.sdk") >= 24)
         let g:openuri_cmd = "netrw"
       else
-        let g:openuri_cmd = '!am start --user 0 -a android.intent.action.VIEW -t text/html -d %s'
-        if exists("*ATEModIntent")
-          let g:openuri_cmd = "call ATEModIntent('VIEW', '%s')"
-        endif
+        let g:openuri_bmp = '!am start --user 0 -a android.intent.action.VIEW -t image/* -d %s'
+        let g:openuri_jpg = g:openuri_bmp
+        let g:openuri_png = g:openuri_bmp
+        let g:openuri_gif = g:openuri_bmp
       endif
     endif
   else

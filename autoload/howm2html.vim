@@ -821,6 +821,7 @@ function! HowmHtmlConvert(list, htmlname)
 
     let html = extend(html, text)
   endfor
+  call map(html, 'substitute(v:val, "\\(file://\\)\\+", "file://", "g")')
 
   if s:Blogger
     let from = g:HowmHtml_encoding

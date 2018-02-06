@@ -78,6 +78,22 @@ body.double-l div#utilities {
 }
 
 /*========================================
+	let HowmHtml_BodyClass = 'single'
+	┏━━━┓
+	┃━━━┃
+	┗━━━┛
+========================================*/
+
+body.single div#main {
+}
+
+/* Utilities
+---------------*/
+
+body.double-l div#utilities {
+}
+
+/*========================================
   #Elements#
   ここから #Decoration#までは基本的な装飾
 ========================================*/
@@ -95,20 +111,17 @@ h1 {
 	background-color: #f5f5f5;
 }
 
-body.mainIndex h1 {
-	display: none;
-}
-
-h2 {
+h1 {
 	margin: 1em 0;
 	font-size: 116%;
 }
 
+h2 {
+	font-size: 108%;
+}
+
 h3 {
-	margin-top: 2em;
-	padding-bottom: 0.4em;
-	border-bottom: 4px solid #eee;
-	font-size: 116%;
+	font-size: 100%;
 }
 
 p {
@@ -272,26 +285,26 @@ body.archives div.entry {
 /* Entry Title
 ---------------*/
 
-div.entry h2 {
+div.entry h1 {
 	margin-bottom: 0;
 	padding: 0.2em 13px 0.4em;
 	border-left: 5px solid #666;
 	border-bottom: 1px dotted #ccc;
 }
 
-div.entry h2 a {
+div.entry h1 a {
 	text-decoration: none;
 }
 
-div.entry h2 a:link {
+div.entry h1 a:link {
 	color: #333;
 }
 
-div.entry h2 a:visited {
+div.entry h1 a:visited {
 	color: #444;
 }
 
-div.entry h2 a:hover {
+div.entry h1 a:hover {
 	color: #2091da;
 	text-decoration: underline;
 }
@@ -300,7 +313,7 @@ div.entry h2 a:hover {
 ---------------*/
 
 div.entry ul.info {
-	margin: 0 0 1em 0;
+	margin: -1em 0 1em 0;
 	padding: 0.3em 0;
 	border-left: 5px solid #ccc;
 	border-bottom: 1px solid #eee;
@@ -323,6 +336,11 @@ div.entry ul.info li a {
 
 /* Text Style
 ---------------*/
+
+div.textBody {
+	margin-top: 1em;
+	margin-bottom: 1em;
+}
 
 div.textBody p {
 	line-height: 1.7;

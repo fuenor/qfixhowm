@@ -27,7 +27,7 @@ hi howmSpecial  ctermfg=Red     guifg=Red
 hi def link howmNormal Normal
 
 hi def link actionlockDate Underlined
-hi def link actionlockTime Constant
+hi def link actionlockTime Number
 
 if exists('g:QFixHowm_Date')
   exec 'syn match actionlockDate contained "'.g:QFixHowm_Date.'" '

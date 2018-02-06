@@ -1,0 +1,171 @@
+= はじめに
+
+`:Howm2html!` (QFixMemoの場合は`g,hi`でも起動)を実行すると、カレントバッファがHTMLファイルに変換され、ブラウザで開かれます。
+
+## シンタックスハイライト
+
+`:set filetype=qfix_memo` (または`set syntax=qfix_memo`) を実行すると専用のシンタックスハイライトが適用されます。
+また拡張子 "txt"のファイルにシンタックスハイライトを適用するには、.vimrcに次の行を追加します。
+```vim
+au BufRead,BufNewFile *.txt set filetype=qfix_memo
+```
+
+なおシンタックスハイライトに`markdown`を指定することでも、ある程度はハイライトされます。
+
+= 見出し
+
+見出しを作成するには、見出しテキストの前に `#`を追加します。 `#`の数で見出しのレベルが決まります。
+
+## Level 2
+### Level 3
+#### Level 4
+##### Level 5
+
+= リンク
+
+URLは自動的にリンクに変換されます。
+[Internet] http://example.com
+[Local file] ./howm2html.txt
+
+".jpg", ".png", ".gif", ".bmp"の画像ファイルはサムネイルとして表示されます。
+[Internet] https://droidterm-e8a40.firebaseapp.com/droidvim/src/md2html.png
+[Local file] ./howm2html.jpg
+QFixMemoのファイルではリンク上で`<CR>`を押すとリンクを開くことができます。
+
+イメージファイル名の先頭に `&`をつけると実際のサイズで表示することができます。
+&./howm2html.png
+
+= テキストの強調表示
+
+テキストの強調表示や意味付けには「HTMLタグ」を使用できます。
+
+<strong>「重要性、重大性、または緊急性のある内容」</strong>を示します。
+<em> "文脈的に強調される内容" </em>を示します。
+<i>「通常と異なる声や気分のテキスト」</i>を示します。
+
+<b> "太字テキスト" </b>としてレンダリングします。
+<u> "下線付きテキスト" </u>としてレンダリングします。
+
+<del>文書から削除されたことを示します</del>。
+<s> "間違っている、すでに正確でない、もはや関連性のない内容" </s>を示します。
+
+## その他のHTMLタグ
+
+&<marquee>その他のHTMLタグは通常の文字として表示されますが、 `<`の前に `&`を追加するとHTMLタグとして扱われます。&</marquee>
+
+= リスト
+
+## 順序のないリスト
+
+あなたが有名ユーチューバーになるために必要なもの。
+
+- ペン
+- パイナップル
+- アップル
+
+## 順序付きリスト
+
+キリンを冷蔵庫に入れる方法。
+
++ 冷蔵庫のドアを開けます。
++ キリンを入れます。
++ ドアを閉じます。
+
+## 複数行の文章
+
+- 場合によっては、複数の行を使用する必要があります。
+     その場合、次の行の先頭に "タブ"または "4つのスペース"を使用して複数行の文章を使用することができます。
+- HTMLタグを使用して改行を追加&<br>することもできます。
+
+## 定義リスト
+
+: Term1 | これは"Term1"の定義です。
+: Term2 | 場合によっては、複数の行を使用する必要があります。
+     その場合、次の行の先頭に "タブ"または "4つのスペース"を使用して複数行の文章を使用することができます。
+
+= テーブル
+
+| #月     | #略語 |                        |
+| January | Jan.  |                        |
+| Febrary | Feb.  | うるう年は29日まである |
+| March   | Mar.  |                        |
+
+= 水平線
+
+3個以上のハイフン。
+
+---
+
+= テキストの引用
+
+引用するテキストの前に `>`を追加してください。
+
+> All work and no play makes Jack a dull boy.
+> All work and no play makes Jack a dull boy.
+> All work and no play makes Jack a dull boy.
+> All work and no play makes Jack a dull boy.
+> All work and no play makes Jack a dull boy.
+
+= インラインコード
+
+インライン`コード`はテキストの周りを`バッククォート`で囲みます。
+
+= テキストブロック
+
+## 整形済みテキスト
+
+前後に「3個のバッククォートの行」を配置することで、整形済みテキストブロックを作成できます。
+
+```
+The quick brown fox jumps over the lazy dog.
+    The quick brown fox jumps over the lazy dog.
+        The quick brown fox jumps over the lazy dog.
+            The quick brown fox jumps over the lazy dog.
+```
+
+## コードのシンタックスハイライト
+
+「言語識別子」を追加すると、テキストブロックで言語のシンタックスハイライトを有効にすることができます。
+（言語識別子には`:set filetype?`の値を設定する）
+
+```sh
+#!/system/bin/sh
+echo "Hello World!"
+```
+
+`:`を使って「タイトル」も追加できます。
+
+```cpp:Syntax highlighting and title.
+// helloworld.cpp
+#include <stdio.h>
+
+int main(void) {
+    printf("Hello Wold!\n");
+    return 0;
+}
+```
+
+= 行のエスケープ
+
+## HTMLコードの埋め込み
+
+`&&`を使用してHTMLコードの埋め込みが行えます。
+
+(例) Youtube
+&& <iframe width="560" height="315" src="https://www.youtube.com/embed/fo25RcjXJI4" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+
+## 行を削除または隠す
+
+行頭と行末に`&&`を追加すると行を削除することができます。
+
+&& 国家機密 &&
+&& 王様の耳はロバの耳！ &&
+
+HTMLのコメントタグを使用すると、削除するのではなく隠すことも可能です。
+&&<!--
+王様の耳はロバの耳！
+&& -->
+
+これはVimのモードラインを表示したくない場合に便利です。
+&& vim: set ft=qfix_memo syn=qfix_memo norl: &&
+

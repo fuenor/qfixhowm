@@ -35,7 +35,7 @@ hi def link txtUrl  Underlined
 "----------
 " contains markdown.vim
 "----------
-syn region qfixmemoCodeBlock start="^\(    \|\t\)" end="$"
+" syn region qfixmemoCodeBlock start="^\(    \|\t\)" end="$"
 " hi def link qfixmemoQuote Comment
 
 "----------
@@ -63,9 +63,9 @@ endif
 syn match txtFile '\[:\?&\?\zs\(memo\|rel\|howm\|https\|http\|file\|ftp\|git\)://\([a-zA-Z]:\)\?[^:]\+\ze:[^\]]*]'
 syn match txtFile '\[:\?&\?\zs\([A-Za-z]:[/\\]\|\~[/\\]\|\.\.\?[/\\]\|[/\\]\)[^:]\+\ze:[^\]]*]'
 
-" definition list （:define : explanation)
-syn match qfixmemoDefinition '^\s*:.\{-}\s:' contains=qfixmemoDefColon
-syn match qfixmemoDefColon  contained '^\s*:\|\s:'
+" definition list （:define | explanation)
+syn match qfixmemoDefinition '^:.\{-}\(\s:\||\)' contains=qfixmemoDefColon
+syn match qfixmemoDefColon  contained '^:\|\s:\||'
 
 hi def link qfixmemoDefinition Identifier
 hi def link qfixmemoDefColon   Label
@@ -89,6 +89,13 @@ hi def link qfixmemoChapter         Title
 hi def link qfixmemoChapterCategory Identifier
 hi def link qfixmemoChapterBullet   Label
 
+" Table
+syn match qfixmemoTextTable +^\s*|.*|$+ contains=qfixmemoTextTableSeparator,qfixmemoTextTableHeader,qfixmemoTextUrl,qfixmemoTextFile,qfixmemoEscapeTag
+syn match qfixmemoTextTableSeparator contained +|+
+syn match qfixmemoTextTableHeader contained '|\s*[*#][^|]\+' contains=qfixmemoTextTableSeparator
+hi def link qfixmemoTextTableHeader    Title
+hi def link qfixmemoTextTableSeparator Statement
+
 "----------
 " markdown style
 "----------
@@ -102,6 +109,12 @@ if !exists('g:qfixmemo_title') || g:qfixmemo_title != '#'
   hi def link qfixmemoSubTitleCategory qfixmemoTitleCategory
 endif
 
+" styling text
+syn region htmlStrike start="<s>" end="</s>" contains=htmlTag,htmlEndTag keepend
+if exists("$APPBASE")
+  hi! link htmlStrike NonText
+endif
+
 " list
 if !exists('g:qfixmemo_title') || g:qfixmemo_title != '*'
   syn region qfixmemoMarkdownList start='^\s*\* ' end='$' contains=qfixmemoMarkdownBullet,qfixmemoChapterCategory keepend
@@ -111,7 +124,7 @@ if !exists('g:qfixmemo_title') || g:qfixmemo_title != '*'
   hi def link qfixmemoMarkdownBullet Label
 endif
 
-syn region qfixmemoList start='^\s*[-+]\+\s' end='$' contains=qfixmemoListBullet,qfixmemoListDefinition keepend
+syn region qfixmemoList start='^\s*[-+]\+' end='\s' contains=qfixmemoListBullet,qfixmemoListDefinition keepend
 syn match qfixmemoListBullet contained '^\s*+\+'
 syn match qfixmemoListBullet contained '^\s*-\+'
 
@@ -121,10 +134,16 @@ hi def link qfixmemoListBullet Label
 " fenced language
 syn region qfixmemoBlock matchgroup=qfixmemoBlockDelimiter start=+^\s*```.*+ end=+^\s*```$+
 hi def link qfixmemoBlockDelimiter Delimiter
+syn match markdownBlockDelimiter '^```.\+$'
+syn region markdownSuperPre matchgroup=markdownBlockDelimiter start=+^```.*$+ end=+^```+
+
+" hi def link markdownSuperPre       Comment
+hi def link markdownBlockDelimiter Delimiter
 
 " block quote
 syn region qfixmemoBlockQuote start='^>\s*' end='$' contains=qfixmemoBlockQuoteDelimiter,howmLink,hatenaSuperPre
 syn match qfixmemoBlockQuoteDelimiter contained '^>[>[:space:]]*'
+hi def link qfixmemoBlockQuote Comment
 hi def link qfixmemoBlockQuoteDelimiter Comment
 
 " horizontal rule
@@ -138,15 +157,15 @@ hi def link qfixmemoHRule Type
 syn match qfixmemoCode display '\(^\|[^`]\)\zs`[^`]\+`\ze\([^`]\|$\)' contains=qfixmemoCodeDelimiter
 syn match qfixmemoCodeDelimiter contained '`'
 
-" hi def link qfixmemoCode          Comment
+hi def link qfixmemoCode Define
 hi def link qfixmemoCodeDelimiter Delimiter
 
 "----------
 " hatena
 "----------
 " pre, quote
-syn match hatenaBlockDelimiter '^\s*>|.\{-}|$\|^||<$'
-syn region hatenaSuperPre matchgroup=hatenaBlockDelimiter start=+^\s*>|[^|]*|$+ end=+^\s*||<$+
+syn match hatenaBlockDelimiter '^>|.\{-}|$\|^||<$'
+syn region hatenaSuperPre matchgroup=hatenaBlockDelimiter start=+^>|[^|]*|$+ end=+^||<$+
 
 hi def link hatenaSuperPre       Comment
 hi def link hatenaBlockDelimiter Delimiter
@@ -156,7 +175,7 @@ hi def link hatenaBlockDelimiter Delimiter
 "----------
 syn match qfixmemoEscapeTag '^&&.*$'
 syn match qfixmemoEscapeTag '&<[^>]\+>'
-hi def link qfixmemoEscapeTag Folded
+hi def link qfixmemoEscapeTag NonText
 
 if !exists('g:qfixmemo_wiki_syntax') || g:qfixmemo_wiki_syntax == 0
   finish

@@ -4,7 +4,7 @@
 "     Maintainer: fuenor@gmail.com
 "                 http://dl.dropbox.com/u/1736409/howm/howm2html.html
 "=============================================================================
-let s:version  = '1.32'
+let s:version  = '1.35'
 scriptencoding utf-8
 
 if exists('g:disable_Howm2html') && g:disable_Howm2html == 1
@@ -36,7 +36,13 @@ let g:loaded_Howm2html = 1
 
 " HTML出力ディレクトリ
 if !exists('g:HowmHtml_htmldir')
-  let g:HowmHtml_htmldir = '~/howm2html'
+  let s:name = 'qfixmemo'
+  let g:HowmHtml_htmldir = '~/'.s:name
+  let dir = fnamemodify(matchstr(&runtimepath, '[^,]\{-}[\\/]'.s:name).'/html/peachpuff.css', ':p:h')
+  if isdirectory(dir)
+    let g:HowmHtml_htmldir = dir
+  endif
+  unlet s:name
 endif
 " (完成版の)HTML出力ディレクトリ
 if !exists('g:HowmHtml_publish_htmldir')
@@ -300,7 +306,7 @@ let g:QFixHowm_UserCmdline = 0
 let s:HowmHtml_Title = '__%arienai title%=='
 
 " エントリの内容をタグに変換する
-function! HowmHtmlTagConvert(list, htmlname, anchor)
+function! s:HowmHtmlTagConvert(list, htmlname, anchor)
   let strlist = a:list
 
   " JpFormatの折り返しを元に戻す
@@ -407,17 +413,21 @@ function! s:HowmStr2HTML(list, htmlname, anchor)
     let str = substitute(str, '&', '\&amp;', 'g')
     let str = substitute(str, '>', '\&gt;', 'g')
     let str = substitute(str, '<', '\&lt;', 'g')
+    let str = substitute(str, '&lt;\(/\?\)\(b\|i\|u\|em\|strong\|strike\|s\|del\)&gt;', '<\1\2>', 'g')
+    let str = substitute(str, '&amp;<\(/\?\)\(b\|i\|u\|em\|strong\|strike\|s\|del\)>', '\&lt;\1\2\&gt;', 'g')
     let ostr = str
     let [saved_header, saved_list, saved_table, saved_folding, saved_define] = [header, list, table, folding, define]
-    let str = s:CnvLocalPath2Uri(str)
-    if g:HowmHtml_ConvertLevel > 0
-      " リンクタグ (>>> http:// c:\temp)
-      let str = s:howmLinktag(str)
-    endif
-    if g:HowmHtml_ConvertLevel > 1
-      let str = s:WikiLinkAndTag(str)
-      if str !~ '^\s*$'
-        let str = substitute(str, '^[*[:blank:]]\+$\|^[-[:blank:]]\+$','<hr>','')
+    if prequote == 0
+      if g:HowmHtml_ConvertLevel > 0
+        let str = s:CnvLocalPath2Uri(str)
+        " リンクタグ (>>> http:// c:\temp)
+        let str = s:howmLinktag(str)
+      endif
+      if g:HowmHtml_ConvertLevel > 1
+        let str = s:WikiLinkAndTag(str)
+        if str !~ '^\s*$'
+          let str = substitute(str, '^[*[:blank:]]\+$\|^[-[:blank:]]\+$','<hr>','')
+        endif
       endif
     endif
 
@@ -443,7 +453,7 @@ function! s:HowmStr2HTML(list, htmlname, anchor)
           " 続きを読む
           let [str, folding] = s:howmFolding(str, folding, a:anchor)
         elseif str =~ g:HowmHtml_BulletRegxp
-          " <h3>～<h6> .*= のアウトライン
+          " <h2>～<h6> .*= のアウトライン
           let [str, header, jump] = s:howmOutline(str, a:htmlname, a:anchor, header, jump)
         endif
       endif
@@ -468,22 +478,26 @@ function! s:HowmStr2HTML(list, htmlname, anchor)
           let prequote = 2
         elseif str =~ '^&gt;\(\s\|$\)'
           call add(html, '<blockquote><p>')
-          let str = substitute(str, '^&gt;\s*', '', '')
+          let str = substitute(str, '^&gt;[\t ]', '', '')
+          let str = substitute(str, '^ \+', escape(substitute(matchstr(str, '^ \+'), '.', "\\&nbsp;", 'g'), '&'), '')
           let str = str. '<br />'
           let prequote = 3
-        elseif str =~ '^    \s*'
-          let class = '<code><pre>'
-          let preclose = '</pre></code>'
-          let str = substitute(str, '^    ', '', '')
-          let str = class.str
-          let prequote = 4
-        elseif str =~ '^```\s*[[:alnum:]]*$'
-          let class = substitute(str, '^```\s*', '', 'g')
+        " elseif str =~ '^    \s*'
+        "   let class = '<code><pre>'
+        "   let preclose = '</pre></code>'
+        "   let str = substitute(str, '^    ', '', '')
+        "   let str = class.str
+        "   let prequote = 4
+        elseif str =~ '^```\s*[[:alnum:]]*\(:.*\)\?$'
+          let class = substitute(str, '^```\s*\|:.*$', '', 'g')
           if class == ''
             let class = '<pre>'
             let preclose = '</pre>'
           else
             let class = printf(g:HowmHtml_preFormat, class)
+            if str =~ '^```\s*[[:alnum:]]\+:.\+$'
+              let class = '<br /><b>'.substitute(str, '^.*:', '', '').'</b>'.class
+            endif
             let preclose = '</pre></code>'
           endif
           let str = class
@@ -514,7 +528,8 @@ function! s:HowmStr2HTML(list, htmlname, anchor)
         if prequote == 4
           let str = substitute(str, '^    ', '', '')
         elseif prequote == 3
-          let str = substitute(str, '^&gt;\s*', '', '') . '<br />'
+          let str = substitute(str, '^&gt;[\t ]', '', '')
+          let str = substitute(str, '^ \+', escape(substitute(matchstr(str, '^ \+'), '.', "\\&nbsp;", 'g'), '&'), '') . '<br />'
         endif
         if prequote > 1
           let str = str
@@ -532,9 +547,9 @@ function! s:HowmStr2HTML(list, htmlname, anchor)
     " <p>タグでくくるか、<br />を付加
     if str == '<hr>'
       " do nothing
-    elseif list != 0 && str =~ '^\t'
+    elseif list != 0 && str =~ '^\(\t\|    \)'
       let str = brtag.str
-    elseif define != 0 && str =~ '^\t'
+    elseif define != 0 && str =~ '^\(\t\|    \)'
       if idx && html[-1] !~ '</dt><dd>$'
         let str = brtag.str
       endif
@@ -686,7 +701,7 @@ endif
 "
 " HTMLヘッダ出力
 "
-function! HowmHTML(type, ...)
+function! s:HowmHTML(type, ...)
   let from = &enc
   let to   = g:HowmHtml_encoding
   let to   = to == 'Shift_JIS' ? 'cp932' : to
@@ -742,6 +757,10 @@ function! HowmHTML(type, ...)
   endif
   let header = extend(header, g:HowmHtml_HttpBody)
 
+  let lang = substitute($LANG, "_.*", "", "g")
+  if (lang == "")
+    let lang = "en"
+  endif
   let title = escape(title, '"')
   let sightname = escape(sightname, '\\"')
   let subject = escape(subject, '\\"')
@@ -754,6 +773,7 @@ function! HowmHTML(type, ...)
   let root = s:root
 
   call map(header, 'substitute(v:val, "%ENCODING%", fenc, "g")')
+  call map(header, 'substitute(v:val, "%LANG%", lang, "g")')
   call map(header, 'substitute(v:val, "%TITLE%", title, "g")')
   call map(header, 'substitute(v:val, "%VICUNA%", g:HowmHtml_Vicuna, "g")')
   let bodyclass = g:HowmHtml_Vicuna == '' ? g:HowmHtml_BodyClass : g:HowmHtml_Vicuna
@@ -771,7 +791,7 @@ function! HowmHTML(type, ...)
 endfunction
 
 " HTML出力本体
-function! HowmHtmlConvert(list, htmlname)
+function! s:HowmHtmlConvert(list, htmlname)
   let htmlname = a:htmlname
   let from = &enc
   " HTMLの文字エンコーディング
@@ -809,10 +829,10 @@ function! HowmHtmlConvert(list, htmlname)
 
     " タグの変換
     let s:subheader = 0
-    let text = HowmHtmlTagConvert(d['text'], htmlname, anchor)
+    let text = s:HowmHtmlTagConvert(d['text'], htmlname, anchor)
 
     " エントリに構造を付加
-    let tlevel = 2 + s:Blogger
+    let tlevel = 1 + s:Blogger
     let esection = printf('<div class="section entry" id="e%s"><h%d>%s</h%d>', anchor, tlevel, atitle, tlevel)
     call insert(text, '<div class="textBody">')
     call insert(text, esection)
@@ -844,14 +864,14 @@ function! HowmHtmlConvert(list, htmlname)
   endif
 
   " HTMLヘッダ
-  let html = extend(HowmHTML('header', fnamemodify(a:list[0]['filename'], ':p'), a:list[0]['title'], htmlname), html)
+  let html = extend(<SID>HowmHTML('header', fnamemodify(a:list[0]['filename'], ':p'), a:list[0]['title'], htmlname), html)
   " HTMLフッタ
   if s:Folding == 1
     call extend(footscript, g:HowmHtml_Folding)
     call map(footscript, 'substitute(v:val, "%ENTRIES%", anchor, "")')
     call map(footscript, 'iconv(v:val, from, to)')
   endif
-  call extend(html, HowmHTML('footer', footscript))
+  call extend(html, <SID>HowmHTML('footer', footscript))
   return html
 endfunction
 
@@ -1088,7 +1108,10 @@ function! howm2html#Howm2html(output, ...)
       silent! 1,$delete _
       call setline(1, glist)
     endif
-    call HowmHtmlCodeHighlight(file)
+    let glist = getline(1,'$')
+    call map(glist, 'substitute(v:val, "^>|\\(.\\+\\)|$\\|^||<$", "```\\1", "g")')
+    call setline(1, glist)
+    call s:HowmHtmlCodeHighlight(file)
     if exists('*HowmHtmlUserProc') && exists('g:fudist')
       call HowmHtmlUserProc(file)
     endif
@@ -1196,7 +1219,7 @@ function! howm2html#Howm2html(output, ...)
   let s:htmldir = htmldir
 
   let start = reltime()
-  let html = HowmHtmlConvert(list, htmlname)
+  let html = s:HowmHtmlConvert(list, htmlname)
   " echoe reltimestr(reltime(start))
   if s:Blogger
     let g:HowmHtml_Blogger = ''
@@ -1238,6 +1261,9 @@ function! howm2html#Howm2html(output, ...)
     redraw|echo 'Html2pdf'.publish.' : ' . file
   endif
 
+  " FIXME
+  silent exe 'set ft='.&ft
+
   " ブラウザ起動
   if a:output && pdf == 0
     let uri = 'file://'.file
@@ -1262,7 +1288,7 @@ if !exists('g:HowmHtml_2html')
   let g:HowmHtml_2html = 'syntax/2html.vim'
 endif
 
-func! HowmHtmlCodeHighlight(file)
+func! s:HowmHtmlCodeHighlight(file)
   if !g:HowmHtml_CodeHighlight
     return
   endif
@@ -1350,13 +1376,13 @@ func! s:Convert2HTMLSnippet(...)
     let firstline = search('^>|.\+|$', 'cW')
     let llreg = '^||<$'
     if firstline == 0
-      let firstline = search('^```\s*[[:alnum:]]\+$', 'cW')
+      let firstline = search('^```\s*[[:alnum:]]\+\(:.*\)\?$', 'cW')
       let llreg = '^```$'
     endif
     if firstline == 0
       break
     endif
-    let type = substitute(getline(firstline), '^>|\||$\|^```\s*', '', 'g')
+    let type = substitute(getline(firstline), '^>|\||$\|^```\s*\|:.*$', '', 'g')
     if type == ''
       continue
     endif
@@ -1504,12 +1530,6 @@ function! s:JpJoinStr(str, marker)
   endfor
   return str
 endfunction
-
-" ユーザーコマンド
-command! -bang -nargs=* -range=% Howm2html call howm2html#Howm2html(<bang>0, <f-args>)
-command! -bang -nargs=* Howm2htmlJump      call howm2html#Jump2html(<bang>0, <f-args>)
-command! -nargs=* Howm2HtmlConvFiles       call howm2html#HowmHtmlConvFiles('%', <q-args>)
-command! -nargs=* -bang Howm2HtmlUpdate    call howm2html#HowmHtmlConvFiles('%', <q-args>, '<bang>')
 
 if !exists('s:howmtempfile')
   let s:howmtempfile = tempname()
@@ -1706,7 +1726,7 @@ function QFixHowmUserCmd(list)
   for idx in range(len(list))
     let list[idx]['index'] = idx
   endfor
-  let html = HowmHtmlConvert(list, htmlname)
+  let html = s:HowmHtmlConvert(list, htmlname)
 
   " html出力
   let file = htmldir.'/'.htmlname
@@ -1818,7 +1838,7 @@ function! s:howmListtag(str, list)
     let str = '<li>'.str
   elseif i == idx && h != ''
     let str = '</li><li>'.str
-  elseif idx > 0 && h == '' && str =~ '^\t'
+  elseif idx > 0 && h == '' && str =~ '^\(\t\|    \)'
     " 行頭がタブならリストの文章
   elseif idx > 0 && h == ''
     for d in s:ptag
@@ -1850,7 +1870,7 @@ function! s:howmTabletag(str, table)
   let str = substitute(str, '^|\||$', '', 'g')
   let str = substitute(str, '^|', '<tr>|', 'g')
   let str = substitute(str, '|$', '|</tr>', 'g')
-  let str = substitute(str, '|\s*\*\([^|]*\)|', '<th>\1</th>', 'g')
+  let str = substitute(str, '|\s*[*#]\([^|]*\)|', '<th>\1</th>', 'g')
   let str = substitute(str, '|\([^|]*\)|', '<td>\1</td>', 'g')
   let str = substitute(str, '</td>|', '</td><td>', '')
   let str = substitute(str, '|</tr>', '</td></tr>', '')
@@ -1868,9 +1888,9 @@ function! s:howmDeftag(str, define)
   let define = a:define
   let close = ''
   " if str !~ '^:.\+\s\+:.\+'
-  if str !~ '^:.\+\s\+:'
+  if str !~ '^\s*:.\+\(\s\+:\||\)'
     if define == 1
-      if str !~ '^\t'
+      if str !~ '^\(\t\|    \)'
         let define = 0
         let close = '</dd></dl>'
       endif
@@ -1884,7 +1904,7 @@ function! s:howmDeftag(str, define)
     else
       let str = substitute(str, '^:', '</dd><dt>', '')
     endif
-    let str = substitute(str, '\s\+:', '</dt><dd>', '')
+    let str = substitute(str, '\(\s\+:\||\)', '</dt><dd>', '')
   endif
   return [close, str, define]
 endfunction
@@ -1921,7 +1941,7 @@ function! s:howmOutline(str, htmlname, anchor, header, jump)
     return [str, header, jump]
   endif
   let bullet = matchstr(bullet, g:HowmHtml_BulletRegxp.'\+')
-  let l = len(bullet) + 2 + s:Blogger
+  let l = len(bullet) + 1 + s:Blogger
   let g:HowmHtml_Title = '='
   let g:HowmHtml_Title = exists('g:QFixHowm_Title') ? g:QFixHowm_Title : g:HowmHtml_Title
   let g:HowmHtml_Title = exists('g:qfixmemo_title') ? g:qfixmemo_title : g:HowmHtml_Title
@@ -1952,17 +1972,14 @@ endfunction
 
 function! s:CnvLocalPath2Uri(str)
   let str = a:str
-  let pathhead = '\(^\|[:space:]\|[^[:graph:]]\)\(\.\.\?[/\\]\)\+'
-  let pathchr  = '-!#%&+,.(){}0-9;=?@A-Za-z_~\\'
-
+  let pathhead = '\.\.\?[/\\]\([./\\]*\)*'
+  let pathchr  = '[^ |:]'
   let prevPath = s:escape(getcwd(), ' ')
   exe 'chdir ' . s:escape(fnamemodify(expand('%'), ':h'), ' ')
-  let filehead = '\([^'.pathchr.':]\[\?\|\[:\)\(\([/\\]['.pathchr.']\+\)\{2,}\)'
   while match(str, pathhead) != -1
     let uri = matchstr(str, pathhead)
     let uri = QFixNormalizePath(fnamemodify(uri, ':p'))
     let str = substitute(str, pathhead, 'file://'.uri, '')
-    let str = substitute(str, filehead, '\1file://\2', 'g')
     let str = substitute(str, 'file:///', 'file://'.fnamemodify('/', ':p'), 'g')
   endwhile
   silent! exe 'chdir ' . prevPath
@@ -2306,7 +2323,7 @@ if !exists('HowmHtml_HttpHeader')
   let HowmHtml_HttpHeader = [
     \ '<?xml version="1.0" encoding="%ENCODING%"?>',
     \ '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">',
-    \ '<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="ja" lang="ja">',
+    \ '<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="%LANG%" lang="%LANG%">',
     \ '<head>',
     \ '<meta http-equiv="Content-Type" content="text/html; charset=%ENCODING%" />',
     \ '<meta http-equiv="Content-Script-Type" content="text/javascript" />',
@@ -2323,7 +2340,6 @@ if !exists('HowmHtml_HttpBody')
     \ '<body class="mainIndex %BODYCLASS%">',
     \ '<div id="header"><p class="siteName"><a href="%BASEDIR%" title="Toplink">%SIGHTNAME%</a></p><p class="description">%DESCRIPTION%</p></div>',
     \ '<div id="content"><div id="main">',
-    \ '<h1>%TITLE%</h1>'
   \]
 endif
 if !exists('HowmHtml_HttpFooter')
@@ -2459,4 +2475,17 @@ function! QFixNormalizePath(path, ...)
   " let path = expand(a:path)
   return path
 endfunction
+
+fun! howm2html#Help()
+    let name = 'howm2html'
+    let dir = fnamemodify(matchstr(&runtimepath, '[^,]\{-}[\\/]'.name).'/doc', ':p')
+    let help = dir.'/'.name.'.txt'
+    let country = substitute($LANG, '_.*', '', '')
+    let help = dir.'/'.name.'.'.country.'x'
+    if !filereadable(help)
+      let help = dir.'/'.name.'.txt'
+    endif
+    unlet name
+    exe ':edit '.help
+endfun
 

@@ -1653,7 +1653,10 @@ function! qfixmemo#RenameAll()
       call add(glist, d)
       continue
     endif
-    call rename(from, to)
+    if rename(from, to) ! 0
+      call add(glist, d)
+      continue
+    endif
   endfor
   close!
   call qfixlist#open(glist, g:qfixmemo_dir)

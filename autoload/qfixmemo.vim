@@ -1638,6 +1638,7 @@ function! qfixmemo#RenameAll()
   for n in range(1, line('$'))
     let str = getline(n)
     let from = g:qfixmemo_dir.'/'.substitute(str, '|.*$', '', '')
+    let from = expand(from)
     let form = substitute(from, '\\', '/', 'g')
     let to   = substitute(str, '^[^|]\+|[^|]|', '', '')
     let res = {'filename': from, 'lnum': 1, 'text': to}
@@ -1653,7 +1654,10 @@ function! qfixmemo#RenameAll()
       call add(glist, d)
       continue
     endif
-    call rename(from, to)
+    if rename(from, to) ! 0
+      call add(glist, d)
+      continue
+    endif
   endfor
   close!
   call qfixlist#open(glist, g:qfixmemo_dir)

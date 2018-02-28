@@ -109,6 +109,7 @@ h1 {
 	font-size: 167%;
 	color: #333;
 	background-color: #f5f5f5;
+	overflow-wrap: break-word;
 }
 
 h1 {
@@ -190,17 +191,20 @@ td {
 	padding: 0.3em 10px;
 	border-collapse: separate;
 	border-spacing: 1px;
+	overflow-wrap: break-word;
 }
 
 th {
 	border-right: 1px solid #ddd;
 	color: #333;
 	background-color: #f5f5f5;
+	overflow-wrap: break-word;
 }
 
 td {
 	border-right: 1px solid #eee;
 	border-top: 1px solid #eee;
+	overflow-wrap: break-word;
 }
 
 /* Others
@@ -274,6 +278,7 @@ div.entry {
 	padding: 1px 0;
 	_height: 1px; /* for IE6 */
 	*min-height: 1px; /* for IE7 */
+	overflow-wrap: break-word;
 }
 
 /* body.archives */
@@ -401,6 +406,7 @@ div#utilities dl dd {
 	margin: 0 5px;
 	padding: 1px 0;
 	background-color: #f5f5f5;
+	overflow-wrap: break-word;
 }
 
 div#utilities dl dd ul {
@@ -585,6 +591,7 @@ div.section {
 
 div.entry h2 {
 	background-color: #f5f5f5;
+	overflow-wrap: break-word;
 }
 
 div.entry ul.info {

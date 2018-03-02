@@ -1365,6 +1365,7 @@ func! s:Convert2HTMLSnippet(...)
     let g:colors_name = 'default'
   endif
   let saved_colorscheme = g:colors_name
+  let saved_background = &background
   let save_cursor = getpos('.')
   let color = g:HowmHtml_colorscheme
   if a:0
@@ -1409,6 +1410,7 @@ func! s:Convert2HTMLSnippet(...)
   endwhile
   call setpos('.', save_cursor)
   silent exe 'colorscheme '.saved_colorscheme
+  silent exe 'set background='.saved_background
 endfunc
 
 func! s:Convert2HTMLCode(line1, line2, ftype, htmltype)

@@ -154,7 +154,7 @@ syn match qfixmemoHRule '^=\{7,}'
 hi def link qfixmemoHRule Type
 
 " code
-syn match qfixmemoCode display '\(^\|[^`]\)\zs`[^`]\+`\ze\([^`]\|$\)' contains=qfixmemoCodeDelimiter
+syn match qfixmemoCode display '`.\{-}\(`\|$\)' contains=qfixmemoCodeDelimiter
 syn match qfixmemoCodeDelimiter contained '`'
 
 hi def link qfixmemoCode Define

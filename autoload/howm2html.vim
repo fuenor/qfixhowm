@@ -286,7 +286,7 @@ if !exists('g:HowmHtml_OpenURIcmd')
     if exists('$ANDROID_DATA')
       let g:HowmHtml_OpenURIcmd = '!am start --user 0 -a android.intent.action.VIEW -t text/html -d %s'
       if exists("*ATEModIntent")
-        let g:HowmHtml_OpenURIcmd = "call ATEModIntent('VIEW', '%s')"
+        let g:HowmHtml_OpenURIcmd = "netrw"
       endif
     endif
   else
@@ -1980,7 +1980,13 @@ function! s:CnvLocalPath2Uri(str)
   exe 'chdir ' . s:escape(fnamemodify(expand('%'), ':h'), ' ')
   while match(str, pathhead) != -1
     let uri = matchstr(str, pathhead)
-    let uri = QFixNormalizePath(fnamemodify(uri, ':p'))
+    if s:publish == ''
+      let uri = QFixNormalizePath(fnamemodify(uri, ':p'))
+    else
+      let alt = matchstr(uri, '\(\.\{1,2}[/\\]\)\+')
+      let alt = substitute(alt, '\.', '@', 'g')
+      let uri = substitute(uri, '\(\.\{1,2}[/\\]\)\+', alt, '')
+    endif
     let str = substitute(str, pathhead, 'file://'.uri, '')
     let str = substitute(str, 'file:///', 'file://'.fnamemodify('/', ':p'), 'g')
   endwhile
@@ -2215,8 +2221,13 @@ function! s:uri2tag(str, pathchr)
         let altimguri = substitute(altimguri, '\.\([^.]\+\)$', '.th.\1', '')
       endif
 
+      let uri = s:restoreLocalLink(uri)
+      let orguri = s:restoreLocalLink(uri)
+      let altimguri = s:restoreLocalLink(uri)
       let uri = printf('<a href="%s"><img src="%s" %s alt="%s" /></a>', uri, altimguri, imgp, orguri)
     else
+      let uri = s:restoreLocalLink(uri)
+      let orguri = s:restoreLocalLink(uri)
       let uri = printf('<a href="%s">%s</a>', uri, orguri)
     endif
     let lstr = strpart(lstr, urilen)
@@ -2224,6 +2235,13 @@ function! s:uri2tag(str, pathchr)
     let str = str.substitute(lstr, urireg.'.*$', '', '')
     let lstr = matchstr(lstr, urireg.'.*$')
   endwhile
+  return str
+endfunction
+
+function! s:restoreLocalLink(str)
+  let alt = substitute(matchstr(a:str, 'file://\(@\{1,2}[/\\]\)\+'), 'file://', '', '')
+  let alt = substitute(alt, '@', '.', 'g')
+  let str = substitute(a:str, 'file://\(@\{1,2}[/\\]\)\+', alt, '')
   return str
 endfunction
 
@@ -2348,6 +2366,13 @@ if !exists('HowmHtml_HttpFooter')
   let HowmHtml_HttpFooter = [
     \ '</div></div>',
     \ '<div id="footer"><address>%DATE% (Howm2html ver. %VERSION%)</address></div>',
+    \ '</body>',
+    \ '</html>'
+  \]
+endif
+if HowmHtml_HttpFooter == []
+  let HowmHtml_HttpFooter = [
+    \ '</div></div>',
     \ '</body>',
     \ '</html>'
   \]

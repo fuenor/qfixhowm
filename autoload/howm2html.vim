@@ -415,6 +415,7 @@ function! s:HowmStr2HTML(list, htmlname, anchor)
     let str = substitute(str, '<', '\&lt;', 'g')
     let str = substitute(str, '&lt;\(/\?\)\(b\|i\|u\|em\|strong\|strike\|s\|del\)&gt;', '<\1\2>', 'g')
     let str = substitute(str, '&amp;<\(/\?\)\(b\|i\|u\|em\|strong\|strike\|s\|del\)>', '\&lt;\1\2\&gt;', 'g')
+    let str = substitute(str, '\\`', '\%\&x60;\%', 'g')
     let ostr = str
     let [saved_header, saved_list, saved_table, saved_folding, saved_define] = [header, list, table, folding, define]
     if prequote == 0
@@ -578,6 +579,7 @@ function! s:HowmStr2HTML(list, htmlname, anchor)
     endif
     " エスケープされたHTMLタグを有効化
     let str = s:howmEscapehtml(str)
+    let str = substitute(str, '%&x60;%', '`', 'g')
     call add(html, str)
     let idx += 1
   endfor

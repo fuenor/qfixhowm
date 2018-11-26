@@ -124,7 +124,7 @@ if !exists('g:qfixmemo_title') || g:qfixmemo_title != '*'
   hi def link qfixmemoMarkdownBullet Label
 endif
 
-syn region qfixmemoList start='^\s*[-+]\+' end='\s' contains=qfixmemoListBullet,qfixmemoListDefinition keepend
+syn region qfixmemoList start='^\s*[-+]\+\s' end='$' contains=qfixmemoListBullet,qfixmemoListDefinition,htmlTag,htmlEndTag,qfixmemoEscapeTag keepend
 syn match qfixmemoListBullet contained '^\s*+\+'
 syn match qfixmemoListBullet contained '^\s*-\+'
 
@@ -174,7 +174,7 @@ hi def link hatenaBlockDelimiter Delimiter
 " howm2html.vim
 "----------
 syn match qfixmemoEscapeTag '^&&.*$'
-syn match qfixmemoEscapeTag '&<[^>]\+>'
+syn match qfixmemoEscapeTag '&<[^>]\+>' contains=txtUrl,txtFile
 hi def link qfixmemoEscapeTag NonText
 
 if !exists('g:qfixmemo_wiki_syntax') || g:qfixmemo_wiki_syntax == 0

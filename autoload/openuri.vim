@@ -125,7 +125,7 @@ if !exists('g:openuri_cmd')
       if !exists("g:netrw_browsex_viewer")
         let g:netrw_browsex_viewer = g:openuri_cmd
       endif
-      if exists('$AMAZON_COMPONENT_LIST') || (system("getprop ro.build.version.sdk") >= 24)
+      if exists('$APPBASE') || (system("getprop ro.build.version.sdk") >= 24)
         let g:openuri_cmd = "netrw"
       else
         let g:openuri_bmp = '!am start --user 0 -a android.intent.action.VIEW -t image/* -d %s'

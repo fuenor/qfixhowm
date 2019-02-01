@@ -293,34 +293,13 @@ function! s:SetFileEncoding()
 endfunction
 
 """"""""""""""""""""""""""""""
-" コマンドラインコマンド
-""""""""""""""""""""""""""""""
-" command! -nargs=* -bang BGrep       call <SID>BGrep(<q-args>, <bang>0, 0)
-" command! -nargs=* -bang Vimgrep     call <SID>QFixCmdGrep('Vimgrep', <q-args>)
-" command! -nargs=* -bang VGrep       call <SID>QFixCmdGrep('Vimgrep', <q-args>)
-"
-" command! -nargs=* -bang BGrepadd    call <SID>BGrep(<q-args>, <bang>0, 1)
-" command! -nargs=* -bang VGrepadd    call <SID>QFixCmdGrep('Vimgrepadd', <q-args>)
-" command! -nargs=* -bang Vimgrepadd  call <SID>QFixCmdGrep('Vimgrepadd', <q-args>)
-"
-" command! -nargs=* -bang Grep        call <SID>QFixCmdGrep('Grep',   <q-args>)
-" command! -nargs=* -bang EGrep       call <SID>QFixCmdGrep('Grep',   <q-args>)
-" command! -nargs=* -bang FGrep       call <SID>QFixCmdGrep('FGrep',  <q-args>)
-" command! -nargs=* -bang RGrep       call <SID>QFixCmdGrep('RGrep',  <q-args>)
-" command! -nargs=* -bang REGrep      call <SID>QFixCmdGrep('RGrep',  <q-args>)
-" command! -nargs=* -bang RFGrep      call <SID>QFixCmdGrep('RFGrep', <q-args>)
-"
-" command! -nargs=* -bang Grepadd     call <SID>QFixCmdGrep('Grepadd',   <q-args>)
-" command! -nargs=* -bang EGrepadd    call <SID>QFixCmdGrep('Grepadd',   <q-args>)
-" command! -nargs=* -bang FGrepadd    call <SID>QFixCmdGrep('FGrepadd',  <q-args>)
-" command! -nargs=* -bang RGrepadd    call <SID>QFixCmdGrep('RGrepadd',  <q-args>)
-" command! -nargs=* -bang REGrepadd   call <SID>QFixCmdGrep('RGrepadd',  <q-args>)
-" command! -nargs=* -bang RFGrepadd   call <SID>QFixCmdGrep('RFGrepadd', <q-args>)
-
-""""""""""""""""""""""""""""""
 " コマンドラインgrep本体
 """"""""""""""""""""""""""""""
-function! s:QFixCmdGrep(cmd, arg)
+function! qfixgrep#BGrep(word, mode, addflag)
+  call s:BGrep(a:word, a:mode, a:addflag)
+endfunction
+
+function! qfixgrep#QFixCmdGrep(cmd, arg)
   let opt = matchstr(a:arg, '^\(\s*[-/][^ ]\+\)\+')
   let fenc = matchstr(opt, '--fenc=[^\s]\+')
   let fenc = substitute(fenc, '--fenc=', '', '')

@@ -385,6 +385,8 @@ let s:cnvopt = [
   \ ['let g:qfixmemo_wildcard_chapter_mode   = %s', 'g:QFixHowm_WildCardChapterMode'],
   \ ['let g:qfixmemo_folding_chapter_title   = %s', 'g:QFixHowm_FoldingChapterTitle'],
   \ ['let g:qfixmemo_folding_mode            = %s', 'g:QFixHowm_FoldingMode'],
+  \ ['let g:qfixmemo_code_block              = %s', 'g:QFixHowm_CodeBlock'],
+  \ ['let g:QFixMRU_CodeBlock                = %s', 'g:qfixmemo_code_block'],
   \ ]
 
 function! QFixHowmSetup()

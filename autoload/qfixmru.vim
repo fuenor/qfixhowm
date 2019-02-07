@@ -101,12 +101,6 @@ if !exists('g:QFixMRU_Title')
   " let g:QFixMRU_Title = {'mkd' : '^#',  'wiki' : '^='}
   let g:QFixMRU_Title = {}
 endif
-if !exists('g:QFixMRU_Comment')
-  let g:QFixMRU_Comment = [
-    \ {'start':'^\s*```',    'end':'^\s*```'},
-    \ {'start':'^>|.\{-}|$', 'end':'^||<$'},
-  \]
-endif
 
 " 任意の拡張子のタイトルを追加設定
 " 拡張子hogeのファイルの「行頭のfuga」をタイトルと見なす設定
@@ -580,7 +574,10 @@ function! QFixMRUGet(mode, mfile, lnum, ...)
   let save_cursor = getpos('.')
   call cursor(lnum, 1)
   let glist = getline(1, '$')
-  let commentLines = s:getCommentLines(glist, g:QFixMRU_Comment)
+  let commentLines = []
+  if exists('g:QFixMRU_CodeBlock')
+    let commentLines = s:getCommentLines(glist, g:QFixMRU_CodeBlock)
+  endif
 
   let flnum = 1
   let elnum = line('$')

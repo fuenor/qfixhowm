@@ -385,6 +385,16 @@ endif
 if !exists('g:qfixmemo_title')
   let g:qfixmemo_title         = '='
 endif
+" コードブロック正規表現
+if !exists('g:qfixmemo_code_block')
+  let g:qfixmemo_code_block = [
+    \ {'start':'^\s*```',    'end':'^\s*```'},
+    \ {'start':'^>|.\{-}|$', 'end':'^||<$'},
+  \]
+endif
+if !exists('g:QFixMRU_CodeBlock')
+  let g:QFixMRU_CodeBlock = g:qfixmemo_code_block
+endif
 " タイトル検索のエスケープパターン
 if !exists('g:qfixmemo_escape')
   let g:qfixmemo_escape = '[]~*.\#'

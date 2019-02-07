@@ -101,6 +101,13 @@ if !exists('g:QFixMRU_Title')
   " let g:QFixMRU_Title = {'mkd' : '^#',  'wiki' : '^='}
   let g:QFixMRU_Title = {}
 endif
+if !exists('g:QFixMRU_Comment')
+  let g:QFixMRU_Comment = [
+    \ {'start':'^\s*```',    'end':'^\s*```'},
+    \ {'start':'^>|.\{-}|$', 'end':'^||<$'},
+  \]
+endif
+
 " 任意の拡張子のタイトルを追加設定
 " 拡張子hogeのファイルの「行頭のfuga」をタイトルと見なす設定
 " function! QFixMRUAddEntryRegxp()
@@ -572,19 +579,44 @@ function! QFixMRUGet(mode, mfile, lnum, ...)
 
   let save_cursor = getpos('.')
   call cursor(lnum, 1)
+  let glist = getline(1, '$')
+  let commentLines = s:getCommentLines(glist, g:QFixMRU_Comment)
 
   let flnum = 1
   let elnum = line('$')
   let text = getline(lnum)
   if tpattern != ''
-    let tlnum = search(tpattern, 'cbW')
+    while 1
+      let tlnum = search(tpattern, 'cbW')
+      if tlnum == 0 || tlnum == 1
+        break
+      endif
+      let s = s:isCommentLine(commentLines, tlnum)
+      if s != {}
+        call cursor(s['start']-1, 1)
+        continue
+      endif
+      break
+    endwhile
     if tlnum
       let ttext = getline(tlnum)
       let text = ttext != '' ? ttext : text
       let lnum = tlnum
       let flnum = tlnum
     endif
-    let tlnum = search(tpattern, 'nW')
+    call cursor(lnum, 1)
+    while 1
+      let tlnum = search(tpattern, 'nW')
+      if tlnum == 0 || tlnum == line('$')
+        break
+      endif
+      let s = s:isCommentLine(commentLines, tlnum)
+      if s != {}
+        call cursor(s['end'], 1)
+        continue
+      endif
+      break
+    endwhile
     if tlnum
       let elnum = tlnum - 1
     endif
@@ -618,6 +650,35 @@ function! QFixMRUGet(mode, mfile, lnum, ...)
     return [glist, flnum, elnum]
   endif
   return [text, flnum, elnum]
+endfunction
+
+function! s:isCommentLine(list, line)
+  for l in a:list
+    if (a:line >= l['start']) && (a:line <= l['end'])
+      return l
+    endif
+  endfor
+  return {}
+endfunction
+
+function! s:getCommentLines(list, Desc)
+  let isComment = []
+  let save_cursor = getpos('.')
+  for desc in a:Desc
+    call cursor(1, 1)
+    while 1
+      let cfirst = search(desc['start'], 'cW')
+      call cursor(cfirst, 1)
+      let cend   = search(desc['end'], 'nW')
+      if cfirst == 0 || cend == 0
+        break
+      endif
+      call add(isComment, {'start':cfirst, 'end':cend})
+      call cursor(cend+1, 1)
+    endwhile
+  endfor
+  call setpos('.', save_cursor)
+  return isComment
 endfunction
 
 "Get mru title regular expression

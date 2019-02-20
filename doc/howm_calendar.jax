@@ -55,6 +55,7 @@ QFixHowm/QFixMemoを使用している場合は自動設定されるので問題
 す。
 
 休日定義ファイルはアーカイブの中の misc/holidayの中にあります。
+https://github.com/fuenor/qfixhowm/tree/master/misc/holiday
 >
     " 休日定義ファイル(パスは環境に合わせてください)
     let calendar_holidayfile = '~/howm/Sche-Hd-0000-00-00-000000.txt'

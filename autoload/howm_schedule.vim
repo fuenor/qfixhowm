@@ -176,7 +176,7 @@ if !exists('g:QFixHowm_HolidayFile')
   let g:QFixHowm_HolidayFile = ''
   if exists('$LANG') && ($LANG =~ 'ja')
     if exists('g:qfixmemo_fileencoding')
-      let s:ext = g:qfixmemo_fileencoding !~ '\ccp932' ? 'utf8' : 'cp932'
+      let s:ext = g:qfixmemo_fileencoding =~ '\ccp932' ? 'cp932' : 'utf8'
       let g:QFixHowm_HolidayFile = expand('<sfile>:p:h:h').'/misc/holiday/Sche-Hd-0000-00-00-000000.'.s:ext
       unlet s:ext
     endif

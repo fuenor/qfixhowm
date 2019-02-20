@@ -1092,10 +1092,13 @@ NOTE:
 ------------------------------------------------------------------------------
 8.1.2 カレンダーの休日表示                         *qfixmemo_submenu_holiday*
 
+日本語環境では自動的に日本の休日設定ファイルが読み込まれます。
+このため以下は会社や学校の休日などの、個人的な休日を追加したい場合に行ってくだ
+さい
+
 カレンダーに表示する休日を定義するファイルにはQFixHowmの休日定義ファイルを使用
 します。
-
-https://sites.google.com/site/fudist/Home/qfixhowm#downloads
+https://github.com/fuenor/qfixhowm/tree/master/misc/holiday
 (misc/holidayにも同じファイルがあります)
 
 定義ファイルを適当なディレクトリにコピーした後calendar_holidayfileに休日定義ファ
@@ -1104,10 +1107,6 @@ https://sites.google.com/site/fudist/Home/qfixhowm#downloads
 >
   " 休日定義ファイル(パスとファイルエンコーディングは環境に合わせてください)
   let calendar_holidayfile = '~/qfixmemo/Sche-Hd-0000-00-00-000000.utf8'
-
-NOTE:
-実際には予定・TODO(|qfixmemo_schedule|)で休日定義ファイル設定を行なっていると
-calendar_holidayfileは自動設定されるので必要ありません。
 
 サインは次の表のように表示されます。
 |     |  普通日               |

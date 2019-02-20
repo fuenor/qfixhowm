@@ -600,9 +600,10 @@ QFixHowm_JpDayOfWeekは必要はありません。
 
 ==============================================================================
 祝日や特別な日を強調表示する
+|qfixmemo_submenu_holiday|
 
 休日定義ファイルを howm_dir へコピーして下さい。
-|qfixmemo_submenu_holiday|
+https://github.com/fuenor/qfixhowm/tree/master/misc/holiday
 
 休日名のデフォルトは以下の通りです。
 >
@@ -817,4 +818,3 @@ QFixHowm_ScheduleSearchFile でファイル名を指定します。
 してしまわないように気を付ける必要があります。
 
   vim:tw=78:ts=8:ft=howm_reminder.help:norl:et:
-

@@ -818,7 +818,13 @@ function! s:BufWritePre()
   if search('^.\+$', 'ncw') == 0
     return
   endif
+  if exists('g:QFixMRU_CodeBlock')
+    let g:QFixMRU_CommentLines = qfixmru#getCommentLines(g:QFixMRU_CodeBlock)
+  else
+    let g:QFixMRU_CommentLines = []
+  endif
   call QFixMemoBufWritePre()
+  unlet g:QFixMRU_CommentLines
 endfunction
 
 function! s:BufWritePost()

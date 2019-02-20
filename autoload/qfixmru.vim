@@ -576,7 +576,11 @@ function! QFixMRUGet(mode, mfile, lnum, ...)
   let glist = getline(1, '$')
   let commentLines = []
   if exists('g:QFixMRU_CodeBlock')
-    let commentLines = s:getCommentLines(glist, g:QFixMRU_CodeBlock)
+    if exists('g:QFixMRU_CommentLines')
+      let commentLines = g:QFixMRU_CommentLines
+    else
+      let commentLines = qfixmru#getCommentLines(g:QFixMRU_CodeBlock)
+    endif
   endif
 
   let flnum = 1
@@ -658,7 +662,16 @@ function! s:isCommentLine(list, line)
   return {}
 endfunction
 
-function! s:getCommentLines(list, Desc)
+function! qfixmru#getCommentLines(Desc)
+  for desc in a:Desc
+    let cfirst = search(desc['start'], 'ncw')
+    if cfirst != -1
+      break
+    endif
+  endfor
+  if cfirst == -1
+    return []
+  endif
   let isComment = []
   let save_cursor = getpos('.')
   for desc in a:Desc

@@ -578,7 +578,7 @@ function! QFixMRUGet(mode, mfile, lnum, ...)
   if exists('g:QFixMRU_CodeBlock')
     if exists('g:QFixMRU_CommentLines')
       let commentLines = g:QFixMRU_CommentLines
-    else
+    elseif exists('g:QFixMRU_CodeBlock')
       let commentLines = qfixmru#getCommentLines(g:QFixMRU_CodeBlock)
     endif
   endif

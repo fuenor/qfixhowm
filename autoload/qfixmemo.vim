@@ -820,11 +820,14 @@ function! s:BufWritePre()
   endif
   if exists('g:QFixMRU_CodeBlock')
     let g:QFixMRU_CommentLines = qfixmru#getCommentLines(g:QFixMRU_CodeBlock)
+    if len(g:QFixMRU_CommentLines) > 0
+      silent! unlet g:QFixMRU_CommentLines
+    endif
   else
     let g:QFixMRU_CommentLines = []
   endif
   call QFixMemoBufWritePre()
-  unlet g:QFixMRU_CommentLines
+  silent! unlet g:QFixMRU_CommentLines
 endfunction
 
 function! s:BufWritePost()

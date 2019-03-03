@@ -121,7 +121,7 @@ if !exists('g:qfixmemo_title') || g:qfixmemo_title != '*'
   syn match qfixmemoMarkdownBullet contained '^\s*\*'
 
   hi def link qfixmemoMarkdownList   Normal
-  hi def link qfixmemoMarkdownBullet Label
+  hi def link qfixmemoMarkdownBullet Number
 endif
 
 syn region qfixmemoList start='^\s*[-+]\+\s' end='$' contains=qfixmemoListBullet,qfixmemoListDefinition,htmlTag,htmlEndTag,qfixmemoEscapeTag keepend
@@ -129,7 +129,7 @@ syn match qfixmemoListBullet contained '^\s*+\+'
 syn match qfixmemoListBullet contained '^\s*-\+'
 
 hi def link qfixmemoList       Normal
-hi def link qfixmemoListBullet Label
+hi def link qfixmemoListBullet Number
 
 " fenced language
 syn region qfixmemoBlock matchgroup=qfixmemoBlockDelimiter start=+^\s*```.*+ end=+^\s*```$+

@@ -36,13 +36,7 @@ let g:loaded_Howm2html = 1
 
 " HTML出力ディレクトリ
 if !exists('g:HowmHtml_htmldir')
-  let s:name = 'qfixmemo'
-  let g:HowmHtml_htmldir = '~/'.s:name
-  let dir = fnamemodify(matchstr(&runtimepath, '[^,]\{-}[\\/]'.s:name).'/html/peachpuff.css', ':p:h')
-  if isdirectory(dir)
-    let g:HowmHtml_htmldir = dir
-  endif
-  unlet s:name
+   let g:HowmHtml_htmldir = expand('<sfile>:p:h:h').'/html'
 endif
 " (完成版の)HTML出力ディレクトリ
 if !exists('g:HowmHtml_publish_htmldir')

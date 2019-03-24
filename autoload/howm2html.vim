@@ -1375,7 +1375,7 @@ func! s:Convert2HTMLSnippet(...)
     let firstline = search('^>|.\+|$', 'cW')
     let llreg = '^||<$'
     if firstline == 0
-      let firstline = search('^```\s*[[:alnum:]]\+\(:.*\)\?$', 'cW')
+      let firstline = search('^```\(\s*[[:alnum:]]\+\(:.*\)\?\)\?$', 'cW')
       let llreg = '^```$'
     endif
     if firstline == 0
@@ -1383,7 +1383,7 @@ func! s:Convert2HTMLSnippet(...)
     endif
     let type = substitute(getline(firstline), '^>|\||$\|^```\s*\|:.*$', '', 'g')
     if type == ''
-      continue
+      let type = 'none'
     endif
     let lastline = search(llreg, 'W')
     if lastline == 0
@@ -1397,7 +1397,11 @@ func! s:Convert2HTMLSnippet(...)
     endif
     let firstline += 1
     let lastline -= 1
-    let rstr = s:Convert2HTMLCode(firstline, lastline, type, 'xhtml')
+    if type == 'none'
+      let rstr = getline(firstline, lastline)
+    else
+      let rstr = s:Convert2HTMLCode(firstline, lastline, type, 'xhtml')
+    endif
     call map(rstr, "substitute(v:val, '<br\\( /\\)\\?>$', '', '')")
     if g:HowmHtml_ConvertFunc == '<SID>HowmStr2HTML'
       " howm2html用に &&を埋め込み
@@ -1405,6 +1409,7 @@ func! s:Convert2HTMLSnippet(...)
     endif
     silent! exe firstline.','.(lastline).'delete _'
     call append(firstline-1, rstr)
+    call cursor(line('.')+1, 1)
   endwhile
   call setpos('.', save_cursor)
   silent exe 'colorscheme '.saved_colorscheme

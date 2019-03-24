@@ -816,10 +816,12 @@ function! s:HowmHtmlConvert(list, htmlname)
       let l:HowmHtml_Title = s:HowmHtml_Title
     endif
     let title = substitute(d['title'], '^'.l:HowmHtml_Title, '', '')
+    let title = substitute(title, '&<', '<', 'g')
     let pattern = '<a href="#t%s" title="t%s" name="t%s" id="t%s">%s</a>%s'
     if g:HowmHtml_BodyClass != '' || g:HowmHtml_Vicuna != '' || bullet == ''
       let pattern = '<a href="#t%s" title="t%s" name="t%s" id="t%s">%s%s</a>'
-      call add(s:entries, '<li><a href="#t'.anchor.'" title="t'.anchor.'">'.title.'</a></li>')
+      let etitle = substitute(title, '<a.\{-}>.\{-}</a>', '', 'g')
+      call add(s:entries, '<li><a href="#t'.anchor.'" title="t'.anchor.'">'.etitle.'</a></li>')
     endif
     let atitle = printf(pattern, anchor, anchor, anchor, anchor, bullet, title)
 

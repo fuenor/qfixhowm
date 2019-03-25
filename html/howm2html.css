@@ -141,7 +141,12 @@ blockquote  p {
 	margin-bottom: 0.5em;
 }
 
+code {
+	font-size: 100%;
+}
+
 pre {
+	font-size: 100%;
 	padding: 15px 20px;
 	border-top: 1px solid #cfe4e8;
 	border-left: 1px solid #cfe4e8;
@@ -155,6 +160,12 @@ pre {
 code {
 	color: #086dac;
 	background-color: #ebf1f2;
+}
+
+/* Text area
+---------------*/
+textarea {
+	font-size: 110%;
 }
 
 /* List

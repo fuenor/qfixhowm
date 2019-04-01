@@ -92,7 +92,7 @@ hi def link qfixmemoChapterBullet   Label
 " Table
 syn match qfixmemoTextTable +^\s*|.*|$+ contains=qfixmemoTextTableSeparator,qfixmemoTextTableHeader,qfixmemoTextUrl,qfixmemoTextFile,qfixmemoEscapeTag
 syn match qfixmemoTextTableSeparator contained +|+
-syn match qfixmemoTextTableHeader contained '|\s*[*#][^|]\+' contains=qfixmemoTextTableSeparator
+syn match qfixmemoTextTableHeader contained '|:\?\s*[*#][^|]\+' contains=qfixmemoTextTableSeparator
 hi def link qfixmemoTextTableHeader    Title
 hi def link qfixmemoTextTableSeparator Statement
 

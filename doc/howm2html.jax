@@ -85,10 +85,10 @@ QFixMemoのファイルではリンク上で`<CR>`を押すとリンクを開く
 
 = テーブル
 
-| #月     | #略語 |                        |
-| January | Jan.  |                        |
-| Febrary | Feb.  | うるう年は29日まである |
-| March   | Mar.  |                        |
+| #月     | #略語 |: #text-align:|
+| January | Jan.  |:  左         |
+| Febrary | Feb.  |:  中央      :|
+| March   | Mar.  |   右        :|
 
 = 水平線
 

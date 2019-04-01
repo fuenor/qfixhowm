@@ -199,6 +199,7 @@ caption {
 
 th,
 td {
+    text-align: center;
 	padding: 0.3em 10px;
 	border-collapse: separate;
 	border-spacing: 1px;
@@ -216,6 +217,30 @@ td {
 	border-right: 1px solid #eee;
 	border-top: 1px solid #eee;
 	overflow-wrap: break-word;
+}
+
+th.center {
+    text-align: center;
+}
+
+td.center {
+    text-align: center;
+}
+
+th.right {
+    text-align: right;
+}
+
+td.right {
+    text-align: right;
+}
+
+th.left {
+    text-align: left;
+}
+
+td.left {
+    text-align: left;
 }
 
 /* Others

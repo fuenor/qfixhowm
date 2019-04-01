@@ -1876,11 +1876,14 @@ function! s:howmTabletag(str, table)
   let str = substitute(str, '^|\||$', '', 'g')
   let str = substitute(str, '^|', '<tr>|', 'g')
   let str = substitute(str, '|$', '|</tr>', 'g')
-  let str = substitute(str, '|\s*[*#]\([^|]*\)|', '<th>\1</th>', 'g')
+  let str = substitute(str, '|\(:\?\)\s*[*#]\([^|]*\)|', '<th>\1\2</th>', 'g')
   let str = substitute(str, '|\([^|]*\)|', '<td>\1</td>', 'g')
   let str = substitute(str, '</td>|', '</td><td>', '')
   let str = substitute(str, '|</tr>', '</td></tr>', '')
   let str = substitute(str, '|', '<td>', '')
+  let str = substitute(str, '\(t[dh]\)\s*>:\([^<]*\):</t', '\1 class="center">\2</t', "g")
+  let str = substitute(str, '\(t[dh]\)\s*>\([^<]*\):</t',  '\1 class="right">\2</t', "g")
+  let str = substitute(str, '\(t[dh]\)\s*>:\([^<]*\)</t',  '\1 class="left">\2</t', "g")
   if table == 0
     let str = '<table>' . str
   endif

@@ -735,7 +735,7 @@ function! s:HowmHTML(type, ...)
 
   if a:0 > 1
     let subject = substitute(a:2, '^. ', '', '')
-    let subject = substitute(subject, '<a name\s*=.\{-}</a>', '', 'g')
+    let subject = substitute(subject, '<a name\s*=.\{-}>\(.\{-}\)</a>', '\1', 'g')
     let htmlname = a:3
   else
     let subject = file

@@ -695,8 +695,6 @@ function! qfixmemo#AddTitle(...)
   elseif str !~ tpattern && str !~ l:qfixmemo_title
     exe "0put='".g:qfixmemo_title . " '"
   endif
-
-  call cursor(1, 1)
   while 1
     let [entry, fline, lline] = QFixMRUGet('entry', '%', fline, tpattern)
     if fline == -1
@@ -739,12 +737,18 @@ function! qfixmemo#AddTime(...)
   endif
   let l:qfixmemo_title = escape(g:qfixmemo_title, g:qfixmemo_escape)
   let save_cursor = getpos('.')
-  call cursor(1, 1)
   let tpattern = qfixmemo#TitleRegxp()
+  if g:qfixmemo_use_addtime != 2
+    call cursor(1, 1)
+  endif
   while 1
-    let fline = search(tpattern, 'cW')
-    if fline == 0
-      break
+    if g:qfixmemo_use_addtime != 2
+      let fline = search(tpattern, 'cW')
+      if fline == 0
+        break
+      endif
+    else
+      let fline = line('.')
     endif
     let [entry, fline, lline] = QFixMRUGet('entry', '%', fline, tpattern)
     if len(filter(entry, "v:val =~ '" . g:qfixmemo_timestamp_regxp. "'")) == 0
@@ -753,6 +757,9 @@ function! qfixmemo#AddTime(...)
       let lline += 1
     endif
     call cursor(lline, 1)
+    if g:qfixmemo_use_addtime == 2
+      break
+    endif
   endwhile
   call setpos('.', save_cursor)
 endfunction

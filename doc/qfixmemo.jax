@@ -1429,8 +1429,11 @@ QFixMemoはキーマップが .vimrcや他のプラグインで定義されて�
   " タイトル行付加
   let qfixmemo_use_addtitle        = 1
   " タイムスタンプ付加
+  " '2'に設定するとカーソル位置のエントリのみタイムスタンプを付加
+  " タイムスタンプ付加は重いので１ファイルに大量のエントリがある場合に使用
   let qfixmemo_use_addtime         = 1
   " タイムスタンプアップデート
+  " 保存時にカーソル位置のエントリのタイムスタンプを更新
   let qfixmemo_use_updatetime      = 0
   " ファイル末の空行を削除
   let qfixmemo_use_deletenulllines = 1

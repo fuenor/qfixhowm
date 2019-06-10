@@ -695,6 +695,8 @@ function! qfixmemo#AddTitle(...)
   elseif str !~ tpattern && str !~ l:qfixmemo_title
     exe "0put='".g:qfixmemo_title . " '"
   endif
+
+  call cursor(1, 1)
   while 1
     let [entry, fline, lline] = QFixMRUGet('entry', '%', fline, tpattern)
     if fline == -1
@@ -722,6 +724,10 @@ function! qfixmemo#AddTitle(...)
       call setline(fline, title)
     endif
     let fline = lline+1
+    let fline = search(rpattern, 'cW')
+    if fline == 0 || fline == lline
+      break
+    endif
   endwhile
   call setpos('.', save_cursor)
 endfunction

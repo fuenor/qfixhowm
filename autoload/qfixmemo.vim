@@ -213,7 +213,7 @@ if !exists('g:qfixmemo_use_addtitle')
 endif
 " オートタイムスタンプ
 if !exists('g:qfixmemo_use_addtime')
-  let g:qfixmemo_use_addtime = 1
+  let g:qfixmemo_use_addtime = 2
 endif
 " タイムスタンプアップデート
 if !exists('g:qfixmemo_use_updatetime')
@@ -738,34 +738,49 @@ function! qfixmemo#AddTime(...)
   let l:qfixmemo_title = escape(g:qfixmemo_title, g:qfixmemo_escape)
   let save_cursor = getpos('.')
   let tpattern = qfixmemo#TitleRegxp()
-  let glines = getline(1, '$')
-  let titles = len(filter(glines, "v:val =~ '" . tpattern . "'"))
-  let glines = getline(1, '$')
-  let times  = len(filter(glines, "v:val =~ '" . g:qfixmemo_timestamp_regxp. "'"))
-  let addTimeMode = titles - times > 1 ? 1 : 2
 
-  if addTimeMode != 2
-    call cursor(1, 1)
-  endif
-  while 1
-    if addTimeMode != 2
-      let fline = search(tpattern, 'cW')
-      if fline == 0
+  let addTimeMode = g:qfixmemo_use_addtime
+  while addTimeMode > 0
+    if addTimeMode == 1
+      call cursor(1, 1)
+    endif
+    while 1
+      if addTimeMode == 1
+        let fline = search(tpattern, 'cW')
+        if fline == 0
+          break
+        endif
+      else
+        let fline = line('.')
+      endif
+      let [entry, fline, lline] = QFixMRUGet('entry', '%', fline, tpattern)
+      if len(filter(entry, "v:val =~ '" . g:qfixmemo_timestamp_regxp. "'")) == 0
+        let str = strftime(g:qfixmemo_timeformat)
+        exe fline . 'put=str'
+        let lline += 1
+      endif
+      call cursor(lline, 1)
+      if addTimeMode >= 2
         break
       endif
-    else
-      let fline = line('.')
-    endif
-    let [entry, fline, lline] = QFixMRUGet('entry', '%', fline, tpattern)
-    if len(filter(entry, "v:val =~ '" . g:qfixmemo_timestamp_regxp. "'")) == 0
-      let str = strftime(g:qfixmemo_timeformat)
-      exe fline . 'put=str'
-      let lline += 1
-    endif
-    call cursor(lline, 1)
-    if addTimeMode == 2
+    endwhile
+    if addTimeMode == 1
       break
     endif
+    let glines = getline(1, '$')
+    let titles = len(filter(glines, "v:val =~ '" . tpattern . "'"))
+    let glines = getline(1, '$')
+    let times  = len(filter(glines, "v:val =~ '" . g:qfixmemo_timestamp_regxp. "'"))
+    if times >= titles
+      if g:qfixmemo_use_addtime > 2 && times > titles
+        echohl ErrorMsg
+        echom "There are more timestamps than titles."
+        echom "(TITLE : ".titles." TIMESTAMP : ".times.")"
+        echohl None
+      endif
+      break
+    endif
+    let addTimeMode = 1
   endwhile
   call setpos('.', save_cursor)
 endfunction

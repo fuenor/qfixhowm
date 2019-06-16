@@ -723,7 +723,7 @@ function! qfixmemo#AddTitle(...)
     endif
     let fline = lline+1
     let fline = search(rpattern, 'cW')
-    if fline == 0 || fline == lline
+    if fline == 0 || fline == lline+1 || lline == line('$')
       break
     endif
   endwhile
@@ -738,11 +738,17 @@ function! qfixmemo#AddTime(...)
   let l:qfixmemo_title = escape(g:qfixmemo_title, g:qfixmemo_escape)
   let save_cursor = getpos('.')
   let tpattern = qfixmemo#TitleRegxp()
-  if g:qfixmemo_use_addtime != 2
+  let glines = getline(1, '$')
+  let titles = len(filter(glines, "v:val =~ '" . tpattern . "'"))
+  let glines = getline(1, '$')
+  let times  = len(filter(glines, "v:val =~ '" . g:qfixmemo_timestamp_regxp. "'"))
+  let addTimeMode = titles - times > 1 ? 1 : 2
+
+  if addTimeMode != 2
     call cursor(1, 1)
   endif
   while 1
-    if g:qfixmemo_use_addtime != 2
+    if addTimeMode != 2
       let fline = search(tpattern, 'cW')
       if fline == 0
         break
@@ -757,7 +763,7 @@ function! qfixmemo#AddTime(...)
       let lline += 1
     endif
     call cursor(lline, 1)
-    if g:qfixmemo_use_addtime == 2
+    if addTimeMode == 2
       break
     endif
   endwhile

@@ -724,7 +724,7 @@ function! qfixmemo#AddTitle(...)
     let fline = lline+1
     call cursor(fline, 1)
     let fline = search(rpattern, 'cW')
-    if fline == 0 || fline == lline+1 || lline == line('$')
+    if fline <= 0 || lline == line('$')
       break
     endif
   endwhile

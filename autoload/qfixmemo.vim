@@ -765,7 +765,7 @@ function! qfixmemo#AddTime(...)
         break
       endif
     endwhile
-    if addTimeMode == 1
+    if addTimeMode == 1 || addTimeMode == 4
       break
     endif
     let glines = getline(1, '$')
@@ -773,7 +773,7 @@ function! qfixmemo#AddTime(...)
     let glines = getline(1, '$')
     let times  = len(filter(glines, "v:val =~ '" . g:qfixmemo_timestamp_regxp. "'"))
     if times >= titles
-      if g:qfixmemo_use_addtime > 2 && times > titles
+      if g:qfixmemo_use_addtime >= 3 && times > titles
         echohl ErrorMsg
         echom "There are more timestamps than titles."
         echom "(TITLE : ".titles." TIMESTAMP : ".times.")"

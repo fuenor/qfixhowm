@@ -50,8 +50,9 @@ NOTE: openuri.vimをautoloadで読み込むと、起動直後は :Openuri コマ
 (例) カーソルを http://www.example.com 上に移動しコマンドを実行します。
   :Openuri
 
-<CR>にopenuriをキーマップすることも可能です。 >
-  nnoremap <silent> <CR> :<C-u>call openuri#cursorline()<CR>
+`gx`にopenuriをキーマップすることも可能です。 >
+  nnoremap <silent> gx :<C-u>call openuri#open()<CR>
+  vnoremap <silent> gx :<C-u>call openuri#openVis()<CR>
 
 openuri.vimで開くことが可能なURIは以下のシンタックスで強調表示できます。 >
   " URIのシンタックス定義

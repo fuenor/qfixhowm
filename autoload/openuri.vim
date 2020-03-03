@@ -4,7 +4,7 @@
 "         Author: fuenor <fuenor@gmail.com>
 "                 http://sites.google.com/site/fudist/Home  (Japanese)
 "=============================================================================
-let s:version = 102
+let s:version = 103
 scriptencoding utf-8
 if exists('g:disable_openuri') && g:disable_openuri == 1
   finish
@@ -43,6 +43,14 @@ function! openuri#open(...)
     let ret = s:cursorline()
   endif
   return ret == 1
+endfunction
+
+function! openuri#openVis()
+  let akeep = @a
+  norm! gv"ay
+  let uri = @a
+  let @a    = akeep
+  call openuri#open(uri)
 endfunction
 
 """"""""""""""""""""""""""""""

@@ -36,7 +36,11 @@ let g:loaded_Howm2html = 1
 
 " HTML出力ディレクトリ
 if !exists('g:HowmHtml_htmldir')
-   let g:HowmHtml_htmldir = expand('<sfile>:p:h:h').'/html'
+  if isdirectory($APPEXTFILES.'/html')
+    let g:HowmHtml_htmldir = $APPEXTFILES.'/html'
+  else
+    let g:HowmHtml_htmldir = expand('<sfile>:p:h:h').'/html'
+  endif
 endif
 " (完成版の)HTML出力ディレクトリ
 if !exists('g:HowmHtml_publish_htmldir')
@@ -137,6 +141,10 @@ endif
 " Vicunaを使用する
 if !exists('HowmHtml_Vicuna')
   let g:HowmHtml_Vicuna = ''
+endif
+" singleの場合にはトップにEntriesを追加する
+if !exists('HowmHtml_SingleEntries')
+  let g:MdHowmml_SingleEntries = 0
 endif
 " BODYCLASSを使用する
 if !exists('HowmHtml_BodyClass')
@@ -860,6 +868,8 @@ function! s:HowmHtmlConvert(list, htmlname)
 
   if (g:HowmHtml_Vicuna != '' && g:HowmHtml_Vicuna !~ 'single') || (g:HowmHtml_BodyClass != '' && g:HowmHtml_BodyClass !~ 'single')
     call extend(html, s:VicunaUtil('multi'))
+  elseif g:HowmHtml_SingleEntries == 1 && g:HowmHtml_BodyClass == 'single'
+    let html = extend(s:VicunaUtil('multi'), html)
   endif
 
   " HTMLヘッダ
@@ -2383,6 +2393,13 @@ if HowmHtml_HttpFooter == []
     \ '</body>',
     \ '</html>'
   \]
+  if g:HowmHtml_SingleEntries == 1 && g:HowmHtml_BodyClass == 'single'
+    let HowmHtml_HttpFooter = [
+      \ '</div>',
+      \ '</body>',
+      \ '</html>'
+    \]
+  endif
 endif
 if !exists('HowmHtml_TopicPath')
   let HowmHtml_TopicPath = [
@@ -2405,10 +2422,12 @@ function! s:VicunaUtil(mode)
   let to   = to == 'Shift_JIS' ? 'cp932' : to
 
   let foot = [
-    \ '</div>',
     \ '<div id="utilities">',
     \ '<dl class="navi">',
   \]
+  if !(g:HowmHtml_SingleEntries == 1 && g:HowmHtml_BodyClass == 'single')
+    call extend(["</div>"], foot)
+  endif
   call extend(foot, g:HowmHtml_Entries)
   call extend(foot, s:entries)
   call add(foot, '</ul></dd>')
@@ -2416,6 +2435,9 @@ function! s:VicunaUtil(mode)
     call extend(foot, g:HowmHtml_Navi)
   endif
   call add(foot, '</dl>')
+  if g:HowmHtml_SingleEntries == 1 && g:HowmHtml_BodyClass == 'single'
+    call extend(foot, ["</div></div>"])
+  endif
   if exists('g:HowmHtml_Others')
     call add(foot, '<dl class="others">')
     call extend(foot, g:HowmHtml_Others)

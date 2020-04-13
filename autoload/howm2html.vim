@@ -2,7 +2,6 @@
 "    Description: HTML converter for QFixMemo
 "                 openuri.vim required
 "     Maintainer: fuenor@gmail.com
-"                 http://dl.dropbox.com/u/1736409/howm/howm2html.html
 "=============================================================================
 let s:version  = '1.35'
 scriptencoding utf-8
@@ -148,7 +147,7 @@ if !exists('HowmHtml_SingleEntries')
 endif
 " BODYCLASSを使用する
 if !exists('HowmHtml_BodyClass')
-  let g:HowmHtml_BodyClass = 'double-l'
+  let g:HowmHtml_BodyClass = 'single'
 endif
 " Vicunaのサイドバーにチャプターも表示する
 if !exists('HowmHtml_VicunaChapter')
@@ -2365,6 +2364,7 @@ if !exists('HowmHtml_HttpHeader')
     \ '<meta http-equiv="Content-Type" content="text/html; charset=%ENCODING%" />',
     \ '<meta http-equiv="Content-Script-Type" content="text/javascript" />',
     \ '<meta http-equiv="Content-Style-Type" content="text/css" />',
+    \ '<meta name="viewport" content="width=device-width, initial-scale=1">',
     \ '<meta name="generator" content="howm2html" />',
     \ '<meta name="description" content="%FILENAME%" />',
     \ '<title> %SUBJECT% </title>',

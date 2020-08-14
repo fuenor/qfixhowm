@@ -20,6 +20,8 @@ if v:version < 700
 endif
 let g:openuri_version = s:version
 let g:loaded_openuri = 1
+let s:save_cpo = &cpo
+set cpo&vim
 
 if !exists('g:openuri_unix_style_path')
   let g:openuri_unix_style_path = 1
@@ -509,4 +511,7 @@ endfunction
 function! s:escape(str, chars)
   return escape(a:str, a:chars.((has('win32')|| has('win64')) ? '#%&' : '#%$'))
 endfunction
+
+let &cpo = s:save_cpo
+unlet s:save_cpo
 

@@ -12,7 +12,6 @@ if exists('g:loaded_MRUpreview') && !exists('g:fudist')
   finish
 endif
 let g:loaded_MRUpreview = 1
-
 if v:version < 700
   finish
 endif
@@ -24,18 +23,26 @@ endif
 
 augroup MRUPreview
   au!
-  autocmd BufWinEnter __MRU_Files__ call <SID>BufWinEnter(g:QFix_MRUPreviewEnable)
-  autocmd BufLeave    __MRU_Files__ call <SID>BufLeave()
-  autocmd CursorHold  __MRU_Files__ call <SID>Preview()
+  autocmd BufWinEnter -RecentFiles- call <SID>BufWinEnter(g:QFix_MRUPreviewEnable)
+  autocmd BufLeave    -RecentFiles- call <SID>BufLeave()
+  autocmd CursorHold  -RecentFiles- call <SID>Preview()
 augroup END
 
+let s:esc_filename_chars = ' *?[{`$%#"|!<>();&' . "'\t\n"
 function! s:Preview()
   if !g:QFix_MRUPreviewEnable
     return
   endif
   " ファイル名と行番号を取得してプレビューウィンドウを表示
-  let file = substitute(getline('.'), '^.*|\s*', '', '')
   let lnum = 1
+  let str = getline('.')
+  if str =~ '^:'
+    let bnum = matchstr(str, '|\s*\zs\d\+\ze')
+    let file = '|'.bnum.'|'
+    let lnum = matchstr(str, '.*[^[:digit:]]\zs\d\+\ze\s*$') + 0
+  else
+    let file = matchstr(str, g:MRU_Filename_Format.parser)
+  endif
   call QFixPreviewOpen(file, lnum)
 endfunction
 

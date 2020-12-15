@@ -233,10 +233,6 @@ function! datelib#MakeHolidayTable(year, ...)
   endfor
 endfunction
 
-function! Debug()
-  echo s:holidaytbl
-endfunction
-
 if !exists('g:qfixtempname')
   let g:qfixtempname = tempname()
 endif
@@ -292,16 +288,6 @@ function! s:ReadScheduleFile(files, table)
       let repeat = substitute(repeat, '(', '', '')
       let text = substitute(str, '^'.sch_cmd, '', '')
       if cmd == '@'
-        if repeat == '' && sft !~ '\c\(Hol\|Hdy\|Wdy\|Holiday\|Weekday\)'
-          let opt = (opt == '' || opt == 0) ? 1 : opt
-          let time = datelib#StrftimeCnvDoWShift(year, month, day, cnvdow, sft)
-          for i in range(opt)
-            let date = strftime('%Y%m%d', time)
-            let a:table[date] = text
-            let time += 24*60*60
-          endfor
-          continue
-        endif
       elseif cmd == '@@'
       elseif cmd == '@@@'
       else
@@ -433,7 +419,6 @@ function! s:SetScheduleTable(year, dict, table, hol)
           endfor
         endfor
       elseif d['cmd'] == '@'
-        " 単発予定は読み込み時に処理済み
         let opt = d['opt']
         let opt = (opt == '' || opt == 0) ? 1 : opt
 
@@ -447,17 +432,9 @@ function! s:SetScheduleTable(year, dict, table, hol)
         let year  = strftime('%Y', time)
         let month = strftime('%m', time)
         let day   = strftime('%d', time)
-        for rday in range(day, day+366, repeat)
-          let time = datelib#StrftimeCnvDoWShift(year, month, rday, d['cnvdow'], d['sft'])
-          for i in range(opt)
-            let date = strftime('%Y%m%d', time)
-            if stridx(date, a:year) != 0
-              continue
-            endif
-            let a:table[date] = d['text']
-            let time += 24*60*60
-          endfor
-        endfor
+        let time = datelib#StrftimeCnvDoWShift(year, month, day, d['cnvdow'], d['sft'])
+        let date = strftime('%Y%m%d', time)
+        let a:table[date] = d['text']
       else
         continue
       endif

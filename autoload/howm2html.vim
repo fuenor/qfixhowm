@@ -143,7 +143,7 @@ if !exists('HowmHtml_Vicuna')
 endif
 " singleの場合にはトップにEntriesを追加する
 if !exists('HowmHtml_SingleEntries')
-  let g:MdHowmml_SingleEntries = 1
+  let g:HowmHtml_SingleEntries = 1
 endif
 " BODYCLASSを使用する
 if !exists('HowmHtml_BodyClass')

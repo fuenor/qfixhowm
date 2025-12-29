@@ -91,9 +91,9 @@ function! datelib#StrftimeCnvDoWShift(year, month, day, cnvdow, sft)
       let time += 7*24*60*60
     endif
   endif
-  if sft =~ '[-+]\?\s*\d\+'
+  if sft =~ '[+\-]\?\s*\d\+'
     let time += str2nr(sft)*24*60*60
-  elseif sft =~ '[-+]\s*\c\(Hol\|Hdy\|Wdy\|Holiday\|Weekday\)'
+  elseif sft =~ '[+\-]\s*\c\(Hol\|Hdy\|Wdy\|Holiday\|Weekday\)'
     let t = str2nr(substitute(sft, '\c\(Hol\|Hdy\|Wdy\|Holiday\|Weekday\)', '1', '')) * 24*60*60
     while 1
       let y = strftime('%Y', time)
@@ -106,7 +106,7 @@ function! datelib#StrftimeCnvDoWShift(year, month, day, cnvdow, sft)
       endif
       let time += t
     endwhile
-  elseif sft =~ '[-+]\s*'.s:DoWregxp
+  elseif sft =~ '[+\-]\s*'.s:DoWregxp
     let fday = time / (24*60*60)
     let fdow = datelib#DoWIdxStrftime(fday)
     if sft =~ g:DoWStrftime[fdow]
@@ -247,10 +247,10 @@ function! s:ReadScheduleFile(files, table)
     endif
     let glist = s:readfile(file)
     let today = strftime('%Y%m%d')
-    let sch_ext  = '-@!+~.'
+    let sch_ext  = '@!+~.-'
     let sch_date = '^.\d\{4}.\d\{2}.\d\{2}.'
     let sch_dow  = s:DoWregxp
-    let sch_cmd  = '['.sch_ext.']\{1,3}\(([0-9]*[-+*]\?'.sch_dow.'\?\([-+]\d\+\)\?)\)\?[0-9]*'
+    let sch_cmd  = '['.sch_ext.']\{1,3}\(([0-9]*[+*\-]\?'.sch_dow.'\?\([+\-]\d\+\)\?)\)\?[0-9]*'
     for str in glist
       let date = matchstr(str, sch_date)
       let date = substitute(date, '[^0-9]', '', 'g')
@@ -282,7 +282,7 @@ function! s:ReadScheduleFile(files, table)
       let opt = matchstr(cmdstr, '\d*$')
       let cnvdow = matchstr(cmdstr, '(\(\d\*\)\?'.sch_dow)
       let cnvdow = substitute(cnvdow, '(', '', '')
-      let sft = matchstr(cmdstr, '[-+]\(\d\+\|'.sch_dow.'\))')
+      let sft = matchstr(cmdstr, '[+\-]\(\d\+\|'.sch_dow.'\))')
       let sft = substitute(sft, ')', '', '')
       let repeat = matchstr(cmdstr, '(\d\+')
       let repeat = substitute(repeat, '(', '', '')
@@ -369,7 +369,7 @@ function! s:setholidayfile()
   let prevPath = s:escape(getcwd(), ' ')
   silent! exe 'chdir ' . s:escape(l:howm_dir, ' ')
   let file = fnamemodify(file, ':p')
-  exe 'chdir ' . prevPath
+  silent! exe 'chdir ' . prevPath
   let file = substitute(expand(file), "\<NL>.*", '', '')
   let file = substitute(file, '\\', '/', 'g')
   return split(file, "\<NL>")

@@ -260,7 +260,7 @@ function! s:QFixHowmAlarmReadFile(mode, ...)
         let sq = QFixHowmListReminder_qf('schedule')
       endif
       if len(sq) > 0
-        let tfmt = '^\s*\['.s:sch_dateTime.'][-@!+~.]'
+        let tfmt = '^\s*\['.s:sch_dateTime.'][@!+~.\-]'
         for d in sq
           if d['text'] =~ tfmt
             if g:QFixHowmAlarmFilterReg == ''
@@ -302,9 +302,9 @@ function! s:HowmAlarmReadFile(file, mode)
 endfunction
 
 function! s:_HowmAlarmSet(retval)
-  let cmdfmt = '\[[TNSDR]:\([-+]\?\d\+\)\?\]'
-  let tfmt = '^\s*\['.s:sch_dateTime.'][-@!+~.]'
-  let rfmt = '^\s*\['.s:sch_rdate.' \d\{2}:\d\{2}][-@!~+.]'
+  let cmdfmt = '\[[TNSDR]:\([+\-]\?\d\+\)\?\]'
+  let tfmt = '^\s*\['.s:sch_dateTime.'][@!+~.\-]'
+  let rfmt = '^\s*\['.s:sch_rdate.' \d\{2}:\d\{2}][@!~+.\-]'
   for d in a:retval
     let text = d
     if text == '' || text !~ tfmt

@@ -124,7 +124,7 @@ if QFixHowm_Convert > 1
   endif
   " ,y で表示する予定・TODO
   if !exists('g:QFixHowm_ListReminder_ScheExt')
-    let g:QFixHowm_ListReminder_ScheExt = '[-@!.]'
+    let g:QFixHowm_ListReminder_ScheExt = '[@!.\-]'
   endif
   " 予定・TODOのソート優先順
   if !exists('g:QFixHowm_ReminderPriority')
@@ -262,7 +262,7 @@ endif
 " 次の設定では休日定義ファイルのように予定・TODOのみ設定している場合に、設定に
 " かかわらずタイトル行が付加されないようにしている。
 if !exists('g:qfixmemo_alt_title_regxp')
-  let g:qfixmemo_alt_title_regxp = '^\s*\[\d\{4}[-/]\d\{2}[-/]\d\{2}\( \d\{2}:\d\{2}\)\?\][-@!+~.]'
+  let g:qfixmemo_alt_title_regxp = '^\s*\[\d\{4}[-/]\d\{2}[-/]\d\{2}\( \d\{2}:\d\{2}\)\?\][@!+~.\-]'
 endif
 
 " howmテンプレート

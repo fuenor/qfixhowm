@@ -223,7 +223,7 @@ if !exists('g:QFixHowm_ListReminder_ScheExt')
 endif
 ",t で表示する予定・TODO
 if !exists('g:QFixHowm_ListReminder_TodoExt')
-  let g:QFixHowm_ListReminder_TodoExt = '[-@+!~.]'
+  let g:QFixHowm_ListReminder_TodoExt = '[@+!~.\-]'
 endif
 "メニューファイル名
 if !exists('g:QFixHowm_Menufile')
@@ -231,7 +231,7 @@ if !exists('g:QFixHowm_Menufile')
 endif
 "menuで表示する予定・TODO
 if !exists('g:QFixHowm_ListReminder_MenuExt')
-  let g:QFixHowm_ListReminder_MenuExt = '[-@+!~.]'
+  let g:QFixHowm_ListReminder_MenuExt = '[@+!~.\-]'
 endif
 "予定・TODOのキャッシュを保持する時間
 if !exists('g:QFixHowm_ListReminderCacheTime')
@@ -390,11 +390,11 @@ function! s:makeRegxp(dpattern)
   let s:sch_dateT    = '\['.s:sch_date.'\( '.s:sch_time.'\)\?\]'
   let s:sch_dateTime = '\['.s:sch_date.' '.s:sch_time.'\]'
   let s:sch_dow      = '\c\(\(Sun\|Mon\|Tue\|Wed\|Thu\|Fri\|Sat\|Hol\|Hdy\|Holiday\|Wdy\|Weekday\)\)'
-  let s:sch_ext      = '-@!+~.'
+  let s:sch_ext      = '@!+~.-'
   let s:sch_Ext      = '['.s:sch_ext.']'
   let s:sch_notExt   = '[^'.s:sch_ext.']'
-  let s:sch_dateCmd  = s:sch_dateT . s:sch_Ext . '\{1,3}\(([0-9]*[-+*]\?'.s:sch_dow.'\?)\)\?[0-9]*'
-  let s:sch_cmd      = s:sch_Ext . '\{1,3}\(([0-9]*[-+*]\?'.s:sch_dow.'\?\([-+]\d\+\)\?)\)\?[0-9]*'
+  let s:sch_dateCmd  = s:sch_dateT . s:sch_Ext . '\{1,3}\(([0-9]*[+*-]\?'.s:sch_dow.'\?)\)\?[0-9]*'
+  let s:sch_cmd      = s:sch_Ext . '\{1,3}\(([0-9]*[+*-]\?'.s:sch_dow.'\?\([+\-]\d\+\)\?)\)\?[0-9]*'
   let s:Recentmode_Date   = '(\d\{12})'
   let g:qfixmemo_scheduleformat = s:sch_dateCmd
 endfunction
@@ -705,7 +705,7 @@ function! s:HolidayGrep(dir, file)
   let reg = g:DL_SundayStr
   let yreg = printf("%d\\|%d", year, year+1)
   call filter(dict, 'v:key =~ yreg')
-  call filter(dict, 'v:val !~ reg')
+  call filter(dict, 'v:val !~ "\\V" . escape(reg, "\\")')
   for [key, value] in items(dict)
     let text = printf('[%s]@ %s', strpart(key, 0, 4).'-'.strpart(key, 4, 2).'-'.strpart(key, 6, 2), value)
     let sepdat = {'filename':file, 'lnum': 1, 'text': text}
@@ -724,26 +724,26 @@ endfunction
 
 function! s:altHolidayVimgrep(dir, file, pattern)
   " 高速化のためテンポラリバッファを使用
+  let path = substitute(fnamemodify(a:dir, ':p'), '\\', '/', 'g')
+  let path = substitute(path, '[\\/]$', '', '')
   let prevPath = s:escape(getcwd(), ' ')
   silent! exe 'chdir ' . s:escape(path, ' ')
   silent! exe 'silent! botright split '.g:qfixtempname
   silent! setlocal bt=nofile bh=hide noswf nobl
-
-  let path = substitute(fnamemodify(a:dir, ':p'), '\\', '/', 'g')
-  let path = substitute(path, '[\\/]$', '', '')
   let file = a:file
   let lnum = 1
   let tlist = s:readfile(path.'/'.file, '')
   let qflist = []
+  let sundaystr = exists('g:DL_SundayStr') ? escape(g:DL_SundayStr, '\^$.*[]~') : ''
   for text in tlist
-    if text =~ s:sch_dateCmd . '\s*'.g:DL_SundayStr .'\s*$'
+    if text =~ s:sch_dateCmd . '\s*' . sundaystr . '\s*$'
       let sepdat = {'filename':path.'/'.file, 'lnum': 1, 'text': text}
       call add(qflist, sepdat)
     endif
     let lnum += 1
   endfor
   silent! close
-  exe 'chdir ' . prevPath
+  silent! exe 'chdir ' . prevPath
   return qflist
 endfunction
 
@@ -1067,15 +1067,15 @@ function! s:CnvRepeatDate(cmd, opt, str, ...)
   endif
   let sft = ''
   " 月末指定のオフセットを特別扱い
-  if cmd =~ '([-+]\d\+)'
-    let sft = substitute(matchstr(cmd, '[-+]\d\+)'), '[^-0-9]', '', 'g')
-    let cmd = substitute(cmd, '([-+]\d\+)$', '', '')
+  if cmd =~ '([+\-]\d\+)'
+    let sft = substitute(matchstr(cmd, '[+\-]\d\+)'), '[^-0-9]', '', 'g')
+    let cmd = substitute(cmd, '([+\-]\d\+)$', '', '')
   endif
   if cmd =~ '('.s:sch_dow
     let cmd = substitute(cmd, '(\('.s:sch_dow.'\)', '(1*\1', '')
   endif
 
-  if g:QFixHowm_AltRepeatAction != '' && cmd =~ '^'.g:QFixHowm_AltRepeatAction.'(\d\+\([-+]'.s:sch_dow.'\)\?)'
+  if g:QFixHowm_AltRepeatAction != '' && cmd =~ '^'.g:QFixHowm_AltRepeatAction.'(\d\+\([+\-]'.s:sch_dow.'\)\?)'
     let str = strftime(g:QFixHowm_DatePattern)
   endif
 
@@ -1119,17 +1119,17 @@ function! s:CnvRepeatDateN(cmd, opt, str, done)
   let ttime = (today - g:DateStrftime) * 24 * 60 * 60 + g:QFixHowm_ST * (60 * 60) "JST = -9
 
   let desc  = escape(cmd[0], '~')
-  let desc0 = '^'. desc . '\{1,3}'.'\c([1-5]\*'.s:sch_dow.'\([-+]\d\+\)\?)'
-  let desc1 = '^'. desc . '\c([0-9]\+\([-+]\?'.s:sch_dow.'\)\?)'
+  let desc0 = '^'. desc . '\{1,3}'.'\c([1-5]\*'.s:sch_dow.'\([+\-]\d\+\)\?)'
+  let desc1 = '^'. desc . '\c([0-9]\+\([+\-]\?'.s:sch_dow.'\)\?)'
   let desc2 = '^'. desc . '\{2}'
   let desc3 = '^'. desc . '\{3}'
 
   "曜日指定
   if cmd =~ desc0
     let ofs = 0
-    if cmd =~ '[-+]\d\+)'
-      let ofs = substitute(matchstr(cmd, '[-+]\d\+)'), '[^-0-9]', '', 'g')
-      let cmd = substitute(cmd, '[-+]\d\+)', ')', '')
+    if cmd =~ '[+\-]\d\+)'
+      let ofs = substitute(matchstr(cmd, '[+\-]\d\+)'), '[^-0-9]', '', 'g')
+      let cmd = substitute(cmd, '[+\-]\d\+)', ')', '')
     endif
 
     let ayear  = matchstr(str, '^\d\{4}')
@@ -1374,8 +1374,8 @@ function! s:CnvRepeatDateR(cmd, opt, str, done)
   let actday = QFixHowmDate2Int(str)
 
   let desc  = escape(cmd[0], '~')
-  let desc0 = '^'. desc . '\{1,3}'.'\c([1-5]\*'.s:sch_dow.'\([-+]\d\+\)\?)'
-  let desc1 = '^'. desc . '\c([0-9]\+\([-+]\?'.s:sch_dow.'\)\?)'
+  let desc0 = '^'. desc . '\{1,3}'.'\c([1-5]\*'.s:sch_dow.'\([+\-]\d\+\)\?)'
+  let desc1 = '^'. desc . '\c([0-9]\+\([+\-]\?'.s:sch_dow.'\)\?)'
   let desc2 = '^'. desc . '\{2}'
   let desc3 = '^'. desc . '\{3}'
   let ttime = (today - g:DateStrftime) * 24 * 60 * 60 + g:QFixHowm_ST * (60 * 60) "JST = -9
@@ -1385,9 +1385,9 @@ function! s:CnvRepeatDateR(cmd, opt, str, done)
   if cmd =~ desc0
     "曜日指定の繰り返し
     let ofs = 0
-    if cmd =~ '[-+]\d\+)'
-      let ofs = substitute(matchstr(cmd, '[-+]\d\+)'), '[^-0-9]', '', 'g')
-      let cmd = substitute(cmd, '[-+]\d\+)', ')', '')
+    if cmd =~ '[+\-]\d\+)'
+      let ofs = substitute(matchstr(cmd, '[+\-]\d\+)'), '[^-0-9]', '', 'g')
+      let cmd = substitute(cmd, '[+\-]\d\+)', ')', '')
     endif
     let stoday = QFixHowmDate2Int(nstr)
     let sttime = (stoday - g:DateStrftime) * 24 * 60 * 60 + g:QFixHowm_ST * (60 * 60)
@@ -1418,7 +1418,7 @@ function! s:CnvRepeatDateR(cmd, opt, str, done)
     "間隔指定の繰り返し
     let step  = matchstr(cmd, '\d\+')
     "曜日シフトされていない間隔指定日を求める
-    let ncmd = substitute(cmd, '\c[-+]'.s:sch_dow,'','')
+    let ncmd = substitute(cmd, '\c[+\-]'.s:sch_dow,'','')
     let nnstr = s:CnvRepeatDateN(ncmd, opt, str, done)
     let nnactday = QFixHowmDate2Int(nstr)
 
@@ -1528,7 +1528,7 @@ function! s:DayOfWeekShift(cmd, str)
     let month = strpart(str, 4, 2)
     let day   = strpart(str, 6, 2)
     let cnvdow = ''
-    let sft = matchstr(cmd, '[-+]'.s:sch_dow)
+    let sft = matchstr(cmd, '[+\-]'.s:sch_dow)
     call datelib#MakeHolidayTable(year)
     let time = datelib#StrftimeCnvDoWShift(year, month, day, cnvdow, sft)
     return strftime(s:hts_date, time)
@@ -1693,7 +1693,7 @@ function! QFixHowmGenerateRepeatDate()
   if cmd =~ pattern
     let cmd = substitute(cmd, pattern, '\1(1)\2', '')
   endif
-  let pattern = '^\('.s:sch_Ext.'(\)\([-+]'.s:sch_dow.')\)'
+  let pattern = '^\('.s:sch_Ext.'(\)\([+\-]'.s:sch_dow.')\)'
   if cmd =~ pattern
     let cmd = substitute(cmd, pattern, '\11\2', '')
   endif
@@ -1723,7 +1723,7 @@ function! QFixHowmGenerateRepeatDate()
     let dstr = s:DayOfWeekShift(cmd, dstr)
     let ostr = substitute(ostr, s:sch_date, dstr, '')
     let ostr = substitute(ostr, '\(]\)\('.s:sch_Ext.'\)\{1,3}', '\1\2', '')
-    let ostr = substitute(ostr, '\(]'.s:sch_Ext.'\)'.'([0-9]*[-+*]\?'.s:sch_dow.'\?\([-+]\d\+\)\?)', '\1', '')
+    let ostr = substitute(ostr, '\(]'.s:sch_Ext.'\)'.'([0-9]*[+*\-]\?'.s:sch_dow.'\?\([+\-]\d\+\)\?)', '\1', '')
     let pstr = pstr . "\<NL>" . ptext .ostr
   endfor
   let pstr = substitute(pstr, "^\<NL>", '', '')
@@ -2336,7 +2336,7 @@ function! QFixHowmTimeActionLock()
   elseif pattern =~ '^\d\{2}:\d\{2}'
     let sec = QFixHowmDate2Int(strftime(s:hts_date).' '.pattern)
     let cpattern = strftime(s:hts_time, sec)
-  elseif pattern =~ '[-+]\?\d\+'
+  elseif pattern =~ '[+\-]\?\d\+'
     let num = substitute(pattern, '^[0+]*', '', '')
     if pattern =~ '^\d\{4}$' && num < 2400
       let sec = QFixHowmDate2Int(strftime(s:hts_date).' '.pattern)
@@ -2403,7 +2403,7 @@ function! QFixHowmDateActionLock()
     " return "\<CR>"
   elseif pattern == '.'
     let cpattern = strftime(s:hts_date)
-  elseif pattern =~ '^[-+]\d\+$'
+  elseif pattern =~ '^[+\-]\d\+$'
     let pattern = substitute(pattern, '^[+0]*', '', '')
     let sec = pattern * 24*60*60
     let sec = sec + QFixHowmDate2Int(dpattern.' 00:00')
